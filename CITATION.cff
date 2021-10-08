@@ -1,0 +1,17 @@
+message: "If you use this software, please cite it using these metadata and the article in CITATION.bib"
+authors:
+  - family-names: "Pajero"
+    given-names: "Tommaso"
+    orcid: "https://orcid.org/0000-0001-9630-2000"
+title: "Charm fitter"
+repository-code: "https://github.com/tpajero/charm-fitter"
+date-released: 2021-10-08
+contact:
+  - email: tommaso.pajero@cern.ch
+cff-version: 1.2.0
+references:
+  - title: "GammaCombo"
+keywords:
+  - charm
+  - mixing
+  - CP violation
