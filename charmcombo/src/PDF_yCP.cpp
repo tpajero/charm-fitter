@@ -102,6 +102,14 @@ void PDF_yCP::setObservables(TString c)
         obsValSource = "https://cds.cern.ch/record/2747731";
         setObservable("yCP_obs", -0.370);
     }
+    else if (c.EqualTo("WA2020_biased")) {
+        obsValSource = "HFLAV";
+        setObservable("yCP_obs", 0.719);
+    }
+    else if (c.EqualTo("LHCb2022_biased")) {
+        obsValSource = "https://inspirehep.net/literature/2035063";
+        setObservable("yCP_obs", 0.696);
+    }
     else {
         cout << "PDF_yCP::setObservables() : ERROR : config " + c + " not found." << endl;
         exit(1);
@@ -115,6 +123,16 @@ void PDF_yCP::setUncertainties(TString c)
         obsErrSource = "https://cds.cern.ch/record/2747731";
         StatErr[0] = 0.704;
         SystErr[0] = 0;
+    }
+    else if (c.EqualTo("WA2020_biased")) {
+        obsValSource = "HFLAV";
+        StatErr[0] = 0.113;
+        SystErr[0] = 0;
+    }
+    else if (c.EqualTo("LHCb2022_biased")) {
+        obsValSource = "https://inspirehep.net/literature/2035063";
+        StatErr[0] = 0.026;
+        SystErr[0] = 0.013;
     }
     else {
         cout << "PDF_yCP::setUncertainties() : ERROR : config " + c + " not found." << endl;

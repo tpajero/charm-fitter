@@ -9,8 +9,11 @@ from copy import copy
 
 # --- configuration -----------------------------------------------------------
 th_cfg = 'theoretical'  # 'theoretical', 'phenomenological', 'superweak'
-combo_to_plot = [2, 1]
-titles = ['World average 2020', 'World average']  # None for default combination names
+combo_to_plot = [3, 1]
+titles = [
+    'World average (Dec 2020)',
+    'World average (Feb 2022)',
+]  # or `None` for default combination names
 plot_1d = True
 plot_2d = False
 n_contours = 2
@@ -55,18 +58,18 @@ class Scan2d:
 
 
 params = {
-    'x12':         Parameter('x12',          0.,   1   ),
-    'y12':         Parameter('y12',          0.,   1.  ),
-    'x12_for2d':   Parameter('x12',          0.,   1.  ,npoints=100),
-    'y12_for2d':   Parameter('y12',          0.0,  1   ,npoints=100),
+    'x12':         Parameter('x12',          0.,   0.8 ),
+    'y12':         Parameter('y12',          0.4,  0.8 ),
+    'x12_for2d':   Parameter('x12',          0.,   0.8 ,npoints=100),
+    'y12_for2d':   Parameter('y12',          0.4,  0.8 ,npoints=100),
     'y12_for_x12': Parameter('y12',          0.2,  1   ),
-    'phiM':        Parameter('phiM',        -0.3,  0.3 ),
-    'phiG':        Parameter('phiG',        -0.6,  0.6 ),
+    'phiM':        Parameter('phiM',        -0.2,  0.2 ),
+    'phiG':        Parameter('phiG',        -0.2,  0.2 ),
     'qop':         Parameter('qop',         -0.2,  0.2 ),
     'phi':         Parameter('phi',         -0.5,  0.5 ),
     'x':           Parameter('x',            0.,   1.  ),
     'y':           Parameter('y',            0.,   1.  ),
-    'Delta_Kpi':   Parameter('Delta_Kpi',   -1.,   1.  ),
+    'Delta_Kpi':   Parameter('Delta_Kpi',   -0.7,  0.7 ),
     'Delta_Kpipi': Parameter('Delta_Kpipi', -2.,   2.  ),
     'R_Kpi':       Parameter('R_Kpi'),
     'A_Kpi':       Parameter('A_Kpi'),
@@ -87,8 +90,9 @@ scan_1d = {
     'Delta_Kpipi': Scan1d(params['Delta_Kpipi']),
     'R_Kpi':     Scan1d(params['R_Kpi']),
     'A_Kpi':     Scan1d(params['A_Kpi'], superweak=False),
-    'DY_RS': Scan1d(params['DY_RS']),
 }
+if scan_dy_rs:
+    scan_1d['DY_RS'] = Scan1d(params['DY_RS'])
 
 
 scan_2d = {
@@ -102,8 +106,8 @@ scan_2d = {
     'x_y':       Scan2d(params['x'], params['y'], theo=False, superweak=False),
     'x_phi':     Scan2d(params['x'], params['phi'], theo=False, superweak=False),
     'y_phi':     Scan2d(params['y'], params['phi'], theo=False, superweak=False),
-    'x_qop':    Scan2d(params['x'], params['qop'], theo=False, superweak=False),
-    'y_qop':    Scan2d(params['y'], params['qop'], theo=False, superweak=False),
+    'x_qop':     Scan2d(params['x'], params['qop'], theo=False, superweak=False),
+    'y_qop':     Scan2d(params['y'], params['qop'], theo=False, superweak=False),
 }
 
 
