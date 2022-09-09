@@ -5,6 +5,7 @@
 #include "GammaComboEngine.h"
 
 #include "ParametersCharmCombo.h"
+#include "PDF_AcpHH_LHCb_Run12.h"
 #include "PDF_BES.h"
 #include "PDF_BinFlip.h"
 #include "PDF_Cleo.h"

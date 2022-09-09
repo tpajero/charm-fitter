@@ -22,6 +22,8 @@ void run_combiner(std::string name, theory_config th_cfg, int argc, char* argv[]
     gc.addPdf(20, new PDF_Kshh    ("Belle", "Belle", "Belle", th_cfg), "Belle Kshh");
     gc.addPdf(21, new PDF_BinFlip ("LHCb_Run1", "LHCb_Run1", "LHCb_Run1", th_cfg), "Bin-flip LHCb Run 1");
     gc.addPdf(22, new PDF_BinFlip ("LHCb_Run2_prompt", "LHCb_Run2_prompt", "LHCb_Run2_prompt", th_cfg), "Bin-flip LHCb Run 2 prompt");
+    gc.addPdf(23, new PDF_BinFlip ("LHCb_Run2_sl", "LHCb_Run2_sl", "LHCb_Run2_sl", th_cfg), "Bin-flip LHCb Run 2 sl");
+    gc.addPdf(24, new PDF_BinFlip ("LHCb_Run2", "LHCb_Run2", "LHCb_Run2", th_cfg), "Bin-flip LHCb Run 2");
 
     gc.addPdf(30, new PDF_WS_NoCPV("CDF", "CDF", "CDF", th_cfg), "WS/RS CDF");
     gc.addPdf(31, new PDF_WS_NoCPV("BaBar", "BaBar", "BaBar", th_cfg), "WS/RS BaBar");
@@ -48,6 +50,8 @@ void run_combiner(std::string name, theory_config th_cfg, int argc, char* argv[]
     gc.addPdf(110, new PDF_yCP    ("WA2020_biased", "WA2020_biased", "WA2020_biased", th_cfg), "y_CP (WA 2020, biased)");
     gc.addPdf(111, new PDF_yCP    ("LHCb2022_biased", "LHCb2022_biased", "LHCb2022_biased", th_cfg), "y_CP-yCP(RS) (LHCb 2022, biased)");
 
+    gc.addPdf(120, new PDF_AcpHH_LHCb_Run12(th_cfg), "ACP(KK) + DeltaACP LHCb Run1+2");
+
     ///////////////////////////////////////////////////
     //
     // Define combinations
@@ -73,6 +77,12 @@ void run_combiner(std::string name, theory_config th_cfg, int argc, char* argv[]
     // WA after LHCb 2022 yCP measurement
     gc.cloneCombiner(3, 2, "WAFeb2022", "World average (Feb 2022)");
     gc.getCombiner(3)->addPdf(gc[64]);  // yCP LHCb 2022
+
+    // WA September 2022
+    gc.cloneCombiner(4, 3, "WASept2022", "World average (Sept 2022)");
+    gc.getCombiner(4)->delPdf(gc[22]);  // bin-flip LHCb Run 2 prompt
+    gc.getCombiner(4)->addPdf(gc[24]);  // bin-flip LHCb Run 2
+    gc.getCombiner(4)->addPdf(gc[120]); // ACP(KK) + DeltaACP LHCb Run 1+2
 
     // WA after LHCb 2022 yCP measurement - biased
     gc.cloneCombiner(100, 2, "WAFeb2022_biased", "World average (Feb 2022) #minus no #it{y}_{#it{CP}}^{#it{K^{#minus}#pi^{+}}} correction");

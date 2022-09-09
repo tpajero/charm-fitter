@@ -1,0 +1,205 @@
+/**
+ * Charm Combination
+ * Author: Tommaso Pajero, tommaso.pajero@cern.ch
+ * Date: September 2022
+ **/
+
+#include "PDF_AcpHH_LHCb_Run12.h"
+#include "ParametersCharmCombo.h"
+
+#include "boost/format.hpp"
+
+using namespace std;
+using namespace RooFit;
+
+PDF_AcpHH_LHCb_Run12::PDF_AcpHH_LHCb_Run12(const theory_config& th_cfg)
+    : PDF_Abs{8}, th_cfg{th_cfg}
+{
+    name = "Charm_AcpHH_LHCb_Run12_Run1-2";
+    initParameters();
+    initRelations();
+    initObservables();
+    setObservables("lhcb-run12");
+    setUncertainties("lhcb-run12");
+    setCorrelations("lhcb-run12");
+    buildCov();
+    buildPdf();
+}
+
+
+PDF_AcpHH_LHCb_Run12::~PDF_AcpHH_LHCb_Run12() {}
+
+
+void PDF_AcpHH_LHCb_Run12::initParameters() {
+    ParametersCharmCombo p{th_cfg};
+    parameters = new RooArgList("parameters");
+    parameters->add(*(p.get("AcpKK")));
+    parameters->add(*(p.get("AcpPP")));
+    switch (th_cfg) {
+        case phenomenological:
+            parameters->add(*(p.get("x")));
+            parameters->add(*(p.get("y")));
+            parameters->add(*(p.get("qop")));
+            parameters->add(*(p.get("phi")));
+            break;
+        case theoretical:
+        case superweak:
+            parameters->add(*(p.get("x12")));
+            parameters->add(*(p.get("y12")));
+            parameters->add(*(p.get("phiM")));
+            break;
+        default:
+            cout << "PDF_AcpHH_LHCb_Run12::initParameters : ERROR : "
+                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+            exit(1);
+    }
+}
+
+
+void PDF_AcpHH_LHCb_Run12::initRelations() {
+    // Average decay times taken from https://cds.cern.ch/record/2799916/
+    theory = new RooArgList("theory");
+    add_acpkk(theory, "acp_d0_to_kk_run1_mu_th",     4.310e-13);
+    add_acpkk(theory, "acp_d0_to_kk_run1_prompt_th", 9.180e-13);
+    add_acpkk(theory, "acp_d0_to_kk_run2_cdp_th",    7.315e-13);
+    add_acpkk(theory, "acp_d0_to_kk_run2_cds_th",    6.868e-13);
+    add_dacp(theory, "dacp_run1_mu_th",     4.437e-13, 4.379e-13);
+    add_dacp(theory, "dacp_run1_prompt_th", 8.827e-13, 8.354e-13);
+    add_dacp(theory, "dacp_run2_mu_th",     4.918e-13, 4.931e-13);
+    add_dacp(theory, "dacp_run2_prompt_th", 6.946e-13, 6.407e-13);
+}
+
+
+void PDF_AcpHH_LHCb_Run12::initObservables() {
+    observables = new RooArgList("observables");
+    observables->add(*(new RooRealVar("acp_d0_to_kk_run1_mu_obs",     "#it{A_{CP}(K^{+}K^{#minus})} Run 1 #it{#mu}",           0, -1, 1)));
+    observables->add(*(new RooRealVar("acp_d0_to_kk_run1_prompt_obs", "#it{A_{CP}(K^{+}K^{#minus})} Run 1 #it{#pi}",           0, -1, 1)));
+    observables->add(*(new RooRealVar("acp_d0_to_kk_run2_cdp_obs",    "#it{A_{CP}(K^{+}K^{#minus})} Run 2 #it{C_{D^{+}}}",     0, -1, 1)));
+    observables->add(*(new RooRealVar("acp_d0_to_kk_run2_cds_obs",    "#it{A_{CP}(K^{+}K^{#minus})} Run 2 #it{C_{D^{+}_{s}}}", 0, -1, 1)));
+    observables->add(*(new RooRealVar("dacp_run1_mu_obs",             "#it{#DeltaA_{CP}} Run 1 #it{#mu}", 0, -1, 1)));
+    observables->add(*(new RooRealVar("dacp_run1_prompt_obs",         "#it{#DeltaA_{CP}} Run 1 #it{#pi}", 0, -1, 1)));
+    observables->add(*(new RooRealVar("dacp_run2_mu_obs",             "#it{#DeltaA_{CP}} Run 2 #it{#mu}", 0, -1, 1)));
+    observables->add(*(new RooRealVar("dacp_run2_prompt_obs",         "#it{#DeltaA_{CP}} Run 2 #it{#pi}", 0, -1, 1)));
+}
+
+
+void PDF_AcpHH_LHCb_Run12::setObservables(TString c) {
+    obsValSource = "https://cds.cern.ch/record/2799916/";
+    setObservable("acp_d0_to_kk_run1_mu_obs",     -6.0e-2);
+    setObservable("acp_d0_to_kk_run1_prompt_obs", 14.0e-2);
+    setObservable("acp_d0_to_kk_run2_cdp_obs",    13.6e-2);
+    setObservable("acp_d0_to_kk_run2_cds_obs",     2.8e-2);
+    setObservable("dacp_run1_mu_obs",             14.0e-2);
+    setObservable("dacp_run1_prompt_obs",        -10.0e-2);
+    setObservable("dacp_run2_mu_obs",             -9.0e-2);
+    setObservable("dacp_run2_prompt_obs",        -18.2e-2);
+}
+
+
+void PDF_AcpHH_LHCb_Run12::setUncertainties(TString c) {
+    obsErrSource = "https://cds.cern.ch/record/2799916/";
+
+    StatErr[0] = 15.0e-2;
+    StatErr[1] = 15.0e-2;
+    StatErr[2] =  8.8e-2;
+    StatErr[3] =  6.7e-2;
+    StatErr[4] = 16.0e-2;
+    StatErr[5] =  8.0e-2;
+    StatErr[6] =  8.0e-2;
+    StatErr[7] =  3.2e-2;
+
+    SystErr[0] = 10.0e-2;
+    SystErr[1] = 10.0e-2;
+    SystErr[2] =  1.6e-2;
+    SystErr[3] =  2.0e-2;
+    SystErr[4] =  8.0e-2;
+    SystErr[5] =  3.0e-2;
+    SystErr[6] =  5.0e-2;
+    SystErr[7] =  0.9e-2;
+}
+
+
+void PDF_AcpHH_LHCb_Run12::setCorrelations(TString c) {
+    corSource = "https://cds.cern.ch/record/2799916/";
+
+    double dataStat[] = {
+       1.  , 0.36, 0.  , 0.  , 0.23, 0.  , 0. , 0.  ,  // ACP(KK) Run 1 mu
+       0.36, 1.  , 0.  , 0.  , 0.  , 0.24, 0. , 0.  ,  // ACP(KK) Run 1 prompt
+       0.  , 0.  , 1.  , 0.05, 0.  , 0.  , 0. , 0.06,  // ACP(KK) Run 2 CDP
+       0.  , 0.  , 0.05, 1.  , 0.  , 0.  , 0. , 0.08,  // ACP(KK) Run 2 CDS
+       0.23, 0.  , 0.  , 0.  , 1.  , 0.  , 0. , 0.  ,  // DeltaACP Run 1 mu
+       0.  , 0.24, 0.  , 0.  , 0.  , 1.  , 0. , 0.  ,  // DeltaACP Run 1 prompt
+       0.  , 0.  , 0.  , 0.  , 0.  , 0.  , 1. , 0.  ,  // DeltaACP Run 2 mu
+       0.  , 0.  , 0.06, 0.08, 0.  , 0.  , 0. , 1.  ,  // DeltaACP Run 2 prompt
+    };
+    corStatMatrix = TMatrixDSym(nObs, dataStat);
+
+    double dataSyst[] = {
+       1.  , 1.  , 0.  , 0.  , 0.40, 0.  , 0. , 0.  ,  // ACP(KK) Run 1 mu
+       1.  , 1.  , 0.  , 0.  , 0.  , 0.  , 0. , 0.  ,  // ACP(KK) Run 1 prompt
+       0.  , 0.  , 1.  , 0.28, 0.  , 0.  , 0. , 0.  ,  // ACP(KK) Run 2 CDP
+       0.  , 0.  , 0.28, 1.  , 0.  , 0.  , 0. , 0.  ,  // ACP(KK) Run 2 CDS
+       0.40, 0.  , 0.  , 0.  , 1.  , 0.  , 0. , 0.  ,  // DeltaACP Run 1 mu
+       0.  , 0.  , 0.  , 0.  , 0.  , 1.  , 0. , 0.  ,  // DeltaACP Run 1 prompt
+       0.  , 0.  , 0.  , 0.  , 0.  , 0.  , 1. , 0.  ,  // DeltaACP Run 2 mu
+       0.  , 0.  , 0.  , 0.  , 0.  , 0.  , 0. , 1.  ,  // DeltaACP Run 2 prompt
+    };
+    corSystMatrix = TMatrixDSym(nObs, dataSyst);
+}
+
+
+void PDF_AcpHH_LHCb_Run12::buildPdf() {
+    pdf = new RooMultiVarGaussian("pdf_"+name, "pdf_"+name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
+}
+
+
+void PDF_AcpHH_LHCb_Run12::add_acpkk(RooArgList* theory, TString name, double avg_time) {
+    switch (th_cfg) {
+        case phenomenological:
+            theory->add(
+                    *(new RooFormulaVar(name, name, boost::str(boost::format(
+                                "AcpKK + %.5f * 0.5 * (- y*(qop+1 - 1/(qop+1))*cos(phi) "
+                                "                      + x*(qop+1 + 1/(qop+1))*sin(phi))")
+                                % (avg_time / d0_lifetime)).c_str(),
+                                *(RooArgSet*)parameters)));
+            break;
+        case theoretical:
+        case superweak:
+            theory->add(
+                    *(new RooFormulaVar(name, name, boost::str(boost::format(
+                                "AcpKK + %.5f * 0.5 * (- x12 * sin(phiM))")
+                                % (avg_time / d0_lifetime)).c_str(),
+                                *(RooArgSet*)parameters)));
+            break;
+        default:
+            cout << "PDF_AcpHH_LHCb_Run12::initRelations : ERROR : "
+                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+            exit(1);
+    }
+}
+
+
+void PDF_AcpHH_LHCb_Run12::add_dacp(RooArgList* theory, TString name, double avg_time_kk, double avg_time_pipi) {
+    switch (th_cfg) {
+        case phenomenological:
+            theory->add(
+                    *(new RooFormulaVar(name, name, boost::str(boost::format(
+                                "AcpKK - AcpPP + %.5f * 0.5 * (- y*(qop+1 - 1/(qop+1))*cos(phi) "
+                                "                              + x*(qop+1 + 1/(qop+1))*sin(phi))")
+                                % ((avg_time_kk - avg_time_pipi) / d0_lifetime)).c_str(),
+                                *(RooArgSet*)parameters)));
+            break;
+        case theoretical:
+        case superweak:
+            theory->add(
+                    *(new RooFormulaVar(name, name, boost::str(boost::format(
+                                "AcpKK - AcpPP + %.5f * 0.5 * (- x12 * sin(phiM))")
+                                % ((avg_time_kk - avg_time_pipi) / d0_lifetime)).c_str(),
+                                *(RooArgSet*)parameters)));
+            break;
+        default:
+            cout << "PDF_AcpHH_LHCb_Run12::initRelations : ERROR : "
+                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+            exit(1);
+    }
+}

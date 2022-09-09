@@ -9,14 +9,13 @@ from copy import copy
 
 # --- configuration -----------------------------------------------------------
 th_cfg = 'theoretical'  # 'theoretical', 'phenomenological', 'superweak'
-combo_to_plot = [3, 1]
+combo_to_plot = [4]
 titles = [
-    'World average (Dec 2020)',
-    'World average (Feb 2022)',
+    'World average (Sept 2022)',
 ]  # or `None` for default combination names
 plot_1d = True
 plot_2d = False
-n_contours = 2
+n_contours = 5
 already_plotted = False  # save time if True
 use_start_file = False
 scan_dy_rs = False
@@ -46,7 +45,7 @@ class Scan1d:
         self.superweak = superweak
         self.options = options
 
-        
+
 class Scan2d:
     def __init__(self, par1, par2, pheno=True, theo=True, superweak=True, options=None):
         self.par1 = par1
@@ -73,6 +72,8 @@ params = {
     'Delta_Kpipi': Parameter('Delta_Kpipi', -2.,   2.  ),
     'R_Kpi':       Parameter('R_Kpi'),
     'A_Kpi':       Parameter('A_Kpi'),
+    'AcpKK':       Parameter('AcpKK',       -0.5,  0.5 ),
+    'AcpPP':       Parameter('AcpPP',       -0.4,  0.7 ),
     'DY_RS':       Parameter('DY_RS', 0., 0.4, npoints=400),
 }
 
@@ -90,12 +91,15 @@ scan_1d = {
     'Delta_Kpipi': Scan1d(params['Delta_Kpipi']),
     'R_Kpi':     Scan1d(params['R_Kpi']),
     'A_Kpi':     Scan1d(params['A_Kpi'], superweak=False),
+    'AcpKK':     Scan1d(params['AcpKK']),
+    'AcpPP':     Scan1d(params['AcpPP']),
 }
 if scan_dy_rs:
     scan_1d['DY_RS'] = Scan1d(params['DY_RS'])
 
 
 scan_2d = {
+    'AcpKK_AcpPP': Scan2d(params['AcpKK'], params['AcpPP'], superweak=False),
     'x11_y12':   Scan2d(params['x12'], params['y12'], pheno=False),
     'phiM_phiG': Scan2d(params['phiM'], params['phiG'], pheno=False, superweak=False),
     'x12_phiM':  Scan2d(params['x12_for2d'], params['phiM'], pheno=False),
@@ -122,12 +126,13 @@ for i in range(len(combo_to_plot)):
                 combo_to_plot[i], '' if titles is None else ' --title "{}"'.format(titles[i])))
 if len(combo_to_plot) == 1:
     base_options.append('--leg off')
+else:
+    base_options.append('--leg 0.18:0.25')
 base_options_2d = copy(base_options)
 base_options_2d.extend(
         ['--magnetic',
          '--2dcl 1',
-         '--ncontours {}'.format(n_contours),
-         '--leg 0.18:0.25',
+         f'--ncontours {n_contours}',
          '--ps 2'])
 
 
@@ -137,19 +142,16 @@ if plot_1d:
         if not do_plot:
             continue
         options = copy(base_options)
-        options.append('--var {}'.format(par.var))
-        options.append('--npoints {}'.format(par.npoints))
+        options.append(f'--var {par.var}')
+        options.append(f'--npoints {par.npoints}')
         if par.x_min is not None and par.x_max is not None:
-            options.append('--scanrange {}:{}'.format(
-                        par.x_min, par.x_max))
+            options.append(f'--scanrange {par.x_min}:{par.x_max}')
         if par.var == 'DY_RS':
             if not scan_dy_rs:
                 continue
             options.append('--teststat 2')  # one-sided CL
-        command = 'bin/charmcombo_{th_cfg} {options}'.format(
-                th_cfg=th_cfg,
-                options=' '.join(options))
-        print('Execute {}'.format(command))
+        command = f'bin/charmcombo_{th_cfg} {" ".join(options)}'
+        print(f'Execute {command}')
         subprocess.run(command, shell=True)
 
     
@@ -159,20 +161,16 @@ if plot_2d:
         if not do_plot:
             continue
         options = copy(base_options_2d)
-        options.append('--var {}'.format(par.par1.var))
-        options.append('--var {}'.format(par.par2.var))
-        options.append('--npoints2dx {}'.format(par.par1.npoints))
-        options.append('--npoints2dy {}'.format(par.par2.npoints))
+        options.append(f'--var {par.par1.var}')
+        options.append(f'--var {par.par2.var}')
+        options.append(f'--npoints2dx {par.par1.npoints}')
+        options.append(f'--npoints2dy {par.par2.npoints}')
         if par.par1.x_min is not None and par.par1.x_max is not None:
-            options.append('--scanrange {}:{}'.format(
-                        par.par1.x_min, par.par1.x_max))
+            options.append(f'--scanrange {par.par1.x_min}:{par.par1.x_max}')
         if par.par2.x_min is not None and par.par2.x_max is not None:
-            options.append('--scanrangey {}:{}'.format(
-                        par.par2.x_min, par.par2.x_max))
+            options.append(f'--scanrangey {par.par2.x_min}:{par.par2.x_max}')
         if par.options is not None:
             options.extend(par.options)
-        command = 'bin/charmcombo_{th_cfg} {options}'.format(
-                th_cfg=th_cfg,
-                options=' '.join(options))
-        print('Execute {}'.format(command))
+        command = f'bin/charmcombo_{th_cfg} {" ".join(options)}'
+        print(f'Execute {command}')
         subprocess.run(command, shell=True)

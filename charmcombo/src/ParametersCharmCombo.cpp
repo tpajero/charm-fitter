@@ -26,6 +26,22 @@ void ParametersCharmCombo::defineParameters(
 {
     Parameter *p = nullptr;
 
+    p = newParameter("AcpKK");
+    p->title = "#it{a}_{K^{+}K^{#minus}}^{d} [%]";
+    p->startvalue = -0.05;
+    p->unit = "";
+    p->scan = range(-2, 2);
+    p->phys = range(-100, 100);
+    p->free = range(-1e4, 1e4);
+
+    p = newParameter("AcpPP");
+    p->title = "#it{a}_{#pi^{+}#pi^{#minus}}^{d} [%]";
+    p->startvalue = -0.05;
+    p->unit = "";
+    p->scan = range(-2, 2);
+    p->phys = range(-100, 100);
+    p->free = range(-1e4, 1e4);
+
     p = newParameter("R_Kpi");
     p->title = "#it{R_{K#pi}} [%]";
     p->startvalue = 0.345;

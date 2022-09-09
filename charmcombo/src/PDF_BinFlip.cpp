@@ -17,6 +17,10 @@ PDF_BinFlip::PDF_BinFlip(TString c, TString err, TString corr,
     TString label;
     if (c.EqualTo("LHCb_Run1"))
         label = "LHCb Binflip Run 1";
+    else if (c.EqualTo("LHCb_Run2_prompt"))
+        label = "LHCb Binflip Run 2 (prompt)";
+    else if (c.EqualTo("LHCb_Run2_sl"))
+        label = "LHCb Binflip Run 2 (muon-tagged)";
     else if (c.EqualTo("LHCb_Run2"))
         label = "LHCb Binflip Run 2";
     initParameters(th_cfg);
@@ -139,12 +143,26 @@ void PDF_BinFlip::setObservables(TString c)
         setObservable("dx_obs", -0.053);
         setObservable("dy_obs", 0.06);
     }
-    else if (c.EqualTo("LHCb_Run2")) {
+    else if (c.EqualTo("LHCb_Run2_prompt")) {
         obsValSource = "https://inspirehep.net/literature/1867376";
         setObservable("x_obs", 0.3973);
         setObservable("y_obs", 0.4589);
         setObservable("dx_obs", -0.0271);
         setObservable("dy_obs", 0.0203);
+    }
+    else if (c.EqualTo("LHCb_Run2_sl")) {
+        obsValSource = "https://inspirehep.net/literature/2135966";
+        setObservable("x_obs", 0.429);
+        setObservable("y_obs", 1.261);
+        setObservable("dx_obs", -0.077);
+        setObservable("dy_obs", 0.301);
+    }
+    else if (c.EqualTo("LHCb_Run2")) {
+        obsValSource = "https://inspirehep.net/literature/2135966";
+        setObservable("x_obs", 0.400);
+        setObservable("y_obs", 0.551);
+        setObservable("dx_obs", -0.029);
+        setObservable("dy_obs", 0.031);
     }
     else {
         cout << "PDF_BinFlip::setObservables() : ERROR : config " + c + " not found." << endl;
@@ -166,7 +184,7 @@ void PDF_BinFlip::setUncertainties(TString c)
         SystErr[2] = 0.022; // dx
         SystErr[3] = 0.03;  // dy
     }
-    else if (c.EqualTo("LHCb_Run2")) {
+    else if (c.EqualTo("LHCb_Run2_prompt")) {
         obsErrSource = "https://inspirehep.net/literature/1867376";
         StatErr[0] = pow(pow(0.0459,2) + pow(0.029,2),0.5); // x
         StatErr[1] = pow(pow(0.1198,2) + pow(0.085,2),0.5); // y
@@ -176,6 +194,28 @@ void PDF_BinFlip::setUncertainties(TString c)
         SystErr[1] = 0.; // y
         SystErr[2] = 0.; // dx
         SystErr[3] = 0.; // dy
+    }
+    else if (c.EqualTo("LHCb_Run2_sl")) {
+        obsErrSource = "https://inspirehep.net/literature/2135966";
+        StatErr[0] = 0.148; // x
+        StatErr[1] = 0.312; // y
+        StatErr[2] = 0.093; // dx
+        StatErr[3] = 0.192; // dy
+        SystErr[0] = 0.026; // x
+        SystErr[1] = 0.083; // y
+        SystErr[2] = 0.028; // dx
+        SystErr[3] = 0.026; // dy
+    }
+    else if (c.EqualTo("LHCb_Run2")) {
+        obsErrSource = "https://inspirehep.net/literature/2135966";
+        StatErr[0] = 0.045; // x
+        StatErr[1] = 0.116; // y
+        StatErr[2] = 0.018; // dx
+        StatErr[3] = 0.035; // dy
+        SystErr[0] = 0.0195; // x
+        SystErr[1] = 0.0594; // y
+        SystErr[2] = 0.0013; // dx
+        SystErr[3] = 0.0128; // dy
     }
     else {
         cout << "PDF_BinFlip::setUncertainties() : ERROR : config " + c + " not found." << endl;
@@ -204,7 +244,7 @@ void PDF_BinFlip::setCorrelations(TString c)
         };
         corSystMatrix = TMatrixDSym(nObs,dataSyst);
     }
-    else if (c.EqualTo("LHCb_Run2")) {
+    else if (c.EqualTo("LHCb_Run2_prompt")) {
         corSource = "https://inspirehep.net/literature/1867376";
         double dataStat[]  = {
              1.   ,  0.111,  -0.017, -0.010,  // x
@@ -218,6 +258,40 @@ void PDF_BinFlip::setCorrelations(TString c)
              0.,  1.,  0.,  0.,  // y
              0.,  0.,  1.,  0.,  // dx
              0.,  0.,  0.,  1.   // dy
+        };
+        corSystMatrix = TMatrixDSym(nObs,dataSyst);
+    }
+    else if (c.EqualTo("LHCb_Run2_sl")) {
+        corSource = "https://inspirehep.net/literature/2135966";
+        double dataStat[]  = {
+             1.   ,  0.085,  -0.011, -0.009,  // x
+             0.085,  1.   ,  -0.001, -0.050,  // y
+            -0.011, -0.001,   1.   ,  0.070,  // dx
+            -0.009, -0.050,  0.070,   1.      // dy
+        };
+        corStatMatrix = TMatrixDSym(nObs,dataStat);
+        double dataSyst[]  = {
+             1.  ,  0.11, -0.25, -0.02,  // x
+             0.11,  1.  , -0.05, -0.20,  // y
+            -0.25, -0.05,  1.  ,  0.11,  // dx
+            -0.02, -0.20,  0.11,  1.     // dy
+        };
+        corSystMatrix = TMatrixDSym(nObs,dataSyst);
+    }
+    else if (c.EqualTo("LHCb_Run2")) {
+        corSource = "https://inspirehep.net/literature/2135966";
+        double dataStat[]  = {
+             1.   ,  0.121,  -0.018, -0.016,  // x
+             0.121,  1.   ,  -0.012, -0.058,  // y
+            -0.018, -0.012,   1.   ,  0.069,  // dx
+            -0.016, -0.058,  0.069,   1.      // dy
+        };
+        corStatMatrix = TMatrixDSym(nObs,dataStat);
+        double dataSyst[]  = {
+             1.  ,  0.08,  0.  , -0.01,  // x
+             0.08,  1.  , -0.02, -0.04,  // y
+             0.  , -0.02,  1.  ,  0.33,  // dx
+            -0.01, -0.04,  0.33,  1.     // dy
         };
         corSystMatrix = TMatrixDSym(nObs,dataSyst);
     }
