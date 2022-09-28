@@ -1,22 +1,22 @@
 /**
  * Charm Combination
  * Author: Tommaso Pajero, tommaso.pajero@cern.ch
- * Date: October 2021
+ * Date: September 2022
  **/
 
-#ifndef PDF_Cleo_h
-#define PDF_Cleo_h
+#ifndef PDF_DY_f_h
+#define PDF_DY_f_h
 
 #include "TString.h"
 
 #include "ParametersCharmCombo.h"
 #include "PDF_Abs.h"
 
-class PDF_Cleo : public PDF_Abs
+class PDF_DY_f : public PDF_Abs
 {
     public:
-        PDF_Cleo(TString measurement_id, const theory_config& th_cf);
-        ~PDF_Cleo();
+        PDF_DY_f(TString measurement_id, const theory_config& th_cf);
+        ~PDF_DY_f();
         void buildPdf() override;
         void initObservables(const TString& setName);
         virtual void initParameters() override;

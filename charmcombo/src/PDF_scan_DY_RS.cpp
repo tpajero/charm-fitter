@@ -8,11 +8,11 @@
 
 
 PDF_scan_DY_RS::PDF_scan_DY_RS(const theory_config& th_cfg)
-: PDF_Abs(1)
+    : PDF_Abs{1}, th_cfg{th_cfg}
 {
     name = "scan_DY_RS";
-    initParameters(th_cfg);
-    initRelations(th_cfg);
+    initParameters();
+    initRelations();
     initObservables();
     setObservables();
     setUncertainties();
@@ -25,9 +25,8 @@ PDF_scan_DY_RS::PDF_scan_DY_RS(const theory_config& th_cfg)
 PDF_scan_DY_RS::~PDF_scan_DY_RS() {}
 
 
-void PDF_scan_DY_RS::initParameters(const theory_config& th_cfg)
-{
-    ParametersCharmCombo p(th_cfg, kTRUE);
+void PDF_scan_DY_RS::initParameters() {
+    ParametersCharmCombo p;
     parameters = new RooArgList("parameters");
     parameters->add(*(p.get("R_Kpi")));
     if (th_cfg != superweak)
@@ -57,35 +56,34 @@ void PDF_scan_DY_RS::initParameters(const theory_config& th_cfg)
 }
 
 
-void PDF_scan_DY_RS::initRelations(const theory_config& th_cfg)
-{
+void PDF_scan_DY_RS::initRelations() {
     theory = new RooArgList("theory");
     switch (th_cfg) {
         case phenomenological:
             theory->add(
-                    *(new RooFormulaVar(
+                    *(Utils::makeTheoryVar(
                             "DY_RS_scan_th","DY_RS_scan_th",
                             "DY_RS - abs(100. * 0.5 * pow(R_Kpi/100, 0.5) * "
                             "(  (y*cos(Delta_Kpi) - x*sin(Delta_Kpi))*((qop+1) - 1/(qop+1) - A_Kpi/100)*cos(phi)"
                             " - (x*cos(Delta_Kpi) + y*sin(Delta_Kpi))*((qop+1) + 1/(qop+1)            )*sin(phi)))",
-                            *(RooArgSet*)parameters)));
+                            parameters)));
             break;
         case theoretical:
             theory->add(
-                    *(new RooFormulaVar(
+                    *(Utils::makeTheoryVar(
                             "DY_RS_scan_th","DY_RS_scan_th",
                             "DY_RS - abs(100 * pow(R_Kpi/100, 0.5) * "
                             "(  (-y12*cos(Delta_Kpi)*cos(phiG) + x12*sin(Delta_Kpi)*cos(phiM))*(A_Kpi/100)*0.5"
                             " + (+y12*sin(Delta_Kpi)*sin(phiG) + x12*cos(Delta_Kpi)*sin(phiM))                 ))",
-                            *(RooArgSet*)parameters)));
+                            parameters)));
             break;
         case superweak:
             theory->add(
-                    *(new RooFormulaVar(
+                    *(Utils::makeTheoryVar(
                             "DY_RS_scan_th","DY_RS_scan_th",
                             "DY_RS - abs(100 * pow(R_Kpi/100, 0.5) * "
                             "            x12 * cos(Delta_Kpi) * sin(phiM))",
-                            *(RooArgSet*)parameters)));
+                            parameters)));
             break;
         default:
             cout << "PDF_scan_DY_RS::initRelations : ERROR : "
@@ -95,8 +93,7 @@ void PDF_scan_DY_RS::initRelations(const theory_config& th_cfg)
 }
 
 
-void PDF_scan_DY_RS::initObservables()
-{
+void PDF_scan_DY_RS::initObservables() {
     observables = new RooArgList("observables");
     observables->add(
             *(new RooRealVar(
@@ -105,28 +102,24 @@ void PDF_scan_DY_RS::initObservables()
                     0, -1e4, 1e4)));
 }
 
-void PDF_scan_DY_RS::setObservables()
-{
+void PDF_scan_DY_RS::setObservables() {
     setObservable("DY_RS_scan_obs", 0.);
 }
 
 
-void PDF_scan_DY_RS::setUncertainties()
-{
+void PDF_scan_DY_RS::setUncertainties() {
     StatErr[0] = 0.005;
     SystErr[0] = 0.;
 }
 
 
-void PDF_scan_DY_RS::setCorrelations()
-{
+void PDF_scan_DY_RS::setCorrelations() {
     resetCorrelations();
     corSource = "No correlations for one observable";
 }
 
 
-void PDF_scan_DY_RS::buildPdf()
-{
+void PDF_scan_DY_RS::buildPdf() {
     pdf = new RooMultiVarGaussian(
             "pdf_" + name, "pdf_" + name, *(RooArgSet*)observables,
             *(RooArgSet*)theory, covMatrix);

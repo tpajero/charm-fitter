@@ -6,18 +6,22 @@
 
 #include "PDF_WS_NoCPV.h"
 
+// core
+#include "Utils.h"
 
-PDF_WS_NoCPV::PDF_WS_NoCPV(TString cObs, TString cErr, TString cCor,
-                           const theory_config& th_cfg)
-: PDF_Abs(3)
+#include <vector>
+
+
+PDF_WS_NoCPV::PDF_WS_NoCPV(TString measurement_id, const theory_config& th_cfg)
+    : PDF_Abs{3}, th_cfg{th_cfg}
 {
-    name = cObs + "_WS_NoCPV";
-    initParameters(th_cfg);
-    initRelations(th_cfg);
-    initObservables(cObs);
-    setObservables(cObs);
-    setUncertainties(cErr);
-    setCorrelations(cCor);
+    name = measurement_id + "_WS_NoCPV";
+    initParameters();
+    initRelations();
+    initObservables(measurement_id);
+    setObservables(measurement_id);
+    setUncertainties(measurement_id);
+    setCorrelations(measurement_id);
     buildCov();
     buildPdf();
 }
@@ -26,9 +30,8 @@ PDF_WS_NoCPV::PDF_WS_NoCPV(TString cObs, TString cErr, TString cCor,
 PDF_WS_NoCPV::~PDF_WS_NoCPV() {}
 
 
-void PDF_WS_NoCPV::initParameters(const theory_config& th_cfg)
-{
-    ParametersCharmCombo p(th_cfg);
+void PDF_WS_NoCPV::initParameters() {
+    ParametersCharmCombo p;
     parameters = new RooArgList("parameters");
     parameters->add(*(p.get("R_Kpi")));
     parameters->add(*(p.get("Delta_Kpi")));
@@ -55,46 +58,44 @@ void PDF_WS_NoCPV::initParameters(const theory_config& th_cfg)
 }
 
 
-void PDF_WS_NoCPV::initRelations(const theory_config& th_cfg)
-{
-    RooArgSet *p = (RooArgSet*)parameters;
+void PDF_WS_NoCPV::initRelations() {
     theory = new RooArgList("theory");
-    theory->add(*(new RooFormulaVar("RD_th", "RD_th", "R_Kpi", *p)));
+    theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "R_Kpi", parameters)));
     switch (th_cfg) {
         case phenomenological:
             theory->add(
-                    *(new RooFormulaVar(
+                    *(Utils::makeTheoryVar(
                             "yp_th", "yp_th",
-                            "y*cos(Delta_Kpi) + x*sin(Delta_Kpi)", *p)));
+                            "y*cos(Delta_Kpi) + x*sin(Delta_Kpi)", parameters)));
             theory->add(
-                    *(new RooFormulaVar(
+                    *(Utils::makeTheoryVar(
                             "xp2_th", "xp2_th",
                             "pow(x*cos(Delta_Kpi) - y*sin(Delta_Kpi),2)",
-                            *p)));
+                            parameters)));
             break;
         case theoretical:
             theory->add(
-                    *(new RooFormulaVar(
+                    *(Utils::makeTheoryVar(
                             "yp_th", "yp_th",
                             "  y12 * cos(Delta_Kpi) * TMath::Sign(1.,cos(phiG)) "
-                            "+ x12 * sin(Delta_Kpi) * TMath::Sign(1.,cos(phiM))", *p)));
+                            "+ x12 * sin(Delta_Kpi) * TMath::Sign(1.,cos(phiM))", parameters)));
             theory->add(
-                    *(new RooFormulaVar(
+                    *(Utils::makeTheoryVar(
                             "xp2_th", "xp2_th",
                             "pow(- y12*sin(Delta_Kpi) * TMath::Sign(1.,cos(phiG))"
-                            "    + x12*cos(Delta_Kpi) * TMath::Sign(1.,cos(phiM)), 2)", *p)));
+                            "    + x12*cos(Delta_Kpi) * TMath::Sign(1.,cos(phiM)), 2)", parameters)));
             break;
         case superweak:
             theory->add(
-                    *(new RooFormulaVar(
+                    *(Utils::makeTheoryVar(
                             "yp_th", "yp_th",
                             "  y12 * cos(Delta_Kpi)                            "
-                            "+ x12 * sin(Delta_Kpi) * TMath::Sign(1.,cos(phiM))", *p)));
+                            "+ x12 * sin(Delta_Kpi) * TMath::Sign(1.,cos(phiM))", parameters)));
             theory->add(
-                    *(new RooFormulaVar(
+                    *(Utils::makeTheoryVar(
                             "xp2_th", "xp2_th",
                             "pow(- y12*sin(Delta_Kpi)                            "
-                            "    + x12*cos(Delta_Kpi) * TMath::Sign(1.,cos(phiM)), 2)", *p)));
+                            "    + x12*cos(Delta_Kpi) * TMath::Sign(1.,cos(phiM)), 2)", parameters)));
             break;
         default:
             cout << "PDF_WS_NoCPV::initRelations : ERROR : "
@@ -104,8 +105,7 @@ void PDF_WS_NoCPV::initRelations(const theory_config& th_cfg)
 }
 
 
-void PDF_WS_NoCPV::initObservables(const TString& setName)
-{
+void PDF_WS_NoCPV::initObservables(const TString& setName) {
     observables = new RooArgList("observables"); ///< the order of this list must match that of the COR matrix!
     observables->add(*(new RooRealVar("RD_obs" , setName + "   #it{R_{K#pi}}",  0., -1e4, 1e4)));
     observables->add(*(new RooRealVar("yp_obs" , setName + "   #it{y'}",  0., -1e4, 1e4)));
@@ -113,41 +113,32 @@ void PDF_WS_NoCPV::initObservables(const TString& setName)
 }
 
 
-void PDF_WS_NoCPV::setObservables(TString c)
-{
-    if (c.EqualTo("truth")) {
-        setObservablesTruth();
-    }
-    else if (c.EqualTo("toy")) {
-        setObservablesToy();
-    }
+void PDF_WS_NoCPV::setObservables(TString c) {
+    if (c.EqualTo("truth")) setObservablesTruth();
+    else if (c.EqualTo("toy")) setObservablesToy();
     else if (c.EqualTo("CDF")) {
         obsValSource = "https://inspirehep.net/literature/1254229";
         setObservable("RD_obs" , 0.351);
         setObservable("yp_obs" , 0.43);
         setObservable("xp2_obs", 0.8);
-    }
-    else if (c.EqualTo("BaBar")) {
+    } else if (c.EqualTo("BaBar")) {
         obsValSource = "https://inspirehep.net/literature/746245";
         setObservable("RD_obs" , 0.303);
         setObservable("yp_obs" , 0.97);
         setObservable("xp2_obs", -2.2);
-    }
-    else if (c.EqualTo("Belle")) {
+    } else if (c.EqualTo("Belle")) {
         obsValSource = "https://inspirehep.net/literature/1277238";
         setObservable("RD_obs" , 0.353);
         setObservable("yp_obs" , 0.46);
         setObservable("xp2_obs", 0.9);
-    }
-    else {
+    } else {
         cout << "PDF_WS_NoCPV::setObservables() : ERROR : config " + c + " not found." << endl;
         exit(1);
     }
 }
 
 
-void PDF_WS_NoCPV::setUncertainties(TString c)
-{
+void PDF_WS_NoCPV::setUncertainties(TString c) {
     if (c.EqualTo("CDF")) {
         obsErrSource = "https://inspirehep.net/literature/1254229";
         StatErr[0] = 0.035; // RD
@@ -172,70 +163,45 @@ void PDF_WS_NoCPV::setUncertainties(TString c)
         SystErr[0] = 0;  // RD
         SystErr[1] = 0;  // y'
         SystErr[2] = 0;  // x'2
-    }
-    else {
+    } else {
         cout << "PDF_WS_NoCPV::setUncertainties() : ERROR : config " + c + " not found." << endl;
         exit(1);
     }
 }
 
 
-void PDF_WS_NoCPV::setCorrelations(TString c)
-{
+void PDF_WS_NoCPV::setCorrelations(TString c) {
     resetCorrelations();
     if (c.EqualTo("CDF")) {
         corSource = "https://inspirehep.net/literature/1254229";
-        cout << "The correlation matrix of paper\n"
-                "https://inspirehep.net/literature/1254229\n"
-                "(WS/RS CDF) is not positive definite;\n"
-                "thus, it has been modified to avoid non convergence.\n";
-        double dataStat[] = {
+        cout << "INFO [PDF_WS_NoCPV]: The correlation matrix of https://inspirehep.net/literature/1254229\n"
+                "                     (CDF) is not positive definite. It has been modified to avoid non convergence." << endl;
+        std::vector<double> dataStat  = {
             //  RD      y'     x'2
-             1.000, -0.967,  0.900,
-            -0.967,  1.000, -0.975,
-             0.900, -0.975,  1.000
+             1.   , -0.967,  0.900,
+                     1.   , -0.975,
+                             1.
         };
-        corStatMatrix = TMatrixDSym(nObs,dataStat);
-        double dataSyst[] = {
-            1.,  0.,  0.,
-            0.,  1.,  0.,
-            0.,  0.,  1.
-        };
-        corSystMatrix = TMatrixDSym(nObs,dataSyst);
-    }
-    else if (c.EqualTo("BaBar")) {
+        corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
+    } else if (c.EqualTo("BaBar")) {
         corSource = "https://inspirehep.net/literature/746245";
-        double dataStat[] = {
+        std::vector<double> dataStat  = {
             //  RD      y'     x'2
-             1.000, -0.87 ,  0.77 ,
-            -0.87 ,  1.000, -0.94 ,
-             0.77 , -0.94 ,  1.000
+             1.   , -0.87 ,  0.77 ,
+                     1.   , -0.94 ,
+                             1.
         };
-        corStatMatrix = TMatrixDSym(nObs,dataStat);
-        double dataSyst[] = {
-            1.,  0.,  0.,
-            0.,  1.,  0.,
-            0.,  0.,  1.
-        };
-        corSystMatrix = TMatrixDSym(nObs,dataSyst);
-    }
-    else if (c.EqualTo("Belle")) {
+        corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
+    } else if (c.EqualTo("Belle")) {
         corSource = "https://inspirehep.net/literature/1277238";
-        double dataStat[] = {
+        std::vector<double> dataStat  = {
             //  RD      y'     x'2
-             1.000, -0.865,  0.737,
-            -0.865,  1.000, -0.948,
-             0.737, -0.948,  1.000
+             1.   , -0.865,  0.737,
+                     1.   , -0.948,
+                             1.
         };
-        corStatMatrix = TMatrixDSym(nObs,dataStat);
-        double dataSyst[] = {
-            1.,  0.,  0.,
-            0.,  1.,  0.,
-            0.,  0.,  1.
-        };
-        corSystMatrix = TMatrixDSym(nObs,dataSyst);
-    }
-    else {
+        corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
+    } else {
         cout << "PDF_WS_NoCPV::setCorrelations() : ERROR : config " + c + " not found." << endl;
         exit(1);
     }

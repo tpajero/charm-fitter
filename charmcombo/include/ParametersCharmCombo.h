@@ -8,11 +8,6 @@
 #define ParametersCharmCombo_h
 
 #include "ParametersAbs.h"
-#include "Utils.h"
-
-using namespace std;
-using namespace Utils;
-
 
 enum theory_config {
     phenomenological,
@@ -21,15 +16,12 @@ enum theory_config {
 };
 
 
-class ParametersCharmCombo : public ParametersAbs
-{
-public:
-    ParametersCharmCombo(theory_config parametrisation,
-                         bool predict_dy_rs=kFALSE);
+class ParametersCharmCombo : public ParametersAbs {
+  public:
+    ParametersCharmCombo();
 
-protected:
-    void defineParameters(theory_config parametrisation,
-                          bool predict_dy_rs);
+  private:
+    void defineParameters();
 };
 
 #endif

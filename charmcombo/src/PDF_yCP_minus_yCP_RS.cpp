@@ -7,17 +7,16 @@
 #include "PDF_yCP_minus_yCP_RS.h"
 
 
-PDF_yCP_minus_yCP_RS::PDF_yCP_minus_yCP_RS(
-        TString cObs, TString cErr, TString cCor, const theory_config& th_cfg)
-: PDF_Abs(1)
+PDF_yCP_minus_yCP_RS::PDF_yCP_minus_yCP_RS(TString measurement_id, const theory_config& th_cfg)
+    : PDF_Abs{1}, th_cfg{th_cfg}
 {
-    name = "yCP_minus_yCP_RS_" + cObs;
-    initParameters(th_cfg);
-    initRelations(th_cfg);
-    initObservables(cObs);
-    setObservables(cObs);
-    setUncertainties(cErr);
-    setCorrelations(cCor);
+    name = "yCP_minus_yCP_RS_" + measurement_id;
+    initParameters();
+    initRelations();
+    initObservables(measurement_id);
+    setObservables(measurement_id);
+    setUncertainties(measurement_id);
+    setCorrelations(measurement_id);
     buildCov();
     buildPdf();
 }
@@ -26,9 +25,8 @@ PDF_yCP_minus_yCP_RS::PDF_yCP_minus_yCP_RS(
 PDF_yCP_minus_yCP_RS::~PDF_yCP_minus_yCP_RS() {}
 
 
-void PDF_yCP_minus_yCP_RS::initParameters(const theory_config& th_cfg)
-{
-    ParametersCharmCombo p(th_cfg);
+void PDF_yCP_minus_yCP_RS::initParameters() {
+    ParametersCharmCombo p;
     parameters = new RooArgList("parameters");
 
     parameters->add(*(p.get("R_Kpi")));
@@ -55,13 +53,12 @@ void PDF_yCP_minus_yCP_RS::initParameters(const theory_config& th_cfg)
 }
 
 
-void PDF_yCP_minus_yCP_RS::initRelations(const theory_config& th_cfg)
-{
+void PDF_yCP_minus_yCP_RS::initRelations() {
     theory = new RooArgList("theory");
     switch (th_cfg) {
         case phenomenological:
             theory->add(
-                    *(new RooFormulaVar(
+                    *(Utils::makeTheoryVar(
                             "yCP_minus_yCP_RS_th", "yCP_minus_yCP_RS_th",
                             "0.5*( "
                             "      y*(qop+1 + 1/(qop+1))*cos(phi)"
@@ -69,27 +66,27 @@ void PDF_yCP_minus_yCP_RS::initRelations(const theory_config& th_cfg)
                             " + sqrt(R_Kpi/100) * ("
                             "      (y * cos(Delta_Kpi) - x * sin(Delta_Kpi)) * (qop+1 + 1/(qop+1)) * cos(phi)"
                             "    - (x * cos(Delta_Kpi) + y * sin(Delta_Kpi)) * (qop+1 - 1/(qop+1)) * sin(phi)))",
-                            *(RooArgSet*)parameters)));
+                            parameters)));
             break;
         case theoretical:
             theory->add(
-                    *(new RooFormulaVar(
+                    *(Utils::makeTheoryVar(
                             "yCP_minus_yCP_RS_th", "yCP_minus_yCP_RS_th",
                             " y12 * cos(phiG)"
                             " + sqrt(R_Kpi/100) * ("
                             "       y12 * cos(Delta_Kpi) * cos(phiG)"
                             "     - x12 * sin(Delta_Kpi) * cos(phiM))",
-                            *(RooArgSet*)parameters)));
+                            parameters)));
             break;
         case superweak:
             theory->add(
-                    *(new RooFormulaVar(
+                    *(Utils::makeTheoryVar(
                             "yCP_minus_yCP_RS_th", "yCP_minus_yCP_RS_th",
                             " y12"
                             " + sqrt(R_Kpi/100) * ("
                             "       y12 * cos(Delta_Kpi)"
                             "     - x12 * sin(Delta_Kpi) * cos(phiM))",
-                            *(RooArgSet*)parameters)));
+                            parameters)));
             break;
         default:
             cout << "PDF_yCP::initRelations : ERROR : "
@@ -99,8 +96,7 @@ void PDF_yCP_minus_yCP_RS::initRelations(const theory_config& th_cfg)
 }
 
 
-void PDF_yCP_minus_yCP_RS::initObservables(const TString& setName)
-{
+void PDF_yCP_minus_yCP_RS::initObservables(const TString& setName) {
     observables = new RooArgList("observables");
     observables->add(*(new RooRealVar(
             "yCP_minus_yCP_RS_obs",
@@ -111,55 +107,44 @@ void PDF_yCP_minus_yCP_RS::initObservables(const TString& setName)
 
 void PDF_yCP_minus_yCP_RS::setObservables(TString c)
 {
-    if (c.EqualTo("truth")) {
-        setObservablesTruth();
-    }
-    else if (c.EqualTo("toy")) {
-        setObservablesToy();
-    }
+    if (c.EqualTo("truth")) setObservablesTruth();
+    else if (c.EqualTo("toy")) setObservablesToy();
     else if (c.EqualTo("WA2020")) {
         obsValSource = "https://cds.cern.ch/record/2747731";
         setObservable("yCP_minus_yCP_RS_obs", 0.738);
-    }
-    else if (c.EqualTo("LHCb2022")) {
+    } else if (c.EqualTo("LHCb2022")) {
         obsValSource = "https://inspirehep.net/literature/2035063";
         setObservable("yCP_minus_yCP_RS_obs", 0.696);
-    }
-    else {
+    } else {
         cout << "PDF_yCP_minus_yCP_RS::setObservables() : ERROR : config " + c + " not found." << endl;
         exit(1);
     }
 }
 
 
-void PDF_yCP_minus_yCP_RS::setUncertainties(TString c)
-{
+void PDF_yCP_minus_yCP_RS::setUncertainties(TString c) {
     if (c.EqualTo("WA2020")) {
         obsErrSource = "https://cds.cern.ch/record/2747731";
         StatErr[0] = 0.111;
         SystErr[0] = 0;
-    }
-    else if (c.EqualTo("LHCb2022")) {
+    } else if (c.EqualTo("LHCb2022")) {
         obsValSource = "https://inspirehep.net/literature/2035063";
         StatErr[0] = 0.026;
         SystErr[0] = 0.013;
-    }
-    else {
+    } else {
         cout << "PDF_yCP_minus_yCP_RS::setUncertainties() : ERROR : config " + c + " not found." << endl;
         exit(1);
     }
 }
 
 
-void PDF_yCP_minus_yCP_RS::setCorrelations(TString c)
-{
+void PDF_yCP_minus_yCP_RS::setCorrelations(TString c) {
     resetCorrelations();
     corSource = "No correlations for one observable";
 }
 
 
-void PDF_yCP_minus_yCP_RS::buildPdf()
-{
+void PDF_yCP_minus_yCP_RS::buildPdf() {
     pdf = new RooMultiVarGaussian(
             "pdf_" + name, "pdf_" + name, *(RooArgSet*)observables,
             *(RooArgSet*)theory, covMatrix);

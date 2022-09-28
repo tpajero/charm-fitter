@@ -7,25 +7,25 @@
 #ifndef PDF_scan_DY_RS_h
 #define PDF_scan_DY_RS_h
 
-#include "PDF_Abs.h"
-#include "ParametersCharmCombo.h"
+#include "TString.h"
 
-using namespace RooFit;
-using namespace std;
+#include "ParametersCharmCombo.h"
+#include "PDF_Abs.h"
 
 class PDF_scan_DY_RS : public PDF_Abs
 {
     public:
         PDF_scan_DY_RS(const theory_config& th_cf);
         ~PDF_scan_DY_RS();
-        void buildPdf();
-        void initParameters(const theory_config& th_cf);
+        void buildPdf() override;
         void initObservables();
-        virtual void initRelations(const theory_config& th_cf);
+        virtual void initParameters() override;
+        virtual void initRelations() override;
         void setCorrelations();
         void setObservables();
         void setUncertainties();
+    private:
+        const theory_config th_cfg;
 };
 
 #endif
-

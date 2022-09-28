@@ -6,18 +6,20 @@
 
 #include "PDF_BES.h"
 
+using namespace std;
+using namespace RooFit;
 
-PDF_BES::PDF_BES(TString cObs, TString cErr, TString cCor,
-                 const theory_config& th_cfg)
-: PDF_Abs(1)
+
+PDF_BES::PDF_BES(TString measurement_id, const theory_config& th_cfg)
+    : PDF_Abs{1}, th_cfg{th_cfg}
 {
     name = "BES";
-    initParameters(th_cfg);
-    initRelations(th_cfg);
+    initParameters();
+    initRelations();
     initObservables(name);
-    setObservables(cObs);
-    setUncertainties(cErr);
-    setCorrelations (cCor);
+    setObservables(measurement_id);
+    setUncertainties(measurement_id);
+    setCorrelations (measurement_id);
     buildCov();
     buildPdf();
 }
@@ -26,8 +28,7 @@ PDF_BES::PDF_BES(TString cObs, TString cErr, TString cCor,
 PDF_BES::~PDF_BES() {}
 
 
-void PDF_BES::initParameters(const theory_config& th_cfg)
-{
+void PDF_BES::initParameters() {
     ParametersCharmCombo p(th_cfg);
     parameters = new RooArgList("parameters");
     parameters->add(*(p.get("Delta_Kpi")));
@@ -53,8 +54,7 @@ void PDF_BES::initParameters(const theory_config& th_cfg)
 }
 
 
-void PDF_BES::initRelations(const theory_config& th_cfg)
-{
+void PDF_BES::initRelations() {
     RooArgSet *p = (RooArgSet*)parameters;
     theory = new RooArgList("theory");
     switch (th_cfg) {
@@ -109,56 +109,45 @@ void PDF_BES::initRelations(const theory_config& th_cfg)
 }
 
 
-void PDF_BES::initObservables(const TString& setName)
-{
+void PDF_BES::initObservables(const TString& setName) {
     observables = new RooArgList("observables");
     observables->add(*(new RooRealVar(
             "asymm_obs", setName + "   #it{A_{K#pi}^{CP}}", 0., -1e4, 1e4)));
 }
 
 
-void PDF_BES::setObservables(TString c)
-{
-    if (c.EqualTo("truth")) {
-        setObservablesTruth();
-    }
-    else if (c.EqualTo("toy")) {
-        setObservablesToy();
-    }
+void PDF_BES::setObservables(TString c) {
+    if (c.EqualTo("truth")) setObservablesTruth();
+    else if (c.EqualTo("toy")) setObservablesToy();
     else if (c.EqualTo("BES")) {
         obsValSource = "http://inspirehep.net/record/1291279";
         setObservable("asymm_obs", 12.7);
-    }
-    else {
+    } else {
         cout << "PDF_BES::setObservables() : ERROR : config " + c + " not found." << endl;
         exit(1);
     }
 }
 
 
-void PDF_BES::setUncertainties(TString c)
-{
+void PDF_BES::setUncertainties(TString c) {
     if (c.EqualTo("BES")) {
         obsErrSource = "http://inspirehep.net/record/1291279";
         StatErr[0] = 1.3;
         SystErr[0] = 0.7;
-    }
-    else {
+    } else {
         cout << "PDF_BES::setUncertainties() : ERROR : config " + c + " not found." << endl;
         exit(1);
     }
 }
 
 
-void PDF_BES::setCorrelations(TString c)
-{
+void PDF_BES::setCorrelations(TString c) {
     resetCorrelations();
     corSource = "No correlations for one observable";
 }
 
 
-void PDF_BES::buildPdf()
-{
+void PDF_BES::buildPdf() {
   pdf = new RooMultiVarGaussian(
           "pdf_" + name, "pdf_" + name, *(RooArgSet*)observables,
           *(RooArgSet*)theory, covMatrix);

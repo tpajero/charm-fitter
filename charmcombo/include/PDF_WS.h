@@ -7,26 +7,25 @@
 #ifndef PDF_WS_h
 #define PDF_WS_h
 
-#include "PDF_Abs.h"
-#include "ParametersCharmCombo.h"
+#include "TString.h"
 
-using namespace RooFit;
-using namespace std;
-using namespace Utils;
+#include "ParametersCharmCombo.h"
+#include "PDF_Abs.h"
 
 class PDF_WS : public PDF_Abs
 {
     public:
-        PDF_WS(TString cObs, TString cErr, TString cCor,
-               const theory_config& th_cf);
+        PDF_WS(TString measurement_id, const theory_config& th_cf);
         ~PDF_WS();
-        void buildPdf();
+        void buildPdf() override;
         void initObservables(const TString& setName);
-        virtual void initParameters(const theory_config& th_cf);
-        virtual void initRelations(const theory_config& th_cf);
-        void setCorrelations(TString c);
-        void setObservables(TString c);
-        void setUncertainties(TString c);
+        virtual void initParameters() override;
+        virtual void initRelations() override;
+        void setCorrelations(TString measurement_id) override;
+        void setObservables(TString measurement_id) override;
+        void setUncertainties(TString measurement_id) override;
+    private:
+        const theory_config th_cfg;
 };
 
 #endif

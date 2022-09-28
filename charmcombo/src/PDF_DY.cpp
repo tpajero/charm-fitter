@@ -7,17 +7,16 @@
 #include "PDF_DY.h"
 
 
-PDF_DY::PDF_DY(TString cObs, TString cErr, TString cCor,
-               const theory_config& th_cfg)
-: PDF_Abs(1)
+PDF_DY::PDF_DY(TString measurement_id, const theory_config& th_cfg)
+    : PDF_Abs{1}, th_cfg{th_cfg}
 {
-    name = "DY_" + cObs;
-    initParameters(th_cfg);
-    initRelations(th_cfg);
-    initObservables(cObs);
-    setObservables(cObs);
-    setUncertainties(cErr);
-    setCorrelations(cCor);
+    name = "DY_" + measurement_id;
+    initParameters();
+    initRelations();
+    initObservables(measurement_id);
+    setObservables(measurement_id);
+    setUncertainties(measurement_id);
+    setCorrelations(measurement_id);
     buildCov();
     buildPdf();
 }
@@ -26,8 +25,7 @@ PDF_DY::PDF_DY(TString cObs, TString cErr, TString cCor,
 PDF_DY::~PDF_DY() {}
 
 
-void PDF_DY::initParameters(const theory_config& th_cfg)
-{
+void PDF_DY::initParameters() {
     ParametersCharmCombo p(th_cfg);
     parameters = new RooArgList("parameters");
     switch (th_cfg) {
@@ -51,8 +49,7 @@ void PDF_DY::initParameters(const theory_config& th_cfg)
 }
 
 
-void PDF_DY::initRelations(const theory_config& th_cfg)
-{
+void PDF_DY::initRelations() {
     theory = new RooArgList("theory");
     switch (th_cfg) {
         case phenomenological:
@@ -78,64 +75,51 @@ void PDF_DY::initRelations(const theory_config& th_cfg)
 }
 
 
-void PDF_DY::initObservables(const TString& setName)
-{
+void PDF_DY::initObservables(const TString& setName) {
     observables = new RooArgList("observables");
     observables->add(*(new RooRealVar("DY_obs", setName + "   #Delta#it{Y}",  0, -1e4, 1e4)));
 }
 
 
-void PDF_DY::setObservables(TString c)
-{
-    if (c.EqualTo("truth")) {
-        setObservablesTruth();
-    }
-    else if (c.EqualTo("toy")) {
-        setObservablesToy();
-    }
+void PDF_DY::setObservables(TString c) {
+    if (c.EqualTo("truth")) setObservablesTruth();
+    else if (c.EqualTo("toy")) setObservablesToy();
     else if (c.EqualTo("WA2020")) {
         obsValSource = "https://cds.cern.ch/record/2747731";
         setObservable("DY_obs", 3.1e-2);
-    }
-    else if (c.EqualTo("WA2021")) {
+    } else if (c.EqualTo("WA2021")) {
         obsValSource = "https://cds.cern.ch/record/2747731";
         setObservable("DY_obs", -0.92e-2);
-    }
-    else {
+    } else {
         cout << "PDF_DY::setObservables() : ERROR : config " + c + " not found." << endl;
         exit(1);
     }
 }
 
 
-void PDF_DY::setUncertainties(TString c)
-{
+void PDF_DY::setUncertainties(TString c) {
     if (c.EqualTo("WA2020")) {
         obsErrSource = "https://cds.cern.ch/record/2747731";
         StatErr[0] = 2.0e-2;
         SystErr[0] = 0.;
-    }
-    else if (c.EqualTo("WA2021")) {
+    } else if (c.EqualTo("WA2021")) {
         obsErrSource = "https://cds.cern.ch/record/2747731";
         StatErr[0] = 1.11e-2;
         SystErr[0] = 0.33e-2;
-    }
-    else {
+    } else {
         cout << "PDF_DY::setUncertainties() : ERROR : config " + c + " not found." << endl;
         exit(1);
     }
 }
 
 
-void PDF_DY::setCorrelations(TString c)
-{
+void PDF_DY::setCorrelations(TString c) {
     resetCorrelations();
     corSource = "No correlations for one observable";
 }
 
 
-void PDF_DY::buildPdf()
-{
+void PDF_DY::buildPdf() {
     pdf = new RooMultiVarGaussian(
             "pdf_" + name, "pdf_" + name, *(RooArgSet*)observables,
             *(RooArgSet*)theory, covMatrix);
