@@ -31,10 +31,10 @@ PDF_AcpHH_LHCb_Run12::~PDF_AcpHH_LHCb_Run12() {}
 
 
 void PDF_AcpHH_LHCb_Run12::initParameters() {
-    ParametersCharmCombo p{th_cfg};
+    ParametersCharmCombo p;
     parameters = new RooArgList("parameters");
-    parameters->add(*(p.get("AcpKK")));
-    parameters->add(*(p.get("AcpPP")));
+    parameters->add(*(p.get("Acp_KK")));
+    parameters->add(*(p.get("Acp_PP")));
     switch (th_cfg) {
         case phenomenological:
             parameters->add(*(p.get("x")));
@@ -122,29 +122,29 @@ void PDF_AcpHH_LHCb_Run12::setUncertainties(TString c) {
 void PDF_AcpHH_LHCb_Run12::setCorrelations(TString c) {
     corSource = "https://cds.cern.ch/record/2799916/";
 
-    double dataStat[] = {
-       1.  , 0.36, 0.  , 0.  , 0.23, 0.  , 0. , 0.  ,  // ACP(KK) Run 1 mu
-       0.36, 1.  , 0.  , 0.  , 0.  , 0.24, 0. , 0.  ,  // ACP(KK) Run 1 prompt
-       0.  , 0.  , 1.  , 0.05, 0.  , 0.  , 0. , 0.06,  // ACP(KK) Run 2 CDP
-       0.  , 0.  , 0.05, 1.  , 0.  , 0.  , 0. , 0.08,  // ACP(KK) Run 2 CDS
-       0.23, 0.  , 0.  , 0.  , 1.  , 0.  , 0. , 0.  ,  // DeltaACP Run 1 mu
-       0.  , 0.24, 0.  , 0.  , 0.  , 1.  , 0. , 0.  ,  // DeltaACP Run 1 prompt
-       0.  , 0.  , 0.  , 0.  , 0.  , 0.  , 1. , 0.  ,  // DeltaACP Run 2 mu
-       0.  , 0.  , 0.06, 0.08, 0.  , 0.  , 0. , 1.  ,  // DeltaACP Run 2 prompt
+    std::vector<double> dataStat = {
+        1.  , 0.36, 0.  , 0.  , 0.23, 0.  , 0. , 0.  ,  // ACP(KK) Run 1 mu
+              1.  , 0.  , 0.  , 0.  , 0.24, 0. , 0.  ,  // ACP(KK) Run 1 prompt
+                    1.  , 0.05, 0.  , 0.  , 0. , 0.06,  // ACP(KK) Run 2 CDP
+                          1.  , 0.  , 0.  , 0. , 0.08,  // ACP(KK) Run 2 CDS
+                                1.  , 0.  , 0. , 0.  ,  // DeltaACP Run 1 mu
+                                      1.  , 0. , 0.  ,  // DeltaACP Run 1 prompt
+                                            1. , 0.  ,  // DeltaACP Run 2 mu
+                                                 1.  ,  // DeltaACP Run 2 prompt
     };
-    corStatMatrix = TMatrixDSym(nObs, dataStat);
+    corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
 
-    double dataSyst[] = {
-       1.  , 1.  , 0.  , 0.  , 0.40, 0.  , 0. , 0.  ,  // ACP(KK) Run 1 mu
-       1.  , 1.  , 0.  , 0.  , 0.  , 0.  , 0. , 0.  ,  // ACP(KK) Run 1 prompt
-       0.  , 0.  , 1.  , 0.28, 0.  , 0.  , 0. , 0.  ,  // ACP(KK) Run 2 CDP
-       0.  , 0.  , 0.28, 1.  , 0.  , 0.  , 0. , 0.  ,  // ACP(KK) Run 2 CDS
-       0.40, 0.  , 0.  , 0.  , 1.  , 0.  , 0. , 0.  ,  // DeltaACP Run 1 mu
-       0.  , 0.  , 0.  , 0.  , 0.  , 1.  , 0. , 0.  ,  // DeltaACP Run 1 prompt
-       0.  , 0.  , 0.  , 0.  , 0.  , 0.  , 1. , 0.  ,  // DeltaACP Run 2 mu
-       0.  , 0.  , 0.  , 0.  , 0.  , 0.  , 0. , 1.  ,  // DeltaACP Run 2 prompt
+    std::vector<double> dataSyst = {
+        1.  , 1.  , 0.  , 0.  , 0.40, 0.  , 0. , 0.  ,  // ACP(KK) Run 1 mu
+              1.  , 0.  , 0.  , 0.  , 0.  , 0. , 0.  ,  // ACP(KK) Run 1 prompt
+                    1.  , 0.28, 0.  , 0.  , 0. , 0.  ,  // ACP(KK) Run 2 CDP
+                          1.  , 0.  , 0.  , 0. , 0.  ,  // ACP(KK) Run 2 CDS
+                                1.  , 0.  , 0. , 0.  ,  // DeltaACP Run 1 mu
+                                      1.  , 0. , 0.  ,  // DeltaACP Run 1 prompt
+                                            1. , 0.  ,  // DeltaACP Run 2 mu
+                                                 1.  ,  // DeltaACP Run 2 prompt
     };
-    corSystMatrix = TMatrixDSym(nObs, dataSyst);
+    corSystMatrix = Utils::buildCorMatrix(nObs, dataSyst);
 }
 
 
@@ -157,19 +157,19 @@ void PDF_AcpHH_LHCb_Run12::add_acpkk(RooArgList* theory, TString name, double av
     switch (th_cfg) {
         case phenomenological:
             theory->add(
-                    *(new RooFormulaVar(name, name, boost::str(boost::format(
-                                "AcpKK + %.5f * 0.5 * (- y*(qop+1 - 1/(qop+1))*cos(phi) "
+                    *(Utils::makeTheoryVar(name, name, boost::str(boost::format(
+                                "Acp_KK + %.5f * 0.5 * (- y*(qop+1 - 1/(qop+1))*cos(phi) "
                                 "                      + x*(qop+1 + 1/(qop+1))*sin(phi))")
                                 % (avg_time / d0_lifetime)).c_str(),
-                                *(RooArgSet*)parameters)));
+                                parameters)));
             break;
         case theoretical:
         case superweak:
             theory->add(
-                    *(new RooFormulaVar(name, name, boost::str(boost::format(
-                                "AcpKK + %.5f * 0.5 * (- x12 * sin(phiM))")
+                    *(Utils::makeTheoryVar(name, name, boost::str(boost::format(
+                                "Acp_KK + %.5f * 0.5 * (- x12 * sin(phiM))")
                                 % (avg_time / d0_lifetime)).c_str(),
-                                *(RooArgSet*)parameters)));
+                                parameters)));
             break;
         default:
             cout << "PDF_AcpHH_LHCb_Run12::initRelations : ERROR : "
@@ -183,19 +183,19 @@ void PDF_AcpHH_LHCb_Run12::add_dacp(RooArgList* theory, TString name, double avg
     switch (th_cfg) {
         case phenomenological:
             theory->add(
-                    *(new RooFormulaVar(name, name, boost::str(boost::format(
-                                "AcpKK - AcpPP + %.5f * 0.5 * (- y*(qop+1 - 1/(qop+1))*cos(phi) "
+                    *(Utils::makeTheoryVar(name, name, boost::str(boost::format(
+                                "Acp_KK - Acp_PP + %.5f * 0.5 * (- y*(qop+1 - 1/(qop+1))*cos(phi) "
                                 "                              + x*(qop+1 + 1/(qop+1))*sin(phi))")
                                 % ((avg_time_kk - avg_time_pipi) / d0_lifetime)).c_str(),
-                                *(RooArgSet*)parameters)));
+                                parameters)));
             break;
         case theoretical:
         case superweak:
             theory->add(
-                    *(new RooFormulaVar(name, name, boost::str(boost::format(
-                                "AcpKK - AcpPP + %.5f * 0.5 * (- x12 * sin(phiM))")
+                    *(Utils::makeTheoryVar(name, name, boost::str(boost::format(
+                                "Acp_KK - Acp_PP + %.5f * 0.5 * (- x12 * sin(phiM))")
                                 % ((avg_time_kk - avg_time_pipi) / d0_lifetime)).c_str(),
-                                *(RooArgSet*)parameters)));
+                                parameters)));
             break;
         default:
             cout << "PDF_AcpHH_LHCb_Run12::initRelations : ERROR : "

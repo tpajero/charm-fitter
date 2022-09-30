@@ -1,22 +1,22 @@
 /**
  * Charm Combination
- * Author: Tommaso Pajero, tommaso.pajero@cern.ch
+ * Author: tommaso.pajero@cern.ch
  * Date: October 2021
  **/
 
-#ifndef PDF_BES_h
-#define PDF_BES_h
+#ifndef PDF_BES_Kpi_1d_h
+#define PDF_BES_Kpi_1d_h
 
 #include "TString.h"
 
 #include "ParametersCharmCombo.h"
 #include "PDF_Abs.h"
 
-class PDF_BES : public PDF_Abs
+class PDF_BES_Kpi_1d : public PDF_Abs
 {
     public:
-        PDF_BES(TString measurement_id, const theory_config& th_cf);
-        ~PDF_BES();
+        PDF_BES_Kpi_1d(const theory_config& th_cf);
+        ~PDF_BES_Kpi_1d();
         void buildPdf() override;
         void initObservables(const TString& setName);
         virtual void initParameters() override;

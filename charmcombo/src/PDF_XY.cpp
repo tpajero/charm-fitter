@@ -4,6 +4,7 @@
  * Date: October 2021
  **/
 
+#include "CharmUtils.h"
 #include "PDF_XY.h"
 
 // ROOT
@@ -69,44 +70,12 @@ void PDF_XY::initRelations() {
             theory->add(*(Utils::makeTheoryVar("y_th", "y_th", "y", parameters)));
             break;
         case theoretical:
-            theory->add(*(Utils::makeTheoryVar(
-                    "x_th", "x_th",
-                    "pow(2,-0.5) * pow( "
-                    "    pow(x12,2) - pow(y12,2) + pow( "
-                    "       + pow(pow(x12,2) + pow(y12,2),2)"
-                    "       - pow(2 * x12 * y12 * sin(phiM - phiG),2),"
-                    "    0.5)"
-                    ",0.5) * TMath::Sign(1., cos(phiM - phiG))",
-                    parameters)));
-            theory->add(*(Utils::makeTheoryVar(
-                    "y_th", "y_th",
-                    "pow(2,-0.5) * pow( "
-                    "    pow(y12,2) - pow(x12,2) + pow( "
-                    "       + pow(pow(x12,2) + pow(y12,2),2)"
-                    "       - pow(2 * x12 * y12 * sin(phiM - phiG),2),"
-                    "    0.5)"
-                    ",0.5)",
-                    parameters)));
+            theory->add(*(Utils::makeTheoryVar("x_th", "x_th", CharmUtils::x_to_theoretical, parameters)));
+            theory->add(*(Utils::makeTheoryVar("y_th", "y_th", CharmUtils::y_to_theoretical, parameters)));
             break;
         case superweak:
-            theory->add(*(Utils::makeTheoryVar(
-                    "x_th", "x_th",
-                    "pow(2,-0.5) * pow( "
-                    "    pow(x12,2) - pow(y12,2) + pow( "
-                    "       + pow(pow(x12,2) + pow(y12,2),2)"
-                    "       - pow(2 * x12 * y12 * sin(phiM),2),"
-                    "    0.5)"
-                    ",0.5) * TMath::Sign(1., cos(phiM))",
-                    parameters)));
-            theory->add(*(Utils::makeTheoryVar(
-                    "y_th", "y_th",
-                    "pow(2,-0.5) * pow( "
-                    "    pow(y12,2) - pow(x12,2) + pow( "
-                    "       + pow(pow(x12,2) + pow(y12,2),2)"
-                    "       - pow(2 * x12 * y12 * sin(phiM),2),"
-                    "    0.5)"
-                    ",0.5)",
-                    parameters)));
+            theory->add(*(Utils::makeTheoryVar("x_th", "x_th", CharmUtils::x_to_superweak, parameters)));
+            theory->add(*(Utils::makeTheoryVar("y_th", "y_th", CharmUtils::y_to_superweak, parameters)));
             break;
         default:
             cout << "PDF_XY::initRelations : ERROR : "
