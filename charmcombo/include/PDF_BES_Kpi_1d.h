@@ -9,13 +9,13 @@
 
 #include "TString.h"
 
-#include "ParametersCharmCombo.h"
+#include "CharmUtils.h"
 #include "PDF_Abs.h"
 
 class PDF_BES_Kpi_1d : public PDF_Abs
 {
     public:
-        PDF_BES_Kpi_1d(const theory_config& th_cf);
+        PDF_BES_Kpi_1d(const theory_config& th_cfg);
         ~PDF_BES_Kpi_1d();
         void buildPdf() override;
         void initObservables(const TString& setName);

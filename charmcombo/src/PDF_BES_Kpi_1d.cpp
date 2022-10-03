@@ -5,6 +5,7 @@
  **/
 
 #include "CharmUtils.h"
+#include "ParametersCharmCombo.h"
 #include "PDF_BES_Kpi_1d.h"
 
 #include <boost/algorithm/string.hpp>
@@ -34,20 +35,20 @@ void PDF_BES_Kpi_1d::initParameters() {
     parameters->add(*(p.get("R_Kpi")));
 
     switch (th_cfg) {
-        case phenomenological:
+        case theory_config::phenomenological:
             parameters->add(*(p.get("x")));
             parameters->add(*(p.get("y")));
             break;
-        case theoretical:
+        case theory_config::theoretical:
             parameters->add(*(p.get("phiG")));
-        case superweak:
+        case theory_config::superweak:
             parameters->add(*(p.get("x12")));
             parameters->add(*(p.get("y12")));
             parameters->add(*(p.get("phiM")));
             break;
         default:
             cout << "PDF_BES_Kpi_1d::initParameters : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
 }
@@ -57,17 +58,17 @@ void PDF_BES_Kpi_1d::initRelations() {
     theory = new RooArgList("theory");
     std::string a_kpi_formula = "(2 * 10 * sqrt(R_Kpi) * cos(Delta_Kpi) + y) / (1 + R_Kpi/100)";
     switch (th_cfg) {
-        case phenomenological:
+        case theory_config::phenomenological:
             break;
-        case theoretical:
+        case theory_config::theoretical:
             boost::replace_all(a_kpi_formula, "y", CharmUtils::y_to_theoretical);
             break;
-        case superweak:
+        case theory_config::superweak:
             boost::replace_all(a_kpi_formula, "y", CharmUtils::y_to_superweak);
             break;
         default:
             cout << "PDF_BES_Kpi_1d::initRelations : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
     theory->add(*(Utils::makeTheoryVar("A_kpi_th", "A_kpi_th", a_kpi_formula, parameters)));

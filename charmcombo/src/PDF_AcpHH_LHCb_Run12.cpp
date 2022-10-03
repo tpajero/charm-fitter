@@ -4,16 +4,15 @@
  * Date: September 2022
  **/
 
-#include "PDF_AcpHH_LHCb_Run12.h"
+#include "CharmUtils.h"
 #include "ParametersCharmCombo.h"
+#include "PDF_AcpHH_LHCb_Run12.h"
 
 #include "boost/format.hpp"
 
-using namespace std;
-using namespace RooFit;
 
-PDF_AcpHH_LHCb_Run12::PDF_AcpHH_LHCb_Run12(const theory_config& th_cfg)
-    : PDF_Abs{8}, th_cfg{th_cfg}
+PDF_AcpHH_LHCb_Run12::PDF_AcpHH_LHCb_Run12(const theory_config th_cfg, const FSC fsc)
+    : PDF_Abs{8}, th_cfg{th_cfg}, fsc{fsc}
 {
     name = "Charm_AcpHH_LHCb_Run12_Run1-2";
     initParameters();
@@ -36,22 +35,31 @@ void PDF_AcpHH_LHCb_Run12::initParameters() {
     parameters->add(*(p.get("Acp_KK")));
     parameters->add(*(p.get("Acp_PP")));
     switch (th_cfg) {
-        case phenomenological:
+        case theory_config::phenomenological:
             parameters->add(*(p.get("x")));
             parameters->add(*(p.get("y")));
             parameters->add(*(p.get("qop")));
             parameters->add(*(p.get("phi")));
             break;
-        case theoretical:
-        case superweak:
+        case theory_config::theoretical:
+        case theory_config::superweak:
             parameters->add(*(p.get("x12")));
             parameters->add(*(p.get("y12")));
             parameters->add(*(p.get("phiM")));
             break;
         default:
             cout << "PDF_AcpHH_LHCb_Run12::initParameters : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
+    }
+    switch (fsc) {
+        case FSC::none:
+        case FSC::partial:
+            break;
+        case FSC::full:
+            parameters->add(*(p.get("cot_delta_KK")));
+            parameters->add(*(p.get("cot_delta_PP")));
+            break;
     }
 }
 
@@ -154,52 +162,22 @@ void PDF_AcpHH_LHCb_Run12::buildPdf() {
 
 
 void PDF_AcpHH_LHCb_Run12::add_acpkk(RooArgList* theory, TString name, double avg_time) {
-    switch (th_cfg) {
-        case phenomenological:
-            theory->add(
-                    *(Utils::makeTheoryVar(name, name, boost::str(boost::format(
-                                "Acp_KK + %.5f * 0.5 * (- y*(qop+1 - 1/(qop+1))*cos(phi) "
-                                "                      + x*(qop+1 + 1/(qop+1))*sin(phi))")
-                                % (avg_time / d0_lifetime)).c_str(),
-                                parameters)));
-            break;
-        case theoretical:
-        case superweak:
-            theory->add(
-                    *(Utils::makeTheoryVar(name, name, boost::str(boost::format(
-                                "Acp_KK + %.5f * 0.5 * (- x12 * sin(phiM))")
-                                % (avg_time / d0_lifetime)).c_str(),
-                                parameters)));
-            break;
-        default:
-            cout << "PDF_AcpHH_LHCb_Run12::initRelations : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
-            exit(1);
-    }
+    theory->add(*(Utils::makeTheoryVar(
+                    name,
+                    name,
+                    boost::str(boost::format("Acp_KK + %.5f * " + CharmUtils::get_dy_expression(th_cfg, fsc, "KK"))
+                        % (avg_time / d0_lifetime)).c_str(),
+                    parameters)));
 }
 
 
-void PDF_AcpHH_LHCb_Run12::add_dacp(RooArgList* theory, TString name, double avg_time_kk, double avg_time_pipi) {
-    switch (th_cfg) {
-        case phenomenological:
-            theory->add(
-                    *(Utils::makeTheoryVar(name, name, boost::str(boost::format(
-                                "Acp_KK - Acp_PP + %.5f * 0.5 * (- y*(qop+1 - 1/(qop+1))*cos(phi) "
-                                "                              + x*(qop+1 + 1/(qop+1))*sin(phi))")
-                                % ((avg_time_kk - avg_time_pipi) / d0_lifetime)).c_str(),
-                                parameters)));
-            break;
-        case theoretical:
-        case superweak:
-            theory->add(
-                    *(Utils::makeTheoryVar(name, name, boost::str(boost::format(
-                                "Acp_KK - Acp_PP + %.5f * 0.5 * (- x12 * sin(phiM))")
-                                % ((avg_time_kk - avg_time_pipi) / d0_lifetime)).c_str(),
-                                parameters)));
-            break;
-        default:
-            cout << "PDF_AcpHH_LHCb_Run12::initRelations : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
-            exit(1);
-    }
+void PDF_AcpHH_LHCb_Run12::add_dacp(RooArgList* theory, TString name, double avg_time_kk, double avg_time_pp) {
+    theory->add(*(Utils::makeTheoryVar(
+                    name,
+                    name,
+                    boost::str(boost::format(
+                              "   Acp_KK + %.5f * " + CharmUtils::get_dy_expression(th_cfg, fsc, "KK")
+                            + " - Acp_PP - %.5f * " + CharmUtils::get_dy_expression(th_cfg, fsc, "PP"))
+                            % (avg_time_kk / d0_lifetime) % (avg_time_pp / d0_lifetime)).c_str(),
+                    parameters)));
 }

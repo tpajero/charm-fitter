@@ -4,6 +4,8 @@
  * Date: October 2021
  **/
 
+#include "CharmUtils.h"
+#include "ParametersCharmCombo.h"
 #include "PDF_scan_DY_RS.h"
 
 
@@ -29,28 +31,28 @@ void PDF_scan_DY_RS::initParameters() {
     ParametersCharmCombo p;
     parameters = new RooArgList("parameters");
     parameters->add(*(p.get("R_Kpi")));
-    if (th_cfg != superweak)
-        parameters->add(*(p.get("A_Kpi")));
+    if (th_cfg != theory_config::superweak)
+        parameters->add(*(p.get("Acp_KP")));
     parameters->add(*(p.get("Delta_Kpi")));
     parameters->add(*(p.get("DY_RS")));
 
     switch (th_cfg) {
-        case phenomenological:
+        case theory_config::phenomenological:
             parameters->add(*(p.get("x")));
             parameters->add(*(p.get("y")));
             parameters->add(*(p.get("qop")));
             parameters->add(*(p.get("phi")));
             break;
-        case theoretical:
+        case theory_config::theoretical:
             parameters->add(*(p.get("phiG")));
-        case superweak:
+        case theory_config::superweak:
             parameters->add(*(p.get("x12")));
             parameters->add(*(p.get("y12")));
             parameters->add(*(p.get("phiM")));
             break;
         default:
             cout << "PDF_scan_DY_RS::initParameters : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
 }
@@ -59,25 +61,25 @@ void PDF_scan_DY_RS::initParameters() {
 void PDF_scan_DY_RS::initRelations() {
     theory = new RooArgList("theory");
     switch (th_cfg) {
-        case phenomenological:
+        case theory_config::phenomenological:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "DY_RS_scan_th","DY_RS_scan_th",
                             "DY_RS - abs(100. * 0.5 * pow(R_Kpi/100, 0.5) * "
-                            "(  (y*cos(Delta_Kpi) - x*sin(Delta_Kpi))*((qop+1) - 1/(qop+1) - A_Kpi/100)*cos(phi)"
-                            " - (x*cos(Delta_Kpi) + y*sin(Delta_Kpi))*((qop+1) + 1/(qop+1)            )*sin(phi)))",
+                            "(  (y*cos(Delta_Kpi) - x*sin(Delta_Kpi))*((qop+1) - 1/(qop+1) - Acp_KP/100)*cos(phi)"
+                            " - (x*cos(Delta_Kpi) + y*sin(Delta_Kpi))*((qop+1) + 1/(qop+1)             )*sin(phi)))",
                             parameters)));
             break;
-        case theoretical:
+        case theory_config::theoretical:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "DY_RS_scan_th","DY_RS_scan_th",
                             "DY_RS - abs(100 * pow(R_Kpi/100, 0.5) * "
-                            "(  (-y12*cos(Delta_Kpi)*cos(phiG) + x12*sin(Delta_Kpi)*cos(phiM))*(A_Kpi/100)*0.5"
+                            "(  (-y12*cos(Delta_Kpi)*cos(phiG) + x12*sin(Delta_Kpi)*cos(phiM))*(Acp_KP/100)*0.5"
                             " + (+y12*sin(Delta_Kpi)*sin(phiG) + x12*cos(Delta_Kpi)*sin(phiM))                 ))",
                             parameters)));
             break;
-        case superweak:
+        case theory_config::superweak:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "DY_RS_scan_th","DY_RS_scan_th",
@@ -87,7 +89,7 @@ void PDF_scan_DY_RS::initRelations() {
             break;
         default:
             cout << "PDF_scan_DY_RS::initRelations : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
 }

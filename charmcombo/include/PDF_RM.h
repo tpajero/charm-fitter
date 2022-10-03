@@ -9,7 +9,7 @@
 
 #include "TString.h"
 
-#include "ParametersCharmCombo.h"
+#include "CharmUtils.h"
 #include "PDF_Abs.h"
 
 class PDF_RM : public PDF_Abs

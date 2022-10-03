@@ -5,6 +5,7 @@
  **/
 
 #include "CharmUtils.h"
+#include "ParametersCharmCombo.h"
 #include "PDF_XY.h"
 
 // ROOT
@@ -38,24 +39,24 @@ void PDF_XY::initParameters() {
     ParametersCharmCombo p;
     parameters = new RooArgList("parameters");
     switch (th_cfg) {
-        case phenomenological:
+        case theory_config::phenomenological:
             parameters->add(*(p.get("x")));
             parameters->add(*(p.get("y")));
             break;
-        case theoretical:
+        case theory_config::theoretical:
             parameters->add(*(p.get("x12")));
             parameters->add(*(p.get("y12")));
             parameters->add(*(p.get("phiM")));
             parameters->add(*(p.get("phiG")));
             break;
-        case superweak:
+        case theory_config::superweak:
             parameters->add(*(p.get("x12")));
             parameters->add(*(p.get("y12")));
             parameters->add(*(p.get("phiM")));
             break;
         default:
             cout << "PDF_XY::initRelations : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
 }
@@ -65,21 +66,21 @@ void PDF_XY::initRelations() {
     theory = new RooArgList("theory"); ///< the order of this list must match that of the COR matrix!
 
     switch (th_cfg) {
-        case phenomenological:
+        case theory_config::phenomenological:
             theory->add(*(Utils::makeTheoryVar("x_th", "x_th", "x", parameters)));
             theory->add(*(Utils::makeTheoryVar("y_th", "y_th", "y", parameters)));
             break;
-        case theoretical:
+        case theory_config::theoretical:
             theory->add(*(Utils::makeTheoryVar("x_th", "x_th", CharmUtils::x_to_theoretical, parameters)));
             theory->add(*(Utils::makeTheoryVar("y_th", "y_th", CharmUtils::y_to_theoretical, parameters)));
             break;
-        case superweak:
+        case theory_config::superweak:
             theory->add(*(Utils::makeTheoryVar("x_th", "x_th", CharmUtils::x_to_superweak, parameters)));
             theory->add(*(Utils::makeTheoryVar("y_th", "y_th", CharmUtils::y_to_superweak, parameters)));
             break;
         default:
             cout << "PDF_XY::initRelations : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
 }

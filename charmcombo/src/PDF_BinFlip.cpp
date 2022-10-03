@@ -4,6 +4,8 @@
  * Date: October 2021
  **/
 
+#include "CharmUtils.h"
+#include "ParametersCharmCombo.h"
 #include "PDF_BinFlip.h"
 
 
@@ -34,22 +36,22 @@ void PDF_BinFlip::initParameters() {
     ParametersCharmCombo p;
     parameters = new RooArgList("parameters");
     switch (th_cfg) {
-        case phenomenological:
+        case theory_config::phenomenological:
             parameters->add(*(p.get("x")));
             parameters->add(*(p.get("y")));
             parameters->add(*(p.get("qop")));
             parameters->add(*(p.get("phi")));
             break;
-        case theoretical:
+        case theory_config::theoretical:
             parameters->add(*(p.get("phiG")));
-        case superweak:
+        case theory_config::superweak:
             parameters->add(*(p.get("x12")));
             parameters->add(*(p.get("y12")));
             parameters->add(*(p.get("phiM")));
             break;
         default:
             cout << "PDF_BinFlip::initParameters : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
 }
@@ -58,7 +60,7 @@ void PDF_BinFlip::initParameters() {
 void PDF_BinFlip::initRelations() {
     theory = new RooArgList("theory"); ///< the order of this list must match that of the COR matrix!
     switch (th_cfg) {
-        case phenomenological:
+        case theory_config::phenomenological:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "x_th" , "x_th" ,
@@ -80,13 +82,13 @@ void PDF_BinFlip::initRelations() {
                             "0.5*(  y*cos(phi)*(qop+1 - 1./(qop+1))"
                             "     - x*sin(phi)*(qop+1 + 1./(qop+1)))", parameters)));
             break;
-        case theoretical:
+        case theory_config::theoretical:
             theory->add(*(Utils::makeTheoryVar("x_th",  "x_th",  " x12*cos(phiM)", parameters)));
             theory->add(*(Utils::makeTheoryVar("y_th",  "y_th",  " y12*cos(phiG)", parameters)));
             theory->add(*(Utils::makeTheoryVar("dx_th", "dx_th", "-y12*sin(phiG)", parameters)));
             theory->add(*(Utils::makeTheoryVar("dy_th", "dy_th", " x12*sin(phiM)", parameters)));
             break;
-        case superweak:
+        case theory_config::superweak:
             theory->add(*(Utils::makeTheoryVar("x_th",  "x_th",  "x12*cos(phiM)", parameters)));
             theory->add(*(Utils::makeTheoryVar("y_th",  "y_th",  "y12",           parameters)));
             theory->add(*(Utils::makeTheoryVar("dx_th", "dx_th", "0",             parameters)));
@@ -94,7 +96,7 @@ void PDF_BinFlip::initRelations() {
             break;
         default:
             cout << "PDF_BinFlip::initRelations : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
 }

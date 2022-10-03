@@ -4,6 +4,8 @@
  * Date: October 2021
  **/
 
+#include "CharmUtils.h"
+#include "ParametersCharmCombo.h"
 #include "PDF_Kshh.h"
 
 // core
@@ -39,22 +41,22 @@ void PDF_Kshh::initParameters() {
     parameters = new RooArgList("parameters");
 
     switch (th_cfg) {
-        case phenomenological:
+        case theory_config::phenomenological:
             parameters->add(*(p.get("x")));
             parameters->add(*(p.get("y")));
             parameters->add(*(p.get("qop")));
             parameters->add(*(p.get("phi")));
             break;
-        case theoretical:
+        case theory_config::theoretical:
             parameters->add(*(p.get("phiG")));
-        case superweak:
+        case theory_config::superweak:
             parameters->add(*(p.get("x12")));
             parameters->add(*(p.get("y12")));
             parameters->add(*(p.get("phiM")));
             break;
         default:
             cout << "PDF_Kshh::initParameters : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
 }
@@ -63,13 +65,13 @@ void PDF_Kshh::initParameters() {
 void PDF_Kshh::initRelations() {
     theory = new RooArgList("theory"); ///< the order of this list must match that of the COR matrix!
     switch (th_cfg) {
-        case phenomenological:
+        case theory_config::phenomenological:
             theory->add(*(Utils::makeTheoryVar("x_th",   "x_th",   "x",     parameters)));
             theory->add(*(Utils::makeTheoryVar("y_th",   "y_th",   "y",     parameters)));
             theory->add(*(Utils::makeTheoryVar("qop_th", "qop_th", "qop+1", parameters)));
             theory->add(*(Utils::makeTheoryVar("phi_th", "phi_th", "phi",   parameters)));
             break;
-        case theoretical:
+        case theory_config::theoretical:
             theory->add(*(Utils::makeTheoryVar(
                     "x_th", "x_th",
                     "pow(2,-0.5) * pow( "
@@ -100,7 +102,7 @@ void PDF_Kshh::initRelations() {
                             "      (pow(x12,2) * sin(2*phiM) + pow(y12,2) * sin(2*phiG))"
                             "    / (pow(x12,2) * cos(2*phiM) + pow(y12,2) * cos(2*phiG)))", parameters)));
             break;
-        case superweak:
+        case theory_config::superweak:
             theory->add(*(Utils::makeTheoryVar(
                     "x_th", "x_th",
                     "pow(2,-0.5) * pow( "
@@ -135,7 +137,7 @@ void PDF_Kshh::initRelations() {
             break;
         default:
             cout << "PDF_Kshh::initRelations : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
 }

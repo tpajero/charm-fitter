@@ -4,6 +4,8 @@
  * Date: October 2021
  **/
 
+#include "CharmUtils.h"
+#include "ParametersCharmCombo.h"
 #include "PDF_yCP.h"
 
 
@@ -30,20 +32,20 @@ void PDF_yCP::initParameters() {
     parameters = new RooArgList("parameters");
 
     switch (th_cfg) {
-        case phenomenological:
+        case theory_config::phenomenological:
             parameters->add(*(p.get("x")));
             parameters->add(*(p.get("y")));
             parameters->add(*(p.get("qop")));
             parameters->add(*(p.get("phi")));
             break;
-        case theoretical:
+        case theory_config::theoretical:
             parameters->add(*(p.get("phiG")));
-        case superweak:
+        case theory_config::superweak:
             parameters->add(*(p.get("y12")));
             break;
         default:
             cout << "PDF_yCP::initParameters : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
 }
@@ -52,7 +54,7 @@ void PDF_yCP::initParameters() {
 void PDF_yCP::initRelations() {
     theory = new RooArgList("theory");
     switch (th_cfg) {
-        case phenomenological:
+        case theory_config::phenomenological:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "yCP_th", "yCP_th",
@@ -60,13 +62,13 @@ void PDF_yCP::initRelations() {
                             "     - x * (qop+1 - 1/(qop+1)) * sin(phi))",
                             parameters)));
             break;
-        case theoretical:
+        case theory_config::theoretical:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "yCP_th", "yCP_th", "y12*cos(phiG)",
                             parameters)));
             break;
-        case superweak:
+        case theory_config::superweak:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "yCP_th", "yCP_th", "y12",
@@ -74,7 +76,7 @@ void PDF_yCP::initRelations() {
             break;
         default:
             cout << "PDF_yCP::initRelations : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
 }

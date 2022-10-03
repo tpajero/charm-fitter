@@ -24,8 +24,8 @@ void ParametersCharmCombo::defineParameters() {
 
     // CP asymmetry in the decay (``direct'' CP asymmetry) of D0 -> K+ K-
     p = newParameter("Acp_KK");
-    p->title = "#it{a}_{K^{+}K^{#minus}}^{d} [%]";
-    p->startvalue = -0.05;
+    p->title = "#it{a}_{#it{K}^{+}#it{K}^{#minus}}^{d} [%]";
+    p->startvalue = 0.08;
     p->unit = "";
     p->scan = range(-2, 2);
     p->phys = range(-100, 100);
@@ -33,16 +33,16 @@ void ParametersCharmCombo::defineParameters() {
 
     // CP asymmetry in the decay (``direct'' CP asymmetry) of D0 -> pi+ pi-
     p = newParameter("Acp_PP");
-    p->title = "#it{a}_{#pi^{+}#pi^{#minus}}^{d} [%]";
-    p->startvalue = -0.05;
+    p->title = "#it{a}_{#it{#pi}^{+}#it{#pi}^{#minus}}^{d} [%]";
+    p->startvalue = 0.24;
     p->unit = "";
     p->scan = range(-2, 2);
     p->phys = range(-100, 100);
     p->free = range(-1e4, 1e4);
 
     // CP asymmetry in the decay (``direct'' CP asymmetry) of D0 -> K+ pi-
-    p = newParameter("A_Kpi");
-    p->title = "#it{A_{K#pi}} [%]";
+    p = newParameter("Acp_KP");
+    p->title = "#it{a}_{#it{K}^{+}#it{#pi}^{#minus}}^{d} [%]";
     p->startvalue = -0.6;
     p->unit = "";
     p->scan = range(-2.5, 2);
@@ -52,7 +52,7 @@ void ParametersCharmCombo::defineParameters() {
     // Ratio of the squared magnitudes of the decay amplitudes of D0 -> K+ pi- to D0 -> K- pi+
     p = newParameter("R_Kpi");
     p->title = "#it{R_{K#pi}} [%]";
-    p->startvalue = 0.345;
+    p->startvalue = 0.343;
     p->unit = "";
     p->scan = range(0.33, 0.36);
     p->phys = range(0, 1e4);
@@ -84,26 +84,26 @@ void ParametersCharmCombo::defineParameters() {
     //   A = A_sd (lambda_s - lambda_d) / 2 + A_b lambda_b / 2,
     //
     // delta_KK is defined as arg(A_b / A_sd).
-    p = newParameter("delta_KK");
-    p->title = "#delta_{#it{KK}} [rad]";
+    p = newParameter("cot_delta_KK");
+    p->title = "cot(#it{#delta_{#it{K^{+}K^{#minus}}}})";
     p->startvalue = 0.;
     p->unit = "";
-    p->scan = range(DegToRad(-180), DegToRad(180));
-    p->phys = range(DegToRad(-180), DegToRad(180));
-    p->free = range(DegToRad(-180), DegToRad(180));
+    p->scan = range(-1e4, 1e4);
+    p->phys = range(-1e4, 1e4);
+    p->free = range(-1e4, 1e4);
 
     // Parametrising the decay amplitude of D0 -> pi+ pi- decays as
     //
     //   A = A_sd (lambda_s - lambda_d) / 2 + A_b lambda_b / 2,
     //
     // delta_PP is defined as arg(A_b / A_sd).
-    p = newParameter("delta_PP");
-    p->title = "#delta_{#it{#pi#pi}} [rad]";
+    p = newParameter("cot_delta_PP");
+    p->title = "cot(#it{#delta_{#it{#pi^{+}#pi^{#minus}}}})";
     p->startvalue = 0.;
     p->unit = "";
-    p->scan = range(DegToRad(-180), DegToRad(180));
-    p->phys = range(DegToRad(-180), DegToRad(180));
-    p->free = range(DegToRad(-180), DegToRad(180));
+    p->scan = range(-1e4, 1e4);
+    p->phys = range(-1e4, 1e4);
+    p->free = range(-1e4, 1e4);
 
     // CP-even fraction of D0 -> pi+ pi- pi0
     p = newParameter("F_pipipi0");
@@ -143,7 +143,7 @@ void ParametersCharmCombo::defineParameters() {
 
     p = newParameter("phi");
     p->title = "#it{#phi}_{2} [rad]";
-    p->startvalue = 0.02;
+    p->startvalue = -0.03;
     p->unit = "";
     p->scan = range(-0.6, 0.6);
     p->phys = range(DegToRad(-180.), DegToRad(180.));

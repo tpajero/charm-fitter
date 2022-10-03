@@ -7,9 +7,7 @@ set(COMBINER_NAME charmcombo)
 #  They have to be located in the main/ subdirectory, and
 #  end with .cpp.
 set(COMBINER_EXECUTABLES
- 	${COMBINER_NAME}_phenomenological
-	${COMBINER_NAME}_theoretical
-	${COMBINER_NAME}_superweak
+ 	${COMBINER_NAME}
 )
 
 ######################################

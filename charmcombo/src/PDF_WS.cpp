@@ -4,6 +4,8 @@
  * Date: October 2021
  **/
 
+#include "CharmUtils.h"
+#include "ParametersCharmCombo.h"
 #include "PDF_WS.h"
 
 // core
@@ -41,27 +43,27 @@ void PDF_WS::initParameters() {
     ParametersCharmCombo p;
     parameters = new RooArgList("parameters");
     parameters->add(*(p.get("R_Kpi")));
-    if (th_cfg != superweak)
-        parameters->add(*(p.get("A_Kpi")));
+    if (th_cfg != theory_config::superweak)
+        parameters->add(*(p.get("Acp_KP")));
     parameters->add(*(p.get("Delta_Kpi")));
 
     switch (th_cfg) {
-        case phenomenological:
+        case theory_config::phenomenological:
             parameters->add(*(p.get("x")));
             parameters->add(*(p.get("y")));
             parameters->add(*(p.get("qop")));
             parameters->add(*(p.get("phi")));
             break;
-        case theoretical:
+        case theory_config::theoretical:
             parameters->add(*(p.get("phiG")));
-        case superweak:
+        case theory_config::superweak:
             parameters->add(*(p.get("x12")));
             parameters->add(*(p.get("y12")));
             parameters->add(*(p.get("phiM")));
             break;
         default:
             cout << "PDF_WS::initParameters : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
 }
@@ -70,22 +72,22 @@ void PDF_WS::initParameters() {
 void PDF_WS::initRelations() {
     theory = new RooArgList("theory");
     switch (th_cfg) {
-        case phenomenological:
-        case theoretical:
+        case theory_config::phenomenological:
+        case theory_config::theoretical:
             theory->add(*(Utils::makeTheoryVar("RD_p_th", "RD_p_th",
-                                            "R_Kpi*(1+A_Kpi/100)", parameters)));
+                                            "R_Kpi*(1+Acp_KP/100)", parameters)));
             break;
-        case superweak:
+        case theory_config::superweak:
             theory->add(*(Utils::makeTheoryVar("RD_p_th", "RD_p_th",
                                             "R_Kpi", parameters)));
             break;
         default:
             cout << "PDF_WS::initRelations : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
     switch (th_cfg) {
-        case phenomenological:
+        case theory_config::phenomenological:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "yp_p_th", "yp_p_th",
@@ -97,7 +99,7 @@ void PDF_WS::initRelations() {
                             "pow((qop+1)*(  x*cos(Delta_Kpi - phi)"
                             "             - y*sin(Delta_Kpi - phi)),2)", parameters)));
             break;
-        case theoretical:
+        case theory_config::theoretical:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "yp_p_th", "yp_p_th",
@@ -111,7 +113,7 @@ void PDF_WS::initRelations() {
                             "    + x12*cos(Delta_Kpi+phiM)"
                             "    ,2)", parameters)));
             break;
-        case superweak:
+        case theory_config::superweak:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "yp_p_th", "yp_p_th",
@@ -127,26 +129,24 @@ void PDF_WS::initRelations() {
             break;
         default:
             cout << "PDF_WS::initRelations : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
     switch (th_cfg) {
-        case phenomenological:
-        case theoretical:
-            theory->add(*(Utils::makeTheoryVar("RD_m_th", "RD_m_th",
-                                            "R_Kpi*(1-A_Kpi/100)", parameters)));
+        case theory_config::phenomenological:
+        case theory_config::theoretical:
+            theory->add(*(Utils::makeTheoryVar("RD_m_th", "RD_m_th", "R_Kpi*(1-Acp_KP/100)", parameters)));
             break;
-        case superweak:
-            theory->add(*(Utils::makeTheoryVar("RD_m_th", "RD_m_th",
-                                            "R_Kpi", parameters)));
+        case theory_config::superweak:
+            theory->add(*(Utils::makeTheoryVar("RD_m_th", "RD_m_th", "R_Kpi", parameters)));
             break;
         default:
             cout << "PDF_WS::initRelations : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
     switch (th_cfg) {
-        case phenomenological:
+        case theory_config::phenomenological:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "yp_m_th", "yp_m_th",
@@ -158,7 +158,7 @@ void PDF_WS::initRelations() {
                             "pow(1/(qop+1)*(  x*cos(Delta_Kpi + phi)"
                             "               - y*sin(Delta_Kpi + phi)),2)", parameters)));
             break;
-        case theoretical:
+        case theory_config::theoretical:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "yp_m_th", "yp_m_th",
@@ -172,7 +172,7 @@ void PDF_WS::initRelations() {
                             "    + x12*cos(Delta_Kpi-phiM)"
                             "    ,2)", parameters)));
             break;
-        case superweak:
+        case theory_config::superweak:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "yp_m_th", "yp_m_th",
@@ -188,7 +188,7 @@ void PDF_WS::initRelations() {
             break;
         default:
             cout << "PDF_WS::initRelations : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
 }

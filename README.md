@@ -35,7 +35,7 @@ Get the source code from GitHub:
 Build the project in a `<build>` directory and install it:
 
     cmake -B <build>
-    cmake --build <build>
+    cmake --build <build> [-j<n-cores>]
     cmake --install <build>
 
 Credits

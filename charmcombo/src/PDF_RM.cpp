@@ -4,6 +4,8 @@
  * Date: October 2021
  **/
 
+#include "CharmUtils.h"
+#include "ParametersCharmCombo.h"
 #include "PDF_RM.h"
 
 
@@ -30,24 +32,24 @@ void PDF_RM::initParameters() {
     parameters = new RooArgList("parameters");
 
     switch (th_cfg) {
-        case phenomenological:
+        case theory_config::phenomenological:
             parameters->add(*(p.get("x")));
             parameters->add(*(p.get("y")));
             break;
-        case theoretical:
+        case theory_config::theoretical:
             parameters->add(*(p.get("x12")));
             parameters->add(*(p.get("y12")));
             parameters->add(*(p.get("phiM")));
             parameters->add(*(p.get("phiG")));
             break;
-        case superweak:
+        case theory_config::superweak:
             parameters->add(*(p.get("x12")));
             parameters->add(*(p.get("y12")));
             parameters->add(*(p.get("phiM")));
             break;
         default:
             cout << "PDF_RM::initParameters : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
 }
@@ -56,14 +58,14 @@ void PDF_RM::initParameters() {
 void PDF_RM::initRelations() {
     theory = new RooArgList("theory");
     switch (th_cfg) {
-        case phenomenological:
+        case theory_config::phenomenological:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "RM_th", "RM_th",
                             "(pow(x,2) + pow(y,2))/2",
                             parameters)));
             break;
-        case theoretical:
+        case theory_config::theoretical:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "RM_th", "RM_th",
@@ -72,7 +74,7 @@ void PDF_RM::initRelations() {
                             "    - pow(2 * x12 * y12 * sin(phiM - phiG),2), 0.5)",
                             parameters)));
             break;
-        case superweak:
+        case theory_config::superweak:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "RM_th", "RM_th",
@@ -83,7 +85,7 @@ void PDF_RM::initRelations() {
             break;
         default:
             cout << "PDF_RM::initRelations : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
 }

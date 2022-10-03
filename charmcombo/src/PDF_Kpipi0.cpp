@@ -4,6 +4,8 @@
  * Date: October 2021
  **/
 
+#include "CharmUtils.h"
+#include "ParametersCharmCombo.h"
 #include "PDF_Kpipi0.h"
 
 // core
@@ -39,20 +41,20 @@ void PDF_Kpipi0::initParameters() {
     parameters->add(*(p.get("Delta_Kpipi")));
 
     switch (th_cfg) {
-        case phenomenological:
+        case theory_config::phenomenological:
             parameters->add(*(p.get("x")));
             parameters->add(*(p.get("y")));
             break;
-        case theoretical:
+        case theory_config::theoretical:
             parameters->add(*(p.get("phiG")));
-        case superweak:
+        case theory_config::superweak:
             parameters->add(*(p.get("x12")));
             parameters->add(*(p.get("y12")));
             parameters->add(*(p.get("phiM")));
             break;
         default:
             cout << "PDF_Kpipi0::initParameters : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
 }
@@ -61,7 +63,7 @@ void PDF_Kpipi0::initParameters() {
 void PDF_Kpipi0::initRelations() {
     theory = new RooArgList("theory");
     switch (th_cfg) {
-        case phenomenological:  // CP violation in the decay is missing!
+        case theory_config::phenomenological:  // CP violation in the decay is missing!
                                 // check the CP violation in x'
             theory->add(
                     *(Utils::makeTheoryVar(
@@ -73,7 +75,7 @@ void PDF_Kpipi0::initRelations() {
                             "ypp_th", "ypp_th",
                             "y*cos(Delta_Kpipi) + x*sin(Delta_Kpipi)", parameters)));
             break;
-        case theoretical:
+        case theory_config::theoretical:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "xpp_th", "xpp_th",
@@ -85,7 +87,7 @@ void PDF_Kpipi0::initRelations() {
                             "  y12 * cos(Delta_Kpipi) * TMath::Sign(1.,cos(phiG))"
                             "+ x12 * sin(Delta_Kpipi) * TMath::Sign(1.,cos(phiM))", parameters)));
             break;
-        case superweak:
+        case theory_config::superweak:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "xpp_th", "xpp_th",
@@ -99,7 +101,7 @@ void PDF_Kpipi0::initRelations() {
             break;
         default:
             cout << "PDF_Kpipi0::initRelations : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
 }

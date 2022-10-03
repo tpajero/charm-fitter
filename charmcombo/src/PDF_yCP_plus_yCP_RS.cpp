@@ -4,6 +4,8 @@
  * Date: October 2021
  **/
 
+#include "CharmUtils.h"
+#include "ParametersCharmCombo.h"
 #include "PDF_yCP_plus_yCP_RS.h"
 
 
@@ -32,22 +34,22 @@ void PDF_yCP_plus_yCP_RS::initParameters() {
     parameters->add(*(p.get("R_Kpi")));
     parameters->add(*(p.get("Delta_Kpi")));
     switch (th_cfg) {
-        case phenomenological:
+        case theory_config::phenomenological:
             parameters->add(*(p.get("x")));
             parameters->add(*(p.get("y")));
             parameters->add(*(p.get("qop")));
             parameters->add(*(p.get("phi")));
             break;
-        case theoretical:
+        case theory_config::theoretical:
             parameters->add(*(p.get("phiG")));
-        case superweak:
+        case theory_config::superweak:
             parameters->add(*(p.get("phiM")));
             parameters->add(*(p.get("x12")));
             parameters->add(*(p.get("y12")));
             break;
         default:
             cout << "PDF_yCP::initParameters : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
 }
@@ -56,7 +58,7 @@ void PDF_yCP_plus_yCP_RS::initParameters() {
 void PDF_yCP_plus_yCP_RS::initRelations() {
     theory = new RooArgList("theory");
     switch (th_cfg) {
-        case phenomenological:
+        case theory_config::phenomenological:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "yCP_plus_yCP_RS_th", "yCP_plus_yCP_RS_th",
@@ -68,7 +70,7 @@ void PDF_yCP_plus_yCP_RS::initRelations() {
                             "    + (x * cos(Delta_Kpi) + y * sin(Delta_Kpi)) * (qop+1 - 1/(qop+1)) * sin(phi)))",
                             parameters)));
             break;
-        case theoretical:
+        case theory_config::theoretical:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "yCP_plus_yCP_RS_th", "yCP_plus_yCP_RS_th",
@@ -78,7 +80,7 @@ void PDF_yCP_plus_yCP_RS::initRelations() {
                             "     + x12 * sin(Delta_Kpi) * cos(phiM))",
                             parameters)));
             break;
-        case superweak:
+        case theory_config::superweak:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "yCP_plus_yCP_RS_th", "yCP_plus_yCP_RS_th",
@@ -90,7 +92,7 @@ void PDF_yCP_plus_yCP_RS::initRelations() {
             break;
         default:
             cout << "PDF_yCP::initRelations : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
 }

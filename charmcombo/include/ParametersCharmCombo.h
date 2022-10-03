@@ -9,13 +9,6 @@
 
 #include "ParametersAbs.h"
 
-enum theory_config {
-    phenomenological,
-    theoretical,
-    superweak
-};
-
-
 class ParametersCharmCombo : public ParametersAbs {
   public:
     ParametersCharmCombo();

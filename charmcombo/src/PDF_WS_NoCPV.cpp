@@ -4,6 +4,8 @@
  * Date: October 2021
  **/
 
+#include "CharmUtils.h"
+#include "ParametersCharmCombo.h"
 #include "PDF_WS_NoCPV.h"
 
 // core
@@ -37,22 +39,22 @@ void PDF_WS_NoCPV::initParameters() {
     parameters->add(*(p.get("Delta_Kpi")));
 
     switch (th_cfg) {
-        case phenomenological:
+        case theory_config::phenomenological:
             parameters->add(*(p.get("x")));
             parameters->add(*(p.get("y")));
             parameters->add(*(p.get("qop")));
             parameters->add(*(p.get("phi")));
             break;
-        case theoretical:
+        case theory_config::theoretical:
             parameters->add(*(p.get("phiG")));
-        case superweak:
+        case theory_config::superweak:
             parameters->add(*(p.get("x12")));
             parameters->add(*(p.get("y12")));
             parameters->add(*(p.get("phiM")));
             break;
         default:
             cout << "PDF_WS_NoCPV::initParameters : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
 }
@@ -62,7 +64,7 @@ void PDF_WS_NoCPV::initRelations() {
     theory = new RooArgList("theory");
     theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "R_Kpi", parameters)));
     switch (th_cfg) {
-        case phenomenological:
+        case theory_config::phenomenological:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "yp_th", "yp_th",
@@ -73,7 +75,7 @@ void PDF_WS_NoCPV::initRelations() {
                             "pow(x*cos(Delta_Kpi) - y*sin(Delta_Kpi),2)",
                             parameters)));
             break;
-        case theoretical:
+        case theory_config::theoretical:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "yp_th", "yp_th",
@@ -85,7 +87,7 @@ void PDF_WS_NoCPV::initRelations() {
                             "pow(- y12*sin(Delta_Kpi) * TMath::Sign(1.,cos(phiG))"
                             "    + x12*cos(Delta_Kpi) * TMath::Sign(1.,cos(phiM)), 2)", parameters)));
             break;
-        case superweak:
+        case theory_config::superweak:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "yp_th", "yp_th",
@@ -99,7 +101,7 @@ void PDF_WS_NoCPV::initRelations() {
             break;
         default:
             cout << "PDF_WS_NoCPV::initRelations : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
 }
@@ -175,7 +177,7 @@ void PDF_WS_NoCPV::setCorrelations(TString c) {
     if (c.EqualTo("CDF")) {
         corSource = "https://inspirehep.net/literature/1254229";
         cout << "INFO [PDF_WS_NoCPV]: The correlation matrix of https://inspirehep.net/literature/1254229\n"
-                "                     (CDF) is not positive definite. It has been modified to avoid non convergence." << endl;
+                "                     (CDF) is not positive definite. It has been modified to avoid non convergence.\n" << endl;
         std::vector<double> dataStat  = {
             //  RD      y'     x'2
              1.   , -0.967,  0.900,

@@ -4,6 +4,8 @@
  * Date: October 2021
  **/
 
+#include "CharmUtils.h"
+#include "ParametersCharmCombo.h"
 #include "PDF_Cleo.h"
 
 
@@ -32,20 +34,20 @@ void PDF_Cleo::initParameters() {
     parameters->add(*(p.get("Delta_Kpi")));
 
     switch (th_cfg) {
-        case phenomenological:
+        case theory_config::phenomenological:
             parameters->add(*(p.get("x")));
             parameters->add(*(p.get("y")));
             break;
-        case theoretical:
+        case theory_config::theoretical:
             parameters->add(*(p.get("phiG")));
-        case superweak:
+        case theory_config::superweak:
             parameters->add(*(p.get("phiM")));
             parameters->add(*(p.get("x12")));
             parameters->add(*(p.get("y12")));
             break;
         default:
             cout << "PDF_Cleo::initParameters : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
 }
@@ -55,11 +57,11 @@ void PDF_Cleo::initRelations() {
     theory = new RooArgList("theory");
     theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "R_Kpi", parameters)));
     switch (th_cfg) {
-        case phenomenological:
+        case theory_config::phenomenological:
             theory->add(*(Utils::makeTheoryVar("x2_th", "x2_th", "x*x", parameters)));
             theory->add(*(Utils::makeTheoryVar("y_th", "y_th", "y", parameters)));
             break;
-        case theoretical:
+        case theory_config::theoretical:
             theory->add(*(Utils::makeTheoryVar(
                     "x2_th", "x2_th",
                     "0.5 * ("
@@ -75,7 +77,7 @@ void PDF_Cleo::initRelations() {
                     "          - pow(2 * x12 * y12 * sin(phiM - phiG),2), 0.5), 0.5)",
                     parameters)));
             break;
-        case superweak:
+        case theory_config::superweak:
             theory->add(*(Utils::makeTheoryVar(
                     "x2_th", "x2_th",
                     "0.5 * ("
@@ -93,7 +95,7 @@ void PDF_Cleo::initRelations() {
             break;
         default:
             cout << "PDF_Cleo::initRelations : ERROR : "
-                    "theory_config " + to_string(th_cfg) + " not found." << endl;
+                    "theory_config not supported." << endl;
             exit(1);
     }
     theory->add(*(Utils::makeTheoryVar("cos_th", "cos_th", "cos(Delta_Kpi)", parameters)));

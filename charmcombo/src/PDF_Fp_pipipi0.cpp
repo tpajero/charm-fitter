@@ -4,6 +4,8 @@
  * Date: October 2021
  **/
 
+#include "CharmUtils.h"
+#include "ParametersCharmCombo.h"
 #include "PDF_Fp_pipipi0.h"
 
 PDF_Fp_pipipi0::PDF_Fp_pipipi0() : PDF_Abs{1} {
@@ -39,7 +41,7 @@ void PDF_Fp_pipipi0::initObservables() {
 
 void PDF_Fp_pipipi0::setObservables(TString c) {
     if (c.EqualTo("Cleo-c")) {
-        obsValSource = "https://inspirehep.net/literature/1364362";
+        obsValSource = "https://inspirehep.net/literature/2139827";
         setObservable("F_pipipi0_obs", 0.973);
     } else {
         cout << "PDF_Fp_pipipi0::setObservables() : ERROR : config " + c + " not found." << endl;
@@ -49,7 +51,7 @@ void PDF_Fp_pipipi0::setObservables(TString c) {
 
 void PDF_Fp_pipipi0::setUncertainties(TString c) {
     if (c.EqualTo("Cleo-c")) {
-        obsErrSource = "https://inspirehep.net/literature/1364362";
+        obsErrSource = "https://inspirehep.net/literature/2139827";
         StatErr[0] = 0.017;
         SystErr[0] = 0.;
     } else {

@@ -9,7 +9,6 @@
 
 #include "TString.h"
 
-#include "ParametersCharmCombo.h"
 #include "PDF_Abs.h"
 
 class PDF_Fp_pipipi0 : public PDF_Abs {

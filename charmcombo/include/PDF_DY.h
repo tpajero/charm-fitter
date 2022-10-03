@@ -1,6 +1,6 @@
 /**
  * Charm Combination
- * Author: Tommaso Pajero, tommaso.pajero@cern.ch
+ * Author: tommaso.pajero@cern.ch
  * Date: October 2021
  **/
 
@@ -9,13 +9,12 @@
 
 #include "TString.h"
 
-#include "ParametersCharmCombo.h"
+#include "CharmUtils.h"
 #include "PDF_Abs.h"
 
-class PDF_DY : public PDF_Abs
-{
+class PDF_DY : public PDF_Abs {
     public:
-        PDF_DY(TString measurement_id, const theory_config& th_cf);
+        PDF_DY(TString measurement_id, const theory_config th_cf, const FSC fsc);
         ~PDF_DY();
         void buildPdf() override;
         void initObservables(const TString& setName);
@@ -25,6 +24,7 @@ class PDF_DY : public PDF_Abs
         void setObservables(TString measurement_id) override;
         void setUncertainties(TString measurement_id) override;
     private:
+        const FSC fsc;
         const theory_config th_cfg;
 };
 
