@@ -87,6 +87,7 @@ include_directories(
 link_directories(${ROOT_LIBRARY_DIR})
 
 aux_source_directory(./core/src CORE_LIB_SOURCES)
+list(REMOVE_ITEM CORE_LIB_SOURCES "./core/src/SharedArray.cpp")
 
 ######################################
 #
@@ -95,7 +96,7 @@ aux_source_directory(./core/src CORE_LIB_SOURCES)
 ######################################
 
 set(CORE_DICTIONARY_SOURCES
-  RooBinned2DBicubicBase.h
+  # RooBinned2DBicubicBase.h
   RooCrossCorPdf.h
   RooHistPdfAngleVar.h
   RooHistPdfVar.h
@@ -107,8 +108,11 @@ set(CORE_DICTIONARY_SOURCES
 set(CORE_DICTIONARY_CPP_SOURCES)
 foreach(file ${CORE_DICTIONARY_SOURCES})
   cmake_path(REPLACE_EXTENSION file ".cpp")
-  set(CORE_DICTIONARY_CPP_SOURCES "./core/src/${file}" ${CORE_DICTIONARY_CPP_SOURCES})
+  if ((NOT ${file} EQUAL "RooBinned2DBicubicBase.cpp") AND (NOT ${file} EQUAL "SharedArray.cpp"))
+    set(CORE_DICTIONARY_CPP_SOURCES "./core/src/${file}" ${CORE_DICTIONARY_CPP_SOURCES})
+  endif()
 endforeach()
+message("CPP sources: ${CORE_DICTIONARY_CPP_SOURCES}")
 
 add_library(${PROJECT_NAME}Dict ${CORE_DICTIONARY_CPP_SOURCES} G__${PROJECT_NAME}Dict.cxx)
 
