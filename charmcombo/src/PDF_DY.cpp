@@ -91,6 +91,7 @@ void PDF_DY::setObservables(TString c) {
     obsValSource = "https://github.com/tpajero/charm-fitter/tree/master/charmcombo/blue/DY.cpp";
     if (c.EqualTo("truth")) setObservablesTruth();
     else if (c.EqualTo("toy")) setObservablesToy();
+    else if (nObs == 1 && c.EqualTo("WA2019"))      setObservable("DY_obs",  3.2e-2);
     else if (nObs == 1 && c.EqualTo("WA2020"))      setObservable("DY_obs",  3.1e-2);
     else if (nObs == 1 && c.EqualTo("WA2021"))      setObservable("DY_obs", -0.92e-2);
     else if (nObs == 1 && c.EqualTo("Belle&BaBar")) setObservable("DY_obs", -1.68e-2);
@@ -110,7 +111,8 @@ void PDF_DY::setObservables(TString c) {
 
 void PDF_DY::setUncertainties(TString c) {
     obsErrSource = "https://github.com/tpajero/charm-fitter/tree/master/charmcombo/blue/DY.cpp";
-    if (nObs == 1 && c.EqualTo("WA2020"))           { StatErr[0] =  2.0e-2;  SystErr[0] = 0.;      }
+    if (nObs == 1 && c.EqualTo("WA2019"))           { StatErr[0] =  2.6e-2;  SystErr[0] = 0.;      }
+    else if (nObs == 1 && c.EqualTo("WA2020"))      { StatErr[0] =  2.0e-2;  SystErr[0] = 0.;      }
     else if (nObs == 1 && c.EqualTo("WA2021"))      { StatErr[0] =  1.11e-2; SystErr[0] = 0.33e-2; }
     else if (nObs == 1 && c.EqualTo("Belle&BaBar")) { StatErr[0] = 15.75e-2; SystErr[0] = 4.81e-2; }
     else if (nObs == 2 && c.EqualTo("WA2020")) {

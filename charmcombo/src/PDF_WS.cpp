@@ -9,28 +9,51 @@
 #include "PDF_WS.h"
 
 // core
-#include "Utils.h"
+#include <Utils.h>
 
 #include <vector>
 
 
-PDF_WS::PDF_WS(TString measurement_id, const theory_config& th_cfg)
-    : PDF_Abs{6}, th_cfg{th_cfg}
-{
+PDF_WS::PDF_WS(TString measurement_id, const theory_config& th_cfg, WS_parametrisation p)
+    : PDF_Abs{6}, th_cfg{th_cfg}, ws_param{p} {
     TString label;
+    if (measurement_id.EqualTo("BaBar")) label = "WS/RS BaBar CPV";
+    else if (measurement_id.EqualTo("Belle")) label = "WS/RS Belle CPV";
+    else if (measurement_id.EqualTo("LHCb_DT_Run1")) label = "WS/RS LHCb dt";
+    else if (measurement_id.EqualTo("LHCb_Run1")) label = "WS/RS LHCb Run 1";
+    else if (measurement_id.EqualTo("LHCb_Prompt_2011_2016"))  label = "WS/RS LHCb prompt (15/16)";
+    else if (measurement_id.EqualTo("LHCb_Prompt_Run12")) label = "WS/RS LHCb prompt (Run 1+2)";
+    else {
+        cout << "PDF_WS: Measurement ID " << measurement_id << " not supported\n;";
+        exit(1);
+    }
 
-    if (measurement_id.EqualTo("LHCb_Prompt_2011_2016")) label = "WS/RS LHCb prompt";
-    else if (measurement_id.EqualTo("LHCb_DT_Run1"))     label = "WS/RS LHCb dt";
-    else if (measurement_id.EqualTo("Belle"))            label = "WS/RS Belle CPV";
-    else exit(1);
+    if (ws_param == WS_parametrisation::ccprime && !measurement_id.EqualTo("LHCb_Prompt_Run12")) exit(1);
 
-    name = "WS_"+measurement_id;
+    name = "WS_" + measurement_id;
     initParameters();
     initRelations();
     initObservables(label);
     setObservables(measurement_id);
     setUncertainties(measurement_id);
     setCorrelations(measurement_id);
+    buildCov();
+    buildPdf();
+}
+
+
+PDF_WS::PDF_WS(TString val, TString err, const theory_config& th_cfg) : PDF_Abs{6}, th_cfg{th_cfg} {
+    TString label;
+    if (err.EqualTo("LHCb_Run12")) label = "WS/RS LHCb prompt (Run 1+2)";
+    else exit(1);
+
+    name = "WS_" + err;
+    initParameters();
+    initRelations();
+    initObservables(label);
+    setObservables(val);
+    setUncertainties(err);
+    setCorrelations(err);
     buildCov();
     buildPdf();
 }
@@ -70,12 +93,164 @@ void PDF_WS::initParameters() {
 
 
 void PDF_WS::initRelations() {
+    switch (ws_param) {
+        case WS_parametrisation::raxy:
+            initRelationsRAXY();
+            break;
+        case WS_parametrisation::rrxy:
+            initRelationsRRXY();
+            break;
+        case WS_parametrisation::ccprime:
+            initRelationsCCPrime();
+            break;
+        default:
+            cout << "PDF_WS::initRelations : ERROR : ws_param not supported.\n";
+            exit(1);
+    }
+}
+
+
+void PDF_WS::initRelationsCCPrime() {
+    theory = new RooArgList("theory");
+    theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "R_Kpi", parameters)));
+    switch (th_cfg) {
+        case theory_config::phenomenological:
+            theory->add(
+                    *(Utils::makeTheoryVar(
+                            "c_th", "c_th",
+                            "0.5 * (      (qop+1)*(  y*cos(Delta_Kpi - phi) + x*sin(Delta_Kpi - phi)) "
+                            "       + 1 / (qop+1)*(  y*cos(Delta_Kpi + phi) + x*sin(Delta_Kpi + phi)))",
+                            parameters)));
+            break;
+        case theory_config::theoretical:
+            theory->add(
+                    *(Utils::makeTheoryVar(
+                            "c_th", "c_th",
+                            "y12 * cos(Delta_Kpi) * cos(phiG) + x12 * sin(Delta_Kpi) * cos(phiM)",
+                            parameters)));
+            break;
+        case theory_config::superweak:
+            theory->add(
+                    *(Utils::makeTheoryVar(
+                            "c_th", "c_th",
+                            "y12 * cos(Delta_Kpi) + x12 * sin(Delta_Kpi) * cos(phiM)",
+                            parameters)));
+            break;
+        default:
+            cout << "PDF_WS::initRelations : ERROR : "
+                    "theory_config not supported." << endl;
+            exit(1);
+    }
+    switch (th_cfg) {
+        case theory_config::phenomenological:
+            theory->add(
+                    *(Utils::makeTheoryVar(
+                            "cp_th", "cp_th",
+                            "0.125 * (pow(x, 2) + pow(y, 2)) * (pow(qop + 1, 2) + pow(qop + 1, -2))",
+                            parameters)));
+            break;
+        case theory_config::theoretical:
+        case theory_config::superweak:
+            theory->add(
+                    *(Utils::makeTheoryVar(
+                            "cp_th", "cp_th",
+                            "0.25 * (pow(x12, 2) + pow(y12, 2))"
+                            "+ 0.25 * R_Kpi / 100 * (pow(y12, 2) - pow(x12, 2))",  // 2nd order corrections
+                            parameters)));
+            break;
+        default:
+            cout << "PDF_WS::initRelations : ERROR : "
+                    "theory_config not supported." << endl;
+            exit(1);
+    }
+    switch (th_cfg) {
+        case theory_config::phenomenological:
+        case theory_config::theoretical:
+            theory->add(*(Utils::makeTheoryVar("AD_th", "AD_th", "Acp_KP", parameters)));
+            break;
+        case theory_config::superweak:
+            theory->add(*(Utils::makeTheoryVar("AD_th", "AD_th", "0", parameters)));
+            break;
+        default:
+            cout << "PDF_WS::initRelations : ERROR : "
+                    "theory_config not supported." << endl;
+            exit(1);
+    }
+    switch (th_cfg) {
+        case theory_config::phenomenological:
+            theory->add(
+                    *(Utils::makeTheoryVar(
+                            "dc_th", "dc_th",
+                            "0.5 * (      (qop+1)*(  y*cos(Delta_Kpi - phi) + x*sin(Delta_Kpi - phi)) "
+                            "       - 1 / (qop+1)*(  y*cos(Delta_Kpi + phi) + x*sin(Delta_Kpi + phi)))",
+                            parameters)));
+            theory->add(
+                    *(Utils::makeTheoryVar(
+                            "dcp_th", "dcp_th",
+                            "   1 / 8 * (pow(x, 2) + pow(y, 2)) * (pow(qop + 1, 2) - pow(qop + 1, -2))",
+                            parameters)));
+            break;
+        case theory_config::theoretical:
+            theory->add(
+                    *(Utils::makeTheoryVar(
+                            "dc_th", "dc_th",
+                            "  x12 * cos(Delta_Kpi) * sin(phiM)"
+                            "- y12 * sin(Delta_Kpi) * sin(phiG)",
+                            parameters)));
+            theory->add(
+                    *(Utils::makeTheoryVar(
+                            "dcp_th", "dcp_th",
+                            "0.5 * x12 * y12 * sin(phiM - phiG)",
+                            parameters)));
+            break;
+        case theory_config::superweak:
+            theory->add(
+                    *(Utils::makeTheoryVar(
+                            "dc_th", "dc_th",
+                            "  x12 * cos(Delta_Kpi) * sin(phiM)",
+                            parameters)));
+            theory->add(
+                    *(Utils::makeTheoryVar(
+                            "dcp_th", "dcp_th",
+                            "0.5 * x12 * y12 * sin(phiM)",
+                            parameters)));
+            break;
+        default:
+            cout << "PDF_WS::initRelations : ERROR : "
+                    "theory_config not supported." << endl;
+            exit(1);
+    }
+}
+
+
+void PDF_WS::initRelationsRAXY() {
+    theory = new RooArgList("theory");
+    theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "R_Kpi", parameters)));
+    initRelationsXYP(theory);
+    switch (th_cfg) {
+        case theory_config::phenomenological:
+        case theory_config::theoretical:
+            theory->add(*(Utils::makeTheoryVar("AD_th", "AD_th", "Acp_KP", parameters)));
+            break;
+        case theory_config::superweak:
+            theory->add(*(Utils::makeTheoryVar("AD_th", "AD_th", "0.", parameters)));
+            break;
+        default:
+            cout << "PDF_WS::initRelations : ERROR : "
+                    "theory_config not supported." << endl;
+            exit(1);
+    }
+    initRelationsXYM(theory);
+}
+
+
+void PDF_WS::initRelationsRRXY() {
     theory = new RooArgList("theory");
     switch (th_cfg) {
         case theory_config::phenomenological:
         case theory_config::theoretical:
             theory->add(*(Utils::makeTheoryVar("RD_p_th", "RD_p_th",
-                                            "R_Kpi*(1+Acp_KP/100)", parameters)));
+                                            "R_Kpi * (1 + Acp_KP / 100)", parameters)));
             break;
         case theory_config::superweak:
             theory->add(*(Utils::makeTheoryVar("RD_p_th", "RD_p_th",
@@ -86,6 +261,25 @@ void PDF_WS::initRelations() {
                     "theory_config not supported." << endl;
             exit(1);
     }
+    initRelationsXYP(theory);
+    switch (th_cfg) {
+        case theory_config::phenomenological:
+        case theory_config::theoretical:
+            theory->add(*(Utils::makeTheoryVar("RD_m_th", "RD_m_th", "R_Kpi * (1 - Acp_KP / 100)", parameters)));
+            break;
+        case theory_config::superweak:
+            theory->add(*(Utils::makeTheoryVar("RD_m_th", "RD_m_th", "R_Kpi", parameters)));
+            break;
+        default:
+            cout << "PDF_WS::initRelations : ERROR : "
+                    "theory_config not supported." << endl;
+            exit(1);
+    }
+    initRelationsXYM(theory);
+}
+
+
+void PDF_WS::initRelationsXYP(RooArgList* theory) {
     switch (th_cfg) {
         case theory_config::phenomenological:
             theory->add(
@@ -132,19 +326,10 @@ void PDF_WS::initRelations() {
                     "theory_config not supported." << endl;
             exit(1);
     }
-    switch (th_cfg) {
-        case theory_config::phenomenological:
-        case theory_config::theoretical:
-            theory->add(*(Utils::makeTheoryVar("RD_m_th", "RD_m_th", "R_Kpi*(1-Acp_KP/100)", parameters)));
-            break;
-        case theory_config::superweak:
-            theory->add(*(Utils::makeTheoryVar("RD_m_th", "RD_m_th", "R_Kpi", parameters)));
-            break;
-        default:
-            cout << "PDF_WS::initRelations : ERROR : "
-                    "theory_config not supported." << endl;
-            exit(1);
-    }
+}
+
+
+void PDF_WS::initRelationsXYM(RooArgList* theory) {
     switch (th_cfg) {
         case theory_config::phenomenological:
             theory->add(
@@ -195,35 +380,52 @@ void PDF_WS::initRelations() {
 
 
 void PDF_WS::initObservables(const TString& setName) {
-    observables = new RooArgList("observables"); ///< the order of this list must match that of the COR matrix!
-    observables->add(*(new RooRealVar("RD_p_obs" , setName + "   #it{R_{K#pi}^{+}}", 0., -1e4, 1e4)));
-    observables->add(*(new RooRealVar("yp_p_obs" , setName + "   #it{y'^{+}}", 0., -1e4, 1e4)));
-    observables->add(*(new RooRealVar("xp2_p_obs", setName + "   #it{x'^{+2}}", 0., -1e4, 1e4)));
-    observables->add(*(new RooRealVar("RD_m_obs" , setName + "   #it{R_{K#pi}^{#minus}}", 0., -1e4, 1e4)));
-    observables->add(*(new RooRealVar("yp_m_obs" , setName + "   #it{y'}^{#minus}", 0., -1e4, 1e4)));
-    observables->add(*(new RooRealVar("xp2_m_obs", setName + "   #it{x'}^{#minus2}", 0., -1e4, 1e4)));
+    observables = new RooArgList("observables");  // the order of this list must match that of the COR matrix!
+    switch (ws_param) {
+        case WS_parametrisation::raxy:
+            observables->add(*(new RooRealVar("RD_obs"   , setName + "   #it{R_{K#pi}}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("yp_p_obs" , setName + "   #it{y'^{+}}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("xp2_p_obs", setName + "   #it{x'^{+2}}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("AD_obs"   , setName + "   #it{A_{K#pi}}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("yp_m_obs" , setName + "   #it{y'}^{#minus}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("xp2_m_obs", setName + "   #it{x'}^{#minus2}", 0., -1e4, 1e4)));
+            break;
+        case WS_parametrisation::rrxy:
+            observables->add(*(new RooRealVar("RD_p_obs" , setName + "   #it{R_{K#pi}^{+}}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("yp_p_obs" , setName + "   #it{y'^{+}}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("xp2_p_obs", setName + "   #it{x'^{+2}}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("RD_m_obs" , setName + "   #it{R_{K#pi}^{#minus}}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("yp_m_obs" , setName + "   #it{y'}^{#minus}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("xp2_m_obs", setName + "   #it{x'}^{#minus2}", 0., -1e4, 1e4)));
+            break;
+        case WS_parametrisation::ccprime:
+            observables->add(*(new RooRealVar("RD_obs" , setName + "   #it{R_{K#pi}}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("c_obs"  , setName + "   #it{c_{K#pi}}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("cp_obs" , setName + "   #it{c'_{K#pi}}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("AD_obs" , setName + "   #it{A_{K#pi}}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("dc_obs" , setName + "   #it{#Deltac_{K#pi}}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("dcp_obs", setName + "   #it{#Deltac'_{K#pi}}", 0., -1e4, 1e4)));
+            break;
+        default:
+            cout << "PDF_WS::initRelations : ERROR : ws_param not supported.\n";
+            exit(1);
+    }
 }
 
 
 void PDF_WS::setObservables(TString c) {
     if (c.EqualTo("truth")) setObservablesTruth();
     else if (c.EqualTo("toy")) setObservablesToy();
-    else if (c.EqualTo("LHCb_Prompt_2011_2016")) {
-        obsValSource = "https://inspirehep.net/literature/1642234";
-        setObservable("RD_p_obs" , 0.3454);
-        setObservable("yp_p_obs" , 0.501);
-        setObservable("xp2_p_obs", 0.61);
-        setObservable("RD_m_obs" , 0.3454);
-        setObservable("yp_m_obs" , 0.554);
-        setObservable("xp2_m_obs", 0.16);
-    } else if (c.EqualTo("LHCb_DT_Run1")) {
-        obsValSource = "https://inspirehep.net/literature/1499047";
-        setObservable("RD_p_obs" , 0.338);
-        setObservable("yp_p_obs" , 0.581);
-        setObservable("xp2_p_obs", -0.19);
-        setObservable("RD_m_obs" , 0.360);
-        setObservable("yp_m_obs" , 0.332);
-        setObservable("xp2_m_obs", 0.79);
+    else if (c.EqualTo("BaBar")) {
+        obsValSource = "https://inspirehep.net/literature/746245";
+        // setObservable("RD_obs", 0.303); TODO
+        setObservable("RD_p_obs", 0.297);
+        setObservable("yp_p_obs", 0.98);
+        setObservable("xp2_p_obs", -2.4);
+        // setObservable("AD_obs", -2.1); TODO
+        setObservable("RD_m_obs", 0.309);
+        setObservable("yp_m_obs" , 0.96);
+        setObservable("xp2_m_obs", -2.0);
     } else if (c.EqualTo("Belle")) {
         obsValSource = "http://belle.kek.jp/belle/theses/doctor/lmzhang06/phd-mix-400.ps.gz";
         setObservable("RD_p_obs" ,  0.373);
@@ -232,6 +434,38 @@ void PDF_WS::setObservables(TString c) {
         setObservable("RD_m_obs" ,  0.356);
         setObservable("yp_m_obs" ,  0.2);
         setObservable("xp2_m_obs",  0.6);
+    } else if (c.EqualTo("LHCb_DT_Run1")) {
+        obsValSource = "https://inspirehep.net/literature/1499047";
+        setObservable("RD_p_obs" , 0.338);
+        setObservable("yp_p_obs" , 0.581);
+        setObservable("xp2_p_obs", -0.19);
+        setObservable("RD_m_obs" , 0.360);
+        setObservable("yp_m_obs" , 0.332);
+        setObservable("xp2_m_obs", 0.79);
+    } else if (c.EqualTo("LHCb_Run1")) {
+        obsValSource = "https://inspirehep.net/literature/1499047";
+        setObservable("RD_p_obs" , 0.3474);
+        setObservable("yp_p_obs" , 0.597);
+        setObservable("xp2_p_obs", 0.11);
+        setObservable("RD_m_obs" , 0.3591);
+        setObservable("yp_m_obs" , 0.450);
+        setObservable("xp2_m_obs", 0.61);
+    } else if (c.EqualTo("LHCb_Prompt_2011_2016")) {
+        obsValSource = "https://inspirehep.net/literature/1642234";
+        setObservable("RD_p_obs" , 0.3454);
+        setObservable("yp_p_obs" , 0.501);
+        setObservable("xp2_p_obs", 0.61);
+        setObservable("RD_m_obs" , 0.3454);
+        setObservable("yp_m_obs" , 0.554);
+        setObservable("xp2_m_obs", 0.16);
+    } else if (c.EqualTo("LHCb_Prompt_Run12")) {
+        obsValSource = "https://indico.cern.ch/event/1355805/";
+        setObservable("RD_obs" ,  0.3427);
+        setObservable("c_obs" , 0.528);
+        setObservable("cp_obs",  0.120);
+        setObservable("AD_obs" , -0.66);
+        setObservable("dc_obs" ,  0.020);
+        setObservable("dcp_obs",  -0.007);
     } else {
         cout << "PDF_WS::setObservables() : ERROR : config " + c + " not found."
              << endl;
@@ -241,14 +475,30 @@ void PDF_WS::setObservables(TString c) {
 
 
 void PDF_WS::setUncertainties(TString c) {
-    if (c.EqualTo("LHCb_Prompt_2011_2016")) {
-        obsErrSource = "https://inspirehep.net/literature/1642234";
-        StatErr[0] = 0.0045;  // RD+
-        StatErr[1] = 0.074;   // y'+
-        StatErr[2] = 0.37;    // x'2+
-        StatErr[3] = 0.0045;  // RD-
-        StatErr[4] = 0.074;   // y'-
-        StatErr[5] = 0.39;    // x'2-
+    if (c.EqualTo("BaBar")) {
+        obsErrSource = "https://inspirehep.net/literature/746245";
+        // StatErr[0] = 0.0189; // RD TODO
+        StatErr[0] = 0.0267; // RD+
+        StatErr[1] = 0.78;   // y'+
+        StatErr[2] = 5.2;    // x'2+
+        // StatErr[3] = 5.4;    // AD TODO
+        StatErr[3] = 0.0267; // RD-
+        StatErr[4] = 0.75;   // y'-
+        StatErr[5] = 5.0;    // x'2-
+        SystErr[0] = 0;  // RD+ (or RD)
+        SystErr[1] = 0;  // y'+
+        SystErr[2] = 0;  // x'2+
+        SystErr[3] = 0;  // RD- (or AD)
+        SystErr[4] = 0;  // y'-
+        SystErr[5] = 0;  // x'2-
+    } else if (c.EqualTo("Belle")) {
+        obsErrSource = "http://belle.kek.jp/belle/theses/doctor/lmzhang06/phd-mix-400.ps.gz";
+        StatErr[0] = 0.024;  // RD+
+        StatErr[1] = 0.57;   // y'+
+        StatErr[2] = 3.1;    // x'2+
+        StatErr[3] = 0.024;  // RD-
+        StatErr[4] = 0.54;   // y'-
+        StatErr[5] = 2.9;    // x'2-
         SystErr[0] = 0;  // RD+
         SystErr[1] = 0;  // y'+
         SystErr[2] = 0;  // x'2+
@@ -269,20 +519,48 @@ void PDF_WS::setUncertainties(TString c) {
         SystErr[3] = 0;  // RD-
         SystErr[4] = 0;  // y'-
         SystErr[5] = 0;  // x'2-
-    } else if (c.EqualTo("Belle")) {
-        obsErrSource = "http://belle.kek.jp/belle/theses/doctor/lmzhang06/phd-mix-400.ps.gz";
-        StatErr[0] = 0.024;  // RD+
-        StatErr[1] = 0.57;   // y'+
-        StatErr[2] = 3.1;    // x'2+
-        StatErr[3] = 0.024;  // RD-
-        StatErr[4] = 0.54;   // y'-
-        StatErr[5] = 2.9;    // x'2-
+    } else if (c.EqualTo("LHCb_Run1")) {
+        obsErrSource = "https://inspirehep.net/literature/1499047";
+        StatErr[0] = 0.081;  // RD+
+        StatErr[1] = 0.125;  // y'+
+        StatErr[2] = 0.65 ;  // x'2+
+        StatErr[3] = 0.081;  // RD-
+        StatErr[4] = 0.121;  // y'-
+        StatErr[5] = 0.61 ;  // x'2-
         SystErr[0] = 0;  // RD+
         SystErr[1] = 0;  // y'+
         SystErr[2] = 0;  // x'2+
         SystErr[3] = 0;  // RD-
         SystErr[4] = 0;  // y'-
         SystErr[5] = 0;  // x'2-
+    } else if (c.EqualTo("LHCb_Prompt_2011_2016")) {
+        obsErrSource = "https://inspirehep.net/literature/1642234";
+        StatErr[0] = 0.0045;  // RD+
+        StatErr[1] = 0.074;   // y'+
+        StatErr[2] = 0.37;    // x'2+
+        StatErr[3] = 0.0045;  // RD-
+        StatErr[4] = 0.074;   // y'-
+        StatErr[5] = 0.39;    // x'2-
+        SystErr[0] = 0;  // RD+
+        SystErr[1] = 0;  // y'+
+        SystErr[2] = 0;  // x'2+
+        SystErr[3] = 0;  // RD-
+        SystErr[4] = 0;  // y'-
+        SystErr[5] = 0;  // x'2-
+    } else if (c.EqualTo("LHCb_Prompt_Run12")) {
+        obsErrSource = "https://indico.cern.ch/event/1355805/";
+        StatErr[0] = 0.0019;  // RD
+        StatErr[1] = 0.033;   // c
+        StatErr[2] = 0.035;   // c'
+        StatErr[3] = 0.57;    // AD
+        StatErr[4] = 0.034;   // dc
+        StatErr[5] = 0.036;   // dc'
+        SystErr[0] = 0;  // RD
+        SystErr[1] = 0;  // c
+        SystErr[2] = 0;  // c'
+        SystErr[3] = 0;  // AD
+        SystErr[4] = 0;  // dc
+        SystErr[5] = 0;  // dc'
     } else {
         cout << "PDF_WS::setUncertainties() : ERROR : config " + c + " not found." << endl;
         exit(1);
@@ -293,15 +571,27 @@ void PDF_WS::setUncertainties(TString c) {
 void PDF_WS::setCorrelations(TString c)
 {
     resetCorrelations();
-    if (c.EqualTo("LHCb_Prompt_2011_2016")) {
-        corSource = "https://inspirehep.net/literature/1642234";
+    if (c.EqualTo("BaBar")) {  // TODO
+        corSource = "https://hflav-eos.web.cern.ch/hflav-eos/charm/CKM23/results_mix_cpv.html";
         std::vector<double> dataStat  = {
             //  RD+     y'+    x'2+     RD-     y'-    x'2-
-             1.   , -0.935,  0.843, -0.012, -0.003, -0.002,  // RD+
-                     1.   , -0.963, -0.003,  0.004, -0.003,  // y'+
-                             1.   ,  0.002, -0.003,  0.003,  // x'2+
-                                     1.   , -0.935,  0.846,  // RD-
-                                             1.   , -0.964,  // y'-
+             1.   , -0.87 ,  0.77 ,  0.   ,  0.   ,  0.   ,  // RD+
+                     1.   , -0.94 ,  0.   ,  0.   ,  0.   ,  // y'+
+                             1.   ,  0.   ,  0.   ,  0.   ,  // x'2+
+                                     1.   , -0.87 ,  0.77 ,  // RD-
+                                             1.   , -0.94 ,  // y'-
+                                                     1.      // x'2-
+        };
+        corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
+    } else if (c.EqualTo("Belle")) {
+        corSource = "http://belle.kek.jp/belle/theses/doctor/lmzhang06/phd-mix-400.ps.gz";
+        std::vector<double> dataStat  = {
+            //  RD+     y'+    x'2+     RD-     y'-    x'2-
+             1.   , -0.834,  0.655,  0.   ,  0.   ,  0.   ,  // RD+
+                     1.   , -0.909,  0.   ,  0.   ,  0.   ,  // y'+
+                             1.   ,  0.   ,  0.   ,  0.   ,  // x'2+
+                                     1.   , -0.834,  0.655,  // RD-
+                                             1.   , -0.909,  // y'-
                                                      1.      // x'2-
         };
         corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
@@ -317,16 +607,40 @@ void PDF_WS::setCorrelations(TString c)
                                                      1.      // x'2-
         };
         corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
-    } else if (c.EqualTo("Belle")) {
-        corSource = "http://belle.kek.jp/belle/theses/doctor/lmzhang06/phd-mix-400.ps.gz";
+    } else if (c.EqualTo("LHCb_Run1")) {
+        corSource = "https://inspirehep.net/literature/1499047";
         std::vector<double> dataStat  = {
             //  RD+     y'+    x'2+     RD-     y'-    x'2-
-             1.   , -0.834,  0.655,  0.   ,  0.   ,  0.   ,  // RD+
-                     1.   , -0.909,  0.   ,  0.   ,  0.   ,  // y'+
-                             1.   ,  0.   ,  0.   ,  0.   ,  // x'2+
-                                     1.   , -0.834,  0.655,  // RD-
-                                             1.   , -0.909,  // y'-
+             1.   , -0.920,  0.823, -0.007, -0.010,  0.008,  // RD+
+                     1.   , -0.962, -0.011,  0.000, -0.002,  // y'+
+                             1.   ,  0.009, -0.002,  0.004,  // x'2+
+                                     1.   , -0.918,  0.812,  // RD-
+                                             1.   , -0.956,  // y'-
                                                      1.      // x'2-
+        };
+        corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
+    } else if (c.EqualTo("LHCb_Prompt_2011_2016")) {
+        corSource = "https://inspirehep.net/literature/1642234";
+        std::vector<double> dataStat  = {
+            //  RD+     y'+    x'2+     RD-     y'-    x'2-
+             1.   , -0.935,  0.843, -0.012, -0.003, -0.002,  // RD+
+                     1.   , -0.963, -0.003,  0.004, -0.003,  // y'+
+                             1.   ,  0.002, -0.003,  0.003,  // x'2+
+                                     1.   , -0.935,  0.846,  // RD-
+                                             1.   , -0.964,  // y'-
+                                                     1.      // x'2-
+        };
+        corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
+    } else if (c.EqualTo("LHCb_Prompt_Run12")) {
+        corSource = "https://indico.cern.ch/event/1355805/";
+        std::vector<double> dataStat  = {
+            //  RD   c       c'      AD      c       c'
+             1.   , -0.927,  0.803,  0.009, -0.007,  0.002,  // RD
+                     1.   , -0.942, -0.013,  0.012, -0.007,  // c
+                             1.   ,  0.007, -0.007,  0.002,  // c'
+                                     1.   , -0.919,  0.797,  // AD
+                                             1.   , -0.941,  // dc
+                                                     1.      // dc'
         };
         corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
     } else {

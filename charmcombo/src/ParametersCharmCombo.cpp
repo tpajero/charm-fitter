@@ -64,7 +64,7 @@ void ParametersCharmCombo::defineParameters() {
     //   Phys. Rev. D 103 053008, 2021 (https://inspirehep.net/literature/1776611)
     p = newParameter("Delta_Kpi");
     p->title = "#Delta_{#it{K#pi}} [rad]";
-    p->startvalue = -0.2;
+    p->startvalue = -0.25;
     p->unit = "";
     p->scan = range(DegToRad(-180), DegToRad(180));
     p->phys = range(DegToRad(-180), DegToRad(180));
@@ -127,7 +127,7 @@ void ParametersCharmCombo::defineParameters() {
 
     p = newParameter("y");
     p->title = "#it{y} [%]";
-    p->startvalue = 0.65;
+    p->startvalue = 0.63;
     p->unit = "";
     p->scan = range(0.1,  1);
     p->phys = range(-1e4, 1e4);
@@ -162,7 +162,7 @@ void ParametersCharmCombo::defineParameters() {
 
     p = newParameter("y12");
     p->title = "#it{y}_{12} [%]";
-    p->startvalue = 0.65;
+    p->startvalue = 0.63;
     p->unit = "";
     p->scan = range(0., 1.1);
     p->phys = range(0, 1e4);

@@ -36,7 +36,7 @@ void PDF_Fp_pipipi0::initRelations() {
 
 void PDF_Fp_pipipi0::initObservables() {
     observables = new RooArgList("observables");
-    observables->add(*(new RooRealVar("F_pipipi0_obs", "F_pipipi0",  0, -1e4, 1e4)));
+    observables->add(*(new RooRealVar("F_pipipi0_obs", "F_{#pi#pi#pi^{0}}",  0, -1e4, 1e4)));
 }
 
 void PDF_Fp_pipipi0::setObservables(TString c) {
