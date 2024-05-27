@@ -19,7 +19,7 @@
 #include "PDF_WS.h"
 #include "PDF_WS_NoCPV.h"
 
-#include <TString.h>
+#include <string>
 #include <vector>
 
 #include "GammaComboEngine.h"
@@ -27,13 +27,19 @@
 
 int main(int argc, char* argv[]) {
 
-    // Get the parametrisation
+    // Get the parametrisation and the parameter to prevent CPV in DCS decays
     theory_config th_cfg = theory_config::theoretical;
-    TString combiner_name = "theoretical";
+    std::string combiner_name;
 
+    bool dcs_cpv = true;
+    int idcs = -1;
     int iparam = -1;
     int ifsc = -1;
     for (int i=1; i<argc-1; ++i) {
+        if (!strcmp(argv[i], "--no-dcs-cpv")) {
+            idcs = i;
+            dcs_cpv = false;
+        }
         if (!strcmp(argv[i], "--param")) {
             iparam = i;
             if (!strcmp(argv[i+1], "phenomenological")) {
@@ -53,10 +59,11 @@ int main(int argc, char* argv[]) {
     }
     std::vector<char*> combiner_argv = {};
     for (int i=0; i<argc; ++i) {
-        if (i != iparam && i != iparam + 1) combiner_argv.emplace_back(argv[i]);
+        if (i != iparam && i != iparam + 1 && i != idcs) combiner_argv.emplace_back(argv[i]);
     }
+    if (!dcs_cpv) combiner_name += "_noDcsCpv";
     std::cout << "INFO: The fitter will be run with the following parameterisation and final-state corrections for DY:\n"
-        << "      Parametrisation:        " << th_cfg << "\n" << std::endl;
+        << "      Parametrisation:        " << th_cfg << ", and will " << (dcs_cpv ? "" : " not") << " allow for CPV in DCS decays\n";
 
     // Define the combiner
     GammaComboEngine gc(combiner_name, combiner_argv.size(), &combiner_argv[0]);
@@ -81,15 +88,16 @@ int main(int argc, char* argv[]) {
     gc.addPdf(23, new PDF_BinFlip ("LHCb_Run2_sl",          th_cfg), "Bin-flip     LHCb     Run 2    [B -> D0 mu] ");
     gc.addPdf(24, new PDF_BinFlip ("LHCb_Run2",             th_cfg), "Bin-flip     LHCb     Run 2                 ");
 
-    gc.addPdf(30, new PDF_WS_NoCPV("CDF",                   th_cfg),                              "WS/RS        CDF                            ");
-    gc.addPdf(31, new PDF_WS_NoCPV("BaBar",                 th_cfg),                              "WS/RS        BaBar    no CPV                ");
-    gc.addPdf(32, new PDF_WS_NoCPV("Belle",                 th_cfg),                              "WS/RS        Belle    no CPV                ");
-    gc.addPdf(33, new PDF_WS_NoCPV("BaBar",                 th_cfg),                              "WS/RS        BaBar                          ");
-    gc.addPdf(34, new PDF_WS_NoCPV("Belle",                 th_cfg),                              "WS/RS        Belle                          ");
-    gc.addPdf(35, new PDF_WS      ("LHCb_DT_Run1",          th_cfg),                              "WS/RS        LHCb     Run 1    [B -> D* mu] ");
-    gc.addPdf(36, new PDF_WS      ("LHCb_Run1",             th_cfg),                              "WS/RS        LHCb     Run 1                 ");
-    gc.addPdf(37, new PDF_WS      ("LHCb_Prompt_2011_2016", th_cfg),                              "WS/RS        LHCb     2011-6   [D* -> D0 pi]");
-    gc.addPdf(38, new PDF_WS      ("LHCb_Prompt_Run12",     th_cfg, WS_parametrisation::ccprime), "WS/RS        LHCb     Run 2    [D* -> D0 pi]");
+    gc.addPdf(30, new PDF_WS_NoCPV("CDF",                    th_cfg),                              "WS/RS        CDF                            ");
+    gc.addPdf(31, new PDF_WS_NoCPV("BaBar",                  th_cfg),                              "WS/RS        BaBar    no CPV                ");
+    gc.addPdf(32, new PDF_WS_NoCPV("Belle",                  th_cfg),                              "WS/RS        Belle    no CPV                ");
+    gc.addPdf(33, new PDF_WS_NoCPV("BaBar",                  th_cfg),                              "WS/RS        BaBar                          ");
+    gc.addPdf(34, new PDF_WS_NoCPV("Belle",                  th_cfg),                              "WS/RS        Belle                          ");
+    gc.addPdf(35, new PDF_WS      ("LHCb_DT_Run1",           th_cfg, dcs_cpv),                              "WS/RS        LHCb     Run 1    [B -> D* mu] ");
+    gc.addPdf(36, new PDF_WS      ("LHCb_Run1",              th_cfg, dcs_cpv),                              "WS/RS        LHCb     Run 1                 ");
+    gc.addPdf(37, new PDF_WS      ("LHCb_Prompt_2011_2016",  th_cfg, dcs_cpv),                              "WS/RS        LHCb     2011-6   [D* -> D0 pi]");
+    gc.addPdf(38, new PDF_WS      ("LHCb_Prompt_Run12_sec9", th_cfg, dcs_cpv, WS_parametrisation::ccprime), "WS/RS        LHCb     Run 2    [D* -> D0 pi]");
+    gc.addPdf(39, new PDF_WS      ("LHCb_Prompt_Run12_appB", th_cfg, dcs_cpv, WS_parametrisation::ccprime), "WS/RS        LHCb     Run 2    [D* -> D0 pi]");
 
     gc.addPdf(50,  new PDF_Cleo      ("Cleo-c",             th_cfg), "Delta_Kpi    Cleo-c                         ");
     gc.addPdf(51,  new PDF_BES_Kpi_1d(                      th_cfg), "Delta_Kpi    BES      3fb      [A_kpi only] ");
@@ -186,17 +194,23 @@ int main(int argc, char* argv[]) {
     // WA March 2024 - no FSC
     gc.cloneCombiner(50, 40, "WAMar2024NoFSC", "World average (March 2024)");
     gc.getCombiner(50)->delPdf(gc[37]);  // WS/RS in D0 -> Kpi from LHCb 2011-2016
-    gc.getCombiner(50)->addPdf(gc[38]);  // WS/RS in D0 -> Kpi from LHCb Run 1+2
+    gc.getCombiner(50)->addPdf(gc[39]);  // WS/RS in D0 -> Kpi from LHCb Run 1+2
+
+    // WA March 2024 with parametrisation of prompt LHCb WS/RS decays from Sec. 9 - no FSC
+    gc.cloneCombiner(51, 50, "WAMar2024NoFSC_WSsec9", "World average (March 2024, prompt WS/RS from Sec. 9)");
+    gc.getCombiner(51)->delPdf(gc[39]);  // WS/RS in D0 -> Kpi from LHCb Run 1+2
+    gc.getCombiner(51)->addPdf(gc[38]);  // WS/RS in D0 -> Kpi from LHCb Run 1+2
+
+    // WA March 2024 without measurement of CPV in the decay (to test the sensitivity of WS/RS to ACP(KK)
+    gc.cloneCombiner(52, 50, "WAMar2024NoFSC_noDcsCpv", "No direct measurements");
+    gc.getCombiner(52)->delPdf(gc[90]);  // Delta_ACP and ACP(KK)
 
     // Impact of LHCb upgrades -----------------------------------------------------------------------------------------
 
     // WA before LHCb Run 2
-    gc.newCombiner(500, "LHCb_Run1", "World average before LHCb Run 2", 1, 2, 3, 4, 10, 11, 20, 21, 30, 31, 32, 35, 36, 50, 52);
-    gc.getCombiner(500)->addPdf(gc[60]);
-    gc.getCombiner(500)->addPdf(gc[61]);
-    gc.getCombiner(500)->addPdf(gc[62]);
-    gc.getCombiner(500)->addPdf(gc[63]);
-    gc.getCombiner(500)->addPdf(gc[70]);
+    gc.newCombiner(500, "LHCb_Run1", "World average before LHCb Run 2");
+    for (auto imeas : {1, 2, 3, 4, 10, 11, 20, 21, 30, 31, 32, 35, 36, 50, 52, 60, 61, 62, 63, 70})
+      gc.getCombiner(500)->addPdf(gc[imeas]);
 
     // WA after LHCb Run 2
     gc.cloneCombiner(501, 50, "LHCb_Run2", "World average after LHCb Run 2");

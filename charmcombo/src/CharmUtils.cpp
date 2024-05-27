@@ -52,10 +52,9 @@ std::string CharmUtils::get_dy_expression(const theory_config th_cfg, const FSC 
             }
             break;
         default:
-            std::cerr << " ERROR [CharmUtils::get_dy_expression]: "
-                    "theory_config not supported." << std::endl;
+            std::cerr << " ERROR [CharmUtils::get_dy_expression]: theory_config not supported." << std::endl;
             exit(1);
     }
     boost::replace_all(expression, "HH", fs);
-    return expression;
+    return "(" + expression + ")";
 }

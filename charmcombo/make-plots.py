@@ -4,7 +4,7 @@ Produce 1D and 2D plots for a single combination, or comparing different
 combinations. The prob method is employed.
 
 Example (plot the current averages):
-    python3 make_plots.py --1d --2d -c 40 --param theoretical
+    python3 make-plots.py --1d --2d -c 40 --param theoretical
 '''
 
 import argparse
@@ -82,7 +82,7 @@ def get_scans_1d(combinations, scan_dy_rs=False):
             Scan1d('Delta_Kpi',    -0.5,   0.2 ),
             Scan1d('R_Kpi',         0.335, 0.355),
             Scan1d('Acp_KP',       -2,     2  ),
-            Scan1d('Acp_KK',       -0.5,   0.5 ),
+            Scan1d('Acp_KK',       -0.7,   0.7 ),
             Scan1d('Acp_PP',       -0.4,   0.7 ),
             Scan1d('cot_delta_KK', -4e2,   4e2 ),
             Scan1d('cot_delta_PP', -4e2,   4e2 ),
@@ -112,11 +112,15 @@ def get_scans_2d(combinations):
             Scan2d('x', 'y', 0.2, 0.6, 0.55, 0.75),
             Scan2d('qop', 'phi', -0.075, 0.075, -0.125, 0.075),
             Scan2d('Acp_KK', 'Acp_PP', -0.3, 0.3, -0.3, 0.5),
+            Scan2d('Acp_KK', 'Acp_KP', -0.3, 0.3, -2, 2),
+            Scan2d('Acp_KK', 'phiM', -0.3, 0.3, -0.15, 0.15),
+            Scan2d('Acp_KP', 'phiM', -2, 2, -0.15, 0.15),
+            Scan2d('Acp_KP', 'phiG', -2, 2, -0.15, 0.15),
             ]
     return scans
 
 
-def get_base_options(param, combinations, titles, parfile, already_plotted, lhcb):
+def get_base_options(param, combinations, titles, parfile, already_plotted, lhcb, no_dcs_cpv):
     options = [f'--param {param}', '--ps 1', '--pulls', '--pr', '--qh 29'] # , '--group off']
     for i in range(len(combinations)):
         options.append('-c {}{}'.format(
@@ -129,16 +133,18 @@ def get_base_options(param, combinations, titles, parfile, already_plotted, lhcb
     if already_plotted:
         options.append('-a plot')
     if lhcb:
-        options.append('--group "LHCb preliminary"')
+        options.append('--group "LHCb"')
+    if no_dcs_cpv:
+        options.append('--no-dcs-cpv')
     return options
 
 
-def get_options_1d(param, combinations, titles, parfile, already_plotted, lhcb):
-    return get_base_options(param, combinations, titles, parfile, already_plotted, lhcb)
+def get_options_1d(param, combinations, titles, parfile, already_plotted, lhcb, no_dcs_cpv):
+    return get_base_options(param, combinations, titles, parfile, already_plotted, lhcb, no_dcs_cpv)
 
 
-def get_options_2d(param, combinations, titles, parfile, already_plotted, lhcb, n_contours=2):
-    options = get_base_options(param, combinations, titles, parfile, already_plotted, lhcb)
+def get_options_2d(param, combinations, titles, parfile, already_plotted, lhcb, no_dcs_cpv, n_contours=2):
+    options = get_base_options(param, combinations, titles, parfile, already_plotted, lhcb, no_dcs_cpv)
     options.extend(['--magnetic', '--2dcl 1', f'--ncontours {n_contours}', '--ps 2'])
     if len(combinations) > 1:
         options.append('--leg 0.18:0.25')
@@ -150,14 +156,15 @@ def execute_cmd(command):
     subprocess.run(command, shell=True)
 
 
-def plot_1d(param, combinations, titles, parfile, already_plotted, scan_dy_rs, lhcb):
+def plot_1d(param, combinations, titles, parfile, already_plotted, scan_dy_rs, lhcb, no_dcs_cpv):
     for scan in get_scans_1d([int(combo) for combo in combinations]):
         cc = copy(combinations)
         tt = copy(titles)
         i = 0
         while i < len(cc):
-            if ((scan.full_fsc_only and cc[i] not in _full_fsc_combinations) or
-                    (scan.var in _cpv_decay_params and ((not isinstance(cc[i], int)) or cc[i] < 40))):  # TODO
+            if scan.full_fsc_only and cc[i] not in _full_fsc_combinations:
+            # if ((scan.full_fsc_only and cc[i] not in _full_fsc_combinations) or
+            #        (scan.var in _cpv_decay_params and ((not isinstance(cc[i], int)) or cc[i] < 40))):  # TODO
                 cc.pop(i)
                 if tt is not None:
                     tt.pop(i)
@@ -165,7 +172,7 @@ def plot_1d(param, combinations, titles, parfile, already_plotted, scan_dy_rs, l
                 i += 1
         if len(cc) == 0 or not getattr(scan, param):
             continue
-        options = get_options_1d(param, cc, tt, parfile, already_plotted, lhcb)
+        options = get_options_1d(param, cc, tt, parfile, already_plotted, lhcb, no_dcs_cpv)
         options.append(f'--var {scan.var}')
         options.append(f'--npoints {scan.npoints}')
         if scan.x_min is not None and scan.x_max is not None:
@@ -178,15 +185,16 @@ def plot_1d(param, combinations, titles, parfile, already_plotted, scan_dy_rs, l
         execute_cmd(f'bin/charmcombo {" ".join(options)}')
 
 
-def plot_2d(param, combinations, titles, parfile, already_plotted, lhcb):
+def plot_2d(param, combinations, titles, parfile, already_plotted, lhcb, no_dcs_cpv):
     for scan in get_scans_2d([int(combo) for combo in combinations]):
         cc = copy(combinations)
         tt = copy(titles)
         i = 0
         while i < len(cc):
-            if ((scan.full_fsc_only and cc[i] not in _full_fsc_combinations) or
-                    (any(v in _cpv_decay_params for v in [scan.var_x, scan.var_y]) and
-                        ((not isinstance(cc[i], int)) or cc[i] < 40))):  # TODO
+            if scan.full_fsc_only and cc[i] not in _full_fsc_combinations:
+            # if ((scan.full_fsc_only and cc[i] not in _full_fsc_combinations) or
+            #         (any(v in _cpv_decay_params for v in [scan.var_x, scan.var_y]) and
+            #             ((not isinstance(cc[i], int)) or cc[i] < 40))):  # TODO
                 cc.pop(i)
                 if tt is not None:
                     tt.pop(i)
@@ -194,7 +202,7 @@ def plot_2d(param, combinations, titles, parfile, already_plotted, lhcb):
                 i += 1
         if len(cc) == 0 or not getattr(scan, param):
             continue
-        options = get_options_2d(param, cc, tt, parfile, already_plotted, lhcb)
+        options = get_options_2d(param, cc, tt, parfile, already_plotted, lhcb, no_dcs_cpv)
         options.append(f'--var {scan.var_x}')
         options.append(f'--var {scan.var_y}')
         options.append(f'--npoints2dx {scan.npoints_x}')
@@ -221,6 +229,7 @@ def parse_args():
             help='Do not rerun the combination and just plot the results retrieving them from a previous execution.')
     parser.add_argument('--scan-dy-rs', action='store_true', help='Provide predictions for the value of DY(K- pi+).')
     parser.add_argument('--lhcb', action='store_true', help='Add the `LHCb` label to the plot')
+    parser.add_argument('--no-dcs-cpv', action='store_true', help='Set A_CP(K+ pi-) to zero')
     args = parser.parse_args()
     if args.titles is not None:
         assert len(args.titles) == len(args.combinations), 'You should provide one title for each combination'

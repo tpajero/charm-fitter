@@ -11,24 +11,99 @@
 // core
 #include <Utils.h>
 
+#include <map>
+#include <string>
 #include <vector>
 
 
-PDF_WS::PDF_WS(TString measurement_id, const theory_config& th_cfg, WS_parametrisation p)
-    : PDF_Abs{6}, th_cfg{th_cfg}, ws_param{p} {
+namespace {
+    // Map containing the expressions for the observables in the various parametrisations
+    std::map<std::string, std::map<theory_config, std::string>> theory_expressions = {
+        {"y'+", {
+            {theory_config::phenomenological, "(qop+1)*(  y * cos(Delta_Kpi - phi)"
+                                              "         + x * sin(Delta_Kpi - phi))"},
+            {theory_config::theoretical, "  y12 * cos(Delta_Kpi + phiG)"
+                                         "+ x12 * sin(Delta_Kpi + phiM)"},
+            {theory_config::superweak,   "  y12 * cos(Delta_Kpi)"
+                                         "+ x12 * sin(Delta_Kpi + phiM)"},
+        }},
+        {"y'-", {
+            {theory_config::phenomenological, "1/(qop+1)*(  y * cos(Delta_Kpi + phi)"
+                                              "           + x * sin(Delta_Kpi + phi))"},
+            {theory_config::theoretical, "  y12 * cos(Delta_Kpi-phiG)"
+                                         "+ x12 * sin(Delta_Kpi-phiM)"},
+            {theory_config::superweak, "(  y12 * cos(Delta_Kpi)"
+                                       " + x12 * sin(Delta_Kpi-phiM))"},
+        }},
+        {"x'2+", {
+            {theory_config::phenomenological, "pow((qop+1)*(  x * cos(Delta_Kpi - phi)"
+                                              "             - y * sin(Delta_Kpi - phi)),2)"},
+            {theory_config::theoretical, "pow(- y12 * sin(Delta_Kpi + phiG)"
+                                         "    + x12 * cos(Delta_Kpi + phiM), 2)"},
+            {theory_config::superweak,   "pow(- y12 * sin(Delta_Kpi)"
+                                         "    + x12 * cos(Delta_Kpi + phiM), 2)"},
+        }},
+        {"x'2-", {
+            {theory_config::phenomenological, "pow(1/(qop+1)*(  x * cos(Delta_Kpi + phi)"
+                                              "               - y * sin(Delta_Kpi + phi)),2)"},
+            {theory_config::theoretical, "pow(- y12 * sin(Delta_Kpi-phiG)"
+                                         "    + x12 * cos(Delta_Kpi-phiM),2)"},
+            {theory_config::superweak, "pow((- y12 * sin(Delta_Kpi)"
+                                       "     + x12 * cos(Delta_Kpi-phiM)),2)"},
+        }},
+        {"c", {
+            {theory_config::phenomenological,
+                    "0.5 * (      (qop+1)*(  y*cos(Delta_Kpi - phi) + x*sin(Delta_Kpi - phi)) "
+                    "       + 1 / (qop+1)*(  y*cos(Delta_Kpi + phi) + x*sin(Delta_Kpi + phi)))"},
+            {theory_config::theoretical, "y12 * cos(Delta_Kpi) * cos(phiG) + x12 * sin(Delta_Kpi) * cos(phiM)"},
+            {theory_config::superweak, "y12 * cos(Delta_Kpi) + x12 * sin(Delta_Kpi) * cos(phiM)"},
+        }},
+        {"c'", {
+            {theory_config::phenomenological, "0.125 * (pow(x, 2) + pow(y, 2)) * (pow(qop + 1, 2) + pow(qop + 1, -2))"},
+            {theory_config::theoretical,
+                    "0.25 * (pow(x12, 2) + pow(y12, 2))"
+                    "+ 0.25 * R_Kpi / 100 * (pow(y12, 2) - pow(x12, 2))"},  // 2nd order corrections
+            {theory_config::superweak,
+                    "0.25 * (pow(x12, 2) + pow(y12, 2))"
+                    "+ 0.25 * R_Kpi / 100 * (pow(y12, 2) - pow(x12, 2))"},  // 2nd order corrections
+        }},
+        {"dc", {
+            {theory_config::phenomenological,
+                "0.5 * (      (qop+1)*(  y*cos(Delta_Kpi - phi) + x*sin(Delta_Kpi - phi)) "
+                "       - 1 / (qop+1)*(  y*cos(Delta_Kpi + phi) + x*sin(Delta_Kpi + phi)))"},
+            {theory_config::theoretical, "  x12 * cos(Delta_Kpi) * sin(phiM)"
+                                         "- y12 * sin(Delta_Kpi) * sin(phiG)"},
+            {theory_config::superweak, "x12 * cos(Delta_Kpi) * sin(phiM)"},
+        }},
+        {"dc'", {
+            {theory_config::phenomenological, "1 / 8 * (pow(x, 2) + pow(y, 2)) * (pow(qop + 1, 2) - pow(qop + 1, -2))"},
+            {theory_config::theoretical, "0.5 * x12 * y12 * sin(phiM - phiG)"},
+            {theory_config::superweak, "0.5 * x12 * y12 * sin(phiM)"},
+        }},
+    };
+}
+
+
+PDF_WS::PDF_WS(TString measurement_id, const theory_config& th_cfg, bool allow_dcs_cpv, WS_parametrisation p)
+    : PDF_Abs{measurement_id.EqualTo("LHCb_Prompt_Run12_appB") ? 9 : 6},
+      th_cfg{th_cfg}, dcs_cpv{allow_dcs_cpv && th_cfg != theory_config::superweak}, ws_param{p} {
     TString label;
     if (measurement_id.EqualTo("BaBar")) label = "WS/RS BaBar CPV";
     else if (measurement_id.EqualTo("Belle")) label = "WS/RS Belle CPV";
     else if (measurement_id.EqualTo("LHCb_DT_Run1")) label = "WS/RS LHCb dt";
     else if (measurement_id.EqualTo("LHCb_Run1")) label = "WS/RS LHCb Run 1";
     else if (measurement_id.EqualTo("LHCb_Prompt_2011_2016"))  label = "WS/RS LHCb prompt (15/16)";
-    else if (measurement_id.EqualTo("LHCb_Prompt_Run12")) label = "WS/RS LHCb prompt (Run 1+2)";
+    else if (measurement_id.EqualTo("LHCb_Prompt_Run12_sec9")) label = "WS/RS LHCb prompt (Run 1+2)";
+    else if (measurement_id.EqualTo("LHCb_Prompt_Run12_appB")) label = "WS/RS LHCb prompt (Run 1+2)";
     else {
-        cout << "PDF_WS: Measurement ID " << measurement_id << " not supported\n;";
+        std::cerr << "PDF_WS: Measurement ID " << measurement_id << " not supported\n";
         exit(1);
     }
 
-    if (ws_param == WS_parametrisation::ccprime && !measurement_id.EqualTo("LHCb_Prompt_Run12")) exit(1);
+    if (ws_param == WS_parametrisation::ccprime && !measurement_id.BeginsWith("LHCb_Prompt_Run12")) {
+        std::cerr << "The c/c' parametrisation was introduced only with the LHCb Run 2 measurement\n";
+        exit(1);
+    }
 
     name = "WS_" + measurement_id;
     initParameters();
@@ -63,32 +138,25 @@ PDF_WS::~PDF_WS() {}
 
 
 void PDF_WS::initParameters() {
-    ParametersCharmCombo p;
-    parameters = new RooArgList("parameters");
-    parameters->add(*(p.get("R_Kpi")));
-    if (th_cfg != theory_config::superweak)
-        parameters->add(*(p.get("Acp_KP")));
-    parameters->add(*(p.get("Delta_Kpi")));
-
+    std::vector<std::string> param_names = {"R_Kpi", "Delta_Kpi"};
+    if (dcs_cpv) param_names.emplace_back("Acp_KP");
+    if (nObs == 9) param_names.emplace_back("Acp_KK");
     switch (th_cfg) {
         case theory_config::phenomenological:
-            parameters->add(*(p.get("x")));
-            parameters->add(*(p.get("y")));
-            parameters->add(*(p.get("qop")));
-            parameters->add(*(p.get("phi")));
+            param_names.insert(param_names.end(), {"x", "y", "qop", "phi"});
             break;
         case theory_config::theoretical:
-            parameters->add(*(p.get("phiG")));
+            param_names.emplace_back("phiG");
         case theory_config::superweak:
-            parameters->add(*(p.get("x12")));
-            parameters->add(*(p.get("y12")));
-            parameters->add(*(p.get("phiM")));
+            param_names.insert(param_names.end(), {"x12", "y12", "phiM"});
             break;
         default:
-            cout << "PDF_WS::initParameters : ERROR : "
-                    "theory_config not supported." << endl;
+            cout << "PDF_WS::initParameters : ERROR : theory_config not supported.\n";
             exit(1);
     }
+    ParametersCharmCombo p;
+    parameters = new RooArgList("parameters");
+    for (const auto& par : param_names) parameters->add(*(p.get(par)));
 }
 
 
@@ -113,112 +181,25 @@ void PDF_WS::initRelations() {
 void PDF_WS::initRelationsCCPrime() {
     theory = new RooArgList("theory");
     theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "R_Kpi", parameters)));
-    switch (th_cfg) {
-        case theory_config::phenomenological:
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "c_th", "c_th",
-                            "0.5 * (      (qop+1)*(  y*cos(Delta_Kpi - phi) + x*sin(Delta_Kpi - phi)) "
-                            "       + 1 / (qop+1)*(  y*cos(Delta_Kpi + phi) + x*sin(Delta_Kpi + phi)))",
-                            parameters)));
-            break;
-        case theory_config::theoretical:
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "c_th", "c_th",
-                            "y12 * cos(Delta_Kpi) * cos(phiG) + x12 * sin(Delta_Kpi) * cos(phiM)",
-                            parameters)));
-            break;
-        case theory_config::superweak:
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "c_th", "c_th",
-                            "y12 * cos(Delta_Kpi) + x12 * sin(Delta_Kpi) * cos(phiM)",
-                            parameters)));
-            break;
-        default:
-            cout << "PDF_WS::initRelations : ERROR : "
-                    "theory_config not supported." << endl;
-            exit(1);
-    }
-    switch (th_cfg) {
-        case theory_config::phenomenological:
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "cp_th", "cp_th",
-                            "0.125 * (pow(x, 2) + pow(y, 2)) * (pow(qop + 1, 2) + pow(qop + 1, -2))",
-                            parameters)));
-            break;
-        case theory_config::theoretical:
-        case theory_config::superweak:
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "cp_th", "cp_th",
-                            "0.25 * (pow(x12, 2) + pow(y12, 2))"
-                            "+ 0.25 * R_Kpi / 100 * (pow(y12, 2) - pow(x12, 2))",  // 2nd order corrections
-                            parameters)));
-            break;
-        default:
-            cout << "PDF_WS::initRelations : ERROR : "
-                    "theory_config not supported." << endl;
-            exit(1);
-    }
-    switch (th_cfg) {
-        case theory_config::phenomenological:
-        case theory_config::theoretical:
-            theory->add(*(Utils::makeTheoryVar("AD_th", "AD_th", "Acp_KP", parameters)));
-            break;
-        case theory_config::superweak:
-            theory->add(*(Utils::makeTheoryVar("AD_th", "AD_th", "0", parameters)));
-            break;
-        default:
-            cout << "PDF_WS::initRelations : ERROR : "
-                    "theory_config not supported." << endl;
-            exit(1);
-    }
-    switch (th_cfg) {
-        case theory_config::phenomenological:
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "dc_th", "dc_th",
-                            "0.5 * (      (qop+1)*(  y*cos(Delta_Kpi - phi) + x*sin(Delta_Kpi - phi)) "
-                            "       - 1 / (qop+1)*(  y*cos(Delta_Kpi + phi) + x*sin(Delta_Kpi + phi)))",
-                            parameters)));
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "dcp_th", "dcp_th",
-                            "   1 / 8 * (pow(x, 2) + pow(y, 2)) * (pow(qop + 1, 2) - pow(qop + 1, -2))",
-                            parameters)));
-            break;
-        case theory_config::theoretical:
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "dc_th", "dc_th",
-                            "  x12 * cos(Delta_Kpi) * sin(phiM)"
-                            "- y12 * sin(Delta_Kpi) * sin(phiG)",
-                            parameters)));
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "dcp_th", "dcp_th",
-                            "0.5 * x12 * y12 * sin(phiM - phiG)",
-                            parameters)));
-            break;
-        case theory_config::superweak:
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "dc_th", "dc_th",
-                            "  x12 * cos(Delta_Kpi) * sin(phiM)",
-                            parameters)));
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "dcp_th", "dcp_th",
-                            "0.5 * x12 * y12 * sin(phiM)",
-                            parameters)));
-            break;
-        default:
-            cout << "PDF_WS::initRelations : ERROR : "
-                    "theory_config not supported." << endl;
-            exit(1);
+    theory->add(*(Utils::makeTheoryVar("c_th", "c_th", theory_expressions["c"][th_cfg], parameters)));
+    theory->add(*(Utils::makeTheoryVar("c'_th", "c'_th", theory_expressions["c'"][th_cfg], parameters)));
+    theory->add(*(Utils::makeTheoryVar("AD_th", "AD_th", dcs_cpv ? "Acp_KP" : "0", parameters)));
+    theory->add(*(Utils::makeTheoryVar("dc_th", "dc_th", theory_expressions["dc"][th_cfg], parameters)));
+    theory->add(*(Utils::makeTheoryVar("dc'_th", "dc'_th", theory_expressions["dc'"][th_cfg], parameters)));
+    if (nObs == 9) {
+      theory->add(*(Utils::makeTheoryVar("ADt_th", "ADt_th", dcs_cpv ? "Acp_KP - 2 * Acp_KK" : "- 2 * Acp_KK", parameters)));
+      theory->add(*(Utils::makeTheoryVar(
+              "dc~_th", "dc~_th",
+              theory_expressions["dc"][th_cfg]
+                      + " - 2 * sqrt(R_Kpi / 100) * (" + CharmUtils::get_dy_expression(th_cfg, FSC::none, "KK") + ")"
+                      + " - Acp_KK / 100 * (" + theory_expressions["c"][th_cfg] + ")",
+              parameters)));
+      theory->add(*(Utils::makeTheoryVar(
+              "dc'~_th", "dc'~_th",
+              theory_expressions["dc'"][th_cfg]
+                      + " - 2 * sqrt(R_Kpi / 100) * (" + theory_expressions["c"][th_cfg] + ") * (" + CharmUtils::get_dy_expression(th_cfg, FSC::none, "KK") + ")"
+                      + " - 2 * Acp_KK / 100 * (" + theory_expressions["c'"][th_cfg] + ")",
+              parameters)));
     }
 }
 
@@ -226,156 +207,24 @@ void PDF_WS::initRelationsCCPrime() {
 void PDF_WS::initRelationsRAXY() {
     theory = new RooArgList("theory");
     theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "R_Kpi", parameters)));
-    initRelationsXYP(theory);
-    switch (th_cfg) {
-        case theory_config::phenomenological:
-        case theory_config::theoretical:
-            theory->add(*(Utils::makeTheoryVar("AD_th", "AD_th", "Acp_KP", parameters)));
-            break;
-        case theory_config::superweak:
-            theory->add(*(Utils::makeTheoryVar("AD_th", "AD_th", "0.", parameters)));
-            break;
-        default:
-            cout << "PDF_WS::initRelations : ERROR : "
-                    "theory_config not supported." << endl;
-            exit(1);
-    }
-    initRelationsXYM(theory);
+    theory->add(*(Utils::makeTheoryVar("y'+_th", "y'+_th", theory_expressions["y'+"][th_cfg], parameters)));
+    theory->add(*(Utils::makeTheoryVar("x'2+_th", "x'2+_th", theory_expressions["x'2+"][th_cfg], parameters)));
+    theory->add(*(Utils::makeTheoryVar("AD_th", "AD_th", dcs_cpv ? "Acp_KP" : "0", parameters)));
+    theory->add(*(Utils::makeTheoryVar("y'-_th", "y'-_th", theory_expressions["y'-"][th_cfg], parameters)));
+    theory->add(*(Utils::makeTheoryVar("x'2-_th", "x'2-_th", theory_expressions["x'2-"][th_cfg], parameters)));
 }
 
 
 void PDF_WS::initRelationsRRXY() {
     theory = new RooArgList("theory");
-    switch (th_cfg) {
-        case theory_config::phenomenological:
-        case theory_config::theoretical:
-            theory->add(*(Utils::makeTheoryVar("RD_p_th", "RD_p_th",
-                                            "R_Kpi * (1 + Acp_KP / 100)", parameters)));
-            break;
-        case theory_config::superweak:
-            theory->add(*(Utils::makeTheoryVar("RD_p_th", "RD_p_th",
-                                            "R_Kpi", parameters)));
-            break;
-        default:
-            cout << "PDF_WS::initRelations : ERROR : "
-                    "theory_config not supported." << endl;
-            exit(1);
-    }
-    initRelationsXYP(theory);
-    switch (th_cfg) {
-        case theory_config::phenomenological:
-        case theory_config::theoretical:
-            theory->add(*(Utils::makeTheoryVar("RD_m_th", "RD_m_th", "R_Kpi * (1 - Acp_KP / 100)", parameters)));
-            break;
-        case theory_config::superweak:
-            theory->add(*(Utils::makeTheoryVar("RD_m_th", "RD_m_th", "R_Kpi", parameters)));
-            break;
-        default:
-            cout << "PDF_WS::initRelations : ERROR : "
-                    "theory_config not supported." << endl;
-            exit(1);
-    }
-    initRelationsXYM(theory);
-}
-
-
-void PDF_WS::initRelationsXYP(RooArgList* theory) {
-    switch (th_cfg) {
-        case theory_config::phenomenological:
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "yp_p_th", "yp_p_th",
-                            "(qop+1)*(  y*cos(Delta_Kpi - phi)"
-                            "         + x*sin(Delta_Kpi - phi))", parameters)));
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "xp2_p_th", "xp2_p_th",
-                            "pow((qop+1)*(  x*cos(Delta_Kpi - phi)"
-                            "             - y*sin(Delta_Kpi - phi)),2)", parameters)));
-            break;
-        case theory_config::theoretical:
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "yp_p_th", "yp_p_th",
-                            "  y12*cos(Delta_Kpi+phiG)"
-                            "+ x12*sin(Delta_Kpi+phiM)",
-                            parameters)));
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "xp2_p_th", "xp2_p_th",
-                            "pow(- y12*sin(Delta_Kpi+phiG)"
-                            "    + x12*cos(Delta_Kpi+phiM)"
-                            "    ,2)", parameters)));
-            break;
-        case theory_config::superweak:
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "yp_p_th", "yp_p_th",
-                            "(  y12*cos(Delta_Kpi)"
-                            " + x12*sin(Delta_Kpi+phiM))",
-                            parameters)));
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "xp2_p_th", "xp2_p_th",
-                            "pow((- y12*sin(Delta_Kpi)"
-                            "     + x12*cos(Delta_Kpi+phiM))"
-                            "    ,2)", parameters)));
-            break;
-        default:
-            cout << "PDF_WS::initRelations : ERROR : "
-                    "theory_config not supported." << endl;
-            exit(1);
-    }
-}
-
-
-void PDF_WS::initRelationsXYM(RooArgList* theory) {
-    switch (th_cfg) {
-        case theory_config::phenomenological:
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "yp_m_th", "yp_m_th",
-                            "1/(qop+1)*(  y*cos(Delta_Kpi + phi)"
-                            "           + x*sin(Delta_Kpi + phi))", parameters)));
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "xp2_m_th", "xp2_m_th",
-                            "pow(1/(qop+1)*(  x*cos(Delta_Kpi + phi)"
-                            "               - y*sin(Delta_Kpi + phi)),2)", parameters)));
-            break;
-        case theory_config::theoretical:
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "yp_m_th", "yp_m_th",
-                            "  y12*cos(Delta_Kpi-phiG)"
-                            "+ x12*sin(Delta_Kpi-phiM)",
-                            parameters)));
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "xp2_m_th", "xp2_m_th",
-                            "pow(- y12*sin(Delta_Kpi-phiG)"
-                            "    + x12*cos(Delta_Kpi-phiM)"
-                            "    ,2)", parameters)));
-            break;
-        case theory_config::superweak:
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "yp_m_th", "yp_m_th",
-                            "(  y12*cos(Delta_Kpi)"
-                            " + x12*sin(Delta_Kpi-phiM))",
-                            parameters)));
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "xp2_m_th", "xp2_m_th",
-                            "pow((- y12*sin(Delta_Kpi)"
-                            "     + x12*cos(Delta_Kpi-phiM))"
-                            "    ,2)", parameters)));
-            break;
-        default:
-            cout << "PDF_WS::initRelations : ERROR : "
-                    "theory_config not supported." << endl;
-            exit(1);
-    }
+    std::string cpv_correction_p = dcs_cpv ? " * (1 + Acp_KP / 100)" : "";
+    std::string cpv_correction_m = dcs_cpv ? " * (1 - Acp_KP / 100)" : "";
+    theory->add(*(Utils::makeTheoryVar("RD_p_th", "RD_p_th", "R_Kpi" + cpv_correction_p, parameters)));
+    theory->add(*(Utils::makeTheoryVar("y'+_th", "y'+_th", theory_expressions["y'+"][th_cfg], parameters)));
+    theory->add(*(Utils::makeTheoryVar("x'2+_th", "x'2+_th", theory_expressions["x'2+"][th_cfg], parameters)));
+    theory->add(*(Utils::makeTheoryVar("RD_m_th", "RD_m_th", "R_Kpi" + cpv_correction_m, parameters)));
+    theory->add(*(Utils::makeTheoryVar("y'-_th", "y'-_th", theory_expressions["y'-"][th_cfg], parameters)));
+    theory->add(*(Utils::makeTheoryVar("x'2-_th", "x'2-_th", theory_expressions["x'2-"][th_cfg], parameters)));
 }
 
 
@@ -383,28 +232,33 @@ void PDF_WS::initObservables(const TString& setName) {
     observables = new RooArgList("observables");  // the order of this list must match that of the COR matrix!
     switch (ws_param) {
         case WS_parametrisation::raxy:
-            observables->add(*(new RooRealVar("RD_obs"   , setName + "   #it{R_{K#pi}}", 0., -1e4, 1e4)));
-            observables->add(*(new RooRealVar("yp_p_obs" , setName + "   #it{y'^{+}}", 0., -1e4, 1e4)));
-            observables->add(*(new RooRealVar("xp2_p_obs", setName + "   #it{x'^{+2}}", 0., -1e4, 1e4)));
-            observables->add(*(new RooRealVar("AD_obs"   , setName + "   #it{A_{K#pi}}", 0., -1e4, 1e4)));
-            observables->add(*(new RooRealVar("yp_m_obs" , setName + "   #it{y'}^{#minus}", 0., -1e4, 1e4)));
-            observables->add(*(new RooRealVar("xp2_m_obs", setName + "   #it{x'}^{#minus2}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("RD_obs"  , setName + "   #it{R_{K#pi}}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("y'+_obs" , setName + "   #it{y'^{+}}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("x'2+_obs", setName + "   #it{x'^{+2}}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("AD_obs"  , setName + "   #it{A_{K#pi}}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("y'-_obs" , setName + "   #it{y'}^{#minus}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("x'2-_obs", setName + "   #it{x'}^{#minus2}", 0., -1e4, 1e4)));
             break;
         case WS_parametrisation::rrxy:
-            observables->add(*(new RooRealVar("RD_p_obs" , setName + "   #it{R_{K#pi}^{+}}", 0., -1e4, 1e4)));
-            observables->add(*(new RooRealVar("yp_p_obs" , setName + "   #it{y'^{+}}", 0., -1e4, 1e4)));
-            observables->add(*(new RooRealVar("xp2_p_obs", setName + "   #it{x'^{+2}}", 0., -1e4, 1e4)));
-            observables->add(*(new RooRealVar("RD_m_obs" , setName + "   #it{R_{K#pi}^{#minus}}", 0., -1e4, 1e4)));
-            observables->add(*(new RooRealVar("yp_m_obs" , setName + "   #it{y'}^{#minus}", 0., -1e4, 1e4)));
-            observables->add(*(new RooRealVar("xp2_m_obs", setName + "   #it{x'}^{#minus2}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("RD_p_obs", setName + "   #it{R_{K#pi}^{+}}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("y'+_obs" , setName + "   #it{y'^{+}}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("x'2+_obs", setName + "   #it{x'^{+2}}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("RD_m_obs", setName + "   #it{R_{K#pi}^{#minus}}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("y'-_obs" , setName + "   #it{y'}^{#minus}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("x'2-_obs", setName + "   #it{x'}^{#minus2}", 0., -1e4, 1e4)));
             break;
         case WS_parametrisation::ccprime:
             observables->add(*(new RooRealVar("RD_obs" , setName + "   #it{R_{K#pi}}", 0., -1e4, 1e4)));
             observables->add(*(new RooRealVar("c_obs"  , setName + "   #it{c_{K#pi}}", 0., -1e4, 1e4)));
-            observables->add(*(new RooRealVar("cp_obs" , setName + "   #it{c'_{K#pi}}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("c'_obs" , setName + "   #it{c'_{K#pi}}", 0., -1e4, 1e4)));
             observables->add(*(new RooRealVar("AD_obs" , setName + "   #it{A_{K#pi}}", 0., -1e4, 1e4)));
             observables->add(*(new RooRealVar("dc_obs" , setName + "   #it{#Deltac_{K#pi}}", 0., -1e4, 1e4)));
-            observables->add(*(new RooRealVar("dcp_obs", setName + "   #it{#Deltac'_{K#pi}}", 0., -1e4, 1e4)));
+            observables->add(*(new RooRealVar("dc'_obs", setName + "   #it{#Deltac'_{K#pi}}", 0., -1e4, 1e4)));
+            if (nObs == 9) {
+              observables->add(*(new RooRealVar("ADt_obs" , setName + "   #it{#tilde{A}_{K#pi}}", 0., -1e4, 1e4)));
+              observables->add(*(new RooRealVar("dc~_obs" , setName + "   #it{#Delta#tilde{c}_{K#pi}}", 0., -1e4, 1e4)));
+              observables->add(*(new RooRealVar("dc'~_obs", setName + "   #it{#Delta#tilde{c}'_{K#pi}}", 0., -1e4, 1e4)));
+            }
             break;
         default:
             cout << "PDF_WS::initRelations : ERROR : ws_param not supported.\n";
@@ -420,52 +274,63 @@ void PDF_WS::setObservables(TString c) {
         obsValSource = "https://inspirehep.net/literature/746245";
         // setObservable("RD_obs", 0.303); TODO
         setObservable("RD_p_obs", 0.297);
-        setObservable("yp_p_obs", 0.98);
-        setObservable("xp2_p_obs", -2.4);
+        setObservable("y'+_obs", 0.98);
+        setObservable("x'2+_obs", -2.4);
         // setObservable("AD_obs", -2.1); TODO
         setObservable("RD_m_obs", 0.309);
-        setObservable("yp_m_obs" , 0.96);
-        setObservable("xp2_m_obs", -2.0);
+        setObservable("y'-_obs" , 0.96);
+        setObservable("x'2-_obs", -2.0);
     } else if (c.EqualTo("Belle")) {
         obsValSource = "http://belle.kek.jp/belle/theses/doctor/lmzhang06/phd-mix-400.ps.gz";
         setObservable("RD_p_obs" ,  0.373);
-        setObservable("yp_p_obs" , -0.12);
-        setObservable("xp2_p_obs",  3.2);
+        setObservable("y'+_obs" , -0.12);
+        setObservable("x'2+_obs",  3.2);
         setObservable("RD_m_obs" ,  0.356);
-        setObservable("yp_m_obs" ,  0.2);
-        setObservable("xp2_m_obs",  0.6);
+        setObservable("y'-_obs" ,  0.2);
+        setObservable("x'2-_obs",  0.6);
     } else if (c.EqualTo("LHCb_DT_Run1")) {
         obsValSource = "https://inspirehep.net/literature/1499047";
         setObservable("RD_p_obs" , 0.338);
-        setObservable("yp_p_obs" , 0.581);
-        setObservable("xp2_p_obs", -0.19);
+        setObservable("y'+_obs" , 0.581);
+        setObservable("x'2+_obs", -0.19);
         setObservable("RD_m_obs" , 0.360);
-        setObservable("yp_m_obs" , 0.332);
-        setObservable("xp2_m_obs", 0.79);
+        setObservable("y'-_obs" , 0.332);
+        setObservable("x'2-_obs", 0.79);
     } else if (c.EqualTo("LHCb_Run1")) {
         obsValSource = "https://inspirehep.net/literature/1499047";
         setObservable("RD_p_obs" , 0.3474);
-        setObservable("yp_p_obs" , 0.597);
-        setObservable("xp2_p_obs", 0.11);
+        setObservable("y'+_obs" , 0.597);
+        setObservable("x'2+_obs", 0.11);
         setObservable("RD_m_obs" , 0.3591);
-        setObservable("yp_m_obs" , 0.450);
-        setObservable("xp2_m_obs", 0.61);
+        setObservable("y'-_obs" , 0.450);
+        setObservable("x'2-_obs", 0.61);
     } else if (c.EqualTo("LHCb_Prompt_2011_2016")) {
         obsValSource = "https://inspirehep.net/literature/1642234";
         setObservable("RD_p_obs" , 0.3454);
-        setObservable("yp_p_obs" , 0.501);
-        setObservable("xp2_p_obs", 0.61);
+        setObservable("y'+_obs" , 0.501);
+        setObservable("x'2+_obs", 0.61);
         setObservable("RD_m_obs" , 0.3454);
-        setObservable("yp_m_obs" , 0.554);
-        setObservable("xp2_m_obs", 0.16);
-    } else if (c.EqualTo("LHCb_Prompt_Run12")) {
+        setObservable("y'-_obs" , 0.554);
+        setObservable("x'2-_obs", 0.16);
+    } else if (c.EqualTo("LHCb_Prompt_Run12_sec9")) {
         obsValSource = "https://indico.cern.ch/event/1355805/";
         setObservable("RD_obs" ,  0.3427);
         setObservable("c_obs" , 0.528);
-        setObservable("cp_obs",  0.120);
+        setObservable("c'_obs",  0.120);
         setObservable("AD_obs" , -0.66);
         setObservable("dc_obs" ,  0.020);
-        setObservable("dcp_obs",  -0.007);
+        setObservable("dc'_obs",  -0.007);
+    } else if (c.EqualTo("LHCb_Prompt_Run12_appB")) {
+        obsValSource = "https://indico.cern.ch/event/1355805/";
+        setObservable("RD_obs" ,  0.3427);
+        setObservable("c_obs" , 0.528);
+        setObservable("c'_obs",  0.120);
+        setObservable("AD_obs" , -0.9);
+        setObservable("dc_obs" ,  -0.01);
+        setObservable("dc'_obs",  0.046);
+        setObservable("ADt_obs" , -0.82);
+        setObservable("dc~_obs" ,  0.032);
+        setObservable("dc'~_obs",  -0.020);
     } else {
         cout << "PDF_WS::setObservables() : ERROR : config " + c + " not found."
              << endl;
@@ -547,7 +412,7 @@ void PDF_WS::setUncertainties(TString c) {
         SystErr[3] = 0;  // RD-
         SystErr[4] = 0;  // y'-
         SystErr[5] = 0;  // x'2-
-    } else if (c.EqualTo("LHCb_Prompt_Run12")) {
+    } else if (c.EqualTo("LHCb_Prompt_Run12_sec9")) {
         obsErrSource = "https://indico.cern.ch/event/1355805/";
         StatErr[0] = 0.0019;  // RD
         StatErr[1] = 0.033;   // c
@@ -561,6 +426,26 @@ void PDF_WS::setUncertainties(TString c) {
         SystErr[3] = 0;  // AD
         SystErr[4] = 0;  // dc
         SystErr[5] = 0;  // dc'
+    } else if (c.EqualTo("LHCb_Prompt_Run12_appB")) {
+        obsErrSource = "https://indico.cern.ch/event/1355805/";
+        StatErr[0] = 0.0019;  // RD
+        StatErr[1] = 0.033;   // c
+        StatErr[2] = 0.035;   // c'
+        StatErr[3] = 2.0;     // AD
+        StatErr[4] = 0.10;    // dc
+        StatErr[5] = 0.098;   // dc'
+        StatErr[6] = 0.59;    // ADt
+        StatErr[7] = 0.036;   // dc~
+        StatErr[8] = 0.038;   // dc'~
+        SystErr[0] = 0;  // RD
+        SystErr[1] = 0;  // c
+        SystErr[2] = 0;  // c'
+        SystErr[3] = 0;  // AD
+        SystErr[4] = 0;  // dc
+        SystErr[5] = 0;  // dc'
+        SystErr[6] = 0;  // ADt
+        SystErr[7] = 0;  // dc~
+        SystErr[8] = 0;  // dc'~
     } else {
         cout << "PDF_WS::setUncertainties() : ERROR : config " + c + " not found." << endl;
         exit(1);
@@ -573,7 +458,7 @@ void PDF_WS::setCorrelations(TString c)
     resetCorrelations();
     if (c.EqualTo("BaBar")) {  // TODO
         corSource = "https://hflav-eos.web.cern.ch/hflav-eos/charm/CKM23/results_mix_cpv.html";
-        std::vector<double> dataStat  = {
+        std::vector<double> dataStat = {
             //  RD+     y'+    x'2+     RD-     y'-    x'2-
              1.   , -0.87 ,  0.77 ,  0.   ,  0.   ,  0.   ,  // RD+
                      1.   , -0.94 ,  0.   ,  0.   ,  0.   ,  // y'+
@@ -585,7 +470,7 @@ void PDF_WS::setCorrelations(TString c)
         corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
     } else if (c.EqualTo("Belle")) {
         corSource = "http://belle.kek.jp/belle/theses/doctor/lmzhang06/phd-mix-400.ps.gz";
-        std::vector<double> dataStat  = {
+        std::vector<double> dataStat = {
             //  RD+     y'+    x'2+     RD-     y'-    x'2-
              1.   , -0.834,  0.655,  0.   ,  0.   ,  0.   ,  // RD+
                      1.   , -0.909,  0.   ,  0.   ,  0.   ,  // y'+
@@ -597,7 +482,7 @@ void PDF_WS::setCorrelations(TString c)
         corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
     } else if (c.EqualTo("LHCb_DT_Run1")) {
         corSource = "https://inspirehep.net/literature/1499047";
-        std::vector<double> dataStat  = {
+        std::vector<double> dataStat = {
             //  RD+     y'+    x'2+     RD-     y'-    x'2-
              1.   , -0.658,  0.043, -0.005,  0.   ,  0.   ,  // RD+
                      1.   ,  0.438, -0.001,  0.000, -0.001,  // y'+
@@ -609,7 +494,7 @@ void PDF_WS::setCorrelations(TString c)
         corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
     } else if (c.EqualTo("LHCb_Run1")) {
         corSource = "https://inspirehep.net/literature/1499047";
-        std::vector<double> dataStat  = {
+        std::vector<double> dataStat = {
             //  RD+     y'+    x'2+     RD-     y'-    x'2-
              1.   , -0.920,  0.823, -0.007, -0.010,  0.008,  // RD+
                      1.   , -0.962, -0.011,  0.000, -0.002,  // y'+
@@ -621,7 +506,7 @@ void PDF_WS::setCorrelations(TString c)
         corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
     } else if (c.EqualTo("LHCb_Prompt_2011_2016")) {
         corSource = "https://inspirehep.net/literature/1642234";
-        std::vector<double> dataStat  = {
+        std::vector<double> dataStat = {
             //  RD+     y'+    x'2+     RD-     y'-    x'2-
              1.   , -0.935,  0.843, -0.012, -0.003, -0.002,  // RD+
                      1.   , -0.963, -0.003,  0.004, -0.003,  // y'+
@@ -631,9 +516,9 @@ void PDF_WS::setCorrelations(TString c)
                                                      1.      // x'2-
         };
         corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
-    } else if (c.EqualTo("LHCb_Prompt_Run12")) {
+    } else if (c.EqualTo("LHCb_Prompt_Run12_sec9")) {
         corSource = "https://indico.cern.ch/event/1355805/";
-        std::vector<double> dataStat  = {
+        std::vector<double> dataStat = {
             //  RD   c       c'      AD      c       c'
              1.   , -0.927,  0.803,  0.009, -0.007,  0.002,  // RD
                      1.   , -0.942, -0.013,  0.012, -0.007,  // c
@@ -641,6 +526,21 @@ void PDF_WS::setCorrelations(TString c)
                                      1.   , -0.919,  0.797,  // AD
                                              1.   , -0.941,  // dc
                                                      1.      // dc'
+        };
+        corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
+    } else if (c.EqualTo("LHCb_Prompt_Run12_appB")) {
+        corSource = "https://indico.cern.ch/event/1355805/";
+        std::vector<double> dataStat = {
+            //  RD   c       c'      AD      c       c'      ADt     ct      c't
+             1.   , -0.927,  0.803,  0.003, -0.002,  0.002,  0.008, -0.007,  0.000,  // RD
+                     1.   , -0.943, -0.005,  0.004, -0.004, -0.014,  0.013, -0.006,  // c
+                             1.   ,  0.003, -0.003,  0.003,  0.007, -0.006,  0.000,  // c'
+                                     1.   , -0.938,  0.811,  0.   ,  0.   ,  0.   ,  // AD
+                                             1.   , -0.943,  0.   ,  0.   ,  0.   ,  // dc
+                                                     1.   ,  0.   ,  0.   ,  0.   ,  // dc'
+                                                             1.   , -0.934,  0.810,  // ADt
+                                                                     1.   , -0.943,  // dc~
+                                                                             1.      // dc'~
         };
         corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
     } else {
