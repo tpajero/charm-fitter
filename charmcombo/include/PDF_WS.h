@@ -16,7 +16,7 @@ enum class WS_parametrisation { raxy, rrxy, ccprime };
 
 class PDF_WS : public PDF_Abs {
     public:
-        PDF_WS(TString measurement_id, const theory_config& th_cfg, bool allow_dcs_cpv=true, WS_parametrisation p=WS_parametrisation::rrxy);
+        PDF_WS(TString measurement_id, const theory_config& th_cfg, WS_parametrisation p=WS_parametrisation::rrxy);
         PDF_WS(TString val, TString err, const theory_config& th_cfg);
         ~PDF_WS();
         void buildPdf() override;
@@ -33,7 +33,6 @@ class PDF_WS : public PDF_Abs {
         void initRelationsXYM(RooArgList *theory);
 
         const theory_config th_cfg;
-        const bool dcs_cpv = true;
         const WS_parametrisation ws_param = WS_parametrisation::rrxy;
 };
 

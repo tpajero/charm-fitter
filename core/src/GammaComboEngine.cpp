@@ -347,13 +347,25 @@ Combiner* GammaComboEngine::getCombiner(int id) const
 }
 
 ///
+/// Get a vector with the indices of all non-trivial combiners created.
+///
+std::vector<int> GammaComboEngine::getCombinersIds() const
+{
+    std::vector<int> ids;
+    for (int id = 0; id < cmb.size(); ++id) {
+        if (combinerExists(id)) ids.push_back(id);
+    }
+    return ids;
+}
+
+///
 /// Get a PDF.
 /// \param id - PDF ID, set when adding the PDF using addPdf()
 ///
 PDF_Abs* GammaComboEngine::getPdf(int id)
 {
     if ( !pdfExists(id) ){
-        cout << "GammaComboEngine::getPdf() : ERROR : Requested PDF id doesn't exist in GammaComboEngine. Exit." << endl;
+        cout << "GammaComboEngine::getPdf() : ERROR : Requested PDF id (" << id << ") doesn't exist in GammaComboEngine. Exit." << endl;
         exit(1);
     }
     return pdf[id];

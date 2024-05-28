@@ -3,8 +3,11 @@
 Produce 1D and 2D plots for a single combination, or comparing different
 combinations. The prob method is employed.
 
-Example (plot the current averages):
-    python3 make-plots.py --1d --2d -c 40 --param theoretical
+Examples:
+- plot the world average from 2024:
+    `python3 make-plots.py --1d --2d -c 50 --param theoretical`
+- compare the world averages from 2024, with and without allowing for CP violation in doubly Cabibbo-suppressed decays:
+    `python3 make-plots.py --lhcb -c 50 50 --title "WA 2024" "WA 2024, A_{CP}(K#pi) = 0" --no-dcs-cpv 0 1 --1d --2d -a`
 '''
 
 import argparse
@@ -49,7 +52,7 @@ class Scan2d:
         self.full_fsc_only = varx in _full_fsc_params or vary in _full_fsc_params
 
 
-def get_scans_1d(combinations, scan_dy_rs=False):
+def get_scans_1d(combinations, plot_acp_kp=True, scan_dy_rs=False):
     before_2022 = 500 in combinations or any(n < 30 for n in combinations)
     if before_2022:
         scans = [
@@ -63,7 +66,6 @@ def get_scans_1d(combinations, scan_dy_rs=False):
             Scan1d('y',             0.4,   0.9 ),
             Scan1d('Delta_Kpi',    -0.8,   0.5 ),
             Scan1d('R_Kpi',         0.325 , 0.36 ),
-            Scan1d('Acp_KP',       -2,     2  ),
             Scan1d('Acp_KK',       -0.5,   0.5 ),
             Scan1d('Acp_PP',       -0.4,   0.7 ),
             Scan1d('cot_delta_KK', -4e2,   4e2 ),
@@ -81,19 +83,20 @@ def get_scans_1d(combinations, scan_dy_rs=False):
             Scan1d('y',             0.5,   0.8 ),
             Scan1d('Delta_Kpi',    -0.5,   0.2 ),
             Scan1d('R_Kpi',         0.335, 0.355),
-            Scan1d('Acp_KP',       -2,     2  ),
             Scan1d('Acp_KK',       -0.7,   0.7 ),
             Scan1d('Acp_PP',       -0.4,   0.7 ),
             Scan1d('cot_delta_KK', -4e2,   4e2 ),
             Scan1d('cot_delta_PP', -4e2,   4e2 ),
             ]
-    scans.append(Scan1d('Delta_Kpipi',  -2.,    2.  ))
+    if plot_acp_kp:
+        scans.append(Scan1d('Acp_KP', -2, 2))
+    scans.append(Scan1d('Delta_Kpipi', -2., 2.))
     if scan_dy_rs:
         scans.append(Scan1d('DY_RS', 0., 0.4))
     return scans
 
 
-def get_scans_2d(combinations):
+def get_scans_2d(combinations, plot_acp_kp=True):
     before_2022 = 500 in combinations or any(n < 30 for n in combinations)
     if before_2022:
         scans = [
@@ -112,20 +115,25 @@ def get_scans_2d(combinations):
             Scan2d('x', 'y', 0.2, 0.6, 0.55, 0.75),
             Scan2d('qop', 'phi', -0.075, 0.075, -0.125, 0.075),
             Scan2d('Acp_KK', 'Acp_PP', -0.3, 0.3, -0.3, 0.5),
-            Scan2d('Acp_KK', 'Acp_KP', -0.3, 0.3, -2, 2),
             Scan2d('Acp_KK', 'phiM', -0.3, 0.3, -0.15, 0.15),
+            ]
+    if plot_acp_kp:
+        scans.extend([
+            Scan2d('Acp_KK', 'Acp_KP', -0.3, 0.3, -2, 2),
             Scan2d('Acp_KP', 'phiM', -2, 2, -0.15, 0.15),
             Scan2d('Acp_KP', 'phiG', -2, 2, -0.15, 0.15),
-            ]
+            ])
     return scans
 
 
 def get_base_options(param, combinations, titles, parfile, already_plotted, lhcb, no_dcs_cpv):
     options = [f'--param {param}', '--ps 1', '--pulls', '--pr', '--qh 29'] # , '--group off']
     for i in range(len(combinations)):
-        options.append('-c {}{}'.format(
-                    combinations[i],
-                    '' if titles is None else ' --title "{}"'.format(titles[i])))
+        fix_acp_kpi = no_dcs_cpv is not None and no_dcs_cpv[i]
+        options.append('-c {}'.format(int(combinations[i]) + 1000 if fix_acp_kpi else combinations[i]))
+        options.append('' if titles is None else f' --title "{titles[i]}"')
+        if no_dcs_cpv is not None:
+            options.append(f'--fix {"Acp_KP=0" if fix_acp_kpi else "none"}')
     if len(combinations) == 1:
         options.append('--leg off')
     if parfile is not None:
@@ -134,8 +142,6 @@ def get_base_options(param, combinations, titles, parfile, already_plotted, lhcb
         options.append('-a plot')
     if lhcb:
         options.append('--group "LHCb"')
-    if no_dcs_cpv:
-        options.append('--no-dcs-cpv')
     return options
 
 
@@ -157,7 +163,8 @@ def execute_cmd(command):
 
 
 def plot_1d(param, combinations, titles, parfile, already_plotted, scan_dy_rs, lhcb, no_dcs_cpv):
-    for scan in get_scans_1d([int(combo) for combo in combinations]):
+    plot_acp_kp = no_dcs_cpv is None or True not in no_dcs_cpv
+    for scan in get_scans_1d([int(combo) for combo in combinations], plot_acp_kp=plot_acp_kp):
         cc = copy(combinations)
         tt = copy(titles)
         i = 0
@@ -186,7 +193,8 @@ def plot_1d(param, combinations, titles, parfile, already_plotted, scan_dy_rs, l
 
 
 def plot_2d(param, combinations, titles, parfile, already_plotted, lhcb, no_dcs_cpv):
-    for scan in get_scans_2d([int(combo) for combo in combinations]):
+    plot_acp_kp = no_dcs_cpv is None or True not in no_dcs_cpv
+    for scan in get_scans_2d([int(combo) for combo in combinations], plot_acp_kp=plot_acp_kp):
         cc = copy(combinations)
         tt = copy(titles)
         i = 0
@@ -214,6 +222,17 @@ def plot_2d(param, combinations, titles, parfile, already_plotted, lhcb, no_dcs_
         execute_cmd(f'bin/charmcombo {" ".join(options)}')
 
 
+def str_to_bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', '--param', choices=['phenomenological', 'theoretical', 'superweak'],
@@ -229,10 +248,12 @@ def parse_args():
             help='Do not rerun the combination and just plot the results retrieving them from a previous execution.')
     parser.add_argument('--scan-dy-rs', action='store_true', help='Provide predictions for the value of DY(K- pi+).')
     parser.add_argument('--lhcb', action='store_true', help='Add the `LHCb` label to the plot')
-    parser.add_argument('--no-dcs-cpv', action='store_true', help='Set A_CP(K+ pi-) to zero')
+    parser.add_argument('--no-dcs-cpv', type=str_to_bool, nargs='+', default=None, help='Set A_CP(K+ pi-) to zero')
     args = parser.parse_args()
     if args.titles is not None:
         assert len(args.titles) == len(args.combinations), 'You should provide one title for each combination'
+    if args.no_dcs_cpv is not None:
+        assert len(args.no_dcs_cpv) == len(args.combinations), 'You should tell whether CPV is allowed in DCS decays for each combination'
     fn_args = copy(vars(args))
     del fn_args['plot_1d'], fn_args['plot_2d']
     if args.plot_1d:

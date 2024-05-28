@@ -24,6 +24,19 @@
 
 #include "GammaComboEngine.h"
 
+namespace {
+    /**
+     *
+     */
+    void add_no_dcs_cpv_combiner(GammaComboEngine &gc, const int icomb) {
+        const auto combiner = gc.getCombiner(icomb);
+        const auto name = "NoDcsCPV_" + combiner->getName();
+        const auto title = combiner->getTitle() + " (A_{CP}(K#pi) = 0)";
+        gc.cloneCombiner(1000 + icomb, icomb, name, title);
+        return;
+    }
+}
+
 
 int main(int argc, char* argv[]) {
 
@@ -31,15 +44,9 @@ int main(int argc, char* argv[]) {
     theory_config th_cfg = theory_config::theoretical;
     std::string combiner_name;
 
-    bool dcs_cpv = true;
-    int idcs = -1;
     int iparam = -1;
     int ifsc = -1;
     for (int i=1; i<argc-1; ++i) {
-        if (!strcmp(argv[i], "--no-dcs-cpv")) {
-            idcs = i;
-            dcs_cpv = false;
-        }
         if (!strcmp(argv[i], "--param")) {
             iparam = i;
             if (!strcmp(argv[i+1], "phenomenological")) {
@@ -59,11 +66,10 @@ int main(int argc, char* argv[]) {
     }
     std::vector<char*> combiner_argv = {};
     for (int i=0; i<argc; ++i) {
-        if (i != iparam && i != iparam + 1 && i != idcs) combiner_argv.emplace_back(argv[i]);
+        if (i != iparam && i != iparam + 1) combiner_argv.emplace_back(argv[i]);
     }
-    if (!dcs_cpv) combiner_name += "_noDcsCpv";
-    std::cout << "INFO: The fitter will be run with the following parameterisation and final-state corrections for DY:\n"
-        << "      Parametrisation:        " << th_cfg << ", and will " << (dcs_cpv ? "" : " not") << " allow for CPV in DCS decays\n";
+    std::cout << "INFO: The fitter will be run with the following configuration:\n"
+        << "      Parametrisation: " << th_cfg << "\n";
 
     // Define the combiner
     GammaComboEngine gc(combiner_name, combiner_argv.size(), &combiner_argv[0]);
@@ -93,11 +99,11 @@ int main(int argc, char* argv[]) {
     gc.addPdf(32, new PDF_WS_NoCPV("Belle",                  th_cfg),                              "WS/RS        Belle    no CPV                ");
     gc.addPdf(33, new PDF_WS_NoCPV("BaBar",                  th_cfg),                              "WS/RS        BaBar                          ");
     gc.addPdf(34, new PDF_WS_NoCPV("Belle",                  th_cfg),                              "WS/RS        Belle                          ");
-    gc.addPdf(35, new PDF_WS      ("LHCb_DT_Run1",           th_cfg, dcs_cpv),                              "WS/RS        LHCb     Run 1    [B -> D* mu] ");
-    gc.addPdf(36, new PDF_WS      ("LHCb_Run1",              th_cfg, dcs_cpv),                              "WS/RS        LHCb     Run 1                 ");
-    gc.addPdf(37, new PDF_WS      ("LHCb_Prompt_2011_2016",  th_cfg, dcs_cpv),                              "WS/RS        LHCb     2011-6   [D* -> D0 pi]");
-    gc.addPdf(38, new PDF_WS      ("LHCb_Prompt_Run12_sec9", th_cfg, dcs_cpv, WS_parametrisation::ccprime), "WS/RS        LHCb     Run 2    [D* -> D0 pi]");
-    gc.addPdf(39, new PDF_WS      ("LHCb_Prompt_Run12_appB", th_cfg, dcs_cpv, WS_parametrisation::ccprime), "WS/RS        LHCb     Run 2    [D* -> D0 pi]");
+    gc.addPdf(35, new PDF_WS      ("LHCb_DT_Run1",           th_cfg),                              "WS/RS        LHCb     Run 1    [B -> D* mu] ");
+    gc.addPdf(36, new PDF_WS      ("LHCb_Run1",              th_cfg),                              "WS/RS        LHCb     Run 1                 ");
+    gc.addPdf(37, new PDF_WS      ("LHCb_Prompt_2011_2016",  th_cfg),                              "WS/RS        LHCb     2011-6   [D* -> D0 pi]");
+    gc.addPdf(38, new PDF_WS      ("LHCb_Prompt_Run12_sec9", th_cfg, WS_parametrisation::ccprime), "WS/RS        LHCb     Run 2    [D* -> D0 pi]");
+    gc.addPdf(39, new PDF_WS      ("LHCb_Prompt_Run12_appB", th_cfg, WS_parametrisation::ccprime), "WS/RS        LHCb     Run 2    [D* -> D0 pi]");
 
     gc.addPdf(50,  new PDF_Cleo      ("Cleo-c",             th_cfg), "Delta_Kpi    Cleo-c                         ");
     gc.addPdf(51,  new PDF_BES_Kpi_1d(                      th_cfg), "Delta_Kpi    BES      3fb      [A_kpi only] ");
@@ -214,6 +220,10 @@ int main(int argc, char* argv[]) {
 
     // WA after LHCb Run 2
     gc.cloneCombiner(501, 50, "LHCb_Run2", "World average after LHCb Run 2");
+
+    // Clone all combiners for no DCS CPV hypothesis -------------------------------------------------------------------
+    for (const auto id : gc.getCombinersIds())
+        add_no_dcs_cpv_combiner(gc, id);
 
     ///////////////////////////////////////////////////
     //

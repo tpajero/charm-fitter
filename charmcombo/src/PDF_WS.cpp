@@ -84,9 +84,9 @@ namespace {
 }
 
 
-PDF_WS::PDF_WS(TString measurement_id, const theory_config& th_cfg, bool allow_dcs_cpv, WS_parametrisation p)
+PDF_WS::PDF_WS(TString measurement_id, const theory_config& th_cfg, WS_parametrisation p)
     : PDF_Abs{measurement_id.EqualTo("LHCb_Prompt_Run12_appB") ? 9 : 6},
-      th_cfg{th_cfg}, dcs_cpv{allow_dcs_cpv && th_cfg != theory_config::superweak}, ws_param{p} {
+      th_cfg{th_cfg}, ws_param{p} {
     TString label;
     if (measurement_id.EqualTo("BaBar")) label = "WS/RS BaBar CPV";
     else if (measurement_id.EqualTo("Belle")) label = "WS/RS Belle CPV";
@@ -139,7 +139,7 @@ PDF_WS::~PDF_WS() {}
 
 void PDF_WS::initParameters() {
     std::vector<std::string> param_names = {"R_Kpi", "Delta_Kpi"};
-    if (dcs_cpv) param_names.emplace_back("Acp_KP");
+    if (th_cfg != theory_config::superweak) param_names.emplace_back("Acp_KP");
     if (nObs == 9) param_names.emplace_back("Acp_KK");
     switch (th_cfg) {
         case theory_config::phenomenological:
@@ -183,11 +183,11 @@ void PDF_WS::initRelationsCCPrime() {
     theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "R_Kpi", parameters)));
     theory->add(*(Utils::makeTheoryVar("c_th", "c_th", theory_expressions["c"][th_cfg], parameters)));
     theory->add(*(Utils::makeTheoryVar("c'_th", "c'_th", theory_expressions["c'"][th_cfg], parameters)));
-    theory->add(*(Utils::makeTheoryVar("AD_th", "AD_th", dcs_cpv ? "Acp_KP" : "0", parameters)));
+    theory->add(*(Utils::makeTheoryVar("AD_th", "AD_th", th_cfg != theory_config::superweak ? "Acp_KP" : "0", parameters)));
     theory->add(*(Utils::makeTheoryVar("dc_th", "dc_th", theory_expressions["dc"][th_cfg], parameters)));
     theory->add(*(Utils::makeTheoryVar("dc'_th", "dc'_th", theory_expressions["dc'"][th_cfg], parameters)));
     if (nObs == 9) {
-      theory->add(*(Utils::makeTheoryVar("ADt_th", "ADt_th", dcs_cpv ? "Acp_KP - 2 * Acp_KK" : "- 2 * Acp_KK", parameters)));
+      theory->add(*(Utils::makeTheoryVar("ADt_th", "ADt_th", th_cfg != theory_config::superweak ? "Acp_KP - 2 * Acp_KK" : "- 2 * Acp_KK", parameters)));
       theory->add(*(Utils::makeTheoryVar(
               "dc~_th", "dc~_th",
               theory_expressions["dc"][th_cfg]
@@ -209,7 +209,7 @@ void PDF_WS::initRelationsRAXY() {
     theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "R_Kpi", parameters)));
     theory->add(*(Utils::makeTheoryVar("y'+_th", "y'+_th", theory_expressions["y'+"][th_cfg], parameters)));
     theory->add(*(Utils::makeTheoryVar("x'2+_th", "x'2+_th", theory_expressions["x'2+"][th_cfg], parameters)));
-    theory->add(*(Utils::makeTheoryVar("AD_th", "AD_th", dcs_cpv ? "Acp_KP" : "0", parameters)));
+    theory->add(*(Utils::makeTheoryVar("AD_th", "AD_th", th_cfg != theory_config::superweak ? "Acp_KP" : "0", parameters)));
     theory->add(*(Utils::makeTheoryVar("y'-_th", "y'-_th", theory_expressions["y'-"][th_cfg], parameters)));
     theory->add(*(Utils::makeTheoryVar("x'2-_th", "x'2-_th", theory_expressions["x'2-"][th_cfg], parameters)));
 }
@@ -217,8 +217,8 @@ void PDF_WS::initRelationsRAXY() {
 
 void PDF_WS::initRelationsRRXY() {
     theory = new RooArgList("theory");
-    std::string cpv_correction_p = dcs_cpv ? " * (1 + Acp_KP / 100)" : "";
-    std::string cpv_correction_m = dcs_cpv ? " * (1 - Acp_KP / 100)" : "";
+    std::string cpv_correction_p = th_cfg != theory_config::superweak ? " * (1 + Acp_KP / 100)" : "";
+    std::string cpv_correction_m = th_cfg != theory_config::superweak ? " * (1 - Acp_KP / 100)" : "";
     theory->add(*(Utils::makeTheoryVar("RD_p_th", "RD_p_th", "R_Kpi" + cpv_correction_p, parameters)));
     theory->add(*(Utils::makeTheoryVar("y'+_th", "y'+_th", theory_expressions["y'+"][th_cfg], parameters)));
     theory->add(*(Utils::makeTheoryVar("x'2+_th", "x'2+_th", theory_expressions["x'2+"][th_cfg], parameters)));
