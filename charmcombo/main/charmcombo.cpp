@@ -6,6 +6,7 @@
 #include "PDF_Cleo.h"
 #include "PDF_Fp_pipipi0.h"
 #include "PDF_DY.h"
+#include "PDF_DY_pipipi0.h"
 #include "PDF_DY_RS.h"
 #include "PDF_Kpipi0.h"
 #include "PDF_Kshh.h"
@@ -26,7 +27,7 @@
 
 namespace {
     /**
-     *
+     * Clone all combinations to enable the comparison of fits with and without allowing for CPV in DCS decays.
      */
     void add_no_dcs_cpv_combiner(GammaComboEngine &gc, const int icomb) {
         const auto combiner = gc.getCombiner(icomb);
@@ -35,8 +36,34 @@ namespace {
         gc.cloneCombiner(1000 + icomb, icomb, name, title);
         return;
     }
-}
 
+    std::vector<int> get_lhcb_pdfs(const std::string run, const FSC fsc) {
+        if (run == "run12") {
+            std::vector<int> list = {
+                    3,   // XY               KSpipi Prompt Run 1
+                    11,  // RM               K3pi Run 1
+                    21,  // BinFlip          Run 1
+                    24,  // BinFlip          Run 2
+                    35,  // WS               DT Run 1
+                    39,  // WS               Prompt Run 1+2
+                    61,  // yCP_minus_yCP_RS WA2020          TODO
+                    64,  // yCP_minus_yCP_RS 2022 prompt
+                    // 80,  // DY_RS   2021
+                    85,  // DY_pipipi0       Run 2
+            };
+            switch (fsc) {
+                // DY average, AcpHH
+                case FSC::none:    list.push_back(74); list.push_back(90); break;
+                case FSC::partial: list.push_back(75); list.push_back(91); break;
+                case FSC::full:    list.push_back(76); list.push_back(92); break;
+            }
+            return list;
+        } else {
+            std::cerr << "The list of the LHCb results from the period `" << run << "` is not supported. Exiting..." << std::endl;
+            exit(1);
+        }
+    }
+}
 
 int main(int argc, char* argv[]) {
 
@@ -126,6 +153,8 @@ int main(int argc, char* argv[]) {
 
     gc.addPdf(80, new PDF_DY_RS  ("LHCb2021",              th_cfg),  "DY(RS)       LHCb     2021                  ");
 
+    gc.addPdf(85, new PDF_DY_pipipi0("LHCb-R2",            th_cfg),  "DY(pipipi0)  LHCb     Run2                  ");
+
     gc.addPdf(90, new PDF_AcpHH_LHCb_Run12(th_cfg, FSC::none   ),    "ACP(KK/PP)   LHCb     Run1+2   [no FSC]     ");
     gc.addPdf(91, new PDF_AcpHH_LHCb_Run12(th_cfg, FSC::partial),    "ACP(KK/PP)   LHCb     Run1+2   [partial FSC]");
     gc.addPdf(92, new PDF_AcpHH_LHCb_Run12(th_cfg, FSC::full   ),    "ACP(KK/PP)   LHCb     Run1+2   [full FSC]   ");
@@ -201,6 +230,7 @@ int main(int argc, char* argv[]) {
     gc.cloneCombiner(50, 40, "WAMar2024NoFSC", "World average (March 2024)");
     gc.getCombiner(50)->delPdf(gc[37]);  // WS/RS in D0 -> Kpi from LHCb 2011-2016
     gc.getCombiner(50)->addPdf(gc[39]);  // WS/RS in D0 -> Kpi from LHCb Run 1+2
+    gc.getCombiner(50)->addPdf(gc[85]);  // DY(pi+ pi- pi0) from LHCb Run 2
 
     // WA March 2024 with parametrisation of prompt LHCb WS/RS decays from Sec. 9 - no FSC
     gc.cloneCombiner(51, 50, "WAMar2024NoFSC_WSsec9", "World average (March 2024, prompt WS/RS from Sec. 9)");
@@ -211,12 +241,24 @@ int main(int argc, char* argv[]) {
     gc.cloneCombiner(52, 50, "WAMar2024NoFSC_noDcsCpv", "No direct measurements");
     gc.getCombiner(52)->delPdf(gc[90]);  // Delta_ACP and ACP(KK)
 
+    // LHCb-only averages ----------------------------------------------------------------------------------------------
+
+    gc.newCombiner(300, "LHCbMar2024NoFSC", "LHCb average (May 2024)");
+    for (const auto imeas : get_lhcb_pdfs("run12", FSC::none))
+        gc.getCombiner(300)->addPdf(gc[imeas]);
+
+    // LHCb-only + charm factories averages ----------------------------------------------------------------------------
+
+    gc.cloneCombiner(400, 300, "LHCbCFMar2024NoFSC", "LHCb + Charm factories average (May 2024)");
+    for (auto imeas : {50, 52, 53})
+        gc.getCombiner(400)->addPdf(gc[imeas]);
+
     // Impact of LHCb upgrades -----------------------------------------------------------------------------------------
 
     // WA before LHCb Run 2
     gc.newCombiner(500, "LHCb_Run1", "World average before LHCb Run 2");
     for (auto imeas : {1, 2, 3, 4, 10, 11, 20, 21, 30, 31, 32, 35, 36, 50, 52, 60, 61, 62, 63, 70})
-      gc.getCombiner(500)->addPdf(gc[imeas]);
+        gc.getCombiner(500)->addPdf(gc[imeas]);
 
     // WA after LHCb Run 2
     gc.cloneCombiner(501, 50, "LHCb_Run2", "World average after LHCb Run 2");

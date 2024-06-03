@@ -111,7 +111,7 @@ def get_scans_2d(combinations, plot_acp_kp=True):
         scans = [
             Scan2d('x12', 'y12', 0.2, 0.6, 0.55, 0.75),
             Scan2d('phiM', 'phiG', -0.15, 0.15, -0.15, 0.15),
-            Scan2d('Delta_Kpi', 'R_Kpi', -0.45, 0.05, 0.3375, 0.3525),
+            Scan2d('Delta_Kpi', 'R_Kpi', -0.5, 0.05, 0.3375, 0.3525),
             Scan2d('x', 'y', 0.2, 0.6, 0.55, 0.75),
             Scan2d('qop', 'phi', -0.075, 0.075, -0.125, 0.075),
             Scan2d('Acp_KK', 'Acp_PP', -0.3, 0.3, -0.3, 0.5),
@@ -134,10 +134,10 @@ def get_base_options(param, combinations, titles, parfile, already_plotted, lhcb
         options.append('' if titles is None else f' --title "{titles[i]}"')
         if no_dcs_cpv is not None:
             options.append(f'--fix {"Acp_KP=0" if fix_acp_kpi else "none"}')
+        if parfile is not None:
+            options.append(f'--parfile {parfile}')
     if len(combinations) == 1:
         options.append('--leg off')
-    if parfile is not None:
-        options.append(f'--parfile {parfile}')
     if already_plotted:
         options.append('-a plot')
     if lhcb:
