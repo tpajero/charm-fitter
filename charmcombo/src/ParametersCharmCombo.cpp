@@ -58,6 +58,42 @@ void ParametersCharmCombo::defineParameters() {
     p->phys = range(0, 1e4);
     p->free = range(0, 1e4);
 
+    // Ratio of the magnitudes of the decay amplitudes of D0 -> K+ pi- pi- pi+ to D0 -> K- pi- pi+ pi+
+    p = newParameter("r_K3pi");
+    p->title = "#it{r_{K3#pi}} [%]";
+    p->startvalue = 5.5;
+    p->unit = "";
+    p->scan = range(4, 6);
+    p->phys = range(0, 1e4);
+    p->free = range(0, 1e4);
+
+    // Ratio of the magnitudes of the decay amplitudes of D0 -> K+ pi- pi0 to D0 -> K- pi+ pi0
+    p = newParameter("r_Kpipi0");
+    p->title = "#it{r_{K#pi#pi^{0}}} [%]";
+    p->startvalue = 4.4;
+    p->unit = "";
+    p->scan = range(4, 6);
+    p->phys = range(0, 1e4);
+    p->free = range(0, 1e4);
+
+    // Coherence parameters for the decay amplitudes of D0 -> K+ pi- pi- pi+ to D0 -> K- pi- pi+ pi+
+    p = newParameter("k_K3pi");
+    p->title = "#it{#kappa_{K3#pi}}";
+    p->startvalue = 0.44;
+    p->unit = "";
+    p->scan = range(0., 1.);
+    p->phys = range(0, 1e4);
+    p->free = range(0, 1e4);
+
+    // Coherence parameters for the decay amplitudes of D0 -> K+ pi- pi0 to D0 -> K- pi+ pi0
+    p = newParameter("k_Kpipi0");
+    p->title = "#it{#kappa_{K#pi#pi^{0}}}";
+    p->startvalue = 0.79;
+    p->unit = "";
+    p->scan = range(0., 1.);
+    p->phys = range(0, 1e4);
+    p->free = range(0, 1e4);
+
     // Strong-phase difference between the decay amplitudes of D0 -> K+ pi- to D0 -> K- pi+
     // Follows the convention of:
     //   A. L. Kagan and L. Silvestrini, Dispersive and absorptive CP violation in D0/anti-D0 mixing
@@ -71,9 +107,21 @@ void ParametersCharmCombo::defineParameters() {
     p->free = range(DegToRad(-180), DegToRad(180));
 
     // Strong-phase difference between the decay amplitudes of D0 -> K+ pi- pi0 to D0 -> K- pi+ pi0
-    p = newParameter("Delta_Kpipi");
-    p->title = "#Delta_{#it{K#pi#pi}} [rad]";
-    p->startvalue = -0.4;
+    p = newParameter("Delta_Kpipi0");
+    p->title = "#Delta_{#it{K#pi#pi^{0}}} [rad]";
+    p->startvalue = -0.24;
+    p->unit = "";
+    p->scan = range(DegToRad(-180), DegToRad(180));
+    p->phys = range(DegToRad(-180), DegToRad(180));
+    p->free = range(DegToRad(-180), DegToRad(180));
+
+    // Strong-phase difference between the decay amplitudes of D0 -> K+ pi- pi- pi+ and D0 -> K- pi- pi+ pi+
+    // Follows the convention of:
+    //   A. L. Kagan and L. Silvestrini, Dispersive and absorptive CP violation in D0/anti-D0 mixing
+    //   Phys. Rev. D 103 053008, 2021 (https://inspirehep.net/literature/1776611)
+    p = newParameter("Delta_K3pi");
+    p->title = "#Delta_{#it{K3#pi}} [rad]";
+    p->startvalue = 0.4;
     p->unit = "";
     p->scan = range(DegToRad(-180), DegToRad(180));
     p->phys = range(DegToRad(-180), DegToRad(180));

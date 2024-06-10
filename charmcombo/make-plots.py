@@ -90,7 +90,14 @@ def get_scans_1d(combinations, plot_acp_kp=True, scan_dy_rs=False):
             ]
     if plot_acp_kp:
         scans.append(Scan1d('Acp_KP', -2, 2))
-    scans.append(Scan1d('Delta_Kpipi', -2., 2.))
+    scans.extend([Scan1d('Delta_Kpipi0', -2., 2.),
+                  # Scan1d('Delta_K3pi', -0.5, 1.5),
+                  # Scan1d('k_K3pi', 0., 1.),
+                  # Scan1d('k_Kpipi0', 0., 1.),
+                  # Scan1d('r_K3pi', 4., 6.),
+                  # Scan1d('r_Kpipi0', 4., 6.),
+                  # Scan1d('F_pipipi0', 0.9, 1.),
+                  ])
     if scan_dy_rs:
         scans.append(Scan1d('DY_RS', 0., 0.4))
     return scans

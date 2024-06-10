@@ -1,5 +1,6 @@
 #include "CharmUtils.h"
 #include "PDF_AcpHH_LHCb_Run12.h"
+#include "PDF_BES_CLEO_K3pi_Kpipi0.h"
 #include "PDF_BES_Kpi.h"
 #include "PDF_BES_Kpi_1d.h"
 #include "PDF_BinFlip.h"
@@ -8,6 +9,7 @@
 #include "PDF_DY.h"
 #include "PDF_DY_pipipi0.h"
 #include "PDF_DY_RS.h"
+#include "PDF_K3pi.h"
 #include "PDF_Kpipi0.h"
 #include "PDF_Kshh.h"
 #include "PDF_RM.h"
@@ -111,6 +113,7 @@ int main(int argc, char* argv[]) {
     gc.addPdf(2,  new PDF_XY      ("BaBar_pipipi0",         th_cfg), "XY pipipi0   BaBar                          ");
     gc.addPdf(3,  new PDF_XY      ("LHCb_KSpipi",           th_cfg), "XY KSpipi    LHCb     2011     [D* -> D0 pi]");
     gc.addPdf(4,  new PDF_Kpipi0  ("BaBar",                 th_cfg), "Kpipi0       BaBar                          ");
+    gc.addPdf(5,  new PDF_K3pi    ("LHCb-run1",             th_cfg), "K3pi         LHCb     Run 1                 ");
 
     gc.addPdf(10, new PDF_RM      ("HFLAV2016",             th_cfg), "R_M          HFLAV    2016                  ");
     gc.addPdf(11, new PDF_RM      ("LHCb_K3pi_Run1",        th_cfg), "R_M K3pi     LHCb                           ");
@@ -136,6 +139,7 @@ int main(int argc, char* argv[]) {
     gc.addPdf(51,  new PDF_BES_Kpi_1d(                      th_cfg), "Delta_Kpi    BES      3fb      [A_kpi only] ");
     gc.addPdf(52,  new PDF_BES_Kpi   (                      th_cfg), "Delta_Kpi    BES      3fb                   ");
     gc.addPdf(53,  new PDF_Fp_pipipi0(                            ), "Fpipipi0     Cleo-c                         ");
+    gc.addPdf(54,  new PDF_BES_CLEO_K3pi_Kpipi0("BES3-CLEO"       ), "K3pi-Kpipi0  BES3 + Cleo                    ");
 
     gc.addPdf(60, new PDF_yCP             ("WA2020",        th_cfg), "yCP          WA       2020                  ");
     gc.addPdf(61, new PDF_yCP_minus_yCP_RS("WA2020",        th_cfg), "yCP-yCP(RS)  WA       2020                  ");
@@ -240,6 +244,12 @@ int main(int argc, char* argv[]) {
     // WA March 2024 without measurement of CPV in the decay (to test the sensitivity of WS/RS to ACP(KK)
     gc.cloneCombiner(52, 50, "WAMar2024NoFSC_noDcsCpv", "No direct measurements");
     gc.getCombiner(52)->delPdf(gc[90]);  // Delta_ACP and ACP(KK)
+
+    // WA March 2024 with full D0 -> K3pi from Run 1
+    gc.cloneCombiner(53, 50, "WAMar2024NoFSC_K3pi", "Full K3#pi");
+    gc.getCombiner(53)->delPdf(gc[11]);  // LHCb K3pi (x2 + y2)/4
+    gc.getCombiner(53)->addPdf(gc[5]);   // LHCb K3pi full
+    gc.getCombiner(53)->addPdf(gc[54]);  // BES3 + CLEO K3pi, Kpipi0
 
     // LHCb-only averages ----------------------------------------------------------------------------------------------
 

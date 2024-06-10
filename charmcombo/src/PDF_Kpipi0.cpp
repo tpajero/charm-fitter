@@ -38,7 +38,7 @@ PDF_Kpipi0::~PDF_Kpipi0() {}
 void PDF_Kpipi0::initParameters() {
     ParametersCharmCombo p;
     parameters = new RooArgList("parameters");
-    parameters->add(*(p.get("Delta_Kpipi")));
+    parameters->add(*(p.get("Delta_Kpipi0")));
 
     switch (th_cfg) {
         case theory_config::phenomenological:
@@ -63,41 +63,40 @@ void PDF_Kpipi0::initParameters() {
 void PDF_Kpipi0::initRelations() {
     theory = new RooArgList("theory");
     switch (th_cfg) {
-        case theory_config::phenomenological:  // CP violation in the decay is missing!
-                                // check the CP violation in x'
+        case theory_config::phenomenological:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "xpp_th", "xpp_th",
-                            "x*cos(Delta_Kpipi) - y*sin(Delta_Kpipi)",
+                            "x*cos(Delta_Kpipi0) - y*sin(Delta_Kpipi0)",
                             parameters)));
             theory->add(
                     *(Utils::makeTheoryVar(
                             "ypp_th", "ypp_th",
-                            "y*cos(Delta_Kpipi) + x*sin(Delta_Kpipi)", parameters)));
+                            "y*cos(Delta_Kpipi0) + x*sin(Delta_Kpipi0)", parameters)));
             break;
         case theory_config::theoretical:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "xpp_th", "xpp_th",
-                            "  x12*cos(Delta_Kpipi) * TMath::Sign(1.,cos(phiM))"
-                            "- y12*sin(Delta_Kpipi) * TMath::Sign(1.,cos(phiG))", parameters)));
+                            "  x12*cos(Delta_Kpipi0) * cos(phiM)"
+                            "- y12*sin(Delta_Kpipi0) * cos(phiG)", parameters)));
             theory->add(
                     *(Utils::makeTheoryVar(
                             "ypp_th", "ypp_th",
-                            "  y12 * cos(Delta_Kpipi) * TMath::Sign(1.,cos(phiG))"
-                            "+ x12 * sin(Delta_Kpipi) * TMath::Sign(1.,cos(phiM))", parameters)));
+                            "  y12 * cos(Delta_Kpipi0) * cos(phiG)"
+                            "+ x12 * sin(Delta_Kpipi0) * cos(phiM)", parameters)));
             break;
         case theory_config::superweak:
             theory->add(
                     *(Utils::makeTheoryVar(
                             "xpp_th", "xpp_th",
-                            "  x12*cos(Delta_Kpipi) * TMath::Sign(1.,cos(phiM))"
-                            "- y12*sin(Delta_Kpipi)                            ", parameters)));
+                            "  x12*cos(Delta_Kpipi0) * cos(phiM)"
+                            "- y12*sin(Delta_Kpipi0)            ", parameters)));
             theory->add(
                     *(Utils::makeTheoryVar(
                             "ypp_th", "ypp_th",
-                            "  y12 * cos(Delta_Kpipi)                            "
-                            "+ x12 * sin(Delta_Kpipi) * TMath::Sign(1.,cos(phiM))", parameters)));
+                            "  y12 * cos(Delta_Kpipi0)            "
+                            "+ x12 * sin(Delta_Kpipi0) * cos(phiM)", parameters)));
             break;
         default:
             cout << "PDF_Kpipi0::initRelations : ERROR : "
