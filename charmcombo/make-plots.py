@@ -52,7 +52,7 @@ class Scan2d:
         self.full_fsc_only = varx in _full_fsc_params or vary in _full_fsc_params
 
 
-def get_scans_1d(combinations, plot_acp_kp=True, scan_dy_rs=False):
+def get_scans_1d(combinations, scan_dy_rs=False):
     before_2022 = 500 in combinations or any(n < 30 for n in combinations)
     if before_2022:
         scans = [
@@ -85,19 +85,19 @@ def get_scans_1d(combinations, plot_acp_kp=True, scan_dy_rs=False):
             Scan1d('R_Kpi',         0.335, 0.355),
             Scan1d('Acp_KK',       -0.7,   0.7 ),
             Scan1d('Acp_PP',       -0.4,   0.7 ),
+            Scan1d('Acp_KP', -2, 2),
             Scan1d('cot_delta_KK', -4e2,   4e2 ),
             Scan1d('cot_delta_PP', -4e2,   4e2 ),
             ]
-    if plot_acp_kp:
-        scans.append(Scan1d('Acp_KP', -2, 2))
-    scans.extend([Scan1d('Delta_Kpipi0', -2., 2.),
-                  # Scan1d('Delta_K3pi', -0.5, 1.5),
-                  # Scan1d('k_K3pi', 0., 1.),
-                  # Scan1d('k_Kpipi0', 0., 1.),
-                  # Scan1d('r_K3pi', 4., 6.),
-                  # Scan1d('r_Kpipi0', 4., 6.),
-                  # Scan1d('F_pipipi0', 0.9, 1.),
-                  ])
+    scans.extend([
+        Scan1d('Delta_Kpipi0', -2., 2.),
+        Scan1d('Delta_K3pi', -0.5, 1.5),
+        Scan1d('k_K3pi', 0., 1.),
+        Scan1d('k_Kpipi0', 0., 1.),
+        Scan1d('r_K3pi', 4., 6.),
+        Scan1d('r_Kpipi0', 4., 6.),
+        Scan1d('F_pipipi0', 0.9, 1.),
+    ])
     if scan_dy_rs:
         scans.append(Scan1d('DY_RS', 0., 0.4))
     return scans
@@ -112,7 +112,7 @@ def get_scans_2d(combinations, plot_acp_kp=True):
             Scan2d('Delta_Kpi', 'R_Kpi', -0.6, 0.4, 0.325, 0.36),
             Scan2d('x', 'y', 0., 0.8, 0.4, 0.9),
             Scan2d('qop', 'phi', -0.2, 0.2, -0.4, 0.4),
-            Scan2d('Acp_KK', 'Acp_PP', -0.3, 0.3, -0.3, 0.5),
+            Scan2d('Acp_KK', 'Acp_PP', -0.5, 0.5, -0.5, 0.7),
             ]
     else:
         scans = [
@@ -171,14 +171,13 @@ def execute_cmd(command):
 
 def plot_1d(param, combinations, titles, parfile, already_plotted, scan_dy_rs, lhcb, no_dcs_cpv):
     plot_acp_kp = no_dcs_cpv is None or True not in no_dcs_cpv
-    for scan in get_scans_1d([int(combo) for combo in combinations], plot_acp_kp=plot_acp_kp):
+    for scan in get_scans_1d([int(combo) for combo in combinations]):
         cc = copy(combinations)
         tt = copy(titles)
         i = 0
         while i < len(cc):
-            if scan.full_fsc_only and cc[i] not in _full_fsc_combinations:
-            # if ((scan.full_fsc_only and cc[i] not in _full_fsc_combinations) or
-            #        (scan.var in _cpv_decay_params and ((not isinstance(cc[i], int)) or cc[i] < 40))):  # TODO
+            if (scan.full_fsc_only and cc[i] not in _full_fsc_combinations) or (scan.var == 'Acp_KP' and plot_acp_kp and int(cc[i]) >= 1000):
+            # or (scan.var in _cpv_decay_params and ((not isinstance(cc[i], int)) or cc[i] < 40))):  # TODO
                 cc.pop(i)
                 if tt is not None:
                     tt.pop(i)
@@ -206,10 +205,8 @@ def plot_2d(param, combinations, titles, parfile, already_plotted, lhcb, no_dcs_
         tt = copy(titles)
         i = 0
         while i < len(cc):
-            if scan.full_fsc_only and cc[i] not in _full_fsc_combinations:
-            # if ((scan.full_fsc_only and cc[i] not in _full_fsc_combinations) or
-            #         (any(v in _cpv_decay_params for v in [scan.var_x, scan.var_y]) and
-            #             ((not isinstance(cc[i], int)) or cc[i] < 40))):  # TODO
+            if (scan.full_fsc_only and cc[i] not in _full_fsc_combinations) or (any(v == 'Acp_KP' for v in [scan.var_x, scan.var_y]) and plot_acp_kp and int(cc[i]) >= 1000):
+            # or (any(v in _cpv_decay_params for v in [scan.var_x, scan.var_y]) and ((not isinstance(cc[i], int)) or cc[i] < 40))):  # TODO
                 cc.pop(i)
                 if tt is not None:
                     tt.pop(i)

@@ -33,7 +33,7 @@ namespace {
      */
     void add_no_dcs_cpv_combiner(GammaComboEngine &gc, const int icomb) {
         const auto combiner = gc.getCombiner(icomb);
-        const auto name = "NoDcsCPV_" + combiner->getName();
+        const auto name = combiner->getName() + "NoDcsCPV";
         const auto title = combiner->getTitle() + " (A_{CP}(K#pi) = 0)";
         gc.cloneCombiner(1000 + icomb, icomb, name, title);
         return;
@@ -162,6 +162,7 @@ int main(int argc, char* argv[]) {
     gc.addPdf(90, new PDF_AcpHH_LHCb_Run12(th_cfg, FSC::none   ),    "ACP(KK/PP)   LHCb     Run1+2   [no FSC]     ");
     gc.addPdf(91, new PDF_AcpHH_LHCb_Run12(th_cfg, FSC::partial),    "ACP(KK/PP)   LHCb     Run1+2   [partial FSC]");
     gc.addPdf(92, new PDF_AcpHH_LHCb_Run12(th_cfg, FSC::full   ),    "ACP(KK/PP)   LHCb     Run1+2   [full FSC]   ");
+    gc.addSubsetPdf(93, new PDF_AcpHH_LHCb_Run12(th_cfg, FSC::none), 0, 1, 4, 5, "ACP(KK/PP)   LHCb     Run1     [no FSC]");
 
     gc.addPdf(100, new PDF_scan_DY_RS(                      th_cfg), "ScanDYRS     This is just a nuisance parameter");
 
@@ -190,6 +191,9 @@ int main(int argc, char* argv[]) {
     gc.getCombiner(20)->addPdf(gc[22]);  // bin-flip run 2
     gc.getCombiner(20)->delPdf(gc[71]);  // DY WA 2020
     gc.getCombiner(20)->addPdf(gc[72]);  // DY WA 2021
+    gc.getCombiner(20)->delPdf(gc[11]);  // LHCb K3pi (x2 + y2)/4
+    gc.getCombiner(20)->addPdf(gc[5]);   // LHCb K3pi full
+    gc.getCombiner(20)->addPdf(gc[54]);  // BES3 + CLEO K3pi, Kpipi0
 
     // WA after LHCb 2022 yCP measurement
     gc.cloneCombiner(30, 20, "WAFeb2022", "World average (Feb 2022)");
@@ -230,6 +234,10 @@ int main(int argc, char* argv[]) {
     gc.getCombiner(42)->delPdf(gc[91]);  // ACP(KK) + DeltaACP LHCb Run 1+2 (partial FSC)
     gc.getCombiner(42)->addPdf(gc[92]);  // ACP(KK) + DeltaACP LHCb Run 1+2 (full FSC)
 
+    // WA March 2024 March before WS/RS
+    gc.cloneCombiner(49, 40, "WAFeb2024NoFSC", "Previous WA");
+    gc.getCombiner(49)->addPdf(gc[85]);  // DY(pi+ pi- pi0) from LHCb Run 2
+
     // WA March 2024 - no FSC
     gc.cloneCombiner(50, 40, "WAMar2024NoFSC", "World average (March 2024)");
     gc.getCombiner(50)->delPdf(gc[37]);  // WS/RS in D0 -> Kpi from LHCb 2011-2016
@@ -244,12 +252,6 @@ int main(int argc, char* argv[]) {
     // WA March 2024 without measurement of CPV in the decay (to test the sensitivity of WS/RS to ACP(KK)
     gc.cloneCombiner(52, 50, "WAMar2024NoFSC_noDcsCpv", "No direct measurements");
     gc.getCombiner(52)->delPdf(gc[90]);  // Delta_ACP and ACP(KK)
-
-    // WA March 2024 with full D0 -> K3pi from Run 1
-    gc.cloneCombiner(53, 50, "WAMar2024NoFSC_K3pi", "Full K3#pi");
-    gc.getCombiner(53)->delPdf(gc[11]);  // LHCb K3pi (x2 + y2)/4
-    gc.getCombiner(53)->addPdf(gc[5]);   // LHCb K3pi full
-    gc.getCombiner(53)->addPdf(gc[54]);  // BES3 + CLEO K3pi, Kpipi0
 
     // LHCb-only averages ----------------------------------------------------------------------------------------------
 
@@ -267,7 +269,7 @@ int main(int argc, char* argv[]) {
 
     // WA before LHCb Run 2
     gc.newCombiner(500, "LHCb_Run1", "World average before LHCb Run 2");
-    for (auto imeas : {1, 2, 3, 4, 10, 11, 20, 21, 30, 31, 32, 35, 36, 50, 52, 60, 61, 62, 63, 70})
+    for (auto imeas : {1, 2, 3, 4, 10, 11, 20, 21, 30, 31, 32, 35, 36, 50, 52, 60, 61, 62, 63, 70, 93})
         gc.getCombiner(500)->addPdf(gc[imeas]);
 
     // WA after LHCb Run 2
