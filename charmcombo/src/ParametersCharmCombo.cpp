@@ -156,7 +156,7 @@ void ParametersCharmCombo::defineParameters() {
     // CP-even fraction of D0 -> pi+ pi- pi0
     p = newParameter("F_pipipi0");
     p->title = "#it{F^{#pi#pi#pi^{0}}_{+}}";
-    p->startvalue = 0.973;
+    p->startvalue = 0.943;
     p->unit = "";
     p->scan = range(0,1);
     p->phys = range(-1,2);

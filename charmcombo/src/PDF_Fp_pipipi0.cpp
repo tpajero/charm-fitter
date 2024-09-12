@@ -4,18 +4,20 @@
  * Date: October 2021
  **/
 
+#include <TString.h>
+
 #include "CharmUtils.h"
 #include "ParametersCharmCombo.h"
 #include "PDF_Fp_pipipi0.h"
 
-PDF_Fp_pipipi0::PDF_Fp_pipipi0() : PDF_Abs{1} {
-    name = "Cleo-Fp-pipipi0";
+PDF_Fp_pipipi0::PDF_Fp_pipipi0(TString measurement_id) : PDF_Abs{1} {
+    name = "Fp-pipipi0" + measurement_id;
     initParameters();
     initRelations();
-    initObservables();
-    setObservables("Cleo-c");
-    setUncertainties("Cleo-c");
-    setCorrelations("Cleo-c");
+    initObservables(measurement_id);
+    setObservables(measurement_id);
+    setUncertainties(measurement_id);
+    setCorrelations(measurement_id);
     buildCov();
     buildPdf();
 }
@@ -34,15 +36,18 @@ void PDF_Fp_pipipi0::initRelations() {
     theory->add(*(new RooFormulaVar("F_pipipi0_th", "F_pipipi0_th", "F_pipipi0", *p)));
 }
 
-void PDF_Fp_pipipi0::initObservables() {
+void PDF_Fp_pipipi0::initObservables(TString measurement_id) {
     observables = new RooArgList("observables");
-    observables->add(*(new RooRealVar("F_pipipi0_obs", "F_{#pi#pi#pi^{0}}",  0, -1e4, 1e4)));
+    observables->add(*(new RooRealVar("F_pipipi0_obs", "F_{#pi#pi#pi^{0}} " + measurement_id, 0, -1e4, 1e4)));
 }
 
 void PDF_Fp_pipipi0::setObservables(TString c) {
     if (c.EqualTo("Cleo-c")) {
         obsValSource = "https://inspirehep.net/literature/2139827";
         setObservable("F_pipipi0_obs", 0.973);
+    } else if (c.EqualTo("BESIII")) {
+        obsValSource = "https://inspirehep.net/literature/2827201";
+        setObservable("F_pipipi0_obs", 0.9406);
     } else {
         cout << "PDF_Fp_pipipi0::setObservables() : ERROR : config " + c + " not found." << endl;
         exit(1);
@@ -54,6 +59,10 @@ void PDF_Fp_pipipi0::setUncertainties(TString c) {
         obsErrSource = "https://inspirehep.net/literature/2139827";
         StatErr[0] = 0.017;
         SystErr[0] = 0.;
+    } else if (c.EqualTo("BESIII")) {
+        obsErrSource = "https://inspirehep.net/literature/2827201";
+        StatErr[0] = 0.0036;
+        SystErr[0] = 0.0021;
     } else {
         cout << "PDF_Fp_pipipi0::setObservables() : ERROR : config " + c + " not found." << endl;
         exit(1);

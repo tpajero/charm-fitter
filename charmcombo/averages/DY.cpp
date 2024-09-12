@@ -69,25 +69,29 @@ void DY(int flag = 0) {
   // Array of estimates and uncertainties
   const std::vector<TString> names_unc = {"  Stat", "m(hhh)", "   Sec", " m(KK)", " m(PP)",
                                           "Weight", "TimRes", "Mistag", "Run1Mu", " Other"};
+
+  // Inverse of Fp_pipipi0 = 0.942554 +/- 0.00404575
+  constexpr auto pipipi0_corr = 1.061;
+
   const std::vector<double> x_est = {
       // clang-format off
-      //       0      1      2     3     4     5      6       7      8      9
-      // Val  Stat    m(hhh) Sec   m(KK) m(PP) Weight TimeRes Mistag Run1Mu Other
-      -8.8  , 25.5  , 0.  ,  0.  , 0.  , 0.  , 0.  ,  0.  ,   0.  ,  0.  ,  5.8 ,  // BaBar
-      19.   , 15.   , 0.  ,  0.  , 0.  , 0.  , 0.  ,  0.  ,   0.  ,  0.  ,  0.  ,  // CDF KK
-       1.   , 18.   , 0.  ,  0.  , 0.  , 0.  , 0.  ,  0.  ,   0.  ,  0.  ,  0.  ,  // CDF PP
-       3.   , 20.   , 0.  ,  0.  , 0.  , 0.  , 0.  ,  0.  ,   0.  ,  0.  ,  7.  ,  // Belle
-      13.40 ,  7.70 , 0.  ,  0.  , 0.  , 0.  , 0.  ,  0.49,   0.  ,  2.55,  0.  ,  // Run 1 mu KK
-       9.2  , 14.5  , 0.  ,  0.  , 0.  , 0.  , 0.  ,  0.42,   0.  ,  2.48,  0.  ,  // Run 1 mu PP
-       3.0  ,  3.2  , 0.1 ,  0.8 , 0.5 , 0.  , 0.2 ,  0.  ,   0.  ,  0.  ,  0.  ,  // Run 1 prompt KK
-      -4.6  ,  5.8  , 0.1 ,  1.2 , 0.  , 0.  , 0.2 ,  0.  ,   0.  ,  0.  ,  0.  ,  // Run 1 prompt PP
-   //  4.3  ,  3.6  , 0.  ,  0.  , 0.  , 0.  , 0.  ,  0.3 ,   0.3 ,  0.  ,  0.3 ,  // Run 2 mu KK
-   // -2.2  ,  7.0  , 0.  ,  0.  , 0.  , 0.  , 0.  ,  0.4 ,   0.6 ,  0.  ,  0.3 ,  // Run 2 mu PP
-       4.8  ,  4.0  , 0.  ,  0.  , 0.  , 0.  , 0.  ,  0.  ,   0.  ,  0.  ,  0.3 ,  // Run 2 mu KK  (scale factor of 1.12 to account for dilution)
-      -2.5  ,  7.8  , 0.  ,  0.  , 0.  , 0.  , 0.  ,  0.  ,   0.  ,  0.  ,  0.3 ,  // Run 2 mu PP  (scale factor of 1.12 to account for dilution)
-      -2.321,  1.524, 0.24,  0.13, 0.06, 0.  , 0.05,  0.  ,   0.  ,  0.  ,  0.  ,  // Run 2 prompt KK
-      -4.014,  2.814, 0.34,  0.13, 0.  , 0.03, 0.05,  0.  ,   0.  ,  0.  ,  0.  ,  // Run 2 prompt PP
-      -1.21 ,  5.97 , 0.  ,  0.  , 0.  , 0.  , 0.  ,  0.  ,   0.  ,  0.  ,  2.01,  // Run 2 pi pi pi0 (remove sys. unc. from time binning)
+      //                     0                    1      2     3     4     5      6       7      8      9
+      // Val                Stat                  m(hhh) Sec   m(KK) m(PP) Weight TimeRes Mistag Run1Mu Other
+      -8.8                , 25.5                , 0.  ,  0.  , 0.  , 0.  , 0.  ,  0.  ,   0.  ,  0.  ,  5.8                ,  // BaBar
+      19.                 , 15.                 , 0.  ,  0.  , 0.  , 0.  , 0.  ,  0.  ,   0.  ,  0.  ,  0.                 ,  // CDF KK
+       1.                 , 18.                 , 0.  ,  0.  , 0.  , 0.  , 0.  ,  0.  ,   0.  ,  0.  ,  0.                 ,  // CDF PP
+       3.                 , 20.                 , 0.  ,  0.  , 0.  , 0.  , 0.  ,  0.  ,   0.  ,  0.  ,  7.                 ,  // Belle
+      13.40               ,  7.70               , 0.  ,  0.  , 0.  , 0.  , 0.  ,  0.49,   0.  ,  2.55,  0.                 ,  // Run 1 mu KK
+       9.2                , 14.5                , 0.  ,  0.  , 0.  , 0.  , 0.  ,  0.42,   0.  ,  2.48,  0.                 ,  // Run 1 mu PP
+       3.0                ,  3.2                , 0.1 ,  0.8 , 0.5 , 0.  , 0.2 ,  0.  ,   0.  ,  0.  ,  0.                 ,  // Run 1 prompt KK
+      -4.6                ,  5.8                , 0.1 ,  1.2 , 0.  , 0.  , 0.2 ,  0.  ,   0.  ,  0.  ,  0.                 ,  // Run 1 prompt PP
+   //  4.3                ,  3.6                , 0.  ,  0.  , 0.  , 0.  , 0.  ,  0.3 ,   0.3 ,  0.  ,  0.3                ,  // Run 2 mu KK
+   // -2.2                ,  7.0                , 0.  ,  0.  , 0.  , 0.  , 0.  ,  0.4 ,   0.6 ,  0.  ,  0.3                ,  // Run 2 mu PP
+       4.8                ,  4.0                , 0.  ,  0.  , 0.  , 0.  , 0.  ,  0.  ,   0.  ,  0.  ,  0.3                ,  // Run 2 mu KK  (scale factor of 1.12 to account for dilution)
+      -2.5                ,  7.8                , 0.  ,  0.  , 0.  , 0.  , 0.  ,  0.  ,   0.  ,  0.  ,  0.3                ,  // Run 2 mu PP  (scale factor of 1.12 to account for dilution)
+      -2.321              ,  1.524              , 0.24,  0.13, 0.06, 0.  , 0.05,  0.  ,   0.  ,  0.  ,  0.                 ,  // Run 2 prompt KK
+      -4.014              ,  2.814              , 0.34,  0.13, 0.  , 0.03, 0.05,  0.  ,   0.  ,  0.  ,  0.                 ,  // Run 2 prompt PP
+      -1.21 * pipipi0_corr,  5.97 * pipipi0_corr, 0.  ,  0.  , 0.  , 0.  , 0.  ,  0.  ,   0.  ,  0.  ,  2.00 * pipipi0_corr,  // Run 2 pi pi pi0 (remove sys. unc. from time binning)
       // clang-format on
   };
   const auto num_unc = names_unc.size();

@@ -138,8 +138,9 @@ int main(int argc, char* argv[]) {
     gc.addPdf(50,  new PDF_Cleo      ("Cleo-c",             th_cfg), "Delta_Kpi    Cleo-c                         ");
     gc.addPdf(51,  new PDF_BES_Kpi_1d(                      th_cfg), "Delta_Kpi    BES      3fb      [A_kpi only] ");
     gc.addPdf(52,  new PDF_BES_Kpi   (                      th_cfg), "Delta_Kpi    BES      3fb                   ");
-    gc.addPdf(53,  new PDF_Fp_pipipi0(                            ), "Fpipipi0     Cleo-c                         ");
+    gc.addPdf(53,  new PDF_Fp_pipipi0("Cleo-c"                    ), "Fpipipi0     Cleo-c                         ");
     gc.addPdf(54,  new PDF_BES_CLEO_K3pi_Kpipi0("BES3-CLEO"       ), "K3pi-Kpipi0  BES3 + Cleo                    ");
+    gc.addPdf(55,  new PDF_Fp_pipipi0("BESIII"                    ), "Fpipipi0     BES3                           ");
 
     gc.addPdf(60, new PDF_yCP             ("WA2020",        th_cfg), "yCP          WA       2020                  ");
     gc.addPdf(61, new PDF_yCP_minus_yCP_RS("WA2020",        th_cfg), "yCP-yCP(RS)  WA       2020                  ");
@@ -252,6 +253,14 @@ int main(int argc, char* argv[]) {
     // WA March 2024 without measurement of CPV in the decay (to test the sensitivity of WS/RS to ACP(KK)
     gc.cloneCombiner(52, 50, "WAMar2024NoFSC_noDcsCpv", "No direct measurements");
     gc.getCombiner(52)->delPdf(gc[90]);  // Delta_ACP and ACP(KK)
+
+    // WA July 2024 (new WS/RS with DT Run 2 data)
+    gc.cloneCombiner(53, 50, "WAJuly2024NoFSC", "World average (March 2024)");
+    gc.getCombiner(53)->addPdf(gc[40]);  // WS/RS in D0 -> Kpi from LHCb Run 2 DT
+
+    // WA Sept 2024 (new BESIII F+(pi+pi-pi0))
+    gc.cloneCombiner(54, 50, "WASep2024NoFSC", "World average (Sep 2024)");
+    gc.getCombiner(54)->addPdf(gc[55]);  // BESIII measurement of Fp_pipipi0
 
     // LHCb-only averages ----------------------------------------------------------------------------------------------
 
