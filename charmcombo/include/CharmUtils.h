@@ -22,7 +22,8 @@ std::ostream& operator<<(std::ostream& os, const FSC& fsc);
 enum class theory_config {
     phenomenological,
     theoretical,
-    superweak
+    superweak,
+    d0_to_kpi
 };
 
 std::ostream& operator<<(std::ostream& os, const theory_config& th_cfg);

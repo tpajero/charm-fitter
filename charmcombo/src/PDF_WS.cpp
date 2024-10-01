@@ -8,7 +8,6 @@
 #include "ParametersCharmCombo.h"
 #include "PDF_WS.h"
 
-// core
 #include <Utils.h>
 
 #include <map>
@@ -26,6 +25,7 @@ namespace {
                                          "+ x12 * sin(Delta_Kpi + phiM)"},
             {theory_config::superweak,   "  y12 * cos(Delta_Kpi)"
                                          "+ x12 * sin(Delta_Kpi + phiM)"},
+            {theory_config::d0_to_kpi, "yp + dyp"},
         }},
         {"y'-", {
             {theory_config::phenomenological, "1/(qop+1)*(  y * cos(Delta_Kpi + phi)"
@@ -34,6 +34,7 @@ namespace {
                                          "+ x12 * sin(Delta_Kpi-phiM)"},
             {theory_config::superweak, "(  y12 * cos(Delta_Kpi)"
                                        " + x12 * sin(Delta_Kpi-phiM))"},
+            {theory_config::d0_to_kpi, "yp - dyp"},
         }},
         {"x'2+", {
             {theory_config::phenomenological, "pow((qop+1)*(  x * cos(Delta_Kpi - phi)"
@@ -42,6 +43,7 @@ namespace {
                                          "    + x12 * cos(Delta_Kpi + phiM), 2)"},
             {theory_config::superweak,   "pow(- y12 * sin(Delta_Kpi)"
                                          "    + x12 * cos(Delta_Kpi + phiM), 2)"},
+            {theory_config::d0_to_kpi, "xp2 + dxp2"},
         }},
         {"x'2-", {
             {theory_config::phenomenological, "pow(1/(qop+1)*(  x * cos(Delta_Kpi + phi)"
@@ -50,6 +52,7 @@ namespace {
                                          "    + x12 * cos(Delta_Kpi-phiM),2)"},
             {theory_config::superweak, "pow((- y12 * sin(Delta_Kpi)"
                                        "     + x12 * cos(Delta_Kpi-phiM)),2)"},
+            {theory_config::d0_to_kpi, "xp2 - dxp2"},
         }},
         {"c", {
             {theory_config::phenomenological,
@@ -57,6 +60,7 @@ namespace {
                     "       + 1 / (qop+1)*(  y*cos(Delta_Kpi + phi) + x*sin(Delta_Kpi + phi)))"},
             {theory_config::theoretical, "y12 * cos(Delta_Kpi) * cos(phiG) + x12 * sin(Delta_Kpi) * cos(phiM)"},
             {theory_config::superweak, "y12 * cos(Delta_Kpi) + x12 * sin(Delta_Kpi) * cos(phiM)"},
+            {theory_config::d0_to_kpi, "yp"},
         }},
         {"c'", {
             {theory_config::phenomenological, "0.125 * (pow(x, 2) + pow(y, 2)) * (pow(qop + 1, 2) + pow(qop + 1, -2))"},
@@ -66,6 +70,7 @@ namespace {
             {theory_config::superweak,
                     "0.25 * (pow(x12, 2) + pow(y12, 2))"
                     "+ 0.25 * R_Kpi / 100 * (pow(y12, 2) - pow(x12, 2))"},  // 2nd order corrections
+            {theory_config::d0_to_kpi, "(pow(yp, 2) + xp2) / 4"},
         }},
         {"dc", {
             {theory_config::phenomenological,
@@ -74,11 +79,13 @@ namespace {
             {theory_config::theoretical, "  x12 * cos(Delta_Kpi) * sin(phiM)"
                                          "- y12 * sin(Delta_Kpi) * sin(phiG)"},
             {theory_config::superweak, "x12 * cos(Delta_Kpi) * sin(phiM)"},
+            {theory_config::d0_to_kpi, "dyp"},
         }},
         {"dc'", {
             {theory_config::phenomenological, "1 / 8 * (pow(x, 2) + pow(y, 2)) * (pow(qop + 1, 2) - pow(qop + 1, -2))"},
             {theory_config::theoretical, "0.5 * x12 * y12 * sin(phiM - phiG)"},
             {theory_config::superweak, "0.5 * x12 * y12 * sin(phiM)"},
+            {theory_config::d0_to_kpi, "(2 * yp * dyp + pow(dyp, 2) + dxp2) / 4"},
         }},
     };
 }
@@ -90,11 +97,13 @@ PDF_WS::PDF_WS(TString measurement_id, const theory_config& th_cfg, WS_parametri
     TString label;
     if (measurement_id.EqualTo("BaBar")) label = "WS/RS BaBar CPV";
     else if (measurement_id.EqualTo("Belle")) label = "WS/RS Belle CPV";
-    else if (measurement_id.EqualTo("LHCb_DT_Run1")) label = "WS/RS LHCb dt";
+    else if (measurement_id.EqualTo("LHCb_DT_Run1")) label = "WS/RS LHCb dt (Run 1)";
     else if (measurement_id.EqualTo("LHCb_Run1")) label = "WS/RS LHCb Run 1";
     else if (measurement_id.EqualTo("LHCb_Prompt_2011_2016"))  label = "WS/RS LHCb prompt (15/16)";
     else if (measurement_id.EqualTo("LHCb_Prompt_Run12_sec9")) label = "WS/RS LHCb prompt (Run 1+2)";
     else if (measurement_id.EqualTo("LHCb_Prompt_Run12_appB")) label = "WS/RS LHCb prompt (Run 1+2)";
+    else if (measurement_id.EqualTo("LHCb_DT_Run2")) label = "WS/RS LHCb dt (Run 2)";
+    else if (measurement_id.EqualTo("LHCb_DT_Run12")) label = "WS/RS LHCb dt (Run 1+2)";
     else {
         std::cerr << "PDF_WS: Measurement ID " << measurement_id << " not supported\n";
         exit(1);
@@ -138,7 +147,8 @@ PDF_WS::~PDF_WS() {}
 
 
 void PDF_WS::initParameters() {
-    std::vector<std::string> param_names = {"R_Kpi", "Delta_Kpi"};
+    std::vector<std::string> param_names = {"R_Kpi"};
+    if (th_cfg != theory_config::d0_to_kpi) param_names.emplace_back("Delta_Kpi");
     if (th_cfg != theory_config::superweak) param_names.emplace_back("Acp_KP");
     if (nObs == 9) param_names.emplace_back("Acp_KK");
     switch (th_cfg) {
@@ -150,8 +160,11 @@ void PDF_WS::initParameters() {
         case theory_config::superweak:
             param_names.insert(param_names.end(), {"x12", "y12", "phiM"});
             break;
+        case theory_config::d0_to_kpi:
+            param_names.insert(param_names.end(), {"yp", "dyp", "xp2", "dxp2"});
+            break;
         default:
-            cout << "PDF_WS::initParameters : ERROR : theory_config not supported.\n";
+            cout << "PDF_WS::initParameters : ERROR : theory_config " << th_cfg << " not supported.\n";
             exit(1);
     }
     ParametersCharmCombo p;
@@ -331,6 +344,22 @@ void PDF_WS::setObservables(TString c) {
         setObservable("ADt_obs" , -0.82);
         setObservable("dc~_obs" ,  0.032);
         setObservable("dc'~_obs",  -0.020);
+    } else if (c.EqualTo("LHCb_DT_Run2")) {
+        obsValSource = "https://indico.cern.ch/event/1423686/contributions/6139348/, LHCb-PAPER-2024-044";
+        setObservable("RD_p_obs", 0.355);
+        setObservable("y'+_obs", 0.356);
+        setObservable("x'2+_obs", 1.086);
+        setObservable("RD_m_obs", 0.339);
+        setObservable("y'-_obs", 0.811);
+        setObservable("x'2-_obs", -1.129);
+    } else if (c.EqualTo("LHCb_DT_Run12")) {
+        obsValSource = "https://indico.cern.ch/event/1423686/contributions/6139348/, LHCb-PAPER-2024-044";
+        setObservable("RD_p_obs", 0.350);
+        setObservable("y'+_obs", 0.414);
+        setObservable("x'2+_obs", 0.784);
+        setObservable("RD_m_obs", 0.344);
+        setObservable("y'-_obs", 0.681);
+        setObservable("x'2-_obs", -0.486);
     } else {
         cout << "PDF_WS::setObservables() : ERROR : config " + c + " not found."
              << endl;
@@ -446,6 +475,26 @@ void PDF_WS::setUncertainties(TString c) {
         SystErr[6] = 0;  // ADt
         SystErr[7] = 0;  // dc~
         SystErr[8] = 0;  // dc'~
+    } else if (c.EqualTo("LHCb_DT_Run2")) {
+        obsErrSource = "https://indico.cern.ch/event/1423686/contributions/6139348/, LHCb-PAPER-2024-044";
+        StatErr[0] = 0.008;  // RD+
+        StatErr[1] = 0.225;  // y'+
+        StatErr[2] = 1.623;  // x'2+
+        StatErr[3] = 0.008;  // RD-
+        StatErr[4] = 0.236;  // y'-
+        StatErr[5] = 1.859;  // x'2-
+        for (int i = 0; i < nObs; ++i)
+            SystErr[i] = 0.;
+    } else if (c.EqualTo("LHCb_DT_Run12")) {
+        obsErrSource = "https://indico.cern.ch/event/1423686/contributions/6139348/, LHCb-PAPER-2024-044";
+        StatErr[0] = 0.007;  // RD+
+        StatErr[1] = 0.204;  // y'+
+        StatErr[2] = 1.522;  // x'2+
+        StatErr[3] = 0.007;  // RD-
+        StatErr[4] = 0.211;  // y'-
+        StatErr[5] = 1.665;  // x'2-
+        for (int i = 0; i < nObs; ++i)
+            SystErr[i] = 0.;
     } else {
         cout << "PDF_WS::setUncertainties() : ERROR : config " + c + " not found." << endl;
         exit(1);
@@ -458,7 +507,7 @@ void PDF_WS::setCorrelations(TString c)
     resetCorrelations();
     if (c.EqualTo("BaBar")) {  // TODO
         corSource = "https://hflav-eos.web.cern.ch/hflav-eos/charm/CKM23/results_mix_cpv.html";
-        std::vector<double> dataStat = {
+        std::vector<double> data = {
             //  RD+     y'+    x'2+     RD-     y'-    x'2-
              1.   , -0.87 ,  0.77 ,  0.   ,  0.   ,  0.   ,  // RD+
                      1.   , -0.94 ,  0.   ,  0.   ,  0.   ,  // y'+
@@ -467,10 +516,10 @@ void PDF_WS::setCorrelations(TString c)
                                              1.   , -0.94 ,  // y'-
                                                      1.      // x'2-
         };
-        corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
+        corStatMatrix = Utils::buildCorMatrix(nObs, data);
     } else if (c.EqualTo("Belle")) {
         corSource = "http://belle.kek.jp/belle/theses/doctor/lmzhang06/phd-mix-400.ps.gz";
-        std::vector<double> dataStat = {
+        std::vector<double> data = {
             //  RD+     y'+    x'2+     RD-     y'-    x'2-
              1.   , -0.834,  0.655,  0.   ,  0.   ,  0.   ,  // RD+
                      1.   , -0.909,  0.   ,  0.   ,  0.   ,  // y'+
@@ -479,22 +528,22 @@ void PDF_WS::setCorrelations(TString c)
                                              1.   , -0.909,  // y'-
                                                      1.      // x'2-
         };
-        corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
+        corStatMatrix = Utils::buildCorMatrix(nObs, data);
     } else if (c.EqualTo("LHCb_DT_Run1")) {
         corSource = "https://inspirehep.net/literature/1499047";
-        std::vector<double> dataStat = {
+        std::vector<double> data = {
             //  RD+     y'+    x'2+     RD-     y'-    x'2-
-             1.   , -0.658,  0.043, -0.005,  0.   ,  0.   ,  // RD+
-                     1.   ,  0.438, -0.001,  0.000, -0.001,  // y'+
-                             1.   ,  0.   ,  0.   , -0.002,  // x'2+
-                                     1.   , -0.621,  0.074,  // RD-
-                                             1.   ,  0.050,  // y'-
+             1.   , -0.732,  0.625, -0.008,  0.   ,  0.   ,  // RD+
+                     1.   , -0.963,  0.   ,  0.   ,  0.   ,  // y'+
+                             1.   ,  0.   ,  0.   ,  0.   ,  // x'2+
+                                     1.   , -0.707,  0.602,  // RD-
+                                             1.   , -0.958,  // y'-
                                                      1.      // x'2-
         };
-        corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
+        corStatMatrix = Utils::buildCorMatrix(nObs, data);
     } else if (c.EqualTo("LHCb_Run1")) {
         corSource = "https://inspirehep.net/literature/1499047";
-        std::vector<double> dataStat = {
+        std::vector<double> data = {
             //  RD+     y'+    x'2+     RD-     y'-    x'2-
              1.   , -0.920,  0.823, -0.007, -0.010,  0.008,  // RD+
                      1.   , -0.962, -0.011,  0.000, -0.002,  // y'+
@@ -503,10 +552,10 @@ void PDF_WS::setCorrelations(TString c)
                                              1.   , -0.956,  // y'-
                                                      1.      // x'2-
         };
-        corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
+        corStatMatrix = Utils::buildCorMatrix(nObs, data);
     } else if (c.EqualTo("LHCb_Prompt_2011_2016")) {
         corSource = "https://inspirehep.net/literature/1642234";
-        std::vector<double> dataStat = {
+        std::vector<double> data = {
             //  RD+     y'+    x'2+     RD-     y'-    x'2-
              1.   , -0.935,  0.843, -0.012, -0.003, -0.002,  // RD+
                      1.   , -0.963, -0.003,  0.004, -0.003,  // y'+
@@ -515,10 +564,10 @@ void PDF_WS::setCorrelations(TString c)
                                              1.   , -0.964,  // y'-
                                                      1.      // x'2-
         };
-        corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
+        corStatMatrix = Utils::buildCorMatrix(nObs, data);
     } else if (c.EqualTo("LHCb_Prompt_Run12_sec9")) {
         corSource = "https://indico.cern.ch/event/1355805/";
-        std::vector<double> dataStat = {
+        std::vector<double> data = {
             //  RD   c       c'      AD      c       c'
              1.   , -0.927,  0.803,  0.009, -0.007,  0.002,  // RD
                      1.   , -0.942, -0.013,  0.012, -0.007,  // c
@@ -527,10 +576,10 @@ void PDF_WS::setCorrelations(TString c)
                                              1.   , -0.941,  // dc
                                                      1.      // dc'
         };
-        corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
+        corStatMatrix = Utils::buildCorMatrix(nObs, data);
     } else if (c.EqualTo("LHCb_Prompt_Run12_appB")) {
         corSource = "https://indico.cern.ch/event/1355805/";
-        std::vector<double> dataStat = {
+        std::vector<double> data = {
             //  RD   c       c'      AD      c       c'      ADt     ct      c't
              1.   , -0.927,  0.803,  0.003, -0.002,  0.002,  0.008, -0.007,  0.000,  // RD
                      1.   , -0.943, -0.005,  0.004, -0.004, -0.014,  0.013, -0.006,  // c
@@ -542,7 +591,31 @@ void PDF_WS::setCorrelations(TString c)
                                                                      1.   , -0.943,  // dc~
                                                                              1.      // dc'~
         };
-        corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
+        corStatMatrix = Utils::buildCorMatrix(nObs, data);
+    } else if (c.EqualTo("LHCb_DT_Run2")) {
+        corSource = "https://indico.cern.ch/event/1423686/contributions/6139348/, LHCb-PAPER-2024-044";
+        std::vector<double> data = {
+            //  RD+     y'+    x'2+     RD-     y'-    x'2-
+             1.   , -0.768,  0.639, -0.015, -0.001,  0.   ,  // RD+
+                     1.   , -0.940,  0.   ,  0.   ,  0.   ,  // y'+
+                             1.   ,  0.   ,  0.   ,  0.   ,  // x'2+
+                                     1.   , -0.769,  0.653,  // RD-
+                                             1.   , -0.950,  // y'-
+                                                     1.      // x'2-
+        };
+        corStatMatrix = Utils::buildCorMatrix(nObs, data);
+    } else if (c.EqualTo("LHCb_DT_Run12")) {
+        corSource = "https://indico.cern.ch/event/1423686/contributions/6139348/, LHCb-PAPER-2024-044";
+        std::vector<double> data = {
+            //  RD+     y'+    x'2+     RD-     y'-    x'2-
+             1.   , -0.759,  0.631, -0.013,  0.   ,  0.   ,  // RD+
+                     1.   , -0.945,  0.   ,  0.   ,  0.   ,  // y'+
+                             1.   ,  0.   ,  0.   ,  0.   ,  // x'2+
+                                     1.   , -0.756,  0.637,  // RD-
+                                             1.   , -0.949,  // y'-
+                                                     1.      // x'2-
+        };
+        corStatMatrix = Utils::buildCorMatrix(nObs, data);
     } else {
         cout << "PDF_WS::setCorrelations() : ERROR : config " + c
                 + " not found." << endl;

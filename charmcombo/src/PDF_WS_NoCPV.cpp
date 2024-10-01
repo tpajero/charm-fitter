@@ -11,12 +11,34 @@
 // core
 #include "Utils.h"
 
+#include <map>
 #include <vector>
+
+namespace {
+    // Map containing the expressions for the observables in the various parametrisations
+    std::map<std::string, std::map<theory_config, std::string>> theory_expressions = {
+        {"y'", {
+            {theory_config::phenomenological, "y*cos(Delta_Kpi) + x*sin(Delta_Kpi)"},
+            {theory_config::theoretical, "  y12 * cos(Delta_Kpi) * TMath::Sign(1.,cos(phiG)) "
+                                         "+ x12 * sin(Delta_Kpi) * TMath::Sign(1.,cos(phiM))"},
+            {theory_config::superweak, "  y12 * cos(Delta_Kpi)                            "
+                                       "+ x12 * sin(Delta_Kpi) * TMath::Sign(1.,cos(phiM))"},
+            {theory_config::d0_to_kpi, "yp"},
+        }},
+        {"x'2", {
+            {theory_config::phenomenological, "pow(x*cos(Delta_Kpi) - y*sin(Delta_Kpi),2)"},
+            {theory_config::theoretical, "pow(- y12*sin(Delta_Kpi) * TMath::Sign(1.,cos(phiG))"
+                                         "    + x12*cos(Delta_Kpi) * TMath::Sign(1.,cos(phiM)), 2)"},
+            {theory_config::superweak, "pow(- y12*sin(Delta_Kpi)                            "
+                                       "    + x12*cos(Delta_Kpi) * TMath::Sign(1.,cos(phiM)), 2)"},
+            {theory_config::d0_to_kpi, "xp2"},
+        }},
+    };
+}
 
 
 PDF_WS_NoCPV::PDF_WS_NoCPV(TString measurement_id, const theory_config& th_cfg)
-    : PDF_Abs{3}, th_cfg{th_cfg}
-{
+    : PDF_Abs{3}, th_cfg{th_cfg} {
     name = measurement_id + "_WS_NoCPV";
     initParameters();
     initRelations();
@@ -24,8 +46,7 @@ PDF_WS_NoCPV::PDF_WS_NoCPV(TString measurement_id, const theory_config& th_cfg)
     setObservables(measurement_id);
     setUncertainties(measurement_id);
     setCorrelations(measurement_id);
-    buildCov();
-    buildPdf();
+    build();
 }
 
 
@@ -33,77 +54,35 @@ PDF_WS_NoCPV::~PDF_WS_NoCPV() {}
 
 
 void PDF_WS_NoCPV::initParameters() {
-    ParametersCharmCombo p;
-    parameters = new RooArgList("parameters");
-    parameters->add(*(p.get("R_Kpi")));
-    parameters->add(*(p.get("Delta_Kpi")));
-
+    std::vector<std::string> param_names = {"R_Kpi"};
+    if (th_cfg != theory_config::d0_to_kpi) param_names.emplace_back("Delta_Kpi");
     switch (th_cfg) {
         case theory_config::phenomenological:
-            parameters->add(*(p.get("x")));
-            parameters->add(*(p.get("y")));
-            parameters->add(*(p.get("qop")));
-            parameters->add(*(p.get("phi")));
+            param_names.insert(param_names.end(), {"x", "y", "qop", "phi"});
             break;
         case theory_config::theoretical:
-            parameters->add(*(p.get("phiG")));
+            param_names.emplace_back("phiG");
         case theory_config::superweak:
-            parameters->add(*(p.get("x12")));
-            parameters->add(*(p.get("y12")));
-            parameters->add(*(p.get("phiM")));
+            param_names.insert(param_names.end(), {"x12", "y12", "phiM"});
+            break;
+        case theory_config::d0_to_kpi:
+            param_names.insert(param_names.end(), {"yp", "xp2"});
             break;
         default:
-            cout << "PDF_WS_NoCPV::initParameters : ERROR : "
-                    "theory_config not supported." << endl;
+            cout << "PDF_WS_NoCPV::initParameters : ERROR : theory_config " << th_cfg << " not supported." << endl;
             exit(1);
     }
+    ParametersCharmCombo p;
+    parameters = new RooArgList("parameters");
+    for (const auto& par : param_names) parameters->add(*(p.get(par)));
 }
 
 
 void PDF_WS_NoCPV::initRelations() {
     theory = new RooArgList("theory");
     theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "R_Kpi", parameters)));
-    switch (th_cfg) {
-        case theory_config::phenomenological:
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "yp_th", "yp_th",
-                            "y*cos(Delta_Kpi) + x*sin(Delta_Kpi)", parameters)));
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "xp2_th", "xp2_th",
-                            "pow(x*cos(Delta_Kpi) - y*sin(Delta_Kpi),2)",
-                            parameters)));
-            break;
-        case theory_config::theoretical:
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "yp_th", "yp_th",
-                            "  y12 * cos(Delta_Kpi) * TMath::Sign(1.,cos(phiG)) "
-                            "+ x12 * sin(Delta_Kpi) * TMath::Sign(1.,cos(phiM))", parameters)));
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "xp2_th", "xp2_th",
-                            "pow(- y12*sin(Delta_Kpi) * TMath::Sign(1.,cos(phiG))"
-                            "    + x12*cos(Delta_Kpi) * TMath::Sign(1.,cos(phiM)), 2)", parameters)));
-            break;
-        case theory_config::superweak:
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "yp_th", "yp_th",
-                            "  y12 * cos(Delta_Kpi)                            "
-                            "+ x12 * sin(Delta_Kpi) * TMath::Sign(1.,cos(phiM))", parameters)));
-            theory->add(
-                    *(Utils::makeTheoryVar(
-                            "xp2_th", "xp2_th",
-                            "pow(- y12*sin(Delta_Kpi)                            "
-                            "    + x12*cos(Delta_Kpi) * TMath::Sign(1.,cos(phiM)), 2)", parameters)));
-            break;
-        default:
-            cout << "PDF_WS_NoCPV::initRelations : ERROR : "
-                    "theory_config not supported." << endl;
-            exit(1);
-    }
+    theory->add(*(Utils::makeTheoryVar("yp_th", "yp_th", theory_expressions["y'"][th_cfg], parameters)));
+    theory->add(*(Utils::makeTheoryVar("xp2_th", "xp2_th", theory_expressions["x'2"][th_cfg], parameters)));
 }
 
 

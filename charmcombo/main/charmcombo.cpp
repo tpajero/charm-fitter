@@ -132,8 +132,10 @@ int main(int argc, char* argv[]) {
     gc.addPdf(35, new PDF_WS      ("LHCb_DT_Run1",           th_cfg),                              "WS/RS        LHCb     Run 1    [B -> D* mu] ");
     gc.addPdf(36, new PDF_WS      ("LHCb_Run1",              th_cfg),                              "WS/RS        LHCb     Run 1                 ");
     gc.addPdf(37, new PDF_WS      ("LHCb_Prompt_2011_2016",  th_cfg),                              "WS/RS        LHCb     2011-6   [D* -> D0 pi]");
-    gc.addPdf(38, new PDF_WS      ("LHCb_Prompt_Run12_sec9", th_cfg, WS_parametrisation::ccprime), "WS/RS        LHCb     Run 2    [D* -> D0 pi]");
-    gc.addPdf(39, new PDF_WS      ("LHCb_Prompt_Run12_appB", th_cfg, WS_parametrisation::ccprime), "WS/RS        LHCb     Run 2    [D* -> D0 pi]");
+    gc.addPdf(38, new PDF_WS      ("LHCb_Prompt_Run12_sec9", th_cfg, WS_parametrisation::ccprime), "WS/RS        LHCb     Run 1+2  [D* -> D0 pi]");
+    gc.addPdf(39, new PDF_WS      ("LHCb_Prompt_Run12_appB", th_cfg, WS_parametrisation::ccprime), "WS/RS        LHCb     Run 1+2  [D* -> D0 pi]");
+    gc.addPdf(40, new PDF_WS      ("LHCb_DT_Run2",           th_cfg),                              "WS/RS        LHCb     Run 2    [B -> D* mu] ");
+    gc.addPdf(41, new PDF_WS      ("LHCb_DT_Run12",          th_cfg),                              "WS/RS        LHCb     Run 1-2  [B -> D* mu] ");
 
     gc.addPdf(50,  new PDF_Cleo      ("Cleo-c",             th_cfg), "Delta_Kpi    Cleo-c                         ");
     gc.addPdf(51,  new PDF_BES_Kpi_1d(                      th_cfg), "Delta_Kpi    BES      3fb      [A_kpi only] ");
@@ -254,13 +256,14 @@ int main(int argc, char* argv[]) {
     gc.cloneCombiner(52, 50, "WAMar2024NoFSC_noDcsCpv", "No direct measurements");
     gc.getCombiner(52)->delPdf(gc[90]);  // Delta_ACP and ACP(KK)
 
-    // WA July 2024 (new WS/RS with DT Run 2 data)
-    gc.cloneCombiner(53, 50, "WAJuly2024NoFSC", "World average (March 2024)");
-    gc.getCombiner(53)->addPdf(gc[40]);  // WS/RS in D0 -> Kpi from LHCb Run 2 DT
-
     // WA Sept 2024 (new BESIII F+(pi+pi-pi0))
-    gc.cloneCombiner(54, 50, "WASep2024NoFSC", "World average (Sep 2024)");
-    gc.getCombiner(54)->addPdf(gc[55]);  // BESIII measurement of Fp_pipipi0
+    gc.cloneCombiner(53, 50, "WASep2024NoFSC", "World average (Sep 2024)");
+    gc.getCombiner(53)->addPdf(gc[55]);  // BESIII measurement of Fp_pipipi0
+
+    // WA October 2024 (new WS/RS with DT Run 2 data)
+    gc.cloneCombiner(54, 53, "WAOct2024NoFSC", "World average (October 2024)");
+    gc.getCombiner(54)->delPdf(gc[35]);  // WS/RS in D0 -> Kpi from LHCb Run 1 DT
+    gc.getCombiner(54)->addPdf(gc[41]);  // WS/RS in D0 -> Kpi from LHCb Run 1+2 DT
 
     // LHCb-only averages ----------------------------------------------------------------------------------------------
 
@@ -285,6 +288,7 @@ int main(int argc, char* argv[]) {
     gc.cloneCombiner(501, 50, "LHCb_Run2", "World average after LHCb Run 2");
 
     // Clone all combiners for no DCS CPV hypothesis -------------------------------------------------------------------
+
     for (const auto id : gc.getCombinersIds())
         add_no_dcs_cpv_combiner(gc, id);
 

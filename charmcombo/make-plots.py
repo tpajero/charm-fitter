@@ -148,7 +148,7 @@ def get_base_options(param, combinations, titles, parfile, already_plotted, lhcb
     if already_plotted:
         options.append('-a plot')
     if lhcb:
-        options.append('--group "LHCb"')
+        options.append('--group "LHCb preliminary"')
     return options
 
 

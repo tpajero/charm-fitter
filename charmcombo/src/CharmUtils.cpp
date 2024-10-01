@@ -23,6 +23,7 @@ std::ostream& operator<<(std::ostream& os, const theory_config& th_cfg) {
         case theory_config::phenomenological: os << "phenomenological (x, y, q/p, phi_2)"; break;
         case theory_config::theoretical: os << "theoretical (x12, y12, phiM, phiG)"; break;
         case theory_config::superweak: os << "superweak (x12, y12, phiM, phiG)"; break;
+        case theory_config::d0_to_kpi: os << "D0 -> Kpi (yp, xp2, dyp, dxp2)"; break;
         default:
             std::cerr << "ERROR: You are trying to apply the '<<' operator to an unsupported theory_cfg type" << std::endl;
             exit(1);

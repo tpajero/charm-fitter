@@ -240,4 +240,37 @@ void ParametersCharmCombo::defineParameters() {
     p->scan = range(0., 1.);
     p->phys = range(0., 1e4);
     p->free = range(0., 1e4);
+
+    // Parameters for (D0 -> Kpi)-only combination
+    p = newParameter("xp2");
+    p->title = "#it{x'}^{2} [10^{#minus4}]";
+    p->startvalue = 0.24;
+    p->unit = "";
+    p->scan = range(-4, 4);
+    p->phys = range(-1e4, 1e4);
+    p->free = range(-1e4, 1e4);
+
+    p = newParameter("yp");
+    p->title = "#it{y'} [%]";
+    p->startvalue = 0.52;
+    p->unit = "";
+    p->scan = range(0.1,  1);
+    p->phys = range(-1e4, 1e4);
+    p->free = range(-1e4, 1e4);
+
+    p = newParameter("dxp2");
+    p->title = "#it{#Delta x'}^{2} [10^{#minus4}]";
+    p->startvalue = 0.02;
+    p->unit = "";
+    p->scan = range(-0.4, 1.);
+    p->phys = range(-1e4, 1e4);
+    p->free = range(-1e4, 1e4);
+
+    p = newParameter("dyp");
+    p->title = "#it{#Delta y'} [%]";
+    p->startvalue = 0.01;
+    p->unit = "";
+    p->scan = range(0.1,  1);
+    p->phys = range(-1e4, 1e4);
+    p->free = range(-1e4, 1e4);
 }

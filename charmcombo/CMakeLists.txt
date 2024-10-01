@@ -8,6 +8,7 @@ set(COMBINER_NAME charmcombo)
 #  end with .cpp.
 set(COMBINER_EXECUTABLES
  	${COMBINER_NAME}
+ 	ws-combo
 )
 
 ######################################
