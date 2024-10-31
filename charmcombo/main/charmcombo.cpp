@@ -114,6 +114,7 @@ int main(int argc, char* argv[]) {
     gc.addPdf(3,  new PDF_XY      ("LHCb_KSpipi",           th_cfg), "XY KSpipi    LHCb     2011     [D* -> D0 pi]");
     gc.addPdf(4,  new PDF_Kpipi0  ("BaBar",                 th_cfg), "Kpipi0       BaBar                          ");
     gc.addPdf(5,  new PDF_K3pi    ("LHCb-run1",             th_cfg), "K3pi         LHCb     Run 1                 ");
+    gc.addPdf(6,  new PDF_XY      ("Belle_Belle2",          th_cfg), "XY KSpipi    Belle+Belle2 (951+408 fb-1)    ");
 
     gc.addPdf(10, new PDF_RM      ("HFLAV2016",             th_cfg), "R_M          HFLAV    2016                  ");
     gc.addPdf(11, new PDF_RM      ("LHCb_K3pi_Run1",        th_cfg), "R_M K3pi     LHCb                           ");
@@ -264,6 +265,11 @@ int main(int argc, char* argv[]) {
     gc.cloneCombiner(54, 53, "WAOct2024NoFSC", "World average (October 2024)");
     gc.getCombiner(54)->delPdf(gc[35]);  // WS/RS in D0 -> Kpi from LHCb Run 1 DT
     gc.getCombiner(54)->addPdf(gc[41]);  // WS/RS in D0 -> Kpi from LHCb Run 1+2 DT
+
+    // WA November 2024 (new BinFlip from Belle + Belle 2)
+    gc.cloneCombiner(55, 54, "WANov2024NoFSC", "World average (November 2024)");
+    gc.getCombiner(55)->delPdf(gc[20]);  // D0 -> KS hh from Belle
+    gc.getCombiner(55)->addPdf(gc[6]);   // D0 -> KS pi pi BinFlip Belle + Belle 2
 
     // LHCb-only averages ----------------------------------------------------------------------------------------------
 

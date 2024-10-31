@@ -4,12 +4,11 @@
  * Date: October 2021
  **/
 
+#include "PDF_XY.h"
 #include "CharmUtils.h"
 #include "ParametersCharmCombo.h"
-#include "PDF_XY.h"
 
-// ROOT
-#include "TMath.h"
+#include <TMath.h>
 
 
 PDF_XY::PDF_XY(TString measurement_id, const theory_config& th_cfg)
@@ -18,17 +17,17 @@ PDF_XY::PDF_XY(TString measurement_id, const theory_config& th_cfg)
     name = "XY_" + measurement_id;
 
     TString label = measurement_id;
-    if (measurement_id.EqualTo("BaBar_Kshh"))         label = "BaBar #it{K}_{S}^{0}#it{h}^{+}#it{h}^{#minus}";
+    if (measurement_id.EqualTo("BaBar_Kshh")) label = "BaBar #it{K}_{S}^{0}#it{h}^{+}#it{h}^{#minus}";
     else if (measurement_id.EqualTo("BaBar_pipipi0")) label = "BaBar #it{#pi}^{+}#it{#pi}^{#minus}#it{#pi}^{0}";
-    else if (measurement_id.EqualTo("LHCb_KSpipi"))   label = "LHCb #it{K}^{0}_{s}#it{#pi}^{+}#pi^{#minus}";
+    else if (measurement_id.EqualTo("LHCb_KSpipi")) label = "LHCb #it{K}^{0}_{s}#it{#pi}^{+}#pi^{#minus}";
+    else if (measurement_id.EqualTo("Belle_Belle2")) label = "Belle 1+2 #it{K}^{0}_{s}#it{#pi}^{+}#pi^{#minus}";
     initParameters();
     initRelations();
     initObservables(label);
     setObservables(measurement_id);
     setUncertainties(measurement_id);
     setCorrelations(measurement_id);
-    buildCov();
-    buildPdf();
+    build();
 }
 
 
@@ -108,6 +107,10 @@ void PDF_XY::setObservables(TString c) {
         obsValSource = "https://inspirehep.net/literature/1396327";
         setObservable("x_obs", -0.86);
         setObservable("y_obs", 0.03);
+    } else if (c.EqualTo("Belle_Belle2")) {
+        obsValSource = "https://arxiv.org/abs/2410.22961";
+        setObservable("x_obs", 0.40);
+        setObservable("y_obs", 0.29);
     } else {
         cout << "PDF_XY::setObservables() : ERROR : config " + c + " not found." << endl;
         exit(1);
@@ -134,6 +137,12 @@ void PDF_XY::setUncertainties(TString c) {
         StatErr[1] = sqrt(pow(0.46,2) + pow(0.13,2)); // y
         SystErr[0] = 0;
         SystErr[1] = 0;
+    } else if (c.EqualTo("Belle_Belle2")) {
+        obsErrSource = "https://arxiv.org/abs/2410.22961";
+        StatErr[0] = 0.17;  // x
+        StatErr[1] = 0.14;  // y
+        SystErr[0] = 0.04;  // x
+        SystErr[1] = 0.03;  // y
     } else {
         cout << "PDF_XY::setUncertainties() : ERROR : config " + c + " not found." << endl;
         exit(1);
@@ -152,6 +161,9 @@ void PDF_XY::setCorrelations(TString c) {
     } else if (c.EqualTo("LHCb_KSpipi")) {
         corSource = "https://inspirehep.net/literature/1396327";
         corStatMatrix[1][0] = 0.37;
+    } else if (c.EqualTo("Belle_Belle2")) {
+        // Correlations are negligible
+        corSource = "https://arxiv.org/abs/2410.22961";
     } else {
         cout << "PDF_XY::setCorrelations() : ERROR : config " + c + " not found." << endl;
         exit(1);
