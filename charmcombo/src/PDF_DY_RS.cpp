@@ -4,6 +4,10 @@
  * Date: October 2021
  **/
 
+#include <RooMultiVarGaussian.h>
+
+#include <Utils.h>
+
 #include <CharmUtils.h>
 #include <PDF_DY_RS.h>
 #include <ParametersCharmCombo.h>
@@ -44,9 +48,9 @@ void PDF_DY_RS::initParameters() {
     parameters->add(*(p.get("phiM")));
     break;
   default:
-    cout << "PDF_DY_RS::initParameters : ERROR : "
-            "theory_config not supported."
-         << endl;
+    std::cout << "PDF_DY_RS::initParameters : ERROR : "
+                 "theory_config not supported."
+              << std::endl;
     exit(1);
   }
 }
@@ -75,9 +79,9 @@ void PDF_DY_RS::initRelations() {
                                        parameters)));
     break;
   default:
-    cout << "PDF_DY_RS::initRelations : ERROR : "
-            "theory_config not supported."
-         << endl;
+    std::cout << "PDF_DY_RS::initRelations : ERROR : "
+                 "theory_config not supported."
+              << std::endl;
     exit(1);
   }
 }
@@ -96,7 +100,7 @@ void PDF_DY_RS::setObservables(TString c) {
     obsValSource = "https://inspirehep.net/literature/1864385";
     setObservable("DY_RS_obs", -0.36e-2);
   } else {
-    cout << "PDF_DY_RS::setObservables() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_DY_RS::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }
@@ -107,7 +111,7 @@ void PDF_DY_RS::setUncertainties(TString c) {
     StatErr[0] = 0.50e-2;
     SystErr[0] = 0.23e-2;
   } else {
-    cout << "PDF_DY_RS::setUncertainties() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_DY_RS::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }

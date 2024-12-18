@@ -6,6 +6,10 @@
 
 #include <boost/algorithm/string.hpp>
 
+#include <RooMultiVarGaussian.h>
+
+#include <Utils.h>
+
 #include <CharmUtils.h>
 #include <PDF_BES_Kpi_1d.h>
 #include <ParametersCharmCombo.h>
@@ -43,9 +47,9 @@ void PDF_BES_Kpi_1d::initParameters() {
     parameters->add(*(p.get("phiM")));
     break;
   default:
-    cout << "PDF_BES_Kpi_1d::initParameters : ERROR : "
-            "theory_config not supported."
-         << endl;
+    std::cout << "PDF_BES_Kpi_1d::initParameters : ERROR : "
+                 "theory_config not supported."
+              << std::endl;
     exit(1);
   }
 }
@@ -63,9 +67,9 @@ void PDF_BES_Kpi_1d::initRelations() {
     boost::replace_all(a_kpi_formula, "y", CharmUtils::y_to_superweak);
     break;
   default:
-    cout << "PDF_BES_Kpi_1d::initRelations : ERROR : "
-            "theory_config not supported."
-         << endl;
+    std::cout << "PDF_BES_Kpi_1d::initRelations : ERROR : "
+                 "theory_config not supported."
+              << std::endl;
     exit(1);
   }
   theory->add(*(Utils::makeTheoryVar("A_kpi_th", "A_kpi_th", a_kpi_formula, parameters)));
@@ -85,7 +89,7 @@ void PDF_BES_Kpi_1d::setObservables(TString c) {
     obsValSource = "http://inspirehep.net/record/1291279";
     setObservable("A_kpi_obs", 12.7);
   } else {
-    cout << "PDF_BES_Kpi_1d::setObservables() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_BES_Kpi_1d::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }
@@ -96,7 +100,7 @@ void PDF_BES_Kpi_1d::setUncertainties(TString c) {
     StatErr[0] = 1.3;
     SystErr[0] = 0.7;
   } else {
-    cout << "PDF_BES_Kpi_1d::setUncertainties() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_BES_Kpi_1d::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }

@@ -6,6 +6,8 @@
 
 #include <vector>
 
+#include <RooMultiVarGaussian.h>
+
 #include <Utils.h>
 
 #include <CharmUtils.h>
@@ -49,9 +51,9 @@ void PDF_Kshh::initParameters() {
     parameters->add(*(p.get("phiM")));
     break;
   default:
-    cout << "PDF_Kshh::initParameters : ERROR : "
-            "theory_config not supported."
-         << endl;
+    std::cout << "PDF_Kshh::initParameters : ERROR : "
+                 "theory_config not supported."
+              << std::endl;
     exit(1);
   }
 }
@@ -123,9 +125,9 @@ void PDF_Kshh::initRelations() {
                                        parameters)));
     break;
   default:
-    cout << "PDF_Kshh::initRelations : ERROR : "
-            "theory_config not supported."
-         << endl;
+    std::cout << "PDF_Kshh::initRelations : ERROR : "
+                 "theory_config not supported."
+              << std::endl;
     exit(1);
   }
 }
@@ -150,7 +152,7 @@ void PDF_Kshh::setObservables(TString c) {
     setObservable("qop_obs", 0.90);
     setObservable("phi_obs", DegToRad(-6.));
   } else {
-    cout << "PDF_Kshh::setObservables() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_Kshh::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }
@@ -167,7 +169,7 @@ void PDF_Kshh::setUncertainties(TString c) {
     SystErr[2] = 0;                                         // qop
     SystErr[3] = 0;                                         // phi
   } else {
-    cout << "PDF_Kshh::setUncertainties() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_Kshh::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }
@@ -186,7 +188,7 @@ void PDF_Kshh::setCorrelations(TString c) {
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
   } else {
-    cout << "PDF_Kshh::setCorrelations() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_Kshh::setCorrelations() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }

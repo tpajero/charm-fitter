@@ -15,6 +15,10 @@
 #include <string>
 #include <vector>
 
+#include <RooMultiVarGaussian.h>
+
+#include <Utils.h>
+
 #include <CharmUtils.h>
 #include <PDF_BES_CLEO_K3pi_Kpipi0.h>
 #include <ParametersCharmCombo.h>
@@ -76,7 +80,7 @@ void PDF_BES_CLEO_K3pi_Kpipi0::setObservables(TString c) {
     setObservable("r_K3pi_obs", 5.46);
     setObservable("r_Kpipi0_obs", 4.41);
   } else {
-    cout << "PDF_BES_CLEO_K3pi_Kpipi0::setObservables() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_BES_CLEO_K3pi_Kpipi0::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }
@@ -99,7 +103,7 @@ void PDF_BES_CLEO_K3pi_Kpipi0::setUncertainties(TString c) {
     SystErr[4] = 0.;
     SystErr[5] = 0.;
   } else {
-    cout << "PDF_BES_CLEO_K3pi_Kpipi0::setUncertainties() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_BES_CLEO_K3pi_Kpipi0::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }
@@ -121,7 +125,7 @@ void PDF_BES_CLEO_K3pi_Kpipi0::setCorrelations(TString c) {
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
   } else {
-    cout << "PDF_BES_CLEO_K3pi_Kpipi0::setCorrelations() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_BES_CLEO_K3pi_Kpipi0::setCorrelations() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }

@@ -6,6 +6,10 @@
 
 #include <boost/format.hpp>
 
+#include <RooMultiVarGaussian.h>
+
+#include <Utils.h>
+
 #include <CharmUtils.h>
 #include <PDF_AcpHH_LHCb_Run12.h>
 #include <ParametersCharmCombo.h>
@@ -44,9 +48,9 @@ void PDF_AcpHH_LHCb_Run12::initParameters() {
     parameters->add(*(p.get("phiM")));
     break;
   default:
-    cout << "PDF_AcpHH_LHCb_Run12::initParameters : ERROR : "
-            "theory_config not supported."
-         << endl;
+    std::cout << "PDF_AcpHH_LHCb_Run12::initParameters : ERROR : "
+                 "theory_config not supported."
+              << std::endl;
     exit(1);
   }
   switch (fsc) {

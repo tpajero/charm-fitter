@@ -4,6 +4,10 @@
  * Date: October 2021
  **/
 
+#include <RooMultiVarGaussian.h>
+
+#include <Utils.h>
+
 #include <CharmUtils.h>
 #include <PDF_BinFlip.h>
 #include <ParametersCharmCombo.h>
@@ -49,9 +53,9 @@ void PDF_BinFlip::initParameters() {
     parameters->add(*(p.get("phiM")));
     break;
   default:
-    cout << "PDF_BinFlip::initParameters : ERROR : "
-            "theory_config not supported."
-         << endl;
+    std::cout << "PDF_BinFlip::initParameters : ERROR : "
+                 "theory_config not supported."
+              << std::endl;
     exit(1);
   }
 }
@@ -90,9 +94,9 @@ void PDF_BinFlip::initRelations() {
     theory->add(*(Utils::makeTheoryVar("dy_th", "dy_th", "x12*sin(phiM)", parameters)));
     break;
   default:
-    cout << "PDF_BinFlip::initRelations : ERROR : "
-            "theory_config not supported."
-         << endl;
+    std::cout << "PDF_BinFlip::initRelations : ERROR : "
+                 "theory_config not supported."
+              << std::endl;
     exit(1);
   }
 }
@@ -135,7 +139,7 @@ void PDF_BinFlip::setObservables(TString c) {
     setObservable("dx_obs", -0.029);
     setObservable("dy_obs", 0.031);
   } else {
-    cout << "PDF_BinFlip::setObservables() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_BinFlip::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }
@@ -182,7 +186,7 @@ void PDF_BinFlip::setUncertainties(TString c) {
     SystErr[2] = 0.0013;  // dx
     SystErr[3] = 0.0128;  // dy
   } else {
-    cout << "PDF_BinFlip::setUncertainties() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_BinFlip::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }
@@ -261,7 +265,7 @@ void PDF_BinFlip::setCorrelations(TString c) {
     };
     corSystMatrix = Utils::buildCorMatrix(nObs, dataSyst);
   } else {
-    cout << "PDF_BinFlip::setCorrelations() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_BinFlip::setCorrelations() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }

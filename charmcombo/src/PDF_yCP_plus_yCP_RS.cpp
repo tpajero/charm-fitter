@@ -4,6 +4,10 @@
  * Date: October 2021
  **/
 
+#include <RooMultiVarGaussian.h>
+
+#include <Utils.h>
+
 #include <CharmUtils.h>
 #include <PDF_yCP_plus_yCP_RS.h>
 #include <ParametersCharmCombo.h>
@@ -44,9 +48,9 @@ void PDF_yCP_plus_yCP_RS::initParameters() {
     parameters->add(*(p.get("y12")));
     break;
   default:
-    cout << "PDF_yCP::initParameters : ERROR : "
-            "theory_config not supported."
-         << endl;
+    std::cout << "PDF_yCP::initParameters : ERROR : "
+                 "theory_config not supported."
+              << std::endl;
     exit(1);
   }
 }
@@ -82,9 +86,9 @@ void PDF_yCP_plus_yCP_RS::initRelations() {
                                        parameters)));
     break;
   default:
-    cout << "PDF_yCP::initRelations : ERROR : "
-            "theory_config not supported."
-         << endl;
+    std::cout << "PDF_yCP::initRelations : ERROR : "
+                 "theory_config not supported."
+              << std::endl;
     exit(1);
   }
 }
@@ -104,7 +108,7 @@ void PDF_yCP_plus_yCP_RS::setObservables(TString c) {
     obsValSource = "https://cds.cern.ch/record/2747731";
     setObservable("yCP_plus_yCP_RS_obs", 0.960);
   } else {
-    cout << "PDF_yCP_plus_yCP_RS::setObservables() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_yCP_plus_yCP_RS::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }
@@ -115,7 +119,7 @@ void PDF_yCP_plus_yCP_RS::setUncertainties(TString c) {
     StatErr[0] = 1.114;
     SystErr[0] = 0;
   } else {
-    cout << "PDF_yCP_plus_yCP_RS::setUncertainties() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_yCP_plus_yCP_RS::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }

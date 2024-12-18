@@ -4,6 +4,10 @@
  * Date: October 2021
  **/
 
+#include <RooMultiVarGaussian.h>
+
+#include <Utils.h>
+
 #include <CharmUtils.h>
 #include <PDF_DY.h>
 #include <ParametersCharmCombo.h>
@@ -40,9 +44,9 @@ void PDF_DY::initParameters() {
     parameters->add(*(p.get("phiM")));
     break;
   default:
-    cout << "PDF_DY::initParameters : ERROR : "
-            "theory_config not supported."
-         << endl;
+    std::cout << "PDF_DY::initParameters : ERROR : "
+                 "theory_config not supported."
+              << std::endl;
     exit(1);
   }
   switch (fsc) {
@@ -106,8 +110,8 @@ void PDF_DY::setObservables(TString c) {
     setObservable("DY_KK_obs", -0.20e-2);
     setObservable("DY_PP_obs", -3.53e-2);
   } else {
-    cout << "PDF_DY::setObservables() : ERROR : config " << c << " not found for " << nObs << " DY observables."
-         << endl;
+    std::cout << "PDF_DY::setObservables() : ERROR : config " << c << " not found for " << nObs << " DY observables."
+              << std::endl;
     exit(1);
   }
 }
@@ -137,8 +141,8 @@ void PDF_DY::setUncertainties(TString c) {
     StatErr[1] = 2.36e-2;
     SystErr[1] = 0.39e-2;
   } else {
-    cout << "PDF_DY::setUncertainties() : ERROR : config " << c << " not found for " << nObs << " DY observables."
-         << endl;
+    std::cout << "PDF_DY::setUncertainties() : ERROR : config " << c << " not found for " << nObs << " DY observables."
+              << std::endl;
     exit(1);
   }
 }
@@ -153,8 +157,8 @@ void PDF_DY::setCorrelations(TString c) {
   else if (nObs == 2 && c.EqualTo("WA2021"))
     corSystMatrix[0][1] = 0.68;  // np.sum(np.square([0.18, 0.21, 0.06, 0.01, 0.07])) / 0.32 / 0.39
   else {
-    cout << "PDF_DY::setCorrelations() : ERROR : config " << c << " not found for " << nObs << " DY observables."
-         << endl;
+    std::cout << "PDF_DY::setCorrelations() : ERROR : config " << c << " not found for " << nObs << " DY observables."
+              << std::endl;
     exit(1);
   }
 }

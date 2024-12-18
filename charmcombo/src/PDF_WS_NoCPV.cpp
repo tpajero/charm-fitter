@@ -7,6 +7,8 @@
 #include <map>
 #include <vector>
 
+#include <RooMultiVarGaussian.h>
+
 #include <Utils.h>
 
 #include <CharmUtils.h>
@@ -66,7 +68,7 @@ void PDF_WS_NoCPV::initParameters() {
     param_names.insert(param_names.end(), {"yp", "xp2"});
     break;
   default:
-    cout << "PDF_WS_NoCPV::initParameters : ERROR : theory_config " << th_cfg << " not supported." << endl;
+    std::cout << "PDF_WS_NoCPV::initParameters : ERROR : theory_config " << th_cfg << " not supported." << std::endl;
     exit(1);
   }
   ParametersCharmCombo p;
@@ -109,7 +111,7 @@ void PDF_WS_NoCPV::setObservables(TString c) {
     setObservable("yp_obs", 0.46);
     setObservable("xp2_obs", 0.9);
   } else {
-    cout << "PDF_WS_NoCPV::setObservables() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_WS_NoCPV::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }
@@ -140,7 +142,7 @@ void PDF_WS_NoCPV::setUncertainties(TString c) {
     SystErr[1] = 0;      // y'
     SystErr[2] = 0;      // x'2
   } else {
-    cout << "PDF_WS_NoCPV::setUncertainties() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_WS_NoCPV::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }
@@ -149,9 +151,9 @@ void PDF_WS_NoCPV::setCorrelations(TString c) {
   resetCorrelations();
   if (c.EqualTo("CDF")) {
     corSource = "https://inspirehep.net/literature/1254229";
-    cout << "INFO [PDF_WS_NoCPV]: The correlation matrix of https://inspirehep.net/literature/1254229\n"
-            "                     (CDF) is not positive definite. It has been modified to avoid non convergence.\n"
-         << endl;
+    std::cout << "INFO [PDF_WS_NoCPV]: The correlation matrix of https://inspirehep.net/literature/1254229\n"
+                 "                     (CDF) is not positive definite. It has been modified to avoid non convergence.\n"
+              << std::endl;
     std::vector<double> dataStat = {
         // clang-format off
         1., -0.967, 0.900,  // RD
@@ -181,7 +183,7 @@ void PDF_WS_NoCPV::setCorrelations(TString c) {
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
   } else {
-    cout << "PDF_WS_NoCPV::setCorrelations() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_WS_NoCPV::setCorrelations() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }

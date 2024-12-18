@@ -6,6 +6,8 @@
 
 #include <vector>
 
+#include <RooMultiVarGaussian.h>
+
 #include <Utils.h>
 
 #include <CharmUtils.h>
@@ -49,9 +51,9 @@ void PDF_Kpipi0::initParameters() {
     parameters->add(*(p.get("phiM")));
     break;
   default:
-    cout << "PDF_Kpipi0::initParameters : ERROR : "
-            "theory_config not supported."
-         << endl;
+    std::cout << "PDF_Kpipi0::initParameters : ERROR : "
+                 "theory_config not supported."
+              << std::endl;
     exit(1);
   }
 }
@@ -84,9 +86,9 @@ void PDF_Kpipi0::initRelations() {
                                        parameters)));
     break;
   default:
-    cout << "PDF_Kpipi0::initRelations : ERROR : "
-            "theory_config not supported."
-         << endl;
+    std::cout << "PDF_Kpipi0::initRelations : ERROR : "
+                 "theory_config not supported."
+              << std::endl;
     exit(1);
   }
 }
@@ -107,7 +109,7 @@ void PDF_Kpipi0::setObservables(TString c) {
     setObservable("xpp_obs", 2.61);
     setObservable("ypp_obs", -0.06);
   } else {
-    cout << "PDF_Kpipi0::setObservables() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_Kpipi0::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }
@@ -118,7 +120,7 @@ void PDF_Kpipi0::setUncertainties(TString c) {
     StatErr[0] = pow(pow(0.625, 2) + pow(0.39, 2), 0.5);  // x''
     StatErr[1] = pow(pow(0.595, 2) + pow(0.34, 2), 0.5);  // y''
   } else {
-    cout << "PDF_Kpipi0::setUncertainties() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_Kpipi0::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }
@@ -130,7 +132,7 @@ void PDF_Kpipi0::setCorrelations(TString c) {
     std::vector<double> dataStat = {1., -0.75, 1.};
     corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
   } else {
-    cout << "PDF_Kpipi0::setCorrelations() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_Kpipi0::setCorrelations() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }

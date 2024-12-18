@@ -4,6 +4,10 @@
  * Date: October 2021
  **/
 
+#include <RooMultiVarGaussian.h>
+
+#include <Utils.h>
+
 #include <CharmUtils.h>
 #include <PDF_Cleo.h>
 #include <ParametersCharmCombo.h>
@@ -41,9 +45,9 @@ void PDF_Cleo::initParameters() {
     parameters->add(*(p.get("y12")));
     break;
   default:
-    cout << "PDF_Cleo::initParameters : ERROR : "
-            "theory_config not supported."
-         << endl;
+    std::cout << "PDF_Cleo::initParameters : ERROR : "
+                 "theory_config not supported."
+              << std::endl;
     exit(1);
   }
 }
@@ -85,9 +89,9 @@ void PDF_Cleo::initRelations() {
                                        parameters)));
     break;
   default:
-    cout << "PDF_Cleo::initRelations : ERROR : "
-            "theory_config not supported."
-         << endl;
+    std::cout << "PDF_Cleo::initRelations : ERROR : "
+                 "theory_config not supported."
+              << std::endl;
     exit(1);
   }
   theory->add(*(Utils::makeTheoryVar("cos_th", "cos_th", "cos(Delta_Kpi)", parameters)));
@@ -116,7 +120,7 @@ void PDF_Cleo::setObservables(TString c) {
     setObservable("cos_obs", 0.81);
     setObservable("sin_obs", -0.01);
   } else {
-    cout << "PDF_Cleo::setObservables() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_Cleo::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }
@@ -135,7 +139,7 @@ void PDF_Cleo::setUncertainties(TString c) {
     SystErr[3] = 0;
     SystErr[4] = 0;
   } else {
-    cout << "PDF_Cleo::setUncertainties() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_Cleo::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }
@@ -155,7 +159,7 @@ void PDF_Cleo::setCorrelations(TString c) {
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
   } else {
-    cout << "PDF_Cleo::setCorrelations() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_Cleo::setCorrelations() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }

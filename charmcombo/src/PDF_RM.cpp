@@ -4,6 +4,10 @@
  * Date: October 2021
  **/
 
+#include <RooMultiVarGaussian.h>
+
+#include <Utils.h>
+
 #include <CharmUtils.h>
 #include <PDF_RM.h>
 #include <ParametersCharmCombo.h>
@@ -43,9 +47,9 @@ void PDF_RM::initParameters() {
     parameters->add(*(p.get("phiM")));
     break;
   default:
-    cout << "PDF_RM::initParameters : ERROR : "
-            "theory_config not supported."
-         << endl;
+    std::cout << "PDF_RM::initParameters : ERROR : "
+                 "theory_config not supported."
+              << std::endl;
     exit(1);
   }
 }
@@ -71,9 +75,9 @@ void PDF_RM::initRelations() {
                                        parameters)));
     break;
   default:
-    cout << "PDF_RM::initRelations : ERROR : "
-            "theory_config not supported."
-         << endl;
+    std::cout << "PDF_RM::initRelations : ERROR : "
+                 "theory_config not supported."
+              << std::endl;
     exit(1);
   }
 }
@@ -95,7 +99,7 @@ void PDF_RM::setObservables(TString c) {
     obsValSource = "https://inspirehep.net/literature/1423070";
     setObservable("RM_obs", 2 * 0.48);
   } else {
-    cout << "PDF_RM::setObservables() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_RM::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }
@@ -110,7 +114,7 @@ void PDF_RM::setUncertainties(TString c) {
     StatErr[0] = 2 * 0.18;
     SystErr[0] = 0;
   } else {
-    cout << "PDF_RM::setUncertainties() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_RM::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }

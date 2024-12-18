@@ -4,6 +4,10 @@
  * Date: October 2021
  **/
 
+#include <RooMultiVarGaussian.h>
+
+#include <Utils.h>
+
 #include <CharmUtils.h>
 #include <PDF_scan_DY_RS.h>
 #include <ParametersCharmCombo.h>
@@ -45,9 +49,9 @@ void PDF_scan_DY_RS::initParameters() {
     parameters->add(*(p.get("phiM")));
     break;
   default:
-    cout << "PDF_scan_DY_RS::initParameters : ERROR : "
-            "theory_config not supported."
-         << endl;
+    std::cout << "PDF_scan_DY_RS::initParameters : ERROR : "
+                 "theory_config not supported."
+              << std::endl;
     exit(1);
   }
 }
@@ -78,9 +82,9 @@ void PDF_scan_DY_RS::initRelations() {
                                        parameters)));
     break;
   default:
-    cout << "PDF_scan_DY_RS::initRelations : ERROR : "
-            "theory_config not supported."
-         << endl;
+    std::cout << "PDF_scan_DY_RS::initRelations : ERROR : "
+                 "theory_config not supported."
+              << std::endl;
     exit(1);
   }
 }

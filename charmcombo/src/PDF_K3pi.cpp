@@ -10,6 +10,10 @@
 
 #include <TMath.h>
 
+#include <RooMultiVarGaussian.h>
+
+#include <Utils.h>
+
 #include <CharmUtils.h>
 #include <PDF_K3pi.h>
 #include <ParametersCharmCombo.h>
@@ -83,7 +87,7 @@ void PDF_K3pi::setObservables(TString c) {
     setObservable("c1_obs", 0.03);
     setObservable("c2_obs", 0.48);
   } else {
-    cout << "PDF_K3pi::setObservables() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_K3pi::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }
@@ -98,7 +102,7 @@ void PDF_K3pi::setUncertainties(TString c) {
     SystErr[1] = 0;
     SystErr[2] = 0;
   } else {
-    cout << "PDF_K3pi::setUncertainties() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_K3pi::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }
@@ -116,7 +120,7 @@ void PDF_K3pi::setCorrelations(TString c) {
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, corrs);
   } else {
-    cout << "PDF_K3pi::setCorrelations() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_K3pi::setCorrelations() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }

@@ -4,6 +4,10 @@
  * Date: June 2024
  **/
 
+#include <RooMultiVarGaussian.h>
+
+#include <Utils.h>
+
 #include <CharmUtils.h>
 #include <PDF_DY_pipipi0.h>
 #include <ParametersCharmCombo.h>
@@ -32,7 +36,7 @@ void PDF_DY_pipipi0::initParameters() {
     param_names.insert(param_names.end(), {"x12", "y12", "phiM"});
     break;
   default:
-    cout << "PDF_DY_pipipi0::initParameters : ERROR : theory_config not supported.\n";
+    std::cout << "PDF_DY_pipipi0::initParameters : ERROR : theory_config not supported.\n";
     exit(1);
   }
   ParametersCharmCombo p;
@@ -62,8 +66,8 @@ void PDF_DY_pipipi0::setObservables(TString c) {
   else if (c.EqualTo("LHCb-R2"))
     setObservable("DY_pipipi0_obs", -1.21e-2);
   else {
-    cout << "PDF_DY_pipipi0::setObservables() : ERROR : config " << c << " not found for " << nObs
-         << " DY_pipipi0 observables." << endl;
+    std::cout << "PDF_DY_pipipi0::setObservables() : ERROR : config " << c << " not found for " << nObs
+              << " DY_pipipi0 observables." << std::endl;
     exit(1);
   }
 }
@@ -74,8 +78,8 @@ void PDF_DY_pipipi0::setUncertainties(TString c) {
     StatErr[0] = 5.97e-2;
     SystErr[0] = 2.01e-2;  // Removed the sys. unc. for the time binning
   } else {
-    cout << "PDF_DY_pipipi0::setUncertainties() : ERROR : config " << c << " not found for " << nObs
-         << " DY_pipipi0 observables." << endl;
+    std::cout << "PDF_DY_pipipi0::setUncertainties() : ERROR : config " << c << " not found for " << nObs
+              << " DY_pipipi0 observables." << std::endl;
     exit(1);
   }
 }

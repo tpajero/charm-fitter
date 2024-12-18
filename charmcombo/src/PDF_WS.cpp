@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include <RooMultiVarGaussian.h>
+
 #include <Utils.h>
 
 #include <CharmUtils.h>
@@ -175,7 +177,7 @@ void PDF_WS::initParameters() {
     param_names.insert(param_names.end(), {"yp", "dyp", "xp2", "dxp2"});
     break;
   default:
-    cout << "PDF_WS::initParameters : ERROR : theory_config " << th_cfg << " not supported.\n";
+    std::cout << "PDF_WS::initParameters : ERROR : theory_config " << th_cfg << " not supported.\n";
     exit(1);
   }
   ParametersCharmCombo p;
@@ -195,7 +197,7 @@ void PDF_WS::initRelations() {
     initRelationsCCPrime();
     break;
   default:
-    cout << "PDF_WS::initRelations : ERROR : ws_param not supported.\n";
+    std::cout << "PDF_WS::initRelations : ERROR : ws_param not supported.\n";
     exit(1);
   }
 }
@@ -282,7 +284,7 @@ void PDF_WS::initObservables(const TString& setName) {
     }
     break;
   default:
-    cout << "PDF_WS::initRelations : ERROR : ws_param not supported.\n";
+    std::cout << "PDF_WS::initRelations : ERROR : ws_param not supported.\n";
     exit(1);
   }
 }
@@ -370,7 +372,7 @@ void PDF_WS::setObservables(TString c) {
     setObservable("y'-_obs", 0.681);
     setObservable("x'2-_obs", -0.486);
   } else {
-    cout << "PDF_WS::setObservables() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_WS::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }
@@ -501,7 +503,7 @@ void PDF_WS::setUncertainties(TString c) {
     StatErr[5] = 1.665;  // x'2-
     for (int i = 0; i < nObs; ++i) SystErr[i] = 0.;
   } else {
-    cout << "PDF_WS::setUncertainties() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_WS::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }
@@ -638,7 +640,7 @@ void PDF_WS::setCorrelations(TString c) {
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, data);
   } else {
-    cout << "PDF_WS::setCorrelations() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_WS::setCorrelations() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }

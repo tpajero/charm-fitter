@@ -4,6 +4,8 @@
  * Date: October 2021
  **/
 
+#include <RooMultiVarGaussian.h>
+
 #include <TString.h>
 
 #include <CharmUtils.h>
@@ -49,7 +51,7 @@ void PDF_Fp_pipipi0::setObservables(TString c) {
     obsValSource = "https://inspirehep.net/literature/2827201";
     setObservable("F_pipipi0_obs", 0.9406);
   } else {
-    cout << "PDF_Fp_pipipi0::setObservables() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_Fp_pipipi0::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }
@@ -64,7 +66,7 @@ void PDF_Fp_pipipi0::setUncertainties(TString c) {
     StatErr[0] = 0.0036;
     SystErr[0] = 0.0021;
   } else {
-    cout << "PDF_Fp_pipipi0::setObservables() : ERROR : config " + c + " not found." << endl;
+    std::cout << "PDF_Fp_pipipi0::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }

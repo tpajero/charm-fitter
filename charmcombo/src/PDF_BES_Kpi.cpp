@@ -7,6 +7,8 @@
 #include <boost/algorithm/string.hpp>
 #include <vector>
 
+#include <RooMultiVarGaussian.h>
+
 #include <Utils.h>
 
 #include <CharmUtils.h>
@@ -46,9 +48,7 @@ void PDF_BES_Kpi::initParameters() {
     parameters->add(*(p.get("phiM")));
     break;
   default:
-    cout << "PDF_BES_Kpi::initParameters : ERROR : "
-            "theory_config not supported."
-         << endl;
+    std::cout << "PDF_BES_Kpi::initParameters : ERROR : theory_config not supported." << std::endl;
     exit(1);
   }
 }
@@ -71,9 +71,7 @@ void PDF_BES_Kpi::initRelations() {
     boost::replace_all(a_kpi_pipipi0_formula, "y", CharmUtils::y_to_superweak);
     break;
   default:
-    cout << "PDF_BES_Kpi_1d::initRelations : ERROR : "
-            "theory_config not supported."
-         << endl;
+    std::cout << "PDF_BES_Kpi_1d::initRelations : ERROR : theory_config not supported." << std::endl;
     exit(1);
   }
   theory->add(*(Utils::makeTheoryVar("A_kpi_th", "A_kpi_th", a_kpi_formula, parameters)));
@@ -98,7 +96,7 @@ void PDF_BES_Kpi::setObservables(TString c) {
     setObservable("rcos_obs", -5.62);
     setObservable("rsin_obs", -1.1);
   } else {
-    cout << "PDF_BES_Kpi::setObservables() : ERROR : obs config " << c << " not found." << endl;
+    std::cout << "PDF_BES_Kpi::setObservables() : ERROR : obs config " << c << " not found." << std::endl;
     exit(1);
   }
 }
@@ -116,7 +114,7 @@ void PDF_BES_Kpi::setUncertainties(TString c) {
     StatErr[3] = std::sqrt(std::pow(1.2, 2) + std::pow(0.7, 2) + std::pow(0.3, 2));
     SystErr[3] = 0.;
   } else {
-    cout << "PDF_BES_Kpi::setObservables() : ERROR : err config " << c << " not found." << endl;
+    std::cout << "PDF_BES_Kpi::setObservables() : ERROR : err config " << c << " not found." << std::endl;
     exit(1);
   }
 }
@@ -144,7 +142,7 @@ void PDF_BES_Kpi::setCorrelations(TString c) {
     };
     corSystMatrix = Utils::buildCorMatrix(nObs, dataSyst);
   } else {
-    cout << "PDF_BES_Kpi::setCorrelations() : ERROR : cor config " << c << " not found." << endl;
+    std::cout << "PDF_BES_Kpi::setCorrelations() : ERROR : cor config " << c << " not found." << std::endl;
     exit(1);
   }
 }
