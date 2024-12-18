@@ -26,6 +26,8 @@ Installation
 ============
 
 To build CharmCombo cmake is needed in version 3.14 or higher.
+If [CernVM-FS](https://cvmfs.readthedocs.io/en/stable/) is available on your computer, a suitable environment can be set
+through `. setup-env-cvmfs.sh`.
 
 Get the source code from GitHub:
 
