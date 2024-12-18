@@ -10,11 +10,11 @@
 #include "ParametersAbs.h"
 
 class ParametersCharmCombo : public ParametersAbs {
-  public:
-    ParametersCharmCombo();
+ public:
+  ParametersCharmCombo();
 
-  private:
-    void defineParameters();
+ private:
+  void defineParameters();
 };
 
 #endif
