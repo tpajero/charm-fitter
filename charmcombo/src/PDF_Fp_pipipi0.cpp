@@ -8,6 +8,8 @@
 
 #include <TString.h>
 
+#include <Utils.h>
+
 #include <CharmUtils.h>
 #include <PDF_Fp_pipipi0.h>
 #include <ParametersCharmCombo.h>
@@ -33,9 +35,8 @@ void PDF_Fp_pipipi0::initParameters() {
 }
 
 void PDF_Fp_pipipi0::initRelations() {
-  RooArgSet* p = (RooArgSet*)parameters;
   theory = new RooArgList("theory");
-  theory->add(*(new RooFormulaVar("F_pipipi0_th", "F_pipipi0_th", "F_pipipi0", *p)));
+  theory->add(*(Utils::makeTheoryVar("F_pipipi0_th", "F_pipipi0_th", "F_pipipi0", parameters)));
 }
 
 void PDF_Fp_pipipi0::initObservables(TString measurement_id) {

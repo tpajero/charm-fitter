@@ -74,8 +74,9 @@ void PDF_BES_Kpi::initRelations() {
     std::cout << "PDF_BES_Kpi_1d::initRelations : ERROR : theory_config not supported." << std::endl;
     exit(1);
   }
-  theory->add(*(Utils::makeTheoryVar("A_kpi_th", "A_kpi_th", a_kpi_formula, parameters)));
-  theory->add(*(Utils::makeTheoryVar("A_kpi_pipipi0_th", "A_kpi_pipipi0_th", a_kpi_pipipi0_formula, parameters)));
+  using Utils::makeTheoryVar;
+  theory->add(*(makeTheoryVar("A_kpi_th", "A_kpi_th", a_kpi_formula, parameters)));
+  theory->add(*(makeTheoryVar("A_kpi_pipipi0_th", "A_kpi_pipipi0_th", a_kpi_pipipi0_formula, parameters)));
   theory->add(*(makeTheoryVar("rcos_th", "rcos_th", "-10 * sqrt(R_Kpi)*cos(Delta_Kpi)", parameters)));
   theory->add(*(makeTheoryVar("rsin_th", "rsin_th", " 10 * sqrt(R_Kpi)*sin(Delta_Kpi)", parameters)));
 }

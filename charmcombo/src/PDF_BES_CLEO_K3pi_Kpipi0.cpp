@@ -23,6 +23,8 @@
 #include <PDF_BES_CLEO_K3pi_Kpipi0.h>
 #include <ParametersCharmCombo.h>
 
+using Utils::DegToRad;
+
 PDF_BES_CLEO_K3pi_Kpipi0::PDF_BES_CLEO_K3pi_Kpipi0(TString measurement_id) : PDF_Abs{6} {
   name = "K3pi_" + measurement_id;
   TString label = "BES3 + CLEO";
@@ -46,6 +48,7 @@ void PDF_BES_CLEO_K3pi_Kpipi0::initParameters() {
 
 void PDF_BES_CLEO_K3pi_Kpipi0::initRelations() {
   theory = new RooArgList("theory");  ///< the order of this list must match that of the COR matrix!
+  using Utils::makeTheoryVar;
   theory->add(*(makeTheoryVar("k_K3pi_th", "k_K3pi_th", "k_K3pi", parameters)));
   theory->add(*(makeTheoryVar("Delta_K3pi_th", "Delta_K3pi_th", "Delta_K3pi", parameters)));
   theory->add(*(makeTheoryVar("k_Kpipi0_th", "k_Kpipi0_th", "k_Kpipi0", parameters)));

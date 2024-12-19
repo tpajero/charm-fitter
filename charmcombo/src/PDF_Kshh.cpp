@@ -150,7 +150,7 @@ void PDF_Kshh::setObservables(TString c) {
     setObservable("x_obs", 0.56);
     setObservable("y_obs", 0.30);
     setObservable("qop_obs", 0.90);
-    setObservable("phi_obs", DegToRad(-6.));
+    setObservable("phi_obs", Utils::DegToRad(-6.));
   } else {
     std::cout << "PDF_Kshh::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
@@ -160,14 +160,14 @@ void PDF_Kshh::setObservables(TString c) {
 void PDF_Kshh::setUncertainties(TString c) {
   if (c.EqualTo("Belle")) {
     obsErrSource = "https://inspirehep.net/literature/1289224";
-    StatErr[0] = sqrt(pow(0.19, 2) + pow(0.093, 2));        // x
-    StatErr[1] = sqrt(pow(0.15, 2) + pow(0.068, 2));        // y
-    StatErr[2] = sqrt(pow(0.155, 2) + pow(0.071, 2));       // qop
-    StatErr[3] = DegToRad(sqrt(pow(11, 2) + pow(4.6, 2)));  // phi
-    SystErr[0] = 0;                                         // x
-    SystErr[1] = 0;                                         // y
-    SystErr[2] = 0;                                         // qop
-    SystErr[3] = 0;                                         // phi
+    StatErr[0] = sqrt(pow(0.19, 2) + pow(0.093, 2));               // x
+    StatErr[1] = sqrt(pow(0.15, 2) + pow(0.068, 2));               // y
+    StatErr[2] = sqrt(pow(0.155, 2) + pow(0.071, 2));              // qop
+    StatErr[3] = Utils::DegToRad(sqrt(pow(11, 2) + pow(4.6, 2)));  // phi
+    SystErr[0] = 0;                                                // x
+    SystErr[1] = 0;                                                // y
+    SystErr[2] = 0;                                                // qop
+    SystErr[3] = 0;                                                // phi
   } else {
     std::cout << "PDF_Kshh::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
     exit(1);

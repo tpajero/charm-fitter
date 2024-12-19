@@ -111,7 +111,7 @@ void PDF_K3pi::setCorrelations(TString c) {
   resetCorrelations();
   if (c.EqualTo("LHCb-run1")) {
     corSource = "https://arxiv.org/abs/1602.07224v2";
-    vector<double> corrs = {
+    std::vector<double> corrs = {
         // clang-format off
         1., 0.91, 0.80,  // r
             1.,   0.94,  // c1
