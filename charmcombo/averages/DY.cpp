@@ -13,6 +13,11 @@
  *    .L DY.cpp
  *    DY(<n-combination>)
  *
+ * The scale factor to account for dilution in the mu-tagged measurement by LHCb (Run2_mu) is taken from
+ * LHCb-ANA-2019-021, and gets contributions from:
+ *  - Fig. 11, where the average from the deviation from unity of the slope is -0.0554
+ *  - Fig. 12, where the average from the deviation from unity of the slope is -0.0521
+ * The scale factor is thus equal to 1 / (1 - 0.0554) / (1 - 0.0521) = 1.117.
  **/
 
 #include <iomanip>
