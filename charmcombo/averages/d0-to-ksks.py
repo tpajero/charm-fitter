@@ -18,10 +18,12 @@ def get_measures(comb):
     measures = [
         Measurement("CLEO", "hep-ex/0012054", -23e-2, 19e-2),
         Measurement("LHCb 2015", "1508.06087", -2.9e-2, 5.2e-2, 2.2e-2),
-        Measurement("Belle", "1705.05966", -0.02e-2, 1.53e-2, 0.02e-2, 0.17e-2),
+        # Measurement("Belle", "1705.05966", -0.02e-2, 1.53e-2, 0.02e-2, 0.17e-2),
         Measurement("LHCb 2021", "2105.01565", -3.1e-2, 1.2e-2, 0.4e-2, 0.2e-2),
         Measurement("CMS", "2405.11606", 6.2e-2, 3.0e-2, 0.2e-2, 0.8e-2),
-        Measurement("World average 2024", None, -1.21e-2, 0.89e-2, 0.26e-2),
+        Measurement("Belle + Belle II 2024", "2411.00306", -1.4e-2, 1.3e-2, 0.1e-2),
+        # Measurement("World average 2024", None, -1.21e-2, 0.89e-2, 0.26e-2),
+        Measurement("World average 2024", None, -1.67e-2, 0.84e-2, 0.22e-2),
     ]
     return measures
 
@@ -43,7 +45,7 @@ def plot_average(date, out_dir):
 
     # Axes and labels
     fig, ax = plt.subplots(figsize=(6, 6))
-    (x_min, x_max), units = (-0.45, 0.78), 1e-2
+    (x_min, x_max), units = (-0.45, 0.6), 1e-2
     y_min, y_max = -0.5, n_meas - 0.5
     plt.xlim(x_min / units, x_max / units)
     plt.ylim(y_min, y_max)

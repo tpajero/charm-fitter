@@ -38,16 +38,17 @@ void print_header(const std::string avg_title) {
 void ksks(int flag = 0) {
 
   const std::map<int, std::pair<std::string, std::vector<int>>> combinations = {
-      {0, {"World average 2024", {0, 1, 2, 3, 4}}},
+      {0, {"World average 2024", {0, 1, 3, 4, 5}}},
   };
 
   // number of estimates, uncertainties, observables
   const std::vector<TString> names = {
-      "CLEO     ",  //  0
-      "LHCb_2015",  //  1
-      "Belle    ",  //  2
-      "LHCb_2021",  //  3
-      "CMS      ",  //  4
+      "CLEO      ",  //  0
+      "LHCb_2015 ",  //  1
+      "Belle_2017",  //  2
+      "LHCb_2021 ",  //  3
+      "CMS       ",  //  4
+      "Belle_2024",  //  5
   };
   const std::vector<TString> names_obs = {" ACP(D0 -> KS KS)"};
   const auto num_est = names.size();
@@ -60,9 +61,10 @@ void ksks(int flag = 0) {
       // Val   Stat    Sys1   Sys2
       -0.23  , 0.19  , 0.    , 0.    ,  // CLEO
       -0.029 , 0.052 , 0.022 , 0.    ,  // LHCb 2015
-      -0.0002, 0.0153, 0.0002, 0.0017,  // Belle
+      -0.0002, 0.0153, 0.0002, 0.0017,  // Belle 2017
       -0.031 , 0.012 , 0.004 , 0.002 ,  // LHCb 2021
        0.062 , 0.030 , 0.002 , 0.008 ,  // CMS
+      -0.014 , 0.013 , 0.001 , 0.    ,  // Belle 2024
       // clang-format on
   };
   const auto num_unc = names_unc.size();
