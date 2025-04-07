@@ -45,7 +45,8 @@ class Measurement:
                 (self.arxiv == 'hep-ex/9705006' or
                  (self.arxiv == '0906.3198' and stat > 0.2))) or (self.label == 'Belle' and self.arxiv == '2103.09969'
                                                                   and stat > 0.1) or self.arxiv in [
-                                                                      "1911.01114", "2105.01565", "2405.11606"
+                                                                      "1911.01114", "2105.01565", "2405.11606",
+                                                                      "2411.00306", "La Thuile"
                                                                   ]:
                 return 1
 

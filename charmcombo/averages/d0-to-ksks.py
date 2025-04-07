@@ -21,10 +21,17 @@ def get_measures(comb):
         # Measurement("Belle", "1705.05966", -0.02e-2, 1.53e-2, 0.02e-2, 0.17e-2),
         Measurement("LHCb 2021", "2105.01565", -3.1e-2, 1.2e-2, 0.4e-2, 0.2e-2),
         Measurement("CMS", "2405.11606", 6.2e-2, 3.0e-2, 0.2e-2, 0.8e-2),
-        Measurement("Belle + Belle II 2024", "2411.00306", -1.4e-2, 1.3e-2, 0.1e-2),
-        # Measurement("World average 2024", None, -1.21e-2, 0.89e-2, 0.26e-2),
-        Measurement("World average 2024", None, -1.67e-2, 0.84e-2, 0.22e-2),
     ]
+    if comb == '2024':
+        measures.extend([
+            Measurement("Belle + Belle II 2024", "2411.00306", -1.4e-2, 1.3e-2, 0.1e-2),
+            Measurement("World average 2024", None, -1.21e-2, 0.89e-2, 0.26e-2),  # p-value 6.12%
+        ])
+    else:
+        measures.extend([
+            Measurement("Belle + Belle II 2025", "La Thuile", -0.6e-2, 1.1e-2, 0.1e-2),
+            Measurement("World average 2025", None, -1.21e-2, 0.77e-2, 0.19e-2),  # p-value 4.85%
+        ])
     return measures
 
 
@@ -85,7 +92,12 @@ def plot_average(date, out_dir):
 def parse_args():
     cwd = os.path.dirname(os.path.realpath(__file__))
     parser = ArgumentParser()
-    parser.add_argument('-c', '--date', type=str, default='2024', help='Date of the combination', choices=['2024'])
+    parser.add_argument('-c',
+                        '--date',
+                        type=str,
+                        default='2025',
+                        help='Date of the combination',
+                        choices=['2024', '2025'])
     parser.add_argument('-o',
                         '--outdir',
                         type=str,

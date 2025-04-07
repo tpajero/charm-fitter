@@ -39,6 +39,7 @@ void ksks(int flag = 0) {
 
   const std::map<int, std::pair<std::string, std::vector<int>>> combinations = {
       {0, {"World average 2024", {0, 1, 3, 4, 5}}},
+      {1, {"World average March 2025", {0, 1, 3, 4, 6}}},
   };
 
   // number of estimates, uncertainties, observables
@@ -49,6 +50,7 @@ void ksks(int flag = 0) {
       "LHCb_2021 ",  //  3
       "CMS       ",  //  4
       "Belle_2024",  //  5
+      "Belle_2025",  //  6
   };
   const std::vector<TString> names_obs = {" ACP(D0 -> KS KS)"};
   const auto num_est = names.size();
@@ -65,6 +67,7 @@ void ksks(int flag = 0) {
       -0.031 , 0.012 , 0.004 , 0.002 ,  // LHCb 2021
        0.062 , 0.030 , 0.002 , 0.008 ,  // CMS
       -0.014 , 0.013 , 0.001 , 0.    ,  // Belle 2024
+      -0.006 , 0.011 , 0.001 , 0.    ,  // Belle 2025
       // clang-format on
   };
   const auto num_unc = names_unc.size();
