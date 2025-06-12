@@ -19,18 +19,21 @@ def get_measures(comb):
         Measurement("CLEO", "hep-ex/0012054", -23e-2, 19e-2),
         Measurement("LHCb 2015", "1508.06087", -2.9e-2, 5.2e-2, 2.2e-2),
         # Measurement("Belle", "1705.05966", -0.02e-2, 1.53e-2, 0.02e-2, 0.17e-2),
-        Measurement("LHCb 2021", "2105.01565", -3.1e-2, 1.2e-2, 0.4e-2, 0.2e-2),
-        Measurement("CMS", "2405.11606", 6.2e-2, 3.0e-2, 0.2e-2, 0.8e-2),
+        Measurement("LHCb 2021", "2105.01565", -3.1e-2, 1.2e-2, 0.4e-2, 0.1e-2),
+        Measurement("CMS", "2405.11606", 6.3e-2, 3.0e-2, 0.2e-2),  # Neglect ACP(KS pi pi)
     ]
     if comb == '2024':
         measures.extend([
             Measurement("Belle + Belle II 2024", "2411.00306", -1.4e-2, 1.3e-2, 0.1e-2),
-            Measurement("World average 2024", None, -1.21e-2, 0.89e-2, 0.26e-2),  # p-value 6.12%
+            Measurement("World average 2024", None, -1.63e-2, 0.84e-2, 0.20e-2),  # p-value 4.67%
         ])
     else:
         measures.extend([
-            Measurement("Belle + Belle II 2025", "La Thuile", -0.6e-2, 1.1e-2, 0.1e-2),
-            Measurement("World average 2025", None, -1.21e-2, 0.77e-2, 0.19e-2),  # p-value 4.85%
+            Measurement("Belle + Belle II 2025", "2504.15881", -0.6e-2, 1.1e-2, 0.1e-2),
+            # Measurement("World average March 2025", None, -1.19e-2, 0.77e-2, 0.17e-2),  # p-value 3.76%
+            Measurement("LHCb 2025", "preliminary", 1.86e-2, 1.04e-2, 0.41e-2),
+            Measurement("LHCb average 2025", "preliminary", -0.37e-2, 0.78e-2, 0.29e-2),
+            Measurement("World average 2025", None, -0.17e-2, 0.62e-2, 0.18e-2),  # p-value 0.99%
         ])
     return measures
 
@@ -75,6 +78,8 @@ def plot_average(date, out_dir):
         plt.text(x_text / units, y_text, f'{meas.label}\n{meas.result_str(units)}', fontsize=18, color=meas.color)
 
     # Vertical and horizontal lines for world average
+    if "average" in measures[-2].label:
+        plt.plot([x_min / units, x_max / units], [1.5, 1.5], linestyle='-', linewidth=1, color='k')
     if "World" in measures[-1].label:
         plt.plot([measures[-1].m / units, measures[-1].m / units], [y_min, y_max],
                  linestyle='--',

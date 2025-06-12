@@ -35,11 +35,13 @@ void print_header(const std::string avg_title) {
  *
  * @param flag Steers which set of measurements should be employed (according to the values of "combinations" below).
  */
-void ksks(int flag = 0) {
+void ksks(const int flag = 0) {
 
   const std::map<int, std::pair<std::string, std::vector<int>>> combinations = {
       {0, {"World average 2024", {0, 1, 3, 4, 5}}},
       {1, {"World average March 2025", {0, 1, 3, 4, 6}}},
+      {2, {"LHCb average 2025", {1, 3, 7}}},
+      {3, {"World average 2025", {0, 1, 3, 4, 6, 7}}},
   };
 
   // number of estimates, uncertainties, observables
@@ -51,6 +53,7 @@ void ksks(int flag = 0) {
       "CMS       ",  //  4
       "Belle_2024",  //  5
       "Belle_2025",  //  6
+      "LHCb_2025",   //  7
   };
   const std::vector<TString> names_obs = {" ACP(D0 -> KS KS)"};
   const auto num_est = names.size();
@@ -61,13 +64,14 @@ void ksks(int flag = 0) {
       // clang-format off
       //       0       1      2     
       // Val   Stat    Sys1   Sys2
-      -0.23  , 0.19  , 0.    , 0.    ,  // CLEO
-      -0.029 , 0.052 , 0.022 , 0.    ,  // LHCb 2015
-      -0.0002, 0.0153, 0.0002, 0.0017,  // Belle 2017
-      -0.031 , 0.012 , 0.004 , 0.002 ,  // LHCb 2021
-       0.062 , 0.030 , 0.002 , 0.008 ,  // CMS
-      -0.014 , 0.013 , 0.001 , 0.    ,  // Belle 2024
-      -0.006 , 0.011 , 0.001 , 0.    ,  // Belle 2025
+      -0.23  , 0.19  , 0.    , 0.     ,  // CLEO
+      -0.029 , 0.052 , 0.022 , 0.     ,  // LHCb 2015
+      -0.0002, 0.0153, 0.0002, 0.0017 ,  // Belle 2017
+      -0.031 , 0.012 , 0.004 , 0.00056,  // LHCb 2021 updated with https://arxiv.org/abs/2209.03179
+       0.063 , 0.030 , 0.002 , 0.     ,  // CMS
+      -0.014 , 0.013 , 0.001 , 0.     ,  // Belle 2024
+      -0.006 , 0.011 , 0.001 , 0.     ,  // Belle 2025
+       0.0186, 0.0104, 0.0041, 0.     ,  // LHCb 2025
       // clang-format on
   };
   const auto num_unc = names_unc.size();

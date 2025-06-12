@@ -13,9 +13,7 @@ class Measurement:
         self.sys = sys
         self.sys2 = sys2
 
-        if any(s in self.label for s in ['average', 'PDG']):
-            self.color = 'k'
-        elif 'BaBar' in self.label:
+        if 'BaBar' in self.label:
             self.color = 'g'
         elif 'Belle' in self.label:
             self.color = 'r'
@@ -29,6 +27,8 @@ class Measurement:
             self.color = 'g'
         elif 'LHCb' in self.label:
             self.color = 'b'
+        elif any(s in self.label for s in ['average', 'PDG']):
+            self.color = 'k'
         else:
             raise RuntimeError(f'The label {self.label} is not supported')
 
