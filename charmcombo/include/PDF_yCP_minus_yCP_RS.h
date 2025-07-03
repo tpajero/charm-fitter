@@ -16,7 +16,6 @@
 class PDF_yCP_minus_yCP_RS : public PDF_Abs {
  public:
   PDF_yCP_minus_yCP_RS(TString measurement_id, const theory_config& th_cfg);
-  ~PDF_yCP_minus_yCP_RS();
   void buildPdf() override;
   void initObservables(const TString& setName);
   virtual void initParameters() override;

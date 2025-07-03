@@ -16,7 +16,6 @@
 class PDF_BES_Kpi : public PDF_Abs {
  public:
   PDF_BES_Kpi(const theory_config& th_cfg);
-  ~PDF_BES_Kpi();
   void buildPdf() override;
   void initObservables() override;
   void initParameters() override;

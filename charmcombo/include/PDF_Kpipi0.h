@@ -16,7 +16,6 @@
 class PDF_Kpipi0 : public PDF_Abs {
  public:
   PDF_Kpipi0(TString measurement_id, const theory_config& th_cfg);
-  ~PDF_Kpipi0();
   void buildPdf() override;
   void initObservables(const TString& setName);
   virtual void initParameters() override;

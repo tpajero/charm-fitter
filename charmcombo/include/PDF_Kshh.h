@@ -16,7 +16,6 @@
 class PDF_Kshh : public PDF_Abs {
  public:
   PDF_Kshh(TString measurement_id, const theory_config& th_cf);
-  ~PDF_Kshh();
   void buildPdf() override;
   void initObservables(const TString& setName);
   virtual void initParameters() override;

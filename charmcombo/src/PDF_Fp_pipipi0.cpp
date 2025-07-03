@@ -26,8 +26,6 @@ PDF_Fp_pipipi0::PDF_Fp_pipipi0(TString measurement_id) : PDF_Abs{1} {
   buildPdf();
 }
 
-PDF_Fp_pipipi0::~PDF_Fp_pipipi0() {}
-
 void PDF_Fp_pipipi0::initParameters() {
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");

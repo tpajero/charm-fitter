@@ -16,7 +16,6 @@
 class PDF_BinFlip : public PDF_Abs {
  public:
   PDF_BinFlip(TString measurement_id, const theory_config& th_cf);
-  ~PDF_BinFlip();
   void buildPdf() override;
   void initObservables(const TString& setName);
   virtual void initParameters() override;

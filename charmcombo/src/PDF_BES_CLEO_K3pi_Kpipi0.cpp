@@ -37,8 +37,6 @@ PDF_BES_CLEO_K3pi_Kpipi0::PDF_BES_CLEO_K3pi_Kpipi0(TString measurement_id) : PDF
   build();
 }
 
-PDF_BES_CLEO_K3pi_Kpipi0::~PDF_BES_CLEO_K3pi_Kpipi0() {}
-
 void PDF_BES_CLEO_K3pi_Kpipi0::initParameters() {
   std::vector<std::string> param_names = {"r_K3pi", "k_K3pi", "Delta_K3pi", "r_Kpipi0", "k_Kpipi0", "Delta_Kpipi0"};
   ParametersCharmCombo p;

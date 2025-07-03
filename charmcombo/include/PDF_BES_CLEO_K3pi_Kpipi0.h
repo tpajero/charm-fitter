@@ -14,7 +14,6 @@
 class PDF_BES_CLEO_K3pi_Kpipi0 : public PDF_Abs {
  public:
   PDF_BES_CLEO_K3pi_Kpipi0(TString measurement_id);
-  ~PDF_BES_CLEO_K3pi_Kpipi0();
   void buildPdf() override;
   void initObservables(const TString& measurement_label);
   virtual void initParameters() override;

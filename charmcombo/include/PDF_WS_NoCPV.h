@@ -16,7 +16,6 @@
 class PDF_WS_NoCPV : public PDF_Abs {
  public:
   PDF_WS_NoCPV(TString measurement_id, const theory_config& th_cfg);
-  ~PDF_WS_NoCPV();
   void buildPdf() override;
   void initObservables(const TString& setName);
   virtual void initParameters() override;

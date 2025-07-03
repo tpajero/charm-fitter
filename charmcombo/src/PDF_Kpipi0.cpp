@@ -31,8 +31,6 @@ PDF_Kpipi0::PDF_Kpipi0(TString measurement_id, const theory_config& th_cfg) : PD
   buildPdf();
 }
 
-PDF_Kpipi0::~PDF_Kpipi0() {}
-
 void PDF_Kpipi0::initParameters() {
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");

@@ -16,7 +16,6 @@
 class PDF_scan_DY_RS : public PDF_Abs {
  public:
   PDF_scan_DY_RS(const theory_config& th_cfg);
-  ~PDF_scan_DY_RS();
   void buildPdf() override;
   virtual void initObservables() override;
   virtual void initParameters() override;

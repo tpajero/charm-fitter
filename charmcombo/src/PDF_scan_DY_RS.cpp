@@ -24,8 +24,6 @@ PDF_scan_DY_RS::PDF_scan_DY_RS(const theory_config& th_cfg) : PDF_Abs{1}, th_cfg
   buildPdf();
 }
 
-PDF_scan_DY_RS::~PDF_scan_DY_RS() {}
-
 void PDF_scan_DY_RS::initParameters() {
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");

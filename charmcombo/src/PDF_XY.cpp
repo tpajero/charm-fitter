@@ -35,8 +35,6 @@ PDF_XY::PDF_XY(TString measurement_id, const theory_config& th_cfg) : PDF_Abs{2}
   build();
 }
 
-PDF_XY::~PDF_XY() {}
-
 void PDF_XY::initParameters() {
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");

@@ -16,7 +16,6 @@
 class PDF_DY : public PDF_Abs {
  public:
   PDF_DY(TString measurement_id, const theory_config th_cf, const FSC fsc);
-  ~PDF_DY();
   void buildPdf() override;
   void initObservables(const TString& setName);
   virtual void initParameters() override;

@@ -27,8 +27,6 @@ PDF_AcpHH_LHCb_Run12::PDF_AcpHH_LHCb_Run12(const theory_config th_cfg, const FSC
   buildPdf();
 }
 
-PDF_AcpHH_LHCb_Run12::~PDF_AcpHH_LHCb_Run12() {}
-
 void PDF_AcpHH_LHCb_Run12::initParameters() {
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");

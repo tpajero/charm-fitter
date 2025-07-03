@@ -30,8 +30,6 @@ PDF_Kshh::PDF_Kshh(TString measurement_id, const theory_config& th_cfg) : PDF_Ab
   buildPdf();
 }
 
-PDF_Kshh::~PDF_Kshh() {}
-
 void PDF_Kshh::initParameters() {
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");

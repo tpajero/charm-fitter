@@ -23,8 +23,6 @@ PDF_DY_pipipi0::PDF_DY_pipipi0(TString measurement_id, const theory_config th_cf
   build();
 }
 
-PDF_DY_pipipi0::~PDF_DY_pipipi0() {}
-
 void PDF_DY_pipipi0::initParameters() {
   std::vector<std::string> param_names = {"F_pipipi0"};
   switch (th_cfg) {

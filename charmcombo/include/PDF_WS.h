@@ -19,7 +19,6 @@ class PDF_WS : public PDF_Abs {
  public:
   PDF_WS(TString measurement_id, const theory_config& th_cfg, WS_parametrisation p = WS_parametrisation::rrxy);
   PDF_WS(TString val, TString err, const theory_config& th_cfg);
-  ~PDF_WS();
   void buildPdf() override;
   void initObservables(const TString& setName);
   virtual void initParameters() override;

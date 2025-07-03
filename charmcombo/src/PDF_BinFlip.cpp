@@ -33,8 +33,6 @@ PDF_BinFlip::PDF_BinFlip(TString measurement_id, const theory_config& th_cfg) : 
   buildPdf();
 }
 
-PDF_BinFlip::~PDF_BinFlip() {}
-
 void PDF_BinFlip::initParameters() {
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");

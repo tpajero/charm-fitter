@@ -157,8 +157,6 @@ PDF_WS::PDF_WS(TString val, TString err, const theory_config& th_cfg) : PDF_Abs{
   buildPdf();
 }
 
-PDF_WS::~PDF_WS() {}
-
 void PDF_WS::initParameters() {
   std::vector<std::string> param_names = {"R_Kpi"};
   if (th_cfg != theory_config::d0_to_kpi) param_names.emplace_back("Delta_Kpi");

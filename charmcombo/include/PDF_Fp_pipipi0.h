@@ -14,7 +14,6 @@
 class PDF_Fp_pipipi0 : public PDF_Abs {
  public:
   PDF_Fp_pipipi0(TString measurement_id);
-  ~PDF_Fp_pipipi0();
   void buildPdf() override;
   void initObservables(TString measurement_id);
   void initParameters() override;

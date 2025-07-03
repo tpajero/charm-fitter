@@ -50,8 +50,6 @@ PDF_WS_NoCPV::PDF_WS_NoCPV(TString measurement_id, const theory_config& th_cfg) 
   build();
 }
 
-PDF_WS_NoCPV::~PDF_WS_NoCPV() {}
-
 void PDF_WS_NoCPV::initParameters() {
   std::vector<std::string> param_names = {"R_Kpi"};
   if (th_cfg != theory_config::d0_to_kpi) param_names.emplace_back("Delta_Kpi");

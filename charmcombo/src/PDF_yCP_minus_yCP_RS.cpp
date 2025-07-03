@@ -25,8 +25,6 @@ PDF_yCP_minus_yCP_RS::PDF_yCP_minus_yCP_RS(TString measurement_id, const theory_
   buildPdf();
 }
 
-PDF_yCP_minus_yCP_RS::~PDF_yCP_minus_yCP_RS() {}
-
 void PDF_yCP_minus_yCP_RS::initParameters() {
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");

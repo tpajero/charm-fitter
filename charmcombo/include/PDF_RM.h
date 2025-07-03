@@ -16,7 +16,6 @@
 class PDF_RM : public PDF_Abs {
  public:
   PDF_RM(TString measurement_id, const theory_config& th_cf);
-  ~PDF_RM();
   void buildPdf() override;
   void initObservables(const TString& setName);
   virtual void initParameters() override;

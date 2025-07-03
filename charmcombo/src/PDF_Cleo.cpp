@@ -24,8 +24,6 @@ PDF_Cleo::PDF_Cleo(TString measurement_id, const theory_config& th_cfg) : PDF_Ab
   buildPdf();
 }
 
-PDF_Cleo::~PDF_Cleo() {}
-
 void PDF_Cleo::initParameters() {
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");

@@ -16,7 +16,6 @@
 class PDF_AcpHH_LHCb_Run12 : public PDF_Abs {
  public:
   PDF_AcpHH_LHCb_Run12(const theory_config th_cf, const FSC fsc);
-  ~PDF_AcpHH_LHCb_Run12();
   void buildPdf() override;
   void initObservables() override;
   void initParameters() override;

@@ -27,8 +27,6 @@ PDF_BES_Kpi::PDF_BES_Kpi(const theory_config& th_cfg) : PDF_Abs{4}, th_cfg{th_cf
   buildPdf();
 }
 
-PDF_BES_Kpi::~PDF_BES_Kpi() {}
-
 void PDF_BES_Kpi::initParameters() {
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");

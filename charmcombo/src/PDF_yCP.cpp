@@ -24,8 +24,6 @@ PDF_yCP::PDF_yCP(TString measurement_id, const theory_config& th_cfg) : PDF_Abs{
   buildPdf();
 }
 
-PDF_yCP::~PDF_yCP() {}
-
 void PDF_yCP::initParameters() {
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");

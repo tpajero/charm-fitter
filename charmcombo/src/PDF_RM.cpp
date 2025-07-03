@@ -24,8 +24,6 @@ PDF_RM::PDF_RM(TString measurement_id, const theory_config& th_cfg) : PDF_Abs{1}
   buildPdf();
 }
 
-PDF_RM::~PDF_RM() {}
-
 void PDF_RM::initParameters() {
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");

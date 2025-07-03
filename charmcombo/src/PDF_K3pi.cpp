@@ -49,8 +49,6 @@ PDF_K3pi::PDF_K3pi(TString measurement_id, const theory_config& th_cfg) : PDF_Ab
   build();
 }
 
-PDF_K3pi::~PDF_K3pi() {}
-
 void PDF_K3pi::initParameters() {
   std::vector<std::string> param_names = {"r_K3pi", "k_K3pi", "Delta_K3pi"};
   if (th_cfg == theory_config::phenomenological)
