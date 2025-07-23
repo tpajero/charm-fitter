@@ -14,7 +14,6 @@ import argparse
 from copy import copy
 import subprocess
 
-
 _not_phen_params = ['x12', 'y12', 'phiG', 'phiM']
 _not_supw_params = ['x', 'y', 'qop', 'phi', 'phiG', 'Acp_KK', 'Acp_PP', 'Acp_KP', 'cot_delta_KK', 'cot_delta_PP']
 _not_theo_params = ['x', 'y', 'qop', 'phi']
@@ -24,6 +23,7 @@ _full_fsc_combinations = [42]
 
 
 class Scan1d:
+
     def __init__(self, var, x_min=None, x_max=None, npoints=200):
         self.var = var
         self.x_min = x_min
@@ -36,6 +36,7 @@ class Scan1d:
 
 
 class Scan2d:
+
     def __init__(self, varx, vary, x_min=None, x_max=None, y_min=None, y_max=None, npoints_x=80, npoints_y=80):
         self.id = f'{varx}_{vary}'
         self.var_x = varx
@@ -56,39 +57,39 @@ def get_scans_1d(combinations, scan_dy_rs=False):
     before_2022 = 500 in combinations or any(n < 30 for n in combinations)
     if before_2022:
         scans = [
-            Scan1d('x12',           0. ,   0.8 ),
-            Scan1d('y12',           0.4,   0.9 ),
-            Scan1d('phiM',         -0.3,   0.3  ),
-            Scan1d('phiG',         -0.4,   0.4),
-            Scan1d('qop',          -0.2  , 0.2  ),
-            Scan1d('phi',          -0.4  , 0.4  ),
-            Scan1d('x',             0. ,   0.8 ),
-            Scan1d('y',             0.4,   0.9 ),
-            Scan1d('Delta_Kpi',    -0.8,   0.5 ),
-            Scan1d('R_Kpi',         0.325 , 0.36 ),
-            Scan1d('Acp_KK',       -0.5,   0.5 ),
-            Scan1d('Acp_PP',       -0.4,   0.7 ),
-            Scan1d('cot_delta_KK', -4e2,   4e2 ),
-            Scan1d('cot_delta_PP', -4e2,   4e2 ),
-            ]
+            Scan1d('x12', 0., 0.8),
+            Scan1d('y12', 0.4, 0.9),
+            Scan1d('phiM', -0.3, 0.3),
+            Scan1d('phiG', -0.4, 0.4),
+            Scan1d('qop', -0.2, 0.2),
+            Scan1d('phi', -0.4, 0.4),
+            Scan1d('x', 0., 0.8),
+            Scan1d('y', 0.4, 0.9),
+            Scan1d('Delta_Kpi', -0.8, 0.5),
+            Scan1d('R_Kpi', 0.325, 0.36),
+            Scan1d('Acp_KK', -0.5, 0.5),
+            Scan1d('Acp_PP', -0.4, 0.7),
+            Scan1d('cot_delta_KK', -4e2, 4e2),
+            Scan1d('cot_delta_PP', -4e2, 4e2),
+        ]
     else:
         scans = [
-            Scan1d('x12',           0.2,   0.7 ),
-            Scan1d('y12',           0.5,   0.8 ),
-            Scan1d('phiM',         -0.125,  0.125),
-            Scan1d('phiG',         -0.15,  0.15),
-            Scan1d('qop',          -0.075, 0.075),
-            Scan1d('phi',          -0.125, 0.125),
-            Scan1d('x',             0.2,   0.7 ),
-            Scan1d('y',             0.5,   0.8 ),
-            Scan1d('Delta_Kpi',    -0.5,   0.2 ),
-            Scan1d('R_Kpi',         0.335, 0.355),
-            Scan1d('Acp_KK',       -0.7,   0.7 ),
-            Scan1d('Acp_PP',       -0.4,   0.7 ),
+            Scan1d('x12', 0.2, 0.7),
+            Scan1d('y12', 0.5, 0.8),
+            Scan1d('phiM', -0.125, 0.125),
+            Scan1d('phiG', -0.15, 0.15),
+            Scan1d('qop', -0.075, 0.075),
+            Scan1d('phi', -0.125, 0.125),
+            Scan1d('x', 0.2, 0.7),
+            Scan1d('y', 0.5, 0.8),
+            Scan1d('Delta_Kpi', -0.5, 0.2),
+            Scan1d('R_Kpi', 0.335, 0.355),
+            Scan1d('Acp_KK', -0.7, 0.7),
+            Scan1d('Acp_PP', -0.4, 0.7),
             Scan1d('Acp_KP', -2, 2),
-            Scan1d('cot_delta_KK', -4e2,   4e2 ),
-            Scan1d('cot_delta_PP', -4e2,   4e2 ),
-            ]
+            Scan1d('cot_delta_KK', -4e2, 4e2),
+            Scan1d('cot_delta_PP', -4e2, 4e2),
+        ]
     scans.extend([
         Scan1d('Delta_Kpipi0', -2., 2.),
         Scan1d('Delta_K3pi', -0.5, 1.5),
@@ -113,28 +114,28 @@ def get_scans_2d(combinations, plot_acp_kp=True):
             Scan2d('x', 'y', 0., 0.8, 0.4, 0.9),
             Scan2d('qop', 'phi', -0.2, 0.2, -0.4, 0.4),
             Scan2d('Acp_KK', 'Acp_PP', -0.5, 0.5, -0.5, 0.7),
-            ]
+        ]
     else:
         scans = [
-            Scan2d('x12', 'y12', 0.2, 0.6, 0.55, 0.75),
-            Scan2d('phiM', 'phiG', -0.15, 0.15, -0.15, 0.15),
-            Scan2d('Delta_Kpi', 'R_Kpi', -0.5, 0.05, 0.3375, 0.3525),
-            Scan2d('x', 'y', 0.2, 0.6, 0.55, 0.75),
-            Scan2d('qop', 'phi', -0.075, 0.075, -0.125, 0.075),
-            Scan2d('Acp_KK', 'Acp_PP', -0.3, 0.3, -0.3, 0.5),
-            Scan2d('Acp_KK', 'phiM', -0.3, 0.3, -0.15, 0.15),
-            ]
+            # Scan2d('x12', 'y12', 0.2, 0.6, 0.55, 0.75),
+            # Scan2d('phiM', 'phiG', -0.15, 0.15, -0.15, 0.15),
+            # Scan2d('Delta_Kpi', 'R_Kpi', -0.5, 0.05, 0.3375, 0.3525),
+            # Scan2d('x', 'y', 0.2, 0.6, 0.55, 0.75),
+            # Scan2d('qop', 'phi', -0.075, 0.075, -0.125, 0.075),
+            Scan2d('Acp_KK', 'Acp_PP', -0.1, 0.25, -0.15, 0.45),
+            # Scan2d('Acp_KK', 'phiM', -0.3, 0.3, -0.15, 0.15),
+        ]
     if plot_acp_kp:
         scans.extend([
             Scan2d('Acp_KK', 'Acp_KP', -0.3, 0.3, -2, 2),
             Scan2d('Acp_KP', 'phiM', -2, 2, -0.15, 0.15),
             Scan2d('Acp_KP', 'phiG', -2, 2, -0.15, 0.15),
-            ])
+        ])
     return scans
 
 
 def get_base_options(param, combinations, titles, parfile, already_plotted, lhcb, no_dcs_cpv):
-    options = [f'--param {param}', '--ps 1', '--pulls', '--pr', '--qh 29'] # , '--group off']
+    options = [f'--param {param}', '--ps 1', '--pulls', '--pr', '--qh 29', '--group off']
     for i in range(len(combinations)):
         fix_acp_kpi = no_dcs_cpv is not None and no_dcs_cpv[i]
         options.append('-c {}'.format(int(combinations[i]) + 1000 if fix_acp_kpi else combinations[i]))
@@ -176,8 +177,9 @@ def plot_1d(param, combinations, titles, parfile, already_plotted, scan_dy_rs, l
         tt = copy(titles)
         i = 0
         while i < len(cc):
-            if (scan.full_fsc_only and cc[i] not in _full_fsc_combinations) or (scan.var == 'Acp_KP' and plot_acp_kp and int(cc[i]) >= 1000):
-            # or (scan.var in _cpv_decay_params and ((not isinstance(cc[i], int)) or cc[i] < 40))):  # TODO
+            if (scan.full_fsc_only and cc[i] not in _full_fsc_combinations) or (scan.var == 'Acp_KP' and plot_acp_kp
+                                                                                and int(cc[i]) >= 1000):
+                # or (scan.var in _cpv_decay_params and ((not isinstance(cc[i], int)) or cc[i] < 40))):  # TODO
                 cc.pop(i)
                 if tt is not None:
                     tt.pop(i)
@@ -205,8 +207,10 @@ def plot_2d(param, combinations, titles, parfile, already_plotted, lhcb, no_dcs_
         tt = copy(titles)
         i = 0
         while i < len(cc):
-            if (scan.full_fsc_only and cc[i] not in _full_fsc_combinations) or (any(v == 'Acp_KP' for v in [scan.var_x, scan.var_y]) and plot_acp_kp and int(cc[i]) >= 1000):
-            # or (any(v in _cpv_decay_params for v in [scan.var_x, scan.var_y]) and ((not isinstance(cc[i], int)) or cc[i] < 40))):  # TODO
+            if (scan.full_fsc_only and cc[i] not in _full_fsc_combinations) or (any(v == 'Acp_KP'
+                                                                                    for v in [scan.var_x, scan.var_y])
+                                                                                and plot_acp_kp and int(cc[i]) >= 1000):
+                # or (any(v in _cpv_decay_params for v in [scan.var_x, scan.var_y]) and ((not isinstance(cc[i], int)) or cc[i] < 40))):  # TODO
                 cc.pop(i)
                 if tt is not None:
                     tt.pop(i)
@@ -239,17 +243,25 @@ def str_to_bool(v):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-p', '--param', choices=['phenomenological', 'theoretical', 'superweak'],
-                        default='theoretical', help='Parametrisation to be used in the combination')
+    parser.add_argument('-p',
+                        '--param',
+                        choices=['phenomenological', 'theoretical', 'superweak'],
+                        default='theoretical',
+                        help='Parametrisation to be used in the combination')
     parser.add_argument('-c', '--combinations', nargs='+', default=[50], help='Combinations to plot')
-    parser.add_argument('-t', '--titles', nargs='+', default=None,
+    parser.add_argument('-t',
+                        '--titles',
+                        nargs='+',
+                        default=None,
                         help='Titles for the combinations to plot. If none, the default values are used.')
     parser.add_argument('--1d', action='store_true', dest='plot_1d', help='Make the 1d plots')
     parser.add_argument('--2d', action='store_true', dest='plot_2d', help='Make the 2d plots')
     parser.add_argument('--parfile', default=None, help='File with initial value of the parameters')
     parser.add_argument(
-            '-a', '--already-plotted', action='store_true',
-            help='Do not rerun the combination and just plot the results retrieving them from a previous execution.')
+        '-a',
+        '--already-plotted',
+        action='store_true',
+        help='Do not rerun the combination and just plot the results retrieving them from a previous execution.')
     parser.add_argument('--scan-dy-rs', action='store_true', help='Provide predictions for the value of DY(K- pi+).')
     parser.add_argument('--lhcb', action='store_true', help='Add the `LHCb` label to the plot')
     parser.add_argument('--no-dcs-cpv', type=str_to_bool, nargs='+', default=None, help='Set A_CP(K+ pi-) to zero')
@@ -257,7 +269,8 @@ def parse_args():
     if args.titles is not None:
         assert len(args.titles) == len(args.combinations), 'You should provide one title for each combination'
     if args.no_dcs_cpv is not None:
-        assert len(args.no_dcs_cpv) == len(args.combinations), 'You should tell whether CPV is allowed in DCS decays for each combination'
+        assert len(args.no_dcs_cpv) == len(
+            args.combinations), 'You should tell whether CPV is allowed in DCS decays for each combination'
     fn_args = copy(vars(args))
     del fn_args['plot_1d'], fn_args['plot_2d']
     if args.plot_1d:

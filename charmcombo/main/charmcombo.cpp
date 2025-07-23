@@ -5,6 +5,7 @@
 
 #include <CharmUtils.h>
 #include <PDF_AcpHH_LHCb_Run12.h>
+#include <PDF_AcpHH_Nico.h>
 #include <PDF_BES_CLEO_K3pi_Kpipi0.h>
 #include <PDF_BES_Kpi.h>
 #include <PDF_BES_Kpi_1d.h>
@@ -178,6 +179,7 @@ int main(int argc, char* argv[]) {
   gc.addPdf(91, new PDF_AcpHH_LHCb_Run12(th_cfg, FSC::partial),                            "ACP(KK/PP)   LHCb     Run1+2   [partial FSC]");
   gc.addPdf(92, new PDF_AcpHH_LHCb_Run12(th_cfg, FSC::full),                               "ACP(KK/PP)   LHCb     Run1+2   [full FSC]   ");
   gc.addSubsetPdf(93, new PDF_AcpHH_LHCb_Run12(th_cfg, FSC::none), 0, 1, 4, 5,             "ACP(KK/PP)   LHCb     Run1     [no FSC]");
+  gc.addPdf(94, new PDF_AcpHH_Nico(th_cfg, FSC::none),                               "ACP(KK/PP)   LHCb     Nico     [no FSC]     ");
 
   gc.addPdf(100, new PDF_scan_DY_RS(th_cfg),                                               "ScanDYRS     This is just a nuisance parameter");
 
@@ -282,6 +284,11 @@ int main(int argc, char* argv[]) {
   gc.cloneCombiner(55, 54, "WANov2024NoFSC", "World average (November 2024)");
   gc.getCombiner(55)->delPdf(gc[20]);  // D0 -> KS hh from Belle
   gc.getCombiner(55)->addPdf(gc[6]);   // D0 -> KS pi pi BinFlip Belle + Belle 2
+
+  // WA after Nico's thesis
+  gc.cloneCombiner(56, 55, "WANico", "World average (Nico's thesis)");
+  gc.getCombiner(56)->delPdf(gc[90]);  // D0 -> KS hh from Belle
+  gc.getCombiner(56)->addPdf(gc[94]);  // D0 -> KS pi pi BinFlip Belle + Belle 2
 
   // LHCb-only averages ----------------------------------------------------------------------------------------------
 
