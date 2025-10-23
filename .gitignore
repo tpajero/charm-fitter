@@ -1,9 +1,22 @@
-*.root
-build*/
-charmcombo/bin/
-charmcombo/plots/
 doc/html/
 doc/latex/
+build*/
+bin/
+plots/
+blue/figs
+
 .DS_Store
+*~
+.*.swp
+*.pyc
+*.pyo
+*.root
+
+# IDEs
 .cproject
 .project
+.settings
+.pydevproject
+.eclipse/
+CMakeLists.txt.user
+.vscode/
