@@ -1,0 +1,37 @@
+axes.labelsize : 22
+
+xtick.direction : in
+ytick.direction : in
+xtick.major.size : 7
+ytick.major.size : 7
+xtick.minor.size : 4
+ytick.minor.size : 4
+xtick.labelsize : 18
+ytick.labelsize : 18
+xtick.top : True
+ytick.right : True
+xtick.minor.visible : True
+ytick.minor.visible : True
+
+font.family: serif
+font.serif:  Times New Roman
+font.size:   16
+font.weight: 400
+
+text.usetex : True
+text.latex.preamble : \usepackage{amsmath}
+
+errorbar.capsize : 2
+
+legend.fontsize : 14
+legend.edgecolor : "1"
+legend.borderpad : 0.1
+legend.handleheight : 1.0
+legend.handlelength : 1.8
+legend.frameon : False
+legend.handletextpad : 0.4
+legend.labelspacing : 0.3
+
+hatch.linewidth : 0.3
+
+figure.constrained_layout.use : True
