@@ -17,7 +17,6 @@ ParametersCharmCombo::ParametersCharmCombo() { defineParameters(); }
  *
  * scan:  defines scan range (for Prob and Plugin methods)
  * phys:  physically allowed range (needs to be set!)
- * free:  range applied when no boundary is required - set this far away from any possible value
  */
 void ParametersCharmCombo::defineParameters() {
   Parameter* p = nullptr;
@@ -29,7 +28,6 @@ void ParametersCharmCombo::defineParameters() {
   p->unit = "";
   p->scan = range(-2, 2);
   p->phys = range(-100, 100);
-  p->free = range(-1e4, 1e4);
 
   // CP asymmetry in the decay (``direct'' CP asymmetry) of D0 -> pi+ pi-
   p = newParameter("Acp_PP");
@@ -38,7 +36,6 @@ void ParametersCharmCombo::defineParameters() {
   p->unit = "";
   p->scan = range(-2, 2);
   p->phys = range(-100, 100);
-  p->free = range(-1e4, 1e4);
 
   // CP asymmetry in the decay (``direct'' CP asymmetry) of D0 -> K+ pi-
   p = newParameter("Acp_KP");
@@ -47,7 +44,6 @@ void ParametersCharmCombo::defineParameters() {
   p->unit = "";
   p->scan = range(-2.5, 2);
   p->phys = range(-100, 100);
-  p->free = range(-1e4, 1e4);
 
   // Ratio of the squared magnitudes of the decay amplitudes of D0 -> K+ pi- to D0 -> K- pi+
   p = newParameter("R_Kpi");
@@ -56,7 +52,6 @@ void ParametersCharmCombo::defineParameters() {
   p->unit = "";
   p->scan = range(0.33, 0.36);
   p->phys = range(0, 1e4);
-  p->free = range(0, 1e4);
 
   // Ratio of the magnitudes of the decay amplitudes of D0 -> K+ pi- pi- pi+ to D0 -> K- pi- pi+ pi+
   p = newParameter("r_K3pi");
@@ -65,7 +60,6 @@ void ParametersCharmCombo::defineParameters() {
   p->unit = "";
   p->scan = range(4, 6);
   p->phys = range(0, 1e4);
-  p->free = range(0, 1e4);
 
   // Ratio of the magnitudes of the decay amplitudes of D0 -> K+ pi- pi0 to D0 -> K- pi+ pi0
   p = newParameter("r_Kpipi0");
@@ -74,7 +68,6 @@ void ParametersCharmCombo::defineParameters() {
   p->unit = "";
   p->scan = range(4, 6);
   p->phys = range(0, 1e4);
-  p->free = range(0, 1e4);
 
   // Coherence parameters for the decay amplitudes of D0 -> K+ pi- pi- pi+ to D0 -> K- pi- pi+ pi+
   p = newParameter("k_K3pi");
@@ -83,7 +76,6 @@ void ParametersCharmCombo::defineParameters() {
   p->unit = "";
   p->scan = range(0., 1.);
   p->phys = range(0, 1e4);
-  p->free = range(0, 1e4);
 
   // Coherence parameters for the decay amplitudes of D0 -> K+ pi- pi0 to D0 -> K- pi+ pi0
   p = newParameter("k_Kpipi0");
@@ -92,7 +84,6 @@ void ParametersCharmCombo::defineParameters() {
   p->unit = "";
   p->scan = range(0., 1.);
   p->phys = range(0, 1e4);
-  p->free = range(0, 1e4);
 
   // Strong-phase difference between the decay amplitudes of D0 -> K+ pi- to D0 -> K- pi+
   // Follows the convention of:
@@ -104,7 +95,6 @@ void ParametersCharmCombo::defineParameters() {
   p->unit = "";
   p->scan = range(DegToRad(-180), DegToRad(180));
   p->phys = range(DegToRad(-180), DegToRad(180));
-  p->free = range(DegToRad(-180), DegToRad(180));
 
   // Strong-phase difference between the decay amplitudes of D0 -> K+ pi- pi0 to D0 -> K- pi+ pi0
   p = newParameter("Delta_Kpipi0");
@@ -113,7 +103,6 @@ void ParametersCharmCombo::defineParameters() {
   p->unit = "";
   p->scan = range(DegToRad(-180), DegToRad(180));
   p->phys = range(DegToRad(-180), DegToRad(180));
-  p->free = range(DegToRad(-180), DegToRad(180));
 
   // Strong-phase difference between the decay amplitudes of D0 -> K+ pi- pi- pi+ and D0 -> K- pi- pi+ pi+
   // Follows the convention of:
@@ -125,7 +114,6 @@ void ParametersCharmCombo::defineParameters() {
   p->unit = "";
   p->scan = range(DegToRad(-180), DegToRad(180));
   p->phys = range(DegToRad(-180), DegToRad(180));
-  p->free = range(DegToRad(-180), DegToRad(180));
 
   // Parametrising the decay amplitude of D0 -> K+ K- decays as
   //
@@ -138,7 +126,6 @@ void ParametersCharmCombo::defineParameters() {
   p->unit = "";
   p->scan = range(-1e4, 1e4);
   p->phys = range(-1e4, 1e4);
-  p->free = range(-1e4, 1e4);
 
   // Parametrising the decay amplitude of D0 -> pi+ pi- decays as
   //
@@ -151,7 +138,6 @@ void ParametersCharmCombo::defineParameters() {
   p->unit = "";
   p->scan = range(-1e4, 1e4);
   p->phys = range(-1e4, 1e4);
-  p->free = range(-1e4, 1e4);
 
   // CP-even fraction of D0 -> pi+ pi- pi0
   p = newParameter("F_pipipi0");
@@ -171,7 +157,6 @@ void ParametersCharmCombo::defineParameters() {
   p->unit = "";
   p->scan = range(-0.4, 1.);
   p->phys = range(-1e4, 1e4);
-  p->free = range(-1e4, 1e4);
 
   p = newParameter("y");
   p->title = "#it{y} [%]";
@@ -179,7 +164,6 @@ void ParametersCharmCombo::defineParameters() {
   p->unit = "";
   p->scan = range(0.1, 1);
   p->phys = range(-1e4, 1e4);
-  p->free = range(-1e4, 1e4);
 
   p = newParameter("qop");
   p->title = "|#it{q/p}|#minus1";
@@ -187,7 +171,6 @@ void ParametersCharmCombo::defineParameters() {
   p->unit = "";
   p->scan = range(-0.25, 0.25);
   p->phys = range(-1., 1e4);
-  p->free = range(-1., 1e4);
 
   p = newParameter("phi");
   p->title = "#it{#phi}_{2} [rad]";
@@ -195,7 +178,6 @@ void ParametersCharmCombo::defineParameters() {
   p->unit = "";
   p->scan = range(-0.6, 0.6);
   p->phys = range(DegToRad(-180.), DegToRad(180.));
-  p->free = range(DegToRad(-180.), DegToRad(180.));
 
   /**
    * Theoretical parametrisation
@@ -206,7 +188,6 @@ void ParametersCharmCombo::defineParameters() {
   p->unit = "";
   p->scan = range(0, 1);
   p->phys = range(0, 1e4);
-  p->free = range(0, 1e4);
 
   p = newParameter("y12");
   p->title = "#it{y}_{12} [%]";
@@ -214,7 +195,6 @@ void ParametersCharmCombo::defineParameters() {
   p->unit = "";
   p->scan = range(0., 1.1);
   p->phys = range(0, 1e4);
-  p->free = range(0, 1e4);
 
   p = newParameter("phiM");
   p->title = "#it{#phi}^{#it{M}}_{2} [rad]";
@@ -222,7 +202,6 @@ void ParametersCharmCombo::defineParameters() {
   p->unit = "";
   p->scan = range(-0.5, 0.5);
   p->phys = range(-1.5, -1.5 + DegToRad(360.));
-  p->free = range(-1.5, -1.5 + DegToRad(360.));
 
   p = newParameter("phiG");
   p->title = "#it{#phi}^{#Gamma}_{2} [rad]";
@@ -230,7 +209,6 @@ void ParametersCharmCombo::defineParameters() {
   p->unit = "";
   p->scan = range(-0.3, 0.3);
   p->phys = range(DegToRad(-180.), DegToRad(180.));
-  p->free = range(DegToRad(-180.), DegToRad(180.));
 
   // Nuisance parameter to get predictions for CP violation in RS decays
   p = newParameter("DY_RS");
@@ -239,7 +217,6 @@ void ParametersCharmCombo::defineParameters() {
   p->unit = "";
   p->scan = range(0., 1.);
   p->phys = range(0., 1e4);
-  p->free = range(0., 1e4);
 
   // Parameters for (D0 -> Kpi)-only combination
   p = newParameter("xp2");
@@ -248,7 +225,6 @@ void ParametersCharmCombo::defineParameters() {
   p->unit = "";
   p->scan = range(-4, 4);
   p->phys = range(-1e4, 1e4);
-  p->free = range(-1e4, 1e4);
 
   p = newParameter("yp");
   p->title = "#it{y'} [%]";
@@ -256,7 +232,6 @@ void ParametersCharmCombo::defineParameters() {
   p->unit = "";
   p->scan = range(0.1, 1);
   p->phys = range(-1e4, 1e4);
-  p->free = range(-1e4, 1e4);
 
   p = newParameter("dxp2");
   p->title = "#it{#Delta x'}^{2} [10^{#minus4}]";
@@ -264,7 +239,6 @@ void ParametersCharmCombo::defineParameters() {
   p->unit = "";
   p->scan = range(-0.4, 1.);
   p->phys = range(-1e4, 1e4);
-  p->free = range(-1e4, 1e4);
 
   p = newParameter("dyp");
   p->title = "#it{#Delta y'} [%]";
@@ -272,5 +246,4 @@ void ParametersCharmCombo::defineParameters() {
   p->unit = "";
   p->scan = range(0.1, 1);
   p->phys = range(-1e4, 1e4);
-  p->free = range(-1e4, 1e4);
 }

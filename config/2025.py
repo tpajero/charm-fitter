@@ -61,7 +61,7 @@ plots_2d = [
 
 # List the IDs and titles for all combinations that may be passed to the main plotting script.
 combiners_info = {
-    55: ("WANov2024NoFSC", "WA 2024"),
+    55: ("WAOct2025NoFSC", "WA 2025"),
 }
 for k in list(combiners_info.keys()):
     combiners_info[k + 1000] = (

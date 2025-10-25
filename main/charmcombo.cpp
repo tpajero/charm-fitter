@@ -9,6 +9,7 @@
 #include <PDF_BES_CLEO_K3pi_Kpipi0.h>
 #include <PDF_BES_Kpi.h>
 #include <PDF_BES_Kpi_1d.h>
+#include <PDF_BES_Kpi_7d.h>
 #include <PDF_BinFlip.h>
 #include <PDF_Cleo.h>
 #include <PDF_DY.h>
@@ -156,6 +157,7 @@ int main(int argc, char* argv[]) {
   gc.addPdf(53, new PDF_Fp_pipipi0("Cleo-c"),                                              "Fpipipi0     Cleo-c                         ");
   gc.addPdf(54, new PDF_BES_CLEO_K3pi_Kpipi0("BES3-CLEO"),                                 "K3pi-Kpipi0  BES3 + Cleo                    ");
   gc.addPdf(55, new PDF_Fp_pipipi0("BESIII"),                                              "Fpipipi0     BES3                           ");
+  gc.addPdf(56, new PDF_BES_Kpi_7d(th_cfg),                                                "Delta_Kpi    BES3     3+7fb                 ");
 
   gc.addPdf(60, new PDF_yCP("WA2020", th_cfg),                                             "yCP          WA       2020                  ");
   gc.addPdf(61, new PDF_yCP_minus_yCP_RS("WA2020", th_cfg),                                "yCP-yCP(RS)  WA       2020                  ");
@@ -279,10 +281,12 @@ int main(int argc, char* argv[]) {
   gc.getCombiner(54)->delPdf(gc[35]);  // WS/RS in D0 -> Kpi from LHCb Run 1 DT
   gc.getCombiner(54)->addPdf(gc[41]);  // WS/RS in D0 -> Kpi from LHCb Run 1+2 DT
 
-  // WA November 2024 (new BinFlip from Belle + Belle 2)
-  gc.cloneCombiner(55, 54, "WANov2024NoFSC", "World average (November 2024)");
+  // WA October 2025 (new BinFlip from Belle + Belle 2, new BESIII Delta_Kpi, no new LHCb D0 -> K3pi Run 2)
+  gc.cloneCombiner(55, 54, "WAOct2025NoFSC", "World average (October 2025)");
   gc.getCombiner(55)->delPdf(gc[20]);  // D0 -> KS hh from Belle
   gc.getCombiner(55)->addPdf(gc[6]);   // D0 -> KS pi pi BinFlip Belle + Belle 2
+  gc.getCombiner(55)->delPdf(gc[52]);  // D0 -> Kpi BESIII 3   fb
+  gc.getCombiner(55)->addPdf(gc[56]);  // D0 -> Kpi BESIII 3+7 fb
 
   // LHCb-only averages ----------------------------------------------------------------------------------------------
 
