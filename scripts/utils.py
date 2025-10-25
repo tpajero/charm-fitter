@@ -265,7 +265,7 @@ class plotter:
                 loc="upper right",
                 fontsize=12,
             )
-        elif self.logo == "r" and self.legpos == "l":
+        elif self.logo in ["r", "br"] and self.legpos == "l":
             legopts = dict(
                 bbox_to_anchor=(
                     0.01,
@@ -385,7 +385,7 @@ class plotter:
         if self.logo == "l":
             logo_x, logo_y = 0.03, 0.92
         elif self.logo == "br":
-            logo_x, logo_y = 0.69, 0.08
+            logo_x, logo_y = 0.69, 0.06
         else:
             logo_x, logo_y = 0.69, 0.92
         charm_fitter_logo(pos=[logo_x, logo_y], date=None, ax=ax)

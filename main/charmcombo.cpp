@@ -281,24 +281,40 @@ int main(int argc, char* argv[]) {
   gc.getCombiner(54)->delPdf(gc[35]);  // WS/RS in D0 -> Kpi from LHCb Run 1 DT
   gc.getCombiner(54)->addPdf(gc[41]);  // WS/RS in D0 -> Kpi from LHCb Run 1+2 DT
 
-  // WA October 2025 (new BinFlip from Belle + Belle 2, new BESIII Delta_Kpi, no new LHCb D0 -> K3pi Run 2)
+  // WA October 2025 (new BinFlip from Belle + Belle 2, new BESIII Delta_Kpi, no new LHCb D0 -> K3pi Run 2) ------------
   gc.cloneCombiner(55, 54, "WAOct2025NoFSC", "World average (October 2025)");
   gc.getCombiner(55)->delPdf(gc[20]);  // D0 -> KS hh from Belle
   gc.getCombiner(55)->addPdf(gc[6]);   // D0 -> KS pi pi BinFlip Belle + Belle 2
   gc.getCombiner(55)->delPdf(gc[52]);  // D0 -> Kpi BESIII 3   fb
   gc.getCombiner(55)->addPdf(gc[56]);  // D0 -> Kpi BESIII 3+7 fb
 
-  // LHCb-only averages ----------------------------------------------------------------------------------------------
+  gc.cloneCombiner(56, 55, "WAOct2025PartialFSC", "World average (October 2025, partial FSC)");
+  gc.getCombiner(56)->delPdf(gc[72],  // DY  no FSC
+                             gc[90]   // ACP no FSC
+  );
+  gc.getCombiner(56)->addPdf(gc[75],  // DY  partial FSC
+                             gc[91]   // ACP partial FSC
+  );
+
+  gc.cloneCombiner(57, 55, "WAOct2025FullFSC", "World average (October 2025, full FSC)");
+  gc.getCombiner(57)->delPdf(gc[72],  // DY  no FSC
+                             gc[90]   // ACP no FSC
+  );
+  gc.getCombiner(57)->addPdf(gc[76],  // DY  full FSC
+                             gc[92]   // ACP full FSC
+  );
+
+  // LHCb-only averages ------------------------------------------------------------------------------------------------
 
   gc.newCombiner(300, "LHCbMar2024NoFSC", "LHCb average (May 2024)");
   for (const auto imeas : get_lhcb_pdfs("run12", FSC::none)) gc.getCombiner(300)->addPdf(gc[imeas]);
 
-  // LHCb-only + charm factories averages ----------------------------------------------------------------------------
+  // LHCb-only + charm factories averages ------------------------------------------------------------------------------
 
   gc.cloneCombiner(400, 300, "LHCbCFMar2024NoFSC", "LHCb + Charm factories average (May 2024)");
   for (auto imeas : {50, 52, 53}) gc.getCombiner(400)->addPdf(gc[imeas]);
 
-  // Impact of LHCb upgrades -----------------------------------------------------------------------------------------
+  // Impact of LHCb upgrades -------------------------------------------------------------------------------------------
 
   // WA before LHCb Run 2
   gc.newCombiner(500, "LHCb_Run1", "World average before LHCb Run 2");

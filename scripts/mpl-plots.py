@@ -23,8 +23,24 @@ def cwd(path):
         os.chdir(oldpwd)
 
 
+def combiner_string(pdf_ids, no_cpv_dcs=False):
+    empty_combiner = 1000 if no_cpv_dcs else 0
+    return f"-c {empty_combiner}:+" + ",+".join([str(pdf_id) for pdf_id in pdf_ids])
+
+
+def combiner_file_string(pdf_ids, no_cpv_dcs=False):
+    return f"_empty{'NoDcsCPV' if no_cpv_dcs else ''}+" + "+".join([str(pdf_id) for pdf_id in pdf_ids])
+
+
 def parse_args():
-    actions = ["all", "scans-1d", "scans-1d-no-dcs-cpv", "scans-2d", "scans-2d-no-dcs-cpv"]
+    actions = [
+        "all",
+        "scans-1d",  # 1D scans,        allow for CPV in DCS decays
+        "scans-1d-no-dcs-cpv",  # 1D scans, do not allow for CPV in DCS decays
+        "scans-2d",  # 2D scans,        allow for CPV in DCS decays
+        "scans-2d-no-dcs-cpv",  # 2D scans, do not allow for CPV in DCS decays
+        "scans-acp",  # Compare ACP(KK) vs ACP(pipi) under different hypotheses for DeltaY
+    ]
     parser = ArgumentParser()
     parser.add_argument("-e", "--execfile", type=str, default="charmcombo", help="Executable name")
     parser.add_argument(
@@ -127,6 +143,54 @@ def run_scans_2d(args, cfg, no_dcs_cpv=False):
     run_commands(cmds)
 
 
+def run_scans_2d_acp(args, cfg, no_dcs_cpv=False):
+    cmds = []
+    xpar, ypar = cfg.params["Acp_KK"], cfg.params["Acp_PP"]
+    for combiner_id in cfg.combiners_acp(no_dcs_cpv):
+        cmd = (
+            f"bin/{args.execfile} -c {combiner_id} --var {xpar.id} --var {ypar.id} --pr --ps 1"
+            f" --scanrange  {xpar.range2d[0]}:{xpar.range2d[1]}"
+            f" --scanrangey {ypar.range2d[0]}:{ypar.range2d[1]}"
+            " --param theoretical"
+        )
+        if no_dcs_cpv:
+            cmd += " --fix Acp_KP=0"
+        if not args.rescan:
+            cmd += " -a plot"
+        cmds.append(cmd)
+    run_commands(cmds)
+
+
+def run_scans_2d_breakup(args, cfg, no_dcs_cpv=False):
+    cmds = []
+    for plot_2d in cfg.plots_2d:
+        xpar, ypar = cfg.params[plot_2d.pars[0]], cfg.params[plot_2d.pars[1]]
+        if no_dcs_cpv and "Acp_KP" in [xpar.id, ypar.id]:
+            continue
+
+        #     cmds.append( f"bin/{args.execfile} {combiner_string( cfg.sub_comb_dict['Charm_lhcb_k3pi'] )} --var xD --var yD --scanrange -0.002:0.02 --scanrangey -0.002:0.02 --pr --ps 1" )
+        #     cmds.append( f"bin/{args.execfile} {combiner_string( cfg.sub_comb_dict['Charm_all_kpi'] )} --var xD --var yD --scanrange -0.002:0.012 --scanrangey -0.002:0.014 --pr --ps 1" )
+        #     cmds.append( f"bin/{args.execfile} {combiner_string( cfg.sub_comb_dict['Charm_lhcb_hh'] )} --var xD --var yD --scanrange -0.002:0.012 --scanrangey 0.005:0.008 --pr --ps 1" + fix_params_string(['qopD', 'phiD', 'rD_kpi', 'dD_kpi']))
+        #     cmds.append( f"bin/{args.execfile} {combiner_string( cfg.sub_comb_dict['Charm_lhcb_kspipi'] )} --var xD --var yD --scanrange 0.002:0.007 --scanrangey 0.002:0.01 --pr --ps 1" )
+
+        # cmd = (
+        #     f"bin/{args.execfile} -c {combiner_id} --var {xpar.id} --var {ypar.id} --pr --ps 1"
+        #     f" --scanrange  {xpar.range2d[0]}:{xpar.range2d[1]}"
+        #     f" --scanrangey {ypar.range2d[0]}:{ypar.range2d[1]}"
+        # )
+        # cmd += (
+        #     " --param phenomenological"
+        #     if "pheno" in [xpar.parametrisation, ypar.parametrisation]
+        #     else " --param theoretical"
+        # )
+        # if no_dcs_cpv:
+        #     cmd += " --fix Acp_KP=0"
+        # if not args.rescan:
+        #     cmd += " -a plot"
+        # cmds.append(cmd)
+    run_commands(cmds)
+
+
 def dirname_from_combiners(combiners):
     """Set the name of the output directory, starting from a list of combiners."""
 
@@ -172,7 +236,7 @@ def make_plots_1d(combiners, cfg, savedir):
 
 
 def make_plots_2d(combiners, cfg, savedir):
-    """Plot the 1D comparison of a set of combiners, for all pairs parameters in the configuration file."""
+    """Plot the 2D comparison of a set of combiners, for all pairs parameters in the configuration file."""
 
     out_dir = os.path.join(savedir, dirname_from_combiners(combiners), "2d")
     os.makedirs(out_dir, exist_ok=True)
@@ -205,6 +269,37 @@ def make_plots_2d(combiners, cfg, savedir):
                 marker=cfg.markers[i],
             )
         plot.plot()
+
+
+def make_plots_2d_acp(cfg, savedir, no_dcs_cpv=False):
+    out_dir = os.path.join(savedir, str(list(cfg.combiners_acp(False).keys())[-1]))
+    os.makedirs(out_dir, exist_ok=True)
+
+    xpar, ypar = cfg.params["Acp_KK"], cfg.params["Acp_PP"]
+    suffix = "-no-dcs-cpv" if no_dcs_cpv else ""
+    plot = plotter(
+        dim=2,
+        save=f"{out_dir}/{xpar.id}-{ypar.id}{suffix}.pdf",
+        xtitle=xpar.title,
+        ytitle=ypar.title,
+        xrange=xpar.range2d,
+        yrange=(-0.1, 0.9),
+        levels=3,
+        logo="br",
+        legpos="l",
+    )
+    for i, (combiner, title) in enumerate(cfg.combiners_acp(no_dcs_cpv).items()):
+        scan_name = f"theoretical_scanner_{cfg.combiners_info[combiner][0]}"
+        plot.add_scan(
+            scan_name,
+            pars=[xpar.id, ypar.id],
+            label=title,
+            bf=True,
+            col=cfg.colors_acp[i],
+            ls=cfg.ls_acp[i],
+            marker=cfg.markers_acp[i],
+        )
+    plot.plot()
 
 
 if __name__ == "__main__":
@@ -242,6 +337,12 @@ if __name__ == "__main__":
             run_scans_2d(args, cfg, no_dcs_cpv=True)
             make_plots_2d([args.combiner_id + 1000], cfg, args.savedir)
             make_plots_2d([args.combiner_id, args.combiner_id + 1000], cfg, args.savedir)
+
+        # Run 2D scans for ACP comparisons with different methods
+        if any(x in ["all", "scans-acp"] for x in args.actions):
+            for no_dcs_cpv in [False, True]:
+                run_scans_2d_acp(args, cfg, no_dcs_cpv)
+                make_plots_2d_acp(cfg, args.savedir, no_dcs_cpv)
 
     if args.interactive:
         plt.show()

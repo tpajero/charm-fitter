@@ -1,17 +1,10 @@
-class Parameter:
-    """Class to define the objects related to a scan parameter in a single place."""
+import os
+import sys
 
-    def __init__(self, identifier, title, range1d, parametrisation, range2d=None, degrees=False):
-        assert parametrisation in ["theo", "pheno", "both"]
-        self.id = identifier
-        self.title = title
-        self.parametrisation = parametrisation
-        self.range1d = range1d
-        self.range2d = range2d if range2d else range1d
-        self.degrees = degrees
-        if self.degrees:
-            self.title += r"\,[^\circ]$"
+config_dir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
+sys.path.append(os.path.abspath(config_dir))
 
+from classes import Parameter, Plot2d, Subcombination
 
 # List all CharmCombo parameters with the properties to be used for plotting.
 params = {
@@ -38,15 +31,6 @@ params = {
 }
 
 
-class Plot2d:
-    """Class to define the properties of 2D plots."""
-
-    def __init__(self, pars, logo="r", legpos="l"):
-        self.pars = pars
-        self.logo = logo
-        self.legpos = legpos
-
-
 # List all pairs of parameters for which 2D scans should be prepared.
 plots_2d = [
     Plot2d(("x12", "y12")),
@@ -62,6 +46,8 @@ plots_2d = [
 # List the IDs and titles for all combinations that may be passed to the main plotting script.
 combiners_info = {
     55: ("WAOct2025NoFSC", "WA 2025"),
+    56: ("WAOct2025PartialFSC", ""),
+    57: ("WAOct2025FullFSC", ""),
 }
 for k in list(combiners_info.keys()):
     combiners_info[k + 1000] = (
@@ -70,27 +56,38 @@ for k in list(combiners_info.keys()):
     )
 
 
-class Subcombination:
-    """Class to define the PDFs and title of a subcombination of measurements."""
+def combiners_acp(no_dcs_cpv=False):
+    combiners = {
+        57: r"$\Delta Y_{f} = - x_{12}\sin\phi^M_2 + y_{12} a^{\rm d}_f (1 + \cot\delta x_{12} / y_{12})$",
+        56: r"$\Delta Y_{f} = - x_{12}\sin\phi^M_2 + y_{12} a^{\rm d}_f$",
+        55: r"$\Delta Y_{f} = - x_{12}\sin\phi^M_2$",
+    }
+    if no_dcs_cpv:
+        tmp = combiners.copy()
+        combiners = {}
+        for k, v in tmp.items():
+            combiners[k + 1000] = v
+    return combiners
 
-    def __init__(self, title, pdfs):
-        self.title = title
-        self.pdfs = pdfs
 
-
-# dict which lists which pdfs are included for each subcombination
+# Dictionary of all subcombinations, of their titles and PDFs.
 sub_comb_dict = {
-    "cc_kpi": Subcombination(r"CLEO/BES $D^0 \to K^\pm \pi^\mp$", [254, 256]),
-    "lhcb_kpi": Subcombination(r"LHCb $D^0 \to K^\pm \pi^\mp$", [220, 216]),
-    "all_kpi": Subcombination(r"$D^0 \to K^\pm \pi^\mp$", [220, 216, 254, 256]),
-    "k3pi": Subcombination(r"$D^0 \to K_S^0 \pi^+\pi^-$", [206, 188]),
-    "kspipi": Subcombination(r"$D^0 \to K_S^0 \pi^+\pi^-$", [201, 202, 222, 188]),
-    "hh": Subcombination(r"$D^0 \to K^\pm \pi^\mp$", [219, 213, 217, 214]),
+    "cc_kpi": Subcombination(r"CLEO/BESIII $D^0 \to K^\pm \pi^\mp$", [50, 55, 56]),
+    "lhcb_kpi": Subcombination(r"LHCb $D^0 \to K^\pm \pi^\mp$", [39, 41]),
+    "all_kpi": Subcombination(r"$D^0 \to K^\pm \pi^\mp$", [39, 41, 50, 55, 56]),
+    "k3pi": Subcombination(r"$D^0 \to K^\pm \pi^\mp \pi^+ \pi^-$", [5, 54]),
+    "kspipi": Subcombination(r"$D^0 \to K_S^0 \pi^+\pi^-$", [1, 3, 21, 24]),
+    "hh": Subcombination(r"$D^0 \to h^+ h^-$", [61, 62, 72, 64, 72]),
 }
 
+# Style for 1D and 2D plots.
 colors = ["r", "lb", "y", "o", "g", "p", "b"]
 ls = ["longdash", "-", "shortdash", "dashdot", "dash3dots", "dash2dots", "dots"]
 
 colors_2d = ["r", "lb", "y", "o", "g", "p", "b"]
 ls_2d = ["longdash", "-", "shortdash", "dashdot", "dash3dots", "dash2dots", "dots"]
-markers = ["o", "P"]
+markers = ["o", "P", "s"]
+
+colors_acp = ["y", "r", "lb"]
+ls_acp = ["shortdash", "longdash", "-"]
+markers_acp = ["o", "s", "P"]
