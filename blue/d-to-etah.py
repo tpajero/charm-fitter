@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Plot the values of all existing measurements of ACP and BF of D(s)+ -> eta(') h+ decays,
-plus the PDG 2024 average.
+plus the PDG 2025 average.
 """
 
 import itertools
@@ -26,62 +26,64 @@ def get_measures(meas_type, decay, date):
             "dp-to-etapi": [
                 Measurement(
                     "CLEO", "0906.3198", 3.63e-3, 0.08e-3, 0.18e-3, 0.06e-3
-                ),  # Using PDG 2024 for D+ -> K- pi+ pi+; original values (3.54e-3, 0.08e-3, 0.18e-3, 0.08e-3)
+                ),  # Using PDG 2025 for D+ -> K- pi+ pi+; original values (3.54e-3, 0.08e-3, 0.18e-3, 0.08e-3)
                 Measurement("BES III", "1802.03119", 3.790e-3, 0.070e-3, 0.068e-3),
-                Measurement("PDG 2024", None, 3.77e-3, 0.09e-3),
+                Measurement("PDG 2025", None, 3.77e-3, 0.09e-3),
             ],
             "dp-to-etappi": [
                 Measurement(
                     "CLEO", "0906.3198", 4.80e-3, 0.16e-3, 0.23e-3, 0.08e-3
-                ),  # Using PDG 2024 for D+ -> K- pi+ pi+; original values (4.68e-3, 0.16e-3, 0.23e-3, 0.10e-3)
+                ),  # Using PDG 2025 for D+ -> K- pi+ pi+; original values (4.68e-3, 0.16e-3, 0.23e-3, 0.10e-3)
                 Measurement(
                     "BES III", "1802.03119", 5.12e-3, 0.14e-3, 0.02e-3
                 ),  # TODO typo in the PDG result (one missing zero in sys. unc.)
-                Measurement("PDG 2024", None, 4.97e-3, 0.19e-3),
+                Measurement("PDG 2025", None, 4.97e-3, 0.19e-3),
             ],
             "dp-to-etak": [
                 Measurement("Belle", "1107.0553", 1.15e-4, 0.16e-4, 0.05e-4, 0.03e-4),
-                Measurement("BES III", "1802.03119", 1.51e-4, 0.25e-4, 0.14e-4),
-                Measurement("PDG 2024", None, 1.25e-4, 0.16e-4),
+                Measurement("BES III 2018", "1802.03119", 1.51e-4, 0.25e-4, 0.14e-4),
+                Measurement("BES III 2025", "2506.15533", 1.17e-4, 0.10e-4, 0.03e-4),
+                Measurement("PDG 2025", None, 1.25e-4, 0.16e-4),
             ],
             "dp-to-etapk": [
                 Measurement(
                     "Belle", "1107.0553", 1.87e-4, 0.19e-4, 0.05e-4, 0.07e-4
-                ),  # Using PDG 2024 for D+ -> eta' pi
-                Measurement("BES III", "1802.03119", 1.64e-4, 0.51e-4, 0.24e-4),
-                Measurement("PDG 2024", None, 1.85e-4, 0.20e-4),
+                ),  # Using PDG 2025 for D+ -> eta' pi
+                Measurement("BES III 2018", "1802.03119", 1.64e-4, 0.51e-4, 0.24e-4),
+                Measurement("BES III 2025", "2506.15533", 1.88e-4, 0.15e-4, 0.11e-4),
+                Measurement("PDG 2025", None, 1.85e-4, 0.20e-4),
             ],
             "ds-to-etapi": [
                 Measurement(
                     "CLEO", "hep-ex/9705006", 1.2e-2, 0.3e-2, 0.2e-2, 0.2e-2
-                ),  # Using PDG 2024 for D+ -> omega pi+
+                ),  # Using PDG 2025 for D+ -> omega pi+
                 Measurement("CLEO", "1306.5363", 1.67e-2, 0.08e-2, 0.06e-2),
                 Measurement("Belle", "1307.6240", 1.82e-2, 0.14e-2, 0.07e-2),
                 Measurement(
                     "BES III", "2005.05072", 1.715e-2, 0.018e-2, 0.026e-2, 0.032e-2
-                ),  # Using PDG 2024 for D+ -> K- K+ pi+; original values (1.741e-2, 0.018e-2, 0.027e-2, 0.054e-2)
+                ),  # Using PDG 2025 for D+ -> K- K+ pi+; original values (1.741e-2, 0.018e-2, 0.027e-2, 0.054e-2)
                 Measurement(
                     "Belle", "2103.09969", 1.874e-2, 0.010e-2, 0.058e-2, 0.051e-2
-                ),  # Using PDG 2024 for D+ -> phi pi+; original values (1.900e-2, 0.010e-2, 0.059e-2, 0.068e-2)
-                Measurement("PDG 2024", None, 1.67e-2, 0.09e-2),
+                ),  # Using PDG 2025 for D+ -> phi pi+; original values (1.900e-2, 0.010e-2, 0.059e-2, 0.068e-2)
+                Measurement("PDG 2025", None, 1.67e-2, 0.09e-2),
             ],
             "ds-to-etappi": [
                 Measurement("CLEO", "1306.5363", 3.94e-2, 0.15e-2, 0.20e-2),
                 Measurement("BES III", "2005.05072", 37.8e-3, 0.4e-3, 2.1e-3, 1.2e-3),
-                Measurement("PDG 2024", None, 3.94e-2, 0.25e-2),
+                Measurement("PDG 2025", None, 3.94e-2, 0.25e-2),
             ],
             "ds-to-etak": [
                 Measurement("CLEO", "0906.3198", 1.76e-3, 0.33e-3, 0.09e-3, 0.10e-3),
                 Measurement("BES III", "2005.05072", 1.62e-3, 0.10e-3, 0.03e-3, 0.05e-3),
                 Measurement(
                     "Belle", "2103.09969", 1.73e-3, 0.05e-3, 0.05e-3, 0.05e-3
-                ),  # Using PDG 2024 for D+ -> phi pi+; original values (1.75e-3, 0.05e-3, 0.05e-3, 0.06e-3)
-                Measurement("PDG 2024", None, 1.73e-3, 0.08e-3),
+                ),  # Using PDG 2025 for D+ -> phi pi+; original values (1.75e-3, 0.05e-3, 0.05e-3, 0.06e-3)
+                Measurement("PDG 2025", None, 1.73e-3, 0.08e-3),
             ],
             "ds-to-etapk": [
                 Measurement("CLEO", "0906.3198", 1.8e-3, 0.5e-3, 0.1e-3, 0.1e-3),
                 Measurement("BES III", "2005.05072", 2.68e-3, 0.17e-3, 0.17e-3, 0.08e-3),
-                Measurement("PDG 2024", None, 2.64e-3, 0.24e-3),
+                Measurement("PDG 2025", None, 2.64e-3, 0.24e-3),
             ],
         },
         "ACP": {
@@ -103,7 +105,7 @@ def get_measures(meas_type, decay, date):
                     1.6e-3,
                     0.5e-3,
                 ),
-                Measurement("PDG 2024", None, 3e-3, 5e-3),
+                Measurement("PDG 2025", None, 3e-3, 5e-3),
             ],
             "dp-to-etappi": [
                 Measurement("CLEO", "0906.3198", -4.0e-2, 3.4e-2, 0.3e-2),
@@ -124,7 +126,7 @@ def get_measures(meas_type, decay, date):
                     0.6e-3,
                     0.5e-3,
                 ),
-                Measurement("PDG 2024", None, 4.1e-3, 2.3e-3),
+                Measurement("PDG 2025", None, 4.1e-3, 2.3e-3),
             ],
             "dp-to-etak": [
                 Measurement(
@@ -134,7 +136,7 @@ def get_measures(meas_type, decay, date):
                     10e-2,
                     4e-2,
                 ),
-                Measurement("PDG 2024", None, -6e-2, 11e-2),
+                Measurement("PDG 2025", None, -6e-2, 11e-2),
             ],
             "dp-to-etapk": [],
             "ds-to-etapi": [
@@ -154,7 +156,7 @@ def get_measures(meas_type, decay, date):
                     5.1e-3,
                     1.2e-3,
                 ),
-                Measurement("PDG 2024", None, 3.2e-3, 3.1e-3),
+                Measurement("PDG 2025", None, 3.2e-3, 3.1e-3),
             ],
             "ds-to-etappi": [
                 Measurement("CLEO", "1306.5363", -2.2e-2, 2.2e-2, 0.6e-2),
@@ -173,7 +175,7 @@ def get_measures(meas_type, decay, date):
                     1.2e-3,
                     0.8e-3,
                 ),
-                Measurement("PDG 2024", None, -0.6e-3, 2.2e-3),
+                Measurement("PDG 2025", None, -0.6e-3, 2.2e-3),
             ],
             "ds-to-etak": [
                 Measurement("CLEO", "0906.3198", 9.3e-2, 15.2e-2, 0.9e-2),
@@ -185,16 +187,16 @@ def get_measures(meas_type, decay, date):
                     3.7e-2,
                     1.1e-2,
                 ),
-                Measurement("PDG 2024", None, 1.8e-2, 1.9e-2),
+                Measurement("PDG 2025", None, 1.8e-2, 1.9e-2),
             ],
             "ds-to-etapk": [
                 Measurement("CLEO", "0906.3198", 6.0e-2, 18.9e-2, 0.9e-2),
-                Measurement("PDG 2024", None, 6e-2, 19e-2),
+                Measurement("PDG 2025", None, 6e-2, 19e-2),
             ],
         },
     }
 
-    if date == "2024":
+    if date == "2025":
         return measures[meas_type][decay]
     else:
         raise RuntimeError(f"The combination for {date} is not supported")
@@ -355,9 +357,9 @@ def parse_args():
         "-c",
         "--date",
         type=str,
-        default="2024",
+        default="2025",
         help="Date of the combination",
-        choices=["2024"],
+        choices=["2025"],
     )
     parser.add_argument(
         "-o",
