@@ -22,6 +22,9 @@ class PDF_Charm : public PDF_Abs {
   /**
    * Run the standard initialisation sequence needed by most PDFs.
    *
+   * This entails calling multiple virtual methods, so this method should never be called by the constructor of a base
+   * class (see PDF_AcpHH and PDF_AcpHH_LHCb_Run12 for an example of how this can be avoided).
+   *
    * @param buildCov Whether to build the covariance matrix and PDF as part of this initialisation, or the PDF only.
    */
   void initialise(TString val_id, TString unc_id, TString cor_id, bool buildCov = true);
