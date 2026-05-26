@@ -4,17 +4,22 @@
  * Date: October 2021
  **/
 
+#include <PDF_RM.h>
+
+#include <CharmUtils.h>
+#include <ParametersCharmCombo.h>
+
+#include <Utils.h>
+
 #include <RooFormulaVar.h>
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
-#include <Utils.h>
+#include <TString.h>
 
-#include <CharmUtils.h>
-#include <PDF_RM.h>
-#include <ParametersCharmCombo.h>
+#include <iostream>
 
-PDF_RM::PDF_RM(TString measurement_id, const theory_config& th_cfg) : PDF_Abs{1}, th_cfg{th_cfg} {
+PDF_RM::PDF_RM(const TString measurement_id, const theory_config th_cfg) : PDF_Abs{1}, th_cfg{th_cfg} {
   name = "RM_" + measurement_id;
   initParameters();
   initRelations();
@@ -22,8 +27,7 @@ PDF_RM::PDF_RM(TString measurement_id, const theory_config& th_cfg) : PDF_Abs{1}
   setObservables(measurement_id);
   setUncertainties(measurement_id);
   setCorrelations(measurement_id);
-  buildCov();
-  buildPdf();
+  build();
 }
 
 void PDF_RM::initParameters() {
@@ -82,12 +86,12 @@ void PDF_RM::initRelations() {
   }
 }
 
-void PDF_RM::initObservables(const TString& setName) {
+void PDF_RM::initObservables(const TString setName) {
   observables = new RooArgList("observables");
   observables->add(*(new RooRealVar("RM_obs", setName + "   #it{R_{M}}", 0, 0., 1e4)));
 }
 
-void PDF_RM::setObservables(TString c) {
+void PDF_RM::setObservables(const TString c) {
   if (c.EqualTo("truth"))
     setObservablesTruth();
   else if (c.EqualTo("toy"))
@@ -104,7 +108,7 @@ void PDF_RM::setObservables(TString c) {
   }
 }
 
-void PDF_RM::setUncertainties(TString c) {
+void PDF_RM::setUncertainties(const TString c) {
   if (c.EqualTo("HFLAV2016")) {
     obsErrSource = "https://hflav-eos.web.cern.ch/hflav-eos/charm/CHARM21/results_mixing.html";
     StatErr[0] = 2.69;
@@ -119,7 +123,7 @@ void PDF_RM::setUncertainties(TString c) {
   }
 }
 
-void PDF_RM::setCorrelations(TString c) {
+void PDF_RM::setCorrelations(const TString c) {
   resetCorrelations();
   corSource = "No correlations for one observable";
 }

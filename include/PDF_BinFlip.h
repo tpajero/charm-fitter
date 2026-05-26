@@ -7,19 +7,19 @@
 #ifndef PDF_BinFlip_h
 #define PDF_BinFlip_h
 
-#include <TString.h>
+#include "CharmUtils.h"
 
 #include <PDF_Abs.h>
 
-#include "CharmUtils.h"
+#include <TString.h>
 
 class PDF_BinFlip : public PDF_Abs {
  public:
-  PDF_BinFlip(TString measurement_id, const theory_config& th_cf);
+  PDF_BinFlip(TString measurement_id, theory_config th_cf);
   void buildPdf() override;
-  void initObservables(const TString& setName);
-  virtual void initParameters() override;
-  virtual void initRelations() override;
+  void initObservables(TString setName);
+  void initParameters() override;
+  void initRelations() override;
   void setCorrelations(TString measurement_id) override;
   void setObservables(TString measurement_id) override;
   void setUncertainties(TString measurement_id) override;

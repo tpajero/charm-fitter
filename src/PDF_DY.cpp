@@ -4,17 +4,20 @@
  * Date: October 2021
  **/
 
+#include <PDF_DY.h>
+
+#include <CharmUtils.h>
+#include <ParametersCharmCombo.h>
+
+#include <Utils.h>
+
 #include <RooFormulaVar.h>
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
-#include <Utils.h>
+#include <iostream>
 
-#include <CharmUtils.h>
-#include <PDF_DY.h>
-#include <ParametersCharmCombo.h>
-
-PDF_DY::PDF_DY(TString measurement_id, const theory_config th_cfg, const FSC fsc)
+PDF_DY::PDF_DY(const TString measurement_id, const theory_config th_cfg, const FSC fsc)
     : PDF_Abs{fsc == FSC::none ? 1 : 2}, th_cfg{th_cfg}, fsc{fsc} {
   name = "DY_" + measurement_id;
   initParameters();
@@ -23,8 +26,7 @@ PDF_DY::PDF_DY(TString measurement_id, const theory_config th_cfg, const FSC fsc
   setObservables(measurement_id);
   setUncertainties(measurement_id);
   setCorrelations(measurement_id);
-  buildCov();
-  buildPdf();
+  build();
 }
 
 void PDF_DY::initParameters() {
@@ -77,7 +79,7 @@ void PDF_DY::initRelations() {
   }
 }
 
-void PDF_DY::initObservables(const TString& setName) {
+void PDF_DY::initObservables(const TString setName) {
   observables = new RooArgList("observables");
   if (nObs == 1) {
     observables->add(*(new RooRealVar("DY_obs", setName + "   #Delta#it{Y}", 0, -1e4, 1e4)));
@@ -89,7 +91,7 @@ void PDF_DY::initObservables(const TString& setName) {
   }
 }
 
-void PDF_DY::setObservables(TString c) {
+void PDF_DY::setObservables(const TString c) {
   obsValSource = "https://github.com/tpajero/charm-fitter/tree/master/charmcombo/blue/DY.cpp";
   if (c.EqualTo("truth"))
     setObservablesTruth();
@@ -116,7 +118,7 @@ void PDF_DY::setObservables(TString c) {
   }
 }
 
-void PDF_DY::setUncertainties(TString c) {
+void PDF_DY::setUncertainties(const TString c) {
   obsErrSource = "https://github.com/tpajero/charm-fitter/tree/master/charmcombo/blue/DY.cpp";
   if (nObs == 1 && c.EqualTo("WA2019")) {
     StatErr[0] = 2.6e-2;
@@ -147,7 +149,7 @@ void PDF_DY::setUncertainties(TString c) {
   }
 }
 
-void PDF_DY::setCorrelations(TString c) {
+void PDF_DY::setCorrelations(const TString c) {
   resetCorrelations();
   corSource = "https://github.com/tpajero/charm-fitter/tree/master/charmcombo/blue/DY.cpp";
   if (nObs == 1)

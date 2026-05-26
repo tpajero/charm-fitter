@@ -4,17 +4,22 @@
  * Date: October 2021
  **/
 
+#include <PDF_BinFlip.h>
+
+#include <CharmUtils.h>
+#include <ParametersCharmCombo.h>
+
+#include <Utils.h>
+
 #include <RooFormulaVar.h>
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
-#include <Utils.h>
+#include <algorithm>
+#include <iostream>
+#include <vector>
 
-#include <CharmUtils.h>
-#include <PDF_BinFlip.h>
-#include <ParametersCharmCombo.h>
-
-PDF_BinFlip::PDF_BinFlip(TString measurement_id, const theory_config& th_cfg) : PDF_Abs{4}, th_cfg{th_cfg} {
+PDF_BinFlip::PDF_BinFlip(const TString measurement_id, const theory_config th_cfg) : PDF_Abs{4}, th_cfg{th_cfg} {
   name = "BinFlip_" + measurement_id;
   TString label;
   if (measurement_id.EqualTo("LHCb_Run1"))
@@ -31,8 +36,7 @@ PDF_BinFlip::PDF_BinFlip(TString measurement_id, const theory_config& th_cfg) : 
   setObservables(measurement_id);
   setUncertainties(measurement_id);
   setCorrelations(measurement_id);
-  buildCov();
-  buildPdf();
+  build();
 }
 
 void PDF_BinFlip::initParameters() {
@@ -101,7 +105,7 @@ void PDF_BinFlip::initRelations() {
   }
 }
 
-void PDF_BinFlip::initObservables(const TString& setName) {
+void PDF_BinFlip::initObservables(const TString setName) {
   observables = new RooArgList("observables");  ///< the order of this list must match that of the COR matrix!
   observables->add(*(new RooRealVar("x_obs", setName + "   #it{x_{CP}}", 0., -1e4, 1e4)));
   observables->add(*(new RooRealVar("y_obs", setName + "   #it{y_{CP}}", 0., -1e4, 1e4)));
@@ -109,7 +113,7 @@ void PDF_BinFlip::initObservables(const TString& setName) {
   observables->add(*(new RooRealVar("dy_obs", setName + "   #it{#Deltay}", 0., -1e4, 1e4)));
 }
 
-void PDF_BinFlip::setObservables(TString c) {
+void PDF_BinFlip::setObservables(const TString c) {
   if (c.EqualTo("truth"))
     setObservablesTruth();
   else if (c.EqualTo("toy"))
@@ -144,7 +148,7 @@ void PDF_BinFlip::setObservables(TString c) {
   }
 }
 
-void PDF_BinFlip::setUncertainties(TString c) {
+void PDF_BinFlip::setUncertainties(const TString c) {
   if (c.EqualTo("LHCb_Run1")) {
     obsErrSource = "https://inspirehep.net/literature/1724179";
     StatErr[0] = 0.16;   // x
@@ -161,10 +165,7 @@ void PDF_BinFlip::setUncertainties(TString c) {
     StatErr[1] = pow(pow(0.1198, 2) + pow(0.085, 2), 0.5);  // y
     StatErr[2] = pow(pow(0.0182, 2) + pow(0.001, 2), 0.5);  // dx
     StatErr[3] = pow(pow(0.0365, 2) + pow(0.011, 2), 0.5);  // dy
-    SystErr[0] = 0.;                                        // x
-    SystErr[1] = 0.;                                        // y
-    SystErr[2] = 0.;                                        // dx
-    SystErr[3] = 0.;                                        // dy
+    std::ranges::fill(SystErr, 0.);
   } else if (c.EqualTo("LHCb_Run2_sl")) {
     obsErrSource = "https://inspirehep.net/literature/2135966";
     StatErr[0] = 0.148;  // x
@@ -191,7 +192,7 @@ void PDF_BinFlip::setUncertainties(TString c) {
   }
 }
 
-void PDF_BinFlip::setCorrelations(TString c) {
+void PDF_BinFlip::setCorrelations(const TString c) {
   resetCorrelations();
   if (c.EqualTo("LHCb_Run1")) {
     corSource = "https://inspirehep.net/literature/1724179";

@@ -4,17 +4,22 @@
  * Date: June 2024
  **/
 
+#include <PDF_DY_pipipi0.h>
+
+#include <CharmUtils.h>
+#include <ParametersCharmCombo.h>
+
+#include <Utils.h>
+
 #include <RooFormulaVar.h>
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
-#include <Utils.h>
+#include <iostream>
+#include <string>
+#include <vector>
 
-#include <CharmUtils.h>
-#include <PDF_DY_pipipi0.h>
-#include <ParametersCharmCombo.h>
-
-PDF_DY_pipipi0::PDF_DY_pipipi0(TString measurement_id, const theory_config th_cfg) : PDF_Abs{1}, th_cfg{th_cfg} {
+PDF_DY_pipipi0::PDF_DY_pipipi0(const TString measurement_id, const theory_config th_cfg) : PDF_Abs{1}, th_cfg{th_cfg} {
   name = "DY_pipipi0_" + measurement_id;
   initParameters();
   initRelations();
@@ -51,13 +56,13 @@ void PDF_DY_pipipi0::initRelations() {
                              "(2 * F_pipipi0 - 1) * (" + CharmUtils::get_dy_expression(th_cfg) + ")", parameters)));
 }
 
-void PDF_DY_pipipi0::initObservables(const TString& setName) {
+void PDF_DY_pipipi0::initObservables(const TString setName) {
   observables = new RooArgList("observables");
   observables->add(
       *(new RooRealVar("DY_pipipi0_obs", setName + "   #Delta#it{Y}(#pi^{+}#pi^{#minus}#pi^{0})", 0, -1e4, 1e4)));
 }
 
-void PDF_DY_pipipi0::setObservables(TString c) {
+void PDF_DY_pipipi0::setObservables(const TString c) {
   obsValSource = "https://arxiv.org/abs/2405.06556";
   if (c.EqualTo("truth"))
     setObservablesTruth();
@@ -72,7 +77,7 @@ void PDF_DY_pipipi0::setObservables(TString c) {
   }
 }
 
-void PDF_DY_pipipi0::setUncertainties(TString c) {
+void PDF_DY_pipipi0::setUncertainties(const TString c) {
   obsErrSource = "https://arxiv.org/abs/2405.06556";
   if (c.EqualTo("LHCb-R2")) {
     StatErr[0] = 5.97e-2;
@@ -84,7 +89,7 @@ void PDF_DY_pipipi0::setUncertainties(TString c) {
   }
 }
 
-void PDF_DY_pipipi0::setCorrelations(TString c) {
+void PDF_DY_pipipi0::setCorrelations(const TString c) {
   resetCorrelations();
   corSource = "No correlations for one observable";
 }

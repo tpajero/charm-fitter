@@ -7,15 +7,15 @@
 #ifndef PDF_BES_Kpi_h
 #define PDF_BES_Kpi_h
 
-#include <TString.h>
+#include "CharmUtils.h"
 
 #include <PDF_Abs.h>
 
-#include "CharmUtils.h"
+#include <TString.h>
 
 class PDF_BES_Kpi : public PDF_Abs {
  public:
-  PDF_BES_Kpi(const theory_config& th_cfg);
+  PDF_BES_Kpi(theory_config th_cfg);
   void buildPdf() override;
   void initObservables() override;
   void initParameters() override;

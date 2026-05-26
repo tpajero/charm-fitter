@@ -7,15 +7,17 @@
 #ifndef PDF_AcpHH_LHCb_Run12_h
 #define PDF_AcpHH_LHCb_Run12_h
 
-#include <TString.h>
+#include "CharmUtils.h"
 
 #include <PDF_Abs.h>
 
-#include "CharmUtils.h"
+#include <TString.h>
+
+class RooArgList;
 
 class PDF_AcpHH_LHCb_Run12 : public PDF_Abs {
  public:
-  PDF_AcpHH_LHCb_Run12(const theory_config th_cf, const FSC fsc);
+  PDF_AcpHH_LHCb_Run12(theory_config th_cf, FSC fsc);
   void buildPdf() override;
   void initObservables() override;
   void initParameters() override;
@@ -28,7 +30,6 @@ class PDF_AcpHH_LHCb_Run12 : public PDF_Abs {
   // Helper functions to avoid boilerplate code
   void add_acpkk(RooArgList* theory, TString name, double avg_time);
   void add_dacp(RooArgList* theory, TString name, double avg_time_kk, double avg_time_pipi);
-  const double d0_lifetime = 4.103e-13;
   const FSC fsc;
   const theory_config th_cfg;
 };

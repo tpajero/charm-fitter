@@ -4,17 +4,20 @@
  * Date: October 2021
  **/
 
+#include <PDF_scan_DY_RS.h>
+
+#include <CharmUtils.h>
+#include <ParametersCharmCombo.h>
+
+#include <Utils.h>
+
 #include <RooFormulaVar.h>
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
-#include <Utils.h>
+#include <iostream>
 
-#include <CharmUtils.h>
-#include <PDF_scan_DY_RS.h>
-#include <ParametersCharmCombo.h>
-
-PDF_scan_DY_RS::PDF_scan_DY_RS(const theory_config& th_cfg) : PDF_Abs{1}, th_cfg{th_cfg} {
+PDF_scan_DY_RS::PDF_scan_DY_RS(const theory_config th_cfg) : PDF_Abs{1}, th_cfg{th_cfg} {
   name = "scan_DY_RS";
   initParameters();
   initRelations();
@@ -22,8 +25,7 @@ PDF_scan_DY_RS::PDF_scan_DY_RS(const theory_config& th_cfg) : PDF_Abs{1}, th_cfg
   setObservables();
   setUncertainties();
   setCorrelations();
-  buildCov();
-  buildPdf();
+  build();
 }
 
 void PDF_scan_DY_RS::initParameters() {

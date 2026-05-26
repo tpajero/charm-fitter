@@ -4,19 +4,23 @@
  * Date: October 2021
  **/
 
-#include <vector>
+#include <PDF_Kshh.h>
+
+#include <CharmUtils.h>
+#include <ParametersCharmCombo.h>
+
+#include <Utils.h>
 
 #include <RooFormulaVar.h>
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
-#include <Utils.h>
+#include <TString.h>
 
-#include <CharmUtils.h>
-#include <PDF_Kshh.h>
-#include <ParametersCharmCombo.h>
+#include <iostream>
+#include <vector>
 
-PDF_Kshh::PDF_Kshh(TString measurement_id, const theory_config& th_cfg) : PDF_Abs{4}, th_cfg{th_cfg} {
+PDF_Kshh::PDF_Kshh(const TString measurement_id, const theory_config th_cfg) : PDF_Abs{4}, th_cfg{th_cfg} {
   name = "Kshh_" + measurement_id;
   initParameters();
   initRelations();
@@ -28,8 +32,7 @@ PDF_Kshh::PDF_Kshh(TString measurement_id, const theory_config& th_cfg) : PDF_Ab
   setObservables(measurement_id);
   setUncertainties(measurement_id);
   setCorrelations(measurement_id);
-  buildCov();
-  buildPdf();
+  build();
 }
 
 void PDF_Kshh::initParameters() {
@@ -132,7 +135,7 @@ void PDF_Kshh::initRelations() {
   }
 }
 
-void PDF_Kshh::initObservables(const TString& setName) {
+void PDF_Kshh::initObservables(const TString setName) {
   observables = new RooArgList("observables");  ///< the order of this list must match that of the COR matrix!
   observables->add(*(new RooRealVar("x_obs", setName + "   #it{x}", 0., -1e4, 1e4)));
   observables->add(*(new RooRealVar("y_obs", setName + "   #it{y}", 0., -1e4, 1e4)));
@@ -140,7 +143,7 @@ void PDF_Kshh::initObservables(const TString& setName) {
   observables->add(*(new RooRealVar("phi_obs", setName + "   #it{#phi}_{2}", 0., -1e4, 1e4)));
 }
 
-void PDF_Kshh::setObservables(TString c) {
+void PDF_Kshh::setObservables(const TString c) {
   if (c.EqualTo("truth"))
     setObservablesTruth();
   else if (c.EqualTo("toy"))
@@ -157,7 +160,7 @@ void PDF_Kshh::setObservables(TString c) {
   }
 }
 
-void PDF_Kshh::setUncertainties(TString c) {
+void PDF_Kshh::setUncertainties(const TString c) {
   if (c.EqualTo("Belle")) {
     obsErrSource = "https://inspirehep.net/literature/1289224";
     StatErr[0] = sqrt(pow(0.19, 2) + pow(0.093, 2));               // x
@@ -174,7 +177,7 @@ void PDF_Kshh::setUncertainties(TString c) {
   }
 }
 
-void PDF_Kshh::setCorrelations(TString c) {
+void PDF_Kshh::setCorrelations(const TString c) {
   resetCorrelations();
   if (c.EqualTo("Belle")) {
     corSource = "hflav";

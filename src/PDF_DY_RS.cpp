@@ -4,17 +4,18 @@
  * Date: October 2021
  **/
 
+#include <PDF_DY_RS.h>
+
+#include <CharmUtils.h>
+#include <ParametersCharmCombo.h>
+
+#include <Utils.h>
+
 #include <RooFormulaVar.h>
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
-#include <Utils.h>
-
-#include <CharmUtils.h>
-#include <PDF_DY_RS.h>
-#include <ParametersCharmCombo.h>
-
-PDF_DY_RS::PDF_DY_RS(TString measurement_id, const theory_config& th_cfg) : PDF_Abs{1}, th_cfg{th_cfg} {
+PDF_DY_RS::PDF_DY_RS(const TString measurement_id, const theory_config th_cfg) : PDF_Abs{1}, th_cfg{th_cfg} {
   name = "DY_RS_" + measurement_id;
   initParameters();
   initRelations();
@@ -22,8 +23,7 @@ PDF_DY_RS::PDF_DY_RS(TString measurement_id, const theory_config& th_cfg) : PDF_
   setObservables(measurement_id);
   setUncertainties(measurement_id);
   setCorrelations(measurement_id);
-  buildCov();
-  buildPdf();
+  build();
 }
 
 void PDF_DY_RS::initParameters() {
@@ -86,12 +86,12 @@ void PDF_DY_RS::initRelations() {
   }
 }
 
-void PDF_DY_RS::initObservables(const TString& setName) {
+void PDF_DY_RS::initObservables(const TString setName) {
   observables = new RooArgList("observables");
   observables->add(*(new RooRealVar("DY_RS_obs", setName + "   #it{A}_{#Gamma}^{#it{K#pi}}", 0, -1e4, 1e4)));
 }
 
-void PDF_DY_RS::setObservables(TString c) {
+void PDF_DY_RS::setObservables(const TString c) {
   if (c.EqualTo("truth"))
     setObservablesTruth();
   else if (c.EqualTo("toy"))
@@ -105,7 +105,7 @@ void PDF_DY_RS::setObservables(TString c) {
   }
 }
 
-void PDF_DY_RS::setUncertainties(TString c) {
+void PDF_DY_RS::setUncertainties(const TString c) {
   if (c.EqualTo("LHCb2021")) {
     obsErrSource = "https://inspirehep.net/literature/1864385";
     StatErr[0] = 0.50e-2;
@@ -116,7 +116,7 @@ void PDF_DY_RS::setUncertainties(TString c) {
   }
 }
 
-void PDF_DY_RS::setCorrelations(TString c) {
+void PDF_DY_RS::setCorrelations(const TString c) {
   resetCorrelations();
   corSource = "No correlations for one observable";
 }

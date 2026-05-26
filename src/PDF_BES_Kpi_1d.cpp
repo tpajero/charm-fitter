@@ -4,19 +4,23 @@
  * Date: October 2021
  **/
 
-#include <boost/algorithm/string.hpp>
+#include <PDF_BES_Kpi_1d.h>
+
+#include <CharmUtils.h>
+#include <ParametersCharmCombo.h>
+
+#include <Utils.h>
 
 #include <RooFormulaVar.h>
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
-#include <Utils.h>
+#include <boost/algorithm/string.hpp>
 
-#include <CharmUtils.h>
-#include <PDF_BES_Kpi_1d.h>
-#include <ParametersCharmCombo.h>
+#include <iostream>
+#include <string>
 
-PDF_BES_Kpi_1d::PDF_BES_Kpi_1d(const theory_config& th_cfg) : PDF_Abs{1}, th_cfg{th_cfg} {
+PDF_BES_Kpi_1d::PDF_BES_Kpi_1d(const theory_config th_cfg) : PDF_Abs{1}, th_cfg{th_cfg} {
   name = "BES";
   initParameters();
   initRelations();
@@ -24,8 +28,7 @@ PDF_BES_Kpi_1d::PDF_BES_Kpi_1d(const theory_config& th_cfg) : PDF_Abs{1}, th_cfg
   setObservables("BES");
   setUncertainties("BES");
   setCorrelations("BES");
-  buildCov();
-  buildPdf();
+  build();
 }
 
 void PDF_BES_Kpi_1d::initParameters() {
@@ -75,12 +78,12 @@ void PDF_BES_Kpi_1d::initRelations() {
   theory->add(*(Utils::makeTheoryVar("A_kpi_th", "A_kpi_th", a_kpi_formula, parameters)));
 }
 
-void PDF_BES_Kpi_1d::initObservables(const TString& setName) {
+void PDF_BES_Kpi_1d::initObservables(const TString setName) {
   observables = new RooArgList("observables");
   observables->add(*(new RooRealVar("A_kpi_obs", setName + "   #it{A_{K#pi}^{CP}}", 0., -1e4, 1e4)));
 }
 
-void PDF_BES_Kpi_1d::setObservables(TString c) {
+void PDF_BES_Kpi_1d::setObservables(const TString c) {
   if (c.EqualTo("truth"))
     setObservablesTruth();
   else if (c.EqualTo("toy"))
@@ -94,7 +97,7 @@ void PDF_BES_Kpi_1d::setObservables(TString c) {
   }
 }
 
-void PDF_BES_Kpi_1d::setUncertainties(TString c) {
+void PDF_BES_Kpi_1d::setUncertainties(const TString c) {
   if (c.EqualTo("BES")) {
     obsErrSource = "http://inspirehep.net/record/1291279";
     StatErr[0] = 1.3;
@@ -105,7 +108,7 @@ void PDF_BES_Kpi_1d::setUncertainties(TString c) {
   }
 }
 
-void PDF_BES_Kpi_1d::setCorrelations(TString c) {
+void PDF_BES_Kpi_1d::setCorrelations(const TString c) {
   resetCorrelations();
   corSource = "No correlations for one observable";
 }

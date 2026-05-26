@@ -4,21 +4,21 @@
  * Date: June 2024
  **/
 
-#include <map>
-#include <string>
-#include <vector>
+#include <PDF_K3pi.h>
 
-#include <TMath.h>
+#include <CharmUtils.h>
+#include <ParametersCharmCombo.h>
+
+#include <Utils.h>
 
 #include <RooFormulaVar.h>
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
-#include <Utils.h>
-
-#include <CharmUtils.h>
-#include <PDF_K3pi.h>
-#include <ParametersCharmCombo.h>
+#include <algorithm>
+#include <map>
+#include <string>
+#include <vector>
 
 namespace {
   std::map<std::string, std::map<theory_config, std::string>> theory_expressions = {
@@ -40,7 +40,7 @@ namespace {
   };
 }
 
-PDF_K3pi::PDF_K3pi(TString measurement_id, const theory_config& th_cfg) : PDF_Abs{3}, th_cfg{th_cfg} {
+PDF_K3pi::PDF_K3pi(const TString measurement_id, const theory_config th_cfg) : PDF_Abs{3}, th_cfg{th_cfg} {
   name = "K3pi_" + measurement_id;
   initParameters();
   initRelations();
@@ -69,14 +69,14 @@ void PDF_K3pi::initRelations() {
   theory->add(*(Utils::makeTheoryVar("c2_th", "c2_th", theory_expressions["c2"][th_cfg], parameters)));
 }
 
-void PDF_K3pi::initObservables(const TString& label) {
+void PDF_K3pi::initObservables(const TString label) {
   observables = new RooArgList("observables");  ///< the order of this list must match that of the COR matrix!
   observables->add(*(new RooRealVar("r_K3pi_obs", label + "   #it{r_{K3#pi}}", 0, -1e4, 1e4)));
   observables->add(*(new RooRealVar("c1_obs", label + "   #it{#kappa_{K3#pi}y'}", 0, -1e4, 1e4)));
   observables->add(*(new RooRealVar("c2_obs", label + "   (#it{x}^{2}+#it{y}^{2})/4", 0, -1e4, 1e4)));
 }
 
-void PDF_K3pi::setObservables(TString c) {
+void PDF_K3pi::setObservables(const TString c) {
   if (c.EqualTo("truth"))
     setObservablesTruth();
   else if (c.EqualTo("toy"))
@@ -92,22 +92,20 @@ void PDF_K3pi::setObservables(TString c) {
   }
 }
 
-void PDF_K3pi::setUncertainties(TString c) {
+void PDF_K3pi::setUncertainties(const TString c) {
   if (c.EqualTo("LHCb-run1")) {
     obsErrSource = "https://arxiv.org/abs/1602.07224v2";
     StatErr[0] = 0.12;
     StatErr[1] = 0.18;
     StatErr[2] = 0.18;
-    SystErr[0] = 0;
-    SystErr[1] = 0;
-    SystErr[2] = 0;
+    std::ranges::fill(SystErr, 0);
   } else {
     std::cout << "PDF_K3pi::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }
 
-void PDF_K3pi::setCorrelations(TString c) {
+void PDF_K3pi::setCorrelations(const TString c) {
   resetCorrelations();
   if (c.EqualTo("LHCb-run1")) {
     corSource = "https://arxiv.org/abs/1602.07224v2";

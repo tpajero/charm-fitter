@@ -1,11 +1,12 @@
+#include <CharmUtils.h>
+
 #include <boost/algorithm/string.hpp>
+
 #include <iostream>
 #include <ostream>
 #include <string>
 
-#include <CharmUtils.h>
-
-std::ostream& operator<<(std::ostream& os, const FSC& fsc) {
+std::ostream& operator<<(std::ostream& os, const FSC fsc) {
   switch (fsc) {
   case FSC::none:
     os << "none";
@@ -24,7 +25,7 @@ std::ostream& operator<<(std::ostream& os, const FSC& fsc) {
   return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const theory_config& th_cfg) {
+std::ostream& operator<<(std::ostream& os, const theory_config th_cfg) {
   switch (th_cfg) {
   case theory_config::phenomenological:
     os << "phenomenological (x, y, q/p, phi_2)";

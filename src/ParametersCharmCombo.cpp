@@ -4,9 +4,9 @@
  * Date: October 2021
  **/
 
-#include <Utils.h>
-
 #include <ParametersCharmCombo.h>
+
+#include <Utils.h>
 
 using Utils::DegToRad;
 

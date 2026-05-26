@@ -4,19 +4,20 @@
  * Date: October 2021
  **/
 
+#include <PDF_Fp_pipipi0.h>
+
+#include <CharmUtils.h>
+#include <ParametersCharmCombo.h>
+
+#include <Utils.h>
+
 #include <RooFormulaVar.h>
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
 #include <TString.h>
 
-#include <Utils.h>
-
-#include <CharmUtils.h>
-#include <PDF_Fp_pipipi0.h>
-#include <ParametersCharmCombo.h>
-
-PDF_Fp_pipipi0::PDF_Fp_pipipi0(TString measurement_id) : PDF_Abs{1} {
+PDF_Fp_pipipi0::PDF_Fp_pipipi0(const TString measurement_id) : PDF_Abs{1} {
   name = "Fp-pipipi0" + measurement_id;
   initParameters();
   initRelations();
@@ -24,8 +25,7 @@ PDF_Fp_pipipi0::PDF_Fp_pipipi0(TString measurement_id) : PDF_Abs{1} {
   setObservables(measurement_id);
   setUncertainties(measurement_id);
   setCorrelations(measurement_id);
-  buildCov();
-  buildPdf();
+  build();
 }
 
 void PDF_Fp_pipipi0::initParameters() {
@@ -39,12 +39,12 @@ void PDF_Fp_pipipi0::initRelations() {
   theory->add(*(Utils::makeTheoryVar("F_pipipi0_th", "F_pipipi0_th", "F_pipipi0", parameters)));
 }
 
-void PDF_Fp_pipipi0::initObservables(TString measurement_id) {
+void PDF_Fp_pipipi0::initObservables(const TString measurement_id) {
   observables = new RooArgList("observables");
   observables->add(*(new RooRealVar("F_pipipi0_obs", "F_{#pi#pi#pi^{0}} " + measurement_id, 0, -1e4, 1e4)));
 }
 
-void PDF_Fp_pipipi0::setObservables(TString c) {
+void PDF_Fp_pipipi0::setObservables(const TString c) {
   if (c.EqualTo("Cleo-c")) {
     obsValSource = "https://inspirehep.net/literature/2139827";
     setObservable("F_pipipi0_obs", 0.973);
@@ -57,7 +57,7 @@ void PDF_Fp_pipipi0::setObservables(TString c) {
   }
 }
 
-void PDF_Fp_pipipi0::setUncertainties(TString c) {
+void PDF_Fp_pipipi0::setUncertainties(const TString c) {
   if (c.EqualTo("Cleo-c")) {
     obsErrSource = "https://inspirehep.net/literature/2139827";
     StatErr[0] = 0.017;
@@ -72,7 +72,7 @@ void PDF_Fp_pipipi0::setUncertainties(TString c) {
   }
 }
 
-void PDF_Fp_pipipi0::setCorrelations(TString c) {
+void PDF_Fp_pipipi0::setCorrelations(const TString c) {
   resetCorrelations();
   corSource = "No correlations for one observable";
 }

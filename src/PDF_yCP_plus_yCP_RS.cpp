@@ -4,17 +4,20 @@
  * Date: October 2021
  **/
 
+#include <PDF_yCP_plus_yCP_RS.h>
+
+#include <CharmUtils.h>
+#include <ParametersCharmCombo.h>
+
+#include <Utils.h>
+
 #include <RooFormulaVar.h>
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
-#include <Utils.h>
+#include <iostream>
 
-#include <CharmUtils.h>
-#include <PDF_yCP_plus_yCP_RS.h>
-#include <ParametersCharmCombo.h>
-
-PDF_yCP_plus_yCP_RS::PDF_yCP_plus_yCP_RS(TString measurement_id, const theory_config& th_cfg)
+PDF_yCP_plus_yCP_RS::PDF_yCP_plus_yCP_RS(const TString measurement_id, const theory_config th_cfg)
     : PDF_Abs{1}, th_cfg{th_cfg} {
   name = "yCP_plus_yCP_RS_" + measurement_id;
   initParameters();
@@ -23,8 +26,7 @@ PDF_yCP_plus_yCP_RS::PDF_yCP_plus_yCP_RS(TString measurement_id, const theory_co
   setObservables(measurement_id);
   setUncertainties(measurement_id);
   setCorrelations(measurement_id);
-  buildCov();
-  buildPdf();
+  build();
 }
 
 void PDF_yCP_plus_yCP_RS::initParameters() {
@@ -93,13 +95,13 @@ void PDF_yCP_plus_yCP_RS::initRelations() {
   }
 }
 
-void PDF_yCP_plus_yCP_RS::initObservables(const TString& setName) {
+void PDF_yCP_plus_yCP_RS::initObservables(const TString setName) {
   observables = new RooArgList("observables");
   observables->add(*(
       new RooRealVar("yCP_plus_yCP_RS_obs", setName + "   #it{y_{CP}}+#it{y_{CP}^{K^{#minus}#pi^{+}}}", 0, -1e4, 1e4)));
 }
 
-void PDF_yCP_plus_yCP_RS::setObservables(TString c) {
+void PDF_yCP_plus_yCP_RS::setObservables(const TString c) {
   if (c.EqualTo("truth"))
     setObservablesTruth();
   else if (c.EqualTo("toy"))
@@ -113,7 +115,7 @@ void PDF_yCP_plus_yCP_RS::setObservables(TString c) {
   }
 }
 
-void PDF_yCP_plus_yCP_RS::setUncertainties(TString c) {
+void PDF_yCP_plus_yCP_RS::setUncertainties(const TString c) {
   if (c.EqualTo("WA2020")) {
     obsErrSource = "https://cds.cern.ch/record/2747731";
     StatErr[0] = 1.114;
@@ -124,7 +126,7 @@ void PDF_yCP_plus_yCP_RS::setUncertainties(TString c) {
   }
 }
 
-void PDF_yCP_plus_yCP_RS::setCorrelations(TString c) {
+void PDF_yCP_plus_yCP_RS::setCorrelations(const TString c) {
   resetCorrelations();
   corSource = "No correlations for one observable";
 }

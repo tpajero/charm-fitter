@@ -4,20 +4,25 @@
  * Date: September 2022
  **/
 
-#include <boost/algorithm/string.hpp>
-#include <vector>
+#include <PDF_BES_Kpi.h>
+
+#include <CharmUtils.h>
+#include <ParametersCharmCombo.h>
+
+#include <Utils.h>
 
 #include <RooFormulaVar.h>
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
-#include <Utils.h>
+#include <boost/algorithm/string.hpp>
 
-#include <CharmUtils.h>
-#include <PDF_BES_Kpi.h>
-#include <ParametersCharmCombo.h>
+#include <cmath>
+#include <iostream>
+#include <string>
+#include <vector>
 
-PDF_BES_Kpi::PDF_BES_Kpi(const theory_config& th_cfg) : PDF_Abs{4}, th_cfg{th_cfg} {
+PDF_BES_Kpi::PDF_BES_Kpi(const theory_config th_cfg) : PDF_Abs{4}, th_cfg{th_cfg} {
   name = "charm-bes-kpi";
   initParameters();
   initRelations();
@@ -25,8 +30,7 @@ PDF_BES_Kpi::PDF_BES_Kpi(const theory_config& th_cfg) : PDF_Abs{4}, th_cfg{th_cf
   setObservables("3fb");
   setUncertainties("3fb");
   setCorrelations("3fb");
-  buildCov();
-  buildPdf();
+  build();
 }
 
 void PDF_BES_Kpi::initParameters() {
@@ -89,7 +93,7 @@ void PDF_BES_Kpi::initObservables() {
   observables->add(*(new RooRealVar("rsin_obs", "#it{r_{D}^{K#pi}}sin#it{#Delta_{D}^{K#pi}}", 0., -20., 20.)));
 }
 
-void PDF_BES_Kpi::setObservables(TString c) {
+void PDF_BES_Kpi::setObservables(const TString c) {
   if (c.EqualTo("3fb")) {
     obsValSource = "https://arxiv.org/pdf/2208.09402v2.pdf";
     setObservable("A_kpi_obs", 13.2);
@@ -102,7 +106,7 @@ void PDF_BES_Kpi::setObservables(TString c) {
   }
 }
 
-void PDF_BES_Kpi::setUncertainties(TString c) {
+void PDF_BES_Kpi::setUncertainties(const TString c) {
   if (c.EqualTo("3fb")) {
     obsErrSource = "https://arxiv.org/pdf/2208.09402v2.pdf";
     StatErr[0] = 1.1;
@@ -120,7 +124,7 @@ void PDF_BES_Kpi::setUncertainties(TString c) {
   }
 }
 
-void PDF_BES_Kpi::setCorrelations(TString c) {
+void PDF_BES_Kpi::setCorrelations(const TString c) {
   resetCorrelations();
   if (c.EqualTo("3fb")) {
     corSource = "https://arxiv.org/pdf/2208.09402v2.pdf";

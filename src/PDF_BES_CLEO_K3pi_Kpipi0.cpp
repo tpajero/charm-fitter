@@ -9,25 +9,26 @@
  *   2. the PDF is not Gaussian, and this effect cannot be taken into account as the full likelihood is not public.
  **/
 
-#include <TMath.h>
+#include <PDF_BES_CLEO_K3pi_Kpipi0.h>
 
-#include <map>
-#include <string>
-#include <vector>
+#include <CharmUtils.h>
+#include <ParametersCharmCombo.h>
 
+#include <Utils.h>
+
+#include <RooArgList.h>
 #include <RooFormulaVar.h>
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
-#include <Utils.h>
-
-#include <CharmUtils.h>
-#include <PDF_BES_CLEO_K3pi_Kpipi0.h>
-#include <ParametersCharmCombo.h>
+#include <algorithm>
+#include <map>
+#include <string>
+#include <vector>
 
 using Utils::DegToRad;
 
-PDF_BES_CLEO_K3pi_Kpipi0::PDF_BES_CLEO_K3pi_Kpipi0(TString measurement_id) : PDF_Abs{6} {
+PDF_BES_CLEO_K3pi_Kpipi0::PDF_BES_CLEO_K3pi_Kpipi0(const TString measurement_id) : PDF_Abs{6} {
   name = "K3pi_" + measurement_id;
   TString label = "BES3 + CLEO";
   initParameters();
@@ -57,7 +58,7 @@ void PDF_BES_CLEO_K3pi_Kpipi0::initRelations() {
   theory->add(*(makeTheoryVar("r_Kpipi0_th", "r_Kpipi0_th", "r_Kpipi0", parameters)));
 }
 
-void PDF_BES_CLEO_K3pi_Kpipi0::initObservables(const TString& label) {
+void PDF_BES_CLEO_K3pi_Kpipi0::initObservables(const TString label) {
   observables = new RooArgList("observables");  ///< the order of this list must match that of the COR matrix!
   observables->add(*(new RooRealVar("k_K3pi_obs", label + "   #it{#kappa_{K3#pi}}", 1, -2, 2)));
   observables->add(
@@ -69,7 +70,7 @@ void PDF_BES_CLEO_K3pi_Kpipi0::initObservables(const TString& label) {
   observables->add(*(new RooRealVar("r_Kpipi0_obs", label + "   #it{r_{K#pi#pi^{0}}}", 1, -1e4, 1e4)));
 }
 
-void PDF_BES_CLEO_K3pi_Kpipi0::setObservables(TString c) {
+void PDF_BES_CLEO_K3pi_Kpipi0::setObservables(const TString c) {
   if (c.EqualTo("truth"))
     setObservablesTruth();
   else if (c.EqualTo("toy"))
@@ -88,7 +89,7 @@ void PDF_BES_CLEO_K3pi_Kpipi0::setObservables(TString c) {
   }
 }
 
-void PDF_BES_CLEO_K3pi_Kpipi0::setUncertainties(TString c) {
+void PDF_BES_CLEO_K3pi_Kpipi0::setUncertainties(const TString c) {
   if (c.EqualTo("BES3-CLEO")) {
     obsErrSource = "BES+CLEO, arXiv:2103.05988";
     // Values are the average of the upper and lower asymmetric uncertainties
@@ -99,19 +100,14 @@ void PDF_BES_CLEO_K3pi_Kpipi0::setUncertainties(TString c) {
     StatErr[4] = 0.08;          // r_K3pi
     StatErr[5] = 0.11;          // r_Kpipi0
 
-    SystErr[0] = 0.;
-    SystErr[1] = 0.;
-    SystErr[2] = 0.;
-    SystErr[3] = 0.;
-    SystErr[4] = 0.;
-    SystErr[5] = 0.;
+    std::ranges::fill(SystErr, 0.);
   } else {
     std::cout << "PDF_BES_CLEO_K3pi_Kpipi0::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }
 
-void PDF_BES_CLEO_K3pi_Kpipi0::setCorrelations(TString c) {
+void PDF_BES_CLEO_K3pi_Kpipi0::setCorrelations(const TString c) {
   resetCorrelations();
   if (c.EqualTo("BES3-CLEO")) {
     corSource = "BES+CLEO, arXiv:2103.05988";

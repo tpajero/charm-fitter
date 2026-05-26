@@ -4,17 +4,22 @@
  * Date: October 2021
  **/
 
+#include <PDF_yCP.h>
+
+#include <CharmUtils.h>
+#include <ParametersCharmCombo.h>
+
+#include <Utils.h>
+
 #include <RooFormulaVar.h>
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
-#include <Utils.h>
+#include <TString.h>
 
-#include <CharmUtils.h>
-#include <PDF_yCP.h>
-#include <ParametersCharmCombo.h>
+#include <iostream>
 
-PDF_yCP::PDF_yCP(TString measurement_id, const theory_config& th_cfg) : PDF_Abs{1}, th_cfg{th_cfg} {
+PDF_yCP::PDF_yCP(const TString measurement_id, const theory_config th_cfg) : PDF_Abs{1}, th_cfg{th_cfg} {
   name = "yCP_" + measurement_id;
   initParameters();
   initRelations();
@@ -22,8 +27,7 @@ PDF_yCP::PDF_yCP(TString measurement_id, const theory_config& th_cfg) : PDF_Abs{
   setObservables(measurement_id);
   setUncertainties(measurement_id);
   setCorrelations(measurement_id);
-  buildCov();
-  buildPdf();
+  build();
 }
 
 void PDF_yCP::initParameters() {
@@ -73,12 +77,12 @@ void PDF_yCP::initRelations() {
   }
 }
 
-void PDF_yCP::initObservables(const TString& setName) {
+void PDF_yCP::initObservables(const TString setName) {
   observables = new RooArgList("observables");
   observables->add(*(new RooRealVar("yCP_obs", setName + "   #it{y_{CP}}", 0, -1e4, 1e4)));
 }
 
-void PDF_yCP::setObservables(TString c) {
+void PDF_yCP::setObservables(const TString c) {
   if (c.EqualTo("truth"))
     setObservablesTruth();
   else if (c.EqualTo("toy"))
@@ -98,7 +102,7 @@ void PDF_yCP::setObservables(TString c) {
   }
 }
 
-void PDF_yCP::setUncertainties(TString c) {
+void PDF_yCP::setUncertainties(const TString c) {
   if (c.EqualTo("WA2020")) {
     obsErrSource = "https://cds.cern.ch/record/2747731";
     StatErr[0] = 0.704;
@@ -117,7 +121,7 @@ void PDF_yCP::setUncertainties(TString c) {
   }
 }
 
-void PDF_yCP::setCorrelations(TString c) {
+void PDF_yCP::setCorrelations(const TString c) {
   resetCorrelations();
   corSource = "No correlations for one observable";
 }

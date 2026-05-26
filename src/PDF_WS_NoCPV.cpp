@@ -4,18 +4,21 @@
  * Date: October 2021
  **/
 
-#include <map>
-#include <vector>
+#include <PDF_WS_NoCPV.h>
+
+#include <CharmUtils.h>
+#include <ParametersCharmCombo.h>
+
+#include <Utils.h>
 
 #include <RooFormulaVar.h>
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
-#include <Utils.h>
-
-#include <CharmUtils.h>
-#include <PDF_WS_NoCPV.h>
-#include <ParametersCharmCombo.h>
+#include <algorithm>
+#include <iostream>
+#include <map>
+#include <vector>
 
 namespace {
   // Map containing the expressions for the observables in the various parametrisations
@@ -41,7 +44,7 @@ namespace {
   };
 }  // namespace
 
-PDF_WS_NoCPV::PDF_WS_NoCPV(TString measurement_id, const theory_config& th_cfg) : PDF_Abs{3}, th_cfg{th_cfg} {
+PDF_WS_NoCPV::PDF_WS_NoCPV(const TString measurement_id, const theory_config th_cfg) : PDF_Abs{3}, th_cfg{th_cfg} {
   name = measurement_id + "_WS_NoCPV";
   initParameters();
   initRelations();
@@ -83,14 +86,14 @@ void PDF_WS_NoCPV::initRelations() {
   theory->add(*(Utils::makeTheoryVar("xp2_th", "xp2_th", theory_expressions["x'2"][th_cfg], parameters)));
 }
 
-void PDF_WS_NoCPV::initObservables(const TString& setName) {
+void PDF_WS_NoCPV::initObservables(const TString setName) {
   observables = new RooArgList("observables");  ///< the order of this list must match that of the COR matrix!
   observables->add(*(new RooRealVar("RD_obs", setName + "   #it{R_{K#pi}}", 0., -1e4, 1e4)));
   observables->add(*(new RooRealVar("yp_obs", setName + "   #it{y'}", 0., -1e4, 1e4)));
   observables->add(*(new RooRealVar("xp2_obs", setName + "   #it{x'}^{2}", 0., -1e4, 1e4)));
 }
 
-void PDF_WS_NoCPV::setObservables(TString c) {
+void PDF_WS_NoCPV::setObservables(const TString c) {
   if (c.EqualTo("truth"))
     setObservablesTruth();
   else if (c.EqualTo("toy"))
@@ -116,38 +119,32 @@ void PDF_WS_NoCPV::setObservables(TString c) {
   }
 }
 
-void PDF_WS_NoCPV::setUncertainties(TString c) {
+void PDF_WS_NoCPV::setUncertainties(const TString c) {
   if (c.EqualTo("CDF")) {
     obsErrSource = "https://inspirehep.net/literature/1254229";
     StatErr[0] = 0.035;  // RD
     StatErr[1] = 0.43;   // y'
     StatErr[2] = 1.8;    // x'2
-    SystErr[0] = 0;      // RD
-    SystErr[1] = 0;      // y'
-    SystErr[2] = 0;      // x'2
+    std::ranges::fill(SystErr, 0.);
   } else if (c.EqualTo("BaBar")) {
     obsErrSource = "https://inspirehep.net/literature/746245";
     StatErr[0] = pow(pow(0.016, 2) + pow(0.010, 2), 0.5);  // RD
     StatErr[1] = pow(pow(0.44, 2) + pow(0.31, 2), 0.5);    // y'+
     StatErr[2] = pow(pow(3.0, 2) + pow(2.1, 2), 0.5);      // x'2+
-    SystErr[0] = 0;                                        // RD
-    SystErr[1] = 0;                                        // y'+
-    SystErr[2] = 0;                                        // x'2+
+    std::ranges::fill(SystErr, 0.);
   } else if (c.EqualTo("Belle")) {
     obsErrSource = "https://inspirehep.net/literature/1277238";
     StatErr[0] = 0.013;  // RD
     StatErr[1] = 0.34;   // y'
     StatErr[2] = 2.2;    // x'2
-    SystErr[0] = 0;      // RD
-    SystErr[1] = 0;      // y'
-    SystErr[2] = 0;      // x'2
+    std::ranges::fill(SystErr, 0.);
   } else {
     std::cout << "PDF_WS_NoCPV::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }
 
-void PDF_WS_NoCPV::setCorrelations(TString c) {
+void PDF_WS_NoCPV::setCorrelations(const TString c) {
   resetCorrelations();
   if (c.EqualTo("CDF")) {
     corSource = "https://inspirehep.net/literature/1254229";

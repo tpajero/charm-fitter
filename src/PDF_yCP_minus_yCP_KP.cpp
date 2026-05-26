@@ -4,17 +4,22 @@
  * Date: October 2021
  **/
 
+#include <PDF_yCP_minus_yCP_KP.h>
+
+#include <CharmUtils.h>
+#include <ParametersCharmCombo.h>
+
+#include <Utils.h>
+
 #include <RooFormulaVar.h>
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
-#include <Utils.h>
+#include <TString.h>
 
-#include <CharmUtils.h>
-#include <PDF_yCP_minus_yCP_KP.h>
-#include <ParametersCharmCombo.h>
+#include <iostream>
 
-PDF_yCP_minus_yCP_KP::PDF_yCP_minus_yCP_KP(TString measurement_id, const theory_config& th_cfg)
+PDF_yCP_minus_yCP_KP::PDF_yCP_minus_yCP_KP(const TString measurement_id, const theory_config th_cfg)
     : PDF_Abs{1}, th_cfg{th_cfg} {
   name = "yCP_minus_yCP_KP_" + measurement_id;
   initParameters();
@@ -23,8 +28,7 @@ PDF_yCP_minus_yCP_KP::PDF_yCP_minus_yCP_KP(TString measurement_id, const theory_
   setObservables(measurement_id);
   setUncertainties(measurement_id);
   setCorrelations(measurement_id);
-  buildCov();
-  buildPdf();
+  build();
 }
 
 void PDF_yCP_minus_yCP_KP::initParameters() {
@@ -85,13 +89,13 @@ void PDF_yCP_minus_yCP_KP::initRelations() {
   }
 }
 
-void PDF_yCP_minus_yCP_KP::initObservables(const TString& setName) {
+void PDF_yCP_minus_yCP_KP::initObservables(const TString setName) {
   observables = new RooArgList("observables");
   observables->add(
       *(new RooRealVar("yCP_minus_yCP_KP_obs", setName + "   #it{y_{CP}}#minus#it{y_{CP}^{K#pi}}", 0, -1e4, 1e4)));
 }
 
-void PDF_yCP_minus_yCP_KP::setObservables(TString c) {
+void PDF_yCP_minus_yCP_KP::setObservables(const TString c) {
   if (c.EqualTo("truth"))
     setObservablesTruth();
   else if (c.EqualTo("toy"))
@@ -105,18 +109,18 @@ void PDF_yCP_minus_yCP_KP::setObservables(TString c) {
   }
 }
 
-void PDF_yCP_minus_yCP_KP::setUncertainties(TString c) {
+void PDF_yCP_minus_yCP_KP::setUncertainties(const TString c) {
   if (c.EqualTo("WA2020")) {
     obsErrSource = "https://cds.cern.ch/record/2747731";
     StatErr[0] = 3.068;
-    SystErr[0] = 0;
+    SystErr[0] = 0.;
   } else {
     std::cout << "PDF_yCP_minus_yCP_KP::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }
 
-void PDF_yCP_minus_yCP_KP::setCorrelations(TString c) {
+void PDF_yCP_minus_yCP_KP::setCorrelations(const TString c) {
   resetCorrelations();
   corSource = "No correlations for one observable";
 }

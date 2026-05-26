@@ -4,19 +4,21 @@
  * Date: October 2021
  **/
 
-#include <vector>
+#include <PDF_Kpipi0.h>
+
+#include <CharmUtils.h>
+#include <ParametersCharmCombo.h>
+
+#include <Utils.h>
 
 #include <RooFormulaVar.h>
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
-#include <Utils.h>
+#include <iostream>
+#include <vector>
 
-#include <CharmUtils.h>
-#include <PDF_Kpipi0.h>
-#include <ParametersCharmCombo.h>
-
-PDF_Kpipi0::PDF_Kpipi0(TString measurement_id, const theory_config& th_cfg) : PDF_Abs{2}, th_cfg{th_cfg} {
+PDF_Kpipi0::PDF_Kpipi0(const TString measurement_id, const theory_config th_cfg) : PDF_Abs{2}, th_cfg{th_cfg} {
   name = measurement_id + "_Kpipi0";
   TString label;
   if (measurement_id.EqualTo("BaBar"))
@@ -29,8 +31,7 @@ PDF_Kpipi0::PDF_Kpipi0(TString measurement_id, const theory_config& th_cfg) : PD
   setObservables(measurement_id);
   setUncertainties(measurement_id);
   setCorrelations(measurement_id);
-  buildCov();
-  buildPdf();
+  build();
 }
 
 void PDF_Kpipi0::initParameters() {
@@ -93,13 +94,13 @@ void PDF_Kpipi0::initRelations() {
   }
 }
 
-void PDF_Kpipi0::initObservables(const TString& setName) {
+void PDF_Kpipi0::initObservables(const TString setName) {
   observables = new RooArgList("observables");  ///< the order of this list must match that of the COR matrix!
   observables->add(*(new RooRealVar("xpp_obs", setName + "   #it{x''}", 0., -1e4, 1e4)));
   observables->add(*(new RooRealVar("ypp_obs", setName + "   #it{y''}", 0., -1e4, 1e4)));
 }
 
-void PDF_Kpipi0::setObservables(TString c) {
+void PDF_Kpipi0::setObservables(const TString c) {
   if (c.EqualTo("truth"))
     setObservablesTruth();
   else if (c.EqualTo("toy"))
@@ -114,7 +115,7 @@ void PDF_Kpipi0::setObservables(TString c) {
   }
 }
 
-void PDF_Kpipi0::setUncertainties(TString c) {
+void PDF_Kpipi0::setUncertainties(const TString c) {
   if (c.EqualTo("BaBar")) {
     obsErrSource = "https://inspirehep.net/literature/791715";
     StatErr[0] = pow(pow(0.625, 2) + pow(0.39, 2), 0.5);  // x''
@@ -125,7 +126,7 @@ void PDF_Kpipi0::setUncertainties(TString c) {
   }
 }
 
-void PDF_Kpipi0::setCorrelations(TString c) {
+void PDF_Kpipi0::setCorrelations(const TString c) {
   resetCorrelations();
   if (c.EqualTo("BaBar")) {
     obsErrSource = "https://inspirehep.net/literature/791715";

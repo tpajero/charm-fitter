@@ -7,19 +7,19 @@
 #ifndef PDF_RM_h
 #define PDF_RM_h
 
-#include <TString.h>
+#include "CharmUtils.h"
 
 #include <PDF_Abs.h>
 
-#include "CharmUtils.h"
+#include <TString.h>
 
 class PDF_RM : public PDF_Abs {
  public:
-  PDF_RM(TString measurement_id, const theory_config& th_cf);
+  PDF_RM(TString measurement_id, theory_config th_cf);
   void buildPdf() override;
-  void initObservables(const TString& setName);
-  virtual void initParameters() override;
-  virtual void initRelations() override;
+  void initObservables(TString setName);
+  void initParameters() override;
+  void initRelations() override;
   void setCorrelations(TString measurement_id) override;
   void setObservables(TString measurement_id) override;
   void setUncertainties(TString measurement_id) override;

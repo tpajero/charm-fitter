@@ -4,19 +4,22 @@
  * Date: October 2021
  **/
 
-#include <map>
-#include <string>
-#include <vector>
+#include <PDF_WS.h>
+
+#include <CharmUtils.h>
+#include <ParametersCharmCombo.h>
+
+#include <Utils.h>
 
 #include <RooFormulaVar.h>
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
-#include <Utils.h>
-
-#include <CharmUtils.h>
-#include <PDF_WS.h>
-#include <ParametersCharmCombo.h>
+#include <algorithm>
+#include <iostream>
+#include <map>
+#include <string>
+#include <vector>
 
 namespace {
   // Map containing the expressions for the observables in the various parametrisations
@@ -99,7 +102,7 @@ namespace {
   };
 }  // namespace
 
-PDF_WS::PDF_WS(TString measurement_id, const theory_config& th_cfg, WS_parametrisation p)
+PDF_WS::PDF_WS(const TString measurement_id, const theory_config th_cfg, WS_parametrisation p)
     : PDF_Abs{measurement_id.EqualTo("LHCb_Prompt_Run12_appB") ? 9 : 6}, th_cfg{th_cfg}, ws_param{p} {
   TString label;
   if (measurement_id.EqualTo("BaBar"))
@@ -137,11 +140,10 @@ PDF_WS::PDF_WS(TString measurement_id, const theory_config& th_cfg, WS_parametri
   setObservables(measurement_id);
   setUncertainties(measurement_id);
   setCorrelations(measurement_id);
-  buildCov();
-  buildPdf();
+  build();
 }
 
-PDF_WS::PDF_WS(TString val, TString err, const theory_config& th_cfg) : PDF_Abs{6}, th_cfg{th_cfg} {
+PDF_WS::PDF_WS(const TString val, TString err, const theory_config th_cfg) : PDF_Abs{6}, th_cfg{th_cfg} {
   TString label;
   if (err.EqualTo("LHCb_Run12"))
     label = "WS/RS LHCb prompt (Run 1+2)";
@@ -155,8 +157,7 @@ PDF_WS::PDF_WS(TString val, TString err, const theory_config& th_cfg) : PDF_Abs{
   setObservables(val);
   setUncertainties(err);
   setCorrelations(err);
-  buildCov();
-  buildPdf();
+  build();
 }
 
 void PDF_WS::initParameters() {
@@ -251,7 +252,7 @@ void PDF_WS::initRelationsRRXY() {
   theory->add(*(Utils::makeTheoryVar("x'2-_th", "x'2-_th", theory_expressions["x'2-"][th_cfg], parameters)));
 }
 
-void PDF_WS::initObservables(const TString& setName) {
+void PDF_WS::initObservables(const TString setName) {
   observables = new RooArgList("observables");  // the order of this list must match that of the COR matrix!
   switch (ws_param) {
   case WS_parametrisation::raxy:
@@ -289,7 +290,7 @@ void PDF_WS::initObservables(const TString& setName) {
   }
 }
 
-void PDF_WS::setObservables(TString c) {
+void PDF_WS::setObservables(const TString c) {
   if (c.EqualTo("truth"))
     setObservablesTruth();
   else if (c.EqualTo("toy"))
@@ -377,7 +378,7 @@ void PDF_WS::setObservables(TString c) {
   }
 }
 
-void PDF_WS::setUncertainties(TString c) {
+void PDF_WS::setUncertainties(const TString c) {
   if (c.EqualTo("BaBar")) {
     obsErrSource = "https://inspirehep.net/literature/746245";
     // StatErr[0] = 0.0189; // RD TODO
@@ -388,12 +389,7 @@ void PDF_WS::setUncertainties(TString c) {
     StatErr[3] = 0.0267;  // RD-
     StatErr[4] = 0.75;    // y'-
     StatErr[5] = 5.0;     // x'2-
-    SystErr[0] = 0;       // RD+ (or RD)
-    SystErr[1] = 0;       // y'+
-    SystErr[2] = 0;       // x'2+
-    SystErr[3] = 0;       // RD- (or AD)
-    SystErr[4] = 0;       // y'-
-    SystErr[5] = 0;       // x'2-
+    std::ranges::fill(SystErr, 0.);
   } else if (c.EqualTo("Belle")) {
     obsErrSource = "http://belle.kek.jp/belle/theses/doctor/lmzhang06/phd-mix-400.ps.gz";
     StatErr[0] = 0.024;  // RD+
@@ -402,12 +398,7 @@ void PDF_WS::setUncertainties(TString c) {
     StatErr[3] = 0.024;  // RD-
     StatErr[4] = 0.54;   // y'-
     StatErr[5] = 2.9;    // x'2-
-    SystErr[0] = 0;      // RD+
-    SystErr[1] = 0;      // y'+
-    SystErr[2] = 0;      // x'2+
-    SystErr[3] = 0;      // RD-
-    SystErr[4] = 0;      // y'-
-    SystErr[5] = 0;      // x'2-
+    std::ranges::fill(SystErr, 0.);
   } else if (c.EqualTo("LHCb_DT_Run1")) {
     obsErrSource = "https://inspirehep.net/literature/1499047";
     StatErr[0] = pow(pow(0.15, 2) + pow(0.06, 2), 0.5);    // RD+
@@ -416,12 +407,7 @@ void PDF_WS::setUncertainties(TString c) {
     StatErr[3] = pow(pow(0.15, 2) + pow(0.07, 2), 0.5);    // RD-
     StatErr[4] = pow(pow(0.521, 2) + pow(0.040, 2), 0.5);  // y'-
     StatErr[5] = pow(pow(4.31, 2) + pow(0.38, 2), 0.5);    // x'2-
-    SystErr[0] = 0;                                        // RD+
-    SystErr[1] = 0;                                        // y'+
-    SystErr[2] = 0;                                        // x'2+
-    SystErr[3] = 0;                                        // RD-
-    SystErr[4] = 0;                                        // y'-
-    SystErr[5] = 0;                                        // x'2-
+    std::ranges::fill(SystErr, 0.);
   } else if (c.EqualTo("LHCb_Run1")) {
     obsErrSource = "https://inspirehep.net/literature/1499047";
     StatErr[0] = 0.081;  // RD+
@@ -430,12 +416,7 @@ void PDF_WS::setUncertainties(TString c) {
     StatErr[3] = 0.081;  // RD-
     StatErr[4] = 0.121;  // y'-
     StatErr[5] = 0.61;   // x'2-
-    SystErr[0] = 0;      // RD+
-    SystErr[1] = 0;      // y'+
-    SystErr[2] = 0;      // x'2+
-    SystErr[3] = 0;      // RD-
-    SystErr[4] = 0;      // y'-
-    SystErr[5] = 0;      // x'2-
+    std::ranges::fill(SystErr, 0.);
   } else if (c.EqualTo("LHCb_Prompt_2011_2016")) {
     obsErrSource = "https://inspirehep.net/literature/1642234";
     StatErr[0] = 0.0045;  // RD+
@@ -444,12 +425,7 @@ void PDF_WS::setUncertainties(TString c) {
     StatErr[3] = 0.0045;  // RD-
     StatErr[4] = 0.074;   // y'-
     StatErr[5] = 0.39;    // x'2-
-    SystErr[0] = 0;       // RD+
-    SystErr[1] = 0;       // y'+
-    SystErr[2] = 0;       // x'2+
-    SystErr[3] = 0;       // RD-
-    SystErr[4] = 0;       // y'-
-    SystErr[5] = 0;       // x'2-
+    std::ranges::fill(SystErr, 0.);
   } else if (c.EqualTo("LHCb_Prompt_Run12_sec9")) {
     obsErrSource = "https://indico.cern.ch/event/1355805/";
     StatErr[0] = 0.0019;  // RD
@@ -458,12 +434,7 @@ void PDF_WS::setUncertainties(TString c) {
     StatErr[3] = 0.57;    // AD
     StatErr[4] = 0.034;   // dc
     StatErr[5] = 0.036;   // dc'
-    SystErr[0] = 0;       // RD
-    SystErr[1] = 0;       // c
-    SystErr[2] = 0;       // c'
-    SystErr[3] = 0;       // AD
-    SystErr[4] = 0;       // dc
-    SystErr[5] = 0;       // dc'
+    std::ranges::fill(SystErr, 0.);
   } else if (c.EqualTo("LHCb_Prompt_Run12_appB")) {
     obsErrSource = "https://indico.cern.ch/event/1355805/";
     StatErr[0] = 0.0019;  // RD
@@ -475,15 +446,7 @@ void PDF_WS::setUncertainties(TString c) {
     StatErr[6] = 0.59;    // ADt
     StatErr[7] = 0.036;   // dc~
     StatErr[8] = 0.038;   // dc'~
-    SystErr[0] = 0;       // RD
-    SystErr[1] = 0;       // c
-    SystErr[2] = 0;       // c'
-    SystErr[3] = 0;       // AD
-    SystErr[4] = 0;       // dc
-    SystErr[5] = 0;       // dc'
-    SystErr[6] = 0;       // ADt
-    SystErr[7] = 0;       // dc~
-    SystErr[8] = 0;       // dc'~
+    std::ranges::fill(SystErr, 0.);
   } else if (c.EqualTo("LHCb_DT_Run2")) {
     obsErrSource = "https://indico.cern.ch/event/1423686/contributions/6139348/, LHCb-PAPER-2024-044";
     StatErr[0] = 0.008;  // RD+
@@ -492,7 +455,7 @@ void PDF_WS::setUncertainties(TString c) {
     StatErr[3] = 0.008;  // RD-
     StatErr[4] = 0.236;  // y'-
     StatErr[5] = 1.859;  // x'2-
-    for (int i = 0; i < nObs; ++i) SystErr[i] = 0.;
+    std::ranges::fill(SystErr, 0.);
   } else if (c.EqualTo("LHCb_DT_Run12")) {
     obsErrSource = "https://indico.cern.ch/event/1423686/contributions/6139348/, LHCb-PAPER-2024-044";
     StatErr[0] = 0.007;  // RD+
@@ -501,14 +464,14 @@ void PDF_WS::setUncertainties(TString c) {
     StatErr[3] = 0.007;  // RD-
     StatErr[4] = 0.211;  // y'-
     StatErr[5] = 1.665;  // x'2-
-    for (int i = 0; i < nObs; ++i) SystErr[i] = 0.;
+    std::ranges::fill(SystErr, 0.);
   } else {
     std::cout << "PDF_WS::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
 }
 
-void PDF_WS::setCorrelations(TString c) {
+void PDF_WS::setCorrelations(const TString c) {
   resetCorrelations();
   if (c.EqualTo("BaBar")) {  // TODO
     corSource = "https://hflav-eos.web.cern.ch/hflav-eos/charm/CKM23/results_mix_cpv.html";

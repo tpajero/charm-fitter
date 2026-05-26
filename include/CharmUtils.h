@@ -14,18 +14,18 @@
  */
 enum class FSC { none, partial, full };
 
-std::ostream& operator<<(std::ostream& os, const FSC& fsc);
+std::ostream& operator<<(std::ostream& os, FSC fsc);
 
 /**
  * Enumeration of the possible parametrisations to be used in the fit.
  */
 enum class theory_config { phenomenological, theoretical, superweak, d0_to_kpi };
 
-std::ostream& operator<<(std::ostream& os, const theory_config& th_cfg);
+std::ostream& operator<<(std::ostream& os, theory_config th_cfg);
 
 namespace CharmUtils {
 
-  std::string get_dy_expression(const theory_config th_cfg, const FSC fsc = FSC::none, const std::string fs = "");
+  std::string get_dy_expression(theory_config th_cfg, FSC fsc = FSC::none, std::string fs = "");
 
   // Helper strings to go from phenomenological to phenomenological parametrisation
   const std::string x_to_superweak = "pow(2,-0.5) * sqrt("

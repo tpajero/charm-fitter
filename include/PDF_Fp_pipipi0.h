@@ -7,9 +7,9 @@
 #ifndef PDF_Fp_pipipi0_h
 #define PDF_Fp_pipipi0_h
 
-#include <TString.h>
-
 #include <PDF_Abs.h>
+
+#include <TString.h>
 
 class PDF_Fp_pipipi0 : public PDF_Abs {
  public:

@@ -4,17 +4,21 @@
  * Date: October 2021
  **/
 
+#include <PDF_Cleo.h>
+
+#include <CharmUtils.h>
+#include <ParametersCharmCombo.h>
+
+#include <Utils.h>
+
 #include <RooFormulaVar.h>
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
-#include <Utils.h>
+#include <iostream>
+#include <vector>
 
-#include <CharmUtils.h>
-#include <PDF_Cleo.h>
-#include <ParametersCharmCombo.h>
-
-PDF_Cleo::PDF_Cleo(TString measurement_id, const theory_config& th_cfg) : PDF_Abs{5}, th_cfg{th_cfg} {
+PDF_Cleo::PDF_Cleo(const TString measurement_id, const theory_config th_cfg) : PDF_Abs{5}, th_cfg{th_cfg} {
   name = "CLEO";
   initParameters();
   initRelations();
@@ -22,8 +26,7 @@ PDF_Cleo::PDF_Cleo(TString measurement_id, const theory_config& th_cfg) : PDF_Ab
   setObservables(measurement_id);
   setUncertainties(measurement_id);
   setCorrelations(measurement_id);
-  buildCov();
-  buildPdf();
+  build();
 }
 
 void PDF_Cleo::initParameters() {
@@ -98,7 +101,7 @@ void PDF_Cleo::initRelations() {
   theory->add(*(Utils::makeTheoryVar("sin_th", "sin_th", "-sin(Delta_Kpi)", parameters)));
 }
 
-void PDF_Cleo::initObservables(const TString& setName) {
+void PDF_Cleo::initObservables(const TString setName) {
   observables = new RooArgList("observables");  ///< the order of this list must match that of the COR matrix!
   observables->add(*(new RooRealVar("RD_obs", setName + "   #it{R_{K#pi}}", 0., 0., 1e4)));
   observables->add(*(new RooRealVar("x2_obs", setName + "   #it{x}^{2}", 0., -1e4, 1e4)));
@@ -107,7 +110,7 @@ void PDF_Cleo::initObservables(const TString& setName) {
   observables->add(*(new RooRealVar("sin_obs", setName + "   #minussin#Delta_{#it{K#pi}}", 0., -1., 1.)));
 }
 
-void PDF_Cleo::setObservables(TString c) {
+void PDF_Cleo::setObservables(const TString c) {
   if (c.EqualTo("truth"))
     setObservablesTruth();
   else if (c.EqualTo("toy"))
@@ -125,7 +128,7 @@ void PDF_Cleo::setObservables(TString c) {
   }
 }
 
-void PDF_Cleo::setUncertainties(TString c) {
+void PDF_Cleo::setUncertainties(const TString c) {
   if (c.EqualTo("Cleo-c")) {
     obsErrSource = "https://inspirehep.net/literature/1189182";
     StatErr[0] = sqrt(pow(0.107, 2) + pow(0.045, 2));  // RD
@@ -144,7 +147,7 @@ void PDF_Cleo::setUncertainties(TString c) {
   }
 }
 
-void PDF_Cleo::setCorrelations(TString c) {
+void PDF_Cleo::setCorrelations(const TString c) {
   resetCorrelations();
   if (c.EqualTo("Cleo-c")) {
     corSource = "https://inspirehep.net/literature/1189182";

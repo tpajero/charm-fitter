@@ -4,17 +4,26 @@
  * Date: September 2022
  **/
 
-#include <boost/format.hpp>
+#include <PDF_AcpHH_LHCb_Run12.h>
 
+#include <CharmUtils.h>
+#include <ParametersCharmCombo.h>
+
+#include <Utils.h>
+
+#include <RooArgList.h>
 #include <RooFormulaVar.h>
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
-#include <Utils.h>
+#include <boost/format.hpp>
 
-#include <CharmUtils.h>
-#include <PDF_AcpHH_LHCb_Run12.h>
-#include <ParametersCharmCombo.h>
+#include <iostream>
+#include <vector>
+
+namespace {
+  constexpr double d0_lifetime = 4.103e-13;
+}
 
 PDF_AcpHH_LHCb_Run12::PDF_AcpHH_LHCb_Run12(const theory_config th_cfg, const FSC fsc)
     : PDF_Abs{8}, th_cfg{th_cfg}, fsc{fsc} {
@@ -25,8 +34,7 @@ PDF_AcpHH_LHCb_Run12::PDF_AcpHH_LHCb_Run12(const theory_config th_cfg, const FSC
   setObservables("lhcb-run12");
   setUncertainties("lhcb-run12");
   setCorrelations("lhcb-run12");
-  buildCov();
-  buildPdf();
+  build();
 }
 
 void PDF_AcpHH_LHCb_Run12::initParameters() {
@@ -93,7 +101,7 @@ void PDF_AcpHH_LHCb_Run12::initObservables() {
   observables->add(*(new RooRealVar("dacp_run2_prompt_obs", "#it{#DeltaA_{CP}} Run 2 #it{#pi}", 0, -1, 1)));
 }
 
-void PDF_AcpHH_LHCb_Run12::setObservables(TString c) {
+void PDF_AcpHH_LHCb_Run12::setObservables(const TString c) {
   obsValSource = "https://cds.cern.ch/record/2799916/";
   setObservable("acp_d0_to_kk_run1_mu_obs", -6.0e-2);
   setObservable("acp_d0_to_kk_run1_prompt_obs", 14.0e-2);
@@ -105,7 +113,7 @@ void PDF_AcpHH_LHCb_Run12::setObservables(TString c) {
   setObservable("dacp_run2_prompt_obs", -18.2e-2);
 }
 
-void PDF_AcpHH_LHCb_Run12::setUncertainties(TString c) {
+void PDF_AcpHH_LHCb_Run12::setUncertainties(const TString c) {
   obsErrSource = "https://cds.cern.ch/record/2799916/";
 
   StatErr[0] = 15.0e-2;
@@ -127,7 +135,7 @@ void PDF_AcpHH_LHCb_Run12::setUncertainties(TString c) {
   SystErr[7] = 0.9e-2;
 }
 
-void PDF_AcpHH_LHCb_Run12::setCorrelations(TString c) {
+void PDF_AcpHH_LHCb_Run12::setCorrelations(const TString c) {
   corSource = "https://cds.cern.ch/record/2799916/";
 
   std::vector<double> dataStat = {

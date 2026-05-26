@@ -19,7 +19,7 @@
 #include <boost/algorithm/string.hpp>
 #include <vector>
 
-PDF_BES_Kpi_7d::PDF_BES_Kpi_7d(const theory_config& th_cfg) : PDF_Abs{7}, th_cfg{th_cfg} {
+PDF_BES_Kpi_7d::PDF_BES_Kpi_7d(const theory_config th_cfg) : PDF_Abs{7}, th_cfg{th_cfg} {
   name = "charm-bes-kpi-2025";
   initParameters();
   initRelations();
@@ -99,7 +99,7 @@ void PDF_BES_Kpi_7d::initObservables() {
   observables->add(*(new RooRealVar("rsin_7fb_obs", "#it{r_{D}^{K#pi}}sin#it{#Delta_{D}^{K#pi}}", 0., -20., 20.)));
 }
 
-void PDF_BES_Kpi_7d::setObservables(TString c) {
+void PDF_BES_Kpi_7d::setObservables(const TString c) {
   if (c.EqualTo("3+7fb")) {
     obsValSource = "https://arxiv.org/pdf/2208.09402v2.pdf, https://arxiv.org/pdf/2506.07907";
     setObservable("A_kpi_obs", 13.2);
@@ -115,7 +115,7 @@ void PDF_BES_Kpi_7d::setObservables(TString c) {
   }
 }
 
-void PDF_BES_Kpi_7d::setUncertainties(TString c) {
+void PDF_BES_Kpi_7d::setUncertainties(const TString c) {
   if (c.EqualTo("3+7fb")) {
     obsErrSource = "https://arxiv.org/pdf/2208.09402v2.pdf, https://arxiv.org/pdf/2506.07907";
     StatErr[0] = 1.1;
@@ -138,7 +138,7 @@ void PDF_BES_Kpi_7d::setUncertainties(TString c) {
   }
 }
 
-void PDF_BES_Kpi_7d::setCorrelations(TString c) {
+void PDF_BES_Kpi_7d::setCorrelations(const TString c) {
   resetCorrelations();
   if (c.EqualTo("3+7fb")) {
     corSource = "https://arxiv.org/pdf/2208.09402v2.pdf, https://arxiv.org/pdf/2506.07907";
