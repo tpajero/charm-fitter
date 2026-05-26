@@ -21,9 +21,12 @@
 #include <vector>
 
 PDF_BinFlip::PDF_BinFlip(const TString measurement_id, const parametrisations::mix mix_param)
-    : PDF_Charm{4}, mix_param{mix_param}, measurement_id{measurement_id} {
-  name = "BinFlip_" + measurement_id;
-  initialise(measurement_id, measurement_id, measurement_id);
+    : PDF_BinFlip{measurement_id, measurement_id, mix_param} {}
+
+PDF_BinFlip::PDF_BinFlip(const TString obs_id, const TString unc_id, const parametrisations::mix mix_param)
+    : PDF_Charm{4}, mix_param{mix_param}, measurement_id{obs_id}, unc_id{unc_id} {
+  name = "BinFlip_" + unc_id;
+  initialise(obs_id, unc_id, unc_id);
 }
 
 std::set<std::string> PDF_BinFlip::getParameterNames() const {
@@ -66,7 +69,7 @@ void PDF_BinFlip::initRelations() {
 }
 
 void PDF_BinFlip::initObservables() {
-  TString label;
+  TString label = unc_id;
   if (measurement_id.EqualTo("LHCb_Run1"))
     label = "LHCb Binflip Run 1";
   else if (measurement_id.EqualTo("LHCb_Run2_prompt"))
@@ -118,6 +121,8 @@ void PDF_BinFlip::setObservables(const TString c) {
 }
 
 void PDF_BinFlip::setUncertainties(const TString c) {
+  const std::vector<double> stat_lhcb_run2 = {0.45e-3, 1.16e-3, 0.18e-3, 0.35e-3};
+  const std::vector<double> syst_lhcb_run2 = {0.195e-3, 0.594e-3, 0.013e-3, 0.128e-3};
   // x, y, dx, dy
   if (c.EqualTo("LHCb_Run1")) {
     obsErrSource = "https://inspirehep.net/literature/1724179";
@@ -134,8 +139,16 @@ void PDF_BinFlip::setUncertainties(const TString c) {
     SystErr = {0.26e-3, 0.83e-3, 0.28e-3, 0.26e-3};
   } else if (c.EqualTo("LHCb_Run2")) {
     obsErrSource = "https://inspirehep.net/literature/2135966";
-    StatErr = {0.45e-3, 1.16e-3, 0.18e-3, 0.35e-3};
-    SystErr = {0.195e-3, 0.594e-3, 0.013e-3, 0.128e-3};
+    StatErr = stat_lhcb_run2;
+    SystErr = syst_lhcb_run2;
+  } else if (c.EqualTo("LHCb-UI") || c.EqualTo("LHCb-UII")) {
+    obsErrSource = "charm-fitter";
+    // Run 2 values times scale factor
+    using constants::lhcb_extrapolations;
+    const auto scale = lhcb_extrapolations.at(c.Data()) / lhcb_extrapolations.at("LHCb-R2");
+    std::transform(stat_lhcb_run2.begin(), stat_lhcb_run2.end(), StatErr.begin(),
+                   [scale](double x) { return x * scale; });
+    std::ranges::fill(SystErr, 0.0);
   } else {
     throw std::runtime_error(std::format("PDF_BinFlip::setUncertainties ERROR config {} not found", c.Data()));
   }
@@ -214,6 +227,19 @@ void PDF_BinFlip::setCorrelations(const TString c) {
         // clang-format on
     };
     corSystMatrix = Utils::buildCorMatrix(nObs, dataSyst);
+  } else if (c.EqualTo("LHCb-UII")) {
+    corSource = "";
+    resetCorrelations();
+    // Run 2 values
+    std::vector<double> dataStat = {
+        // clang-format off
+        1., 0.121,  -0.018, -0.016,  // x
+            1.,     -0.012, -0.058,  // y
+                     1.,     0.069,  // dx
+                             1.      // dy
+        // clang-format on
+    };
+    corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
   } else {
     throw std::runtime_error(std::format("PDF_BinFlip::setCorrelations ERROR config {} not found", c.Data()));
   }

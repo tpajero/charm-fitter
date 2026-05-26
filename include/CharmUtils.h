@@ -1,6 +1,8 @@
 #ifndef CHARM_UTILS_H
 #define CHARM_UTILS_H
 
+#include <cmath>
+#include <map>
 #include <ostream>
 #include <set>
 #include <string>
@@ -19,6 +21,19 @@ namespace constants {
    *    ACP_PP ~ - acp_prefix * sin(delta_PP).
    */
   constexpr double acp_prefix = 1.3e-3;
+
+  /** LHCb extrapolations for the expected precision of all charm measurements.
+   *
+   * The Run 2 results are taken as reference, and Upgrade I and Upgrade II extrapolations are obtained through the
+   * script `scripts/extrapolate-precision.py` with an assumed 2x improvement in the trigger, and luminosities of
+   * 50 fb^-1 and 300 fb^-1, respectively.
+   */
+  const std::map<std::string, double> lhcb_extrapolations = {
+      {"LHCb-R2", 1.0},
+      {"LHCb-UI", 0.245},
+      {"LHCb-UII", 0.10},
+  };
+
 }  // namespace constants
 
 namespace hypotheses {

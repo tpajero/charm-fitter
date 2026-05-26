@@ -16,14 +16,19 @@
 #include <format>
 #include <iostream>
 #include <stdexcept>
+#include <vector>
+
+PDF_DY::PDF_DY(const TString val_id, const TString unc_id, const hypotheses::dy_fsc dy_fsc_hypo,
+               const parametrisations::acp acp_param, const parametrisations::mix mix_param)
+    : PDF_Charm{dy_fsc_hypo == hypotheses::dy_fsc::none ? 1 : 2}, acp_param{acp_param}, dy_fsc_hypo{dy_fsc_hypo},
+      mix_param{mix_param}, measurement_id{val_id} {
+  name = "DY_" + measurement_id;
+  initialise(val_id, unc_id, unc_id);
+}
 
 PDF_DY::PDF_DY(const TString measurement_id, const hypotheses::dy_fsc dy_fsc_hypo,
                const parametrisations::acp acp_param, const parametrisations::mix mix_param)
-    : PDF_Charm{dy_fsc_hypo == hypotheses::dy_fsc::none ? 1 : 2}, dy_fsc_hypo{dy_fsc_hypo}, acp_param{acp_param},
-      mix_param{mix_param}, measurement_id{measurement_id} {
-  name = "DY_" + measurement_id;
-  initialise(measurement_id, measurement_id, measurement_id);
-}
+    : PDF_DY{measurement_id, measurement_id, dy_fsc_hypo, acp_param, mix_param} {}
 
 std::set<std::string> PDF_DY::getParameterNames() const {
   return utils::dy_hh_parameters_names(dy_fsc_hypo, acp_param, mix_param, {"KK", "PP"});
@@ -94,6 +99,7 @@ void PDF_DY::setObservables(const TString c) {
 }
 
 void PDF_DY::setUncertainties(const TString c) {
+  const std::vector<double> stat_lhcb_run2 = {1.4e-4, 2.5e-4};
   obsErrSource = "https://github.com/tpajero/charm-fitter/tree/master/charmcombo/blue/DY.cpp";
   if (nObs == 1 && c.EqualTo("Belle&BaBar")) {
     StatErr = {15.75e-4};
@@ -113,6 +119,13 @@ void PDF_DY::setUncertainties(const TString c) {
   } else if (c.EqualTo("LHCb-R12")) {
     StatErr = (nObs == 1) ? std::initializer_list<double>{1.13e-4} : std::initializer_list<double>{1.28e-4, 2.38e-4};
     SystErr = (nObs == 1) ? std::initializer_list<double>{0.33e-4} : std::initializer_list<double>{0.32e-4, 0.40e-4};
+  } else if (nObs == 2 && (c.EqualTo("LHCb-UI") || c.EqualTo("LHCb-UII"))) {
+    obsErrSource = "charm-fitter";
+    // Run 2 values times scale factor
+    using constants::lhcb_extrapolations;
+    const auto scale = lhcb_extrapolations.at(c.Data()) / lhcb_extrapolations.at("LHCb-R2");
+    std::transform(stat_lhcb_run2.begin(), stat_lhcb_run2.end(), StatErr.begin(),
+                   [scale](double x) { return x * scale; });
   } else {
     throw std::runtime_error(
         std::format("PDF_DY::setUncertainties ERROR config {} not found for {} DY observables", c.Data(), nObs));
@@ -134,6 +147,8 @@ void PDF_DY::setCorrelations(const TString c) {
       corSystMatrix[0][1] = 0.62;  // np.sum(np.square([0.09, 0.68, 0.17, 0.06, 0.35])) / 0.91 / 1.11
     else if (c.EqualTo("LHCb-R12"))
       corSystMatrix[0][1] = 0.70;  // np.sum(np.square([0.19, 0.21, 0.07, 0.01, 0.07])) / 0.32 / 0.40
+    else if (c.EqualTo("LHCb-UI") || c.EqualTo("LHCb-UII"))
+      corSystMatrix[0][1] = 0.;
     else
       throw std::runtime_error(
           std::format("PDF_DY::setCorrelations ERROR config {} not found for {} DY observables", c.Data(), nObs));

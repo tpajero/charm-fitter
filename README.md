@@ -61,6 +61,8 @@ To see all available options, run `python scripts/charm-combo.py -h`.
 The configuration files that steer what plots should be produced live in the folder `config/plotting`.
 In particular:
 - `LHCb-R12-vs-R1.py` shows the improvements between LHCb Run 1 and 2;
+- `LHCb-upgrades-projections.py` shows the foreseen impact of LHCb Upgrade I and II with respect to the precision
+  at the end of LHCb Run 1 + 2. Precision extrapolations are made using the script `scripts/extrapolate-precision.py`.
 
 Analogous plots for the subset of WS/RS D0 -> Kpi measurements can be obtained through a sibling script,
 see `python scripts/ws-combo.py -h`.

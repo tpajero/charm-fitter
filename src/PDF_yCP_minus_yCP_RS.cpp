@@ -20,9 +20,13 @@
 #include <stdexcept>
 
 PDF_yCP_minus_yCP_RS::PDF_yCP_minus_yCP_RS(const TString measurement_id, const parametrisations::mix mix_param)
-    : PDF_Charm{1}, mix_param{mix_param}, measurement_id{measurement_id} {
-  name = "yCP_minus_yCP_RS_" + measurement_id;
-  initialise(measurement_id, measurement_id, measurement_id);
+    : PDF_yCP_minus_yCP_RS{measurement_id, measurement_id, mix_param} {}
+
+PDF_yCP_minus_yCP_RS::PDF_yCP_minus_yCP_RS(const TString obs_id, const TString unc_id,
+                                           const parametrisations::mix mix_param)
+    : PDF_Charm{1}, mix_param{mix_param}, measurement_id{unc_id} {
+  name = "yCP_minus_yCP_RS_" + unc_id;
+  initialise(obs_id, unc_id, unc_id);
 }
 
 std::set<std::string> PDF_yCP_minus_yCP_RS::getParameterNames() const {
@@ -96,6 +100,7 @@ void PDF_yCP_minus_yCP_RS::setObservables(const TString c) {
 }
 
 void PDF_yCP_minus_yCP_RS::setUncertainties(const TString c) {
+  constexpr double stat_lhcb_run2 = 0.26e-3;
   if (c.EqualTo("WA2020")) {
     obsErrSource = "https://cds.cern.ch/record/2747731";
     StatErr = {1.11e-3};
@@ -106,8 +111,16 @@ void PDF_yCP_minus_yCP_RS::setUncertainties(const TString c) {
     SystErr = {0.9e-3};
   } else if (c.EqualTo("LHCb-R2")) {
     obsErrSource = "https://inspirehep.net/literature/2035063";
-    StatErr = {0.26e-3};
+    StatErr = {stat_lhcb_run2};
     SystErr = {0.13e-3};
+  } else if (c.EqualTo("LHCb-UI") || c.EqualTo("LHCb-UII")) {
+    obsErrSource = "charm-fitter";
+    // Run 2 values times scale factor
+    std::string id = c.Data();
+    using constants::lhcb_extrapolations;
+    const auto scale = lhcb_extrapolations.at(c.Data()) / lhcb_extrapolations.at("LHCb-R2");
+    StatErr = {stat_lhcb_run2 * scale};
+    SystErr = {0.0};
   } else {
     throw std::runtime_error(std::format("PDF_yCP_minus_yCP_RS::setUncertainties ERROR config {} not found", c.Data()));
   }
