@@ -57,10 +57,11 @@ The configuration files that steer what plots should be produced, the scan range
 In particular:
 - `WA-<date>.py` prepares the plots for the world average at a given date;
 - `LHCb-R12-vs-R1.py` shows the precision improvement between LHCb Run 1 and 2;
+- `LHCb-upgrades-projections.py` shows the foreseen impact of LHCb Upgrade I and II with respect to the precision
+  at the end of LHCb Run 1 + 2. Precision extrapolations are made using the script `scripts/extrapolate-precision.py`.
 For example, you can plot the results of the world average of 2025 with
 
     python scripts/charm-combo.py --config config/charm-combo/plotting/WA-2025-06.py -a all --rescan
-
 
 Analogous plots for the subset of WS/RS D0 -> Kpi measurements can be obtained through a sibling script,
 see `python scripts/ws-combo.py -h`.

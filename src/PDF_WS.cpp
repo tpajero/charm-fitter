@@ -469,6 +469,16 @@ void PDF_WS::setUncertainties(const TString c) {
         std::hypot(16.61e-5, 1e-5),      // x'2-
     };
     std::ranges::fill(SystErr, 0.0);
+  } else if (c.EqualTo("LHCb-UI") || c.EqualTo("LHCb-UII")) {
+    obsErrSource = "charm-fitter";
+    // Run 1+2 (appB) values times scale factor
+    //                                    RD        c       c'      ADt      dc~     dc'~
+    std::vector<double> stat_lhcb_run2 = {0.019e-3, 3.3e-4, 3.5e-6, 0.59e-2, 3.6e-4, 3.8e-6};
+    using constants::lhcb_extrapolations;
+    const auto scale = lhcb_extrapolations.at(c.Data()) / lhcb_extrapolations.at("LHCb-R2");
+    std::transform(stat_lhcb_run2.begin(), stat_lhcb_run2.end(), StatErr.begin(),
+                   [scale](double x) { return x * scale; });
+    std::ranges::fill(SystErr, 0.0);
   } else {
     throw std::runtime_error(std::format("PDF_WS::setUncertainties ERROR config {} not found", c.Data()));
   }
@@ -637,6 +647,20 @@ void PDF_WS::setCorrelations(const TString c) {
                                 1.,   -0.745, 0.629,  // RD-
                                        1.,   -0.946,  // y'-
                                               1.      // x'2-
+        // clang-format on
+    };
+    corStatMatrix = Utils::buildCorMatrix(nObs, data);
+  } else if (c.EqualTo("LHCb-UII")) {
+    corSource = "";
+    std::vector<double> data = {
+        // clang-format off
+        // RD  c      c'      ADt     dct     dc't
+        1.,   -0.927, 0.803,  0.008, -0.007,  0.000,  // RD
+               1.,   -0.943, -0.014,  0.013, -0.006,  // c
+                      1.,     0.007, -0.006,  0.000,  // c'
+                              1.,    -0.934,  0.810,  // ADt
+                                      1.,    -0.943,  // dc~
+                                              1.      // dc'~
         // clang-format on
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, data);

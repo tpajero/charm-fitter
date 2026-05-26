@@ -20,14 +20,19 @@
 #include <stdexcept>
 #include <string>
 #include <utility>
+#include <vector>
+
+PDF_DY::PDF_DY(const TString val_id, const TString unc_id, const hypotheses::dy_fsc dy_fsc_hypo,
+               const parametrisations::acp acp_param, const parametrisations::mix mix_param)
+    : PDF_Charm{dy_fsc_hypo == hypotheses::dy_fsc::none ? 1 : 2}, acp_param{acp_param}, dy_fsc_hypo{dy_fsc_hypo},
+      mix_param{mix_param}, measurement_id{val_id} {
+  name = "DY_" + measurement_id;
+  initialise(val_id, unc_id, unc_id);
+}
 
 PDF_DY::PDF_DY(const TString measurement_id, const hypotheses::dy_fsc dy_fsc_hypo,
                const parametrisations::acp acp_param, const parametrisations::mix mix_param)
-    : PDF_Charm{dy_fsc_hypo == hypotheses::dy_fsc::none ? 1 : 2}, dy_fsc_hypo{dy_fsc_hypo}, acp_param{acp_param},
-      mix_param{mix_param}, measurement_id{measurement_id} {
-  name = "DY_" + measurement_id;
-  initialise(measurement_id, measurement_id, measurement_id);
-}
+    : PDF_DY{measurement_id, measurement_id, dy_fsc_hypo, acp_param, mix_param} {}
 
 std::set<std::string> PDF_DY::getParameterNames() const {
   return utils::dy_hh_parameters_names(dy_fsc_hypo, acp_param, mix_param, {"KK", "PP"});
@@ -109,9 +114,18 @@ void PDF_DY::setUncertainties(const TString c) {
       StatErr = {stat};
       SystErr = {syst};
     } else {
-      const auto& [err_kk, err_pp] = err_kk_pp.at(c.Data());
+      const bool extrapolation = c.EqualTo("LHCb-UI") || c.EqualTo("LHCb-UII");
+      const std::string tag = extrapolation ? "LHCb-R2" : c.Data();
+      const auto& [err_kk, err_pp] = err_kk_pp.at(tag);
       StatErr = {err_kk.first, err_pp.first};
       SystErr = {err_kk.second, err_pp.second};
+      if (extrapolation) {
+        // Run 2 values times scale factor
+        using constants::lhcb_extrapolations;
+        const auto scale = lhcb_extrapolations.at(c.Data()) / lhcb_extrapolations.at("LHCb-R2");
+        std::ranges::for_each(StatErr, [scale](double& unc) { unc *= scale; });
+        std::ranges::fill(SystErr, 0.0);
+      }
     }
   } catch (const std::out_of_range&) {
     throw std::runtime_error(
@@ -131,7 +145,8 @@ void PDF_DY::setCorrelations(const TString c) {
       {"LHCb-R1", 0.8681}, {"LHCb-R12", 0.912}, {"NonLHCb-2015", 0.},
   };
   try {
-    corSystMatrix(0, 1) = cor.at(c.Data());
+    const std::string tag = (c.EqualTo("LHCb-UI") || c.EqualTo("LHCb-UII")) ? "LHCb-R12" : c.Data();
+    corSystMatrix(0, 1) = cor.at(tag);
   } catch (const std::out_of_range&) {
     throw std::runtime_error(
         std::format("PDF_DY::setCorrelations ERROR config \"{}\" not found for {} DY observables", c.Data(), nObs));
