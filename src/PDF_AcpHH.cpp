@@ -217,6 +217,42 @@ const std::map<std::string, PDF_AcpHH::Dataset>& PDF_AcpHH::datasets() {
             },
     };
 
+    /**
+     * LHCb Upgrade I and Upgrade II projections: Run 2 prompt statistical uncertainties scaled by the factors in
+     * constants::lhcb_extrapolations, with systematic uncertainties neglected. To be used with "truth" or "toy"
+     * observables, hence the null central values.
+     */
+    for (const std::string id : {"LHCb-UI", "LHCb-UII"}) {
+      using constants::lhcb_extrapolations;
+      const double scale = lhcb_extrapolations.at(id) / lhcb_extrapolations.at("LHCb-R2");
+      const std::string suffix = id == "LHCb-UI" ? "ui" : "uii";
+      const std::string title = id == "LHCb-UI" ? "Upgrade I" : "Upgrade II";
+      d[id] = {
+          .source = "charm-fitter",
+          .measurements =
+              {
+                  // Average decay times from https://cds.cern.ch/record/2799916/
+                  {ObsType::acp_kk,
+                   "acp_d0_to_kk_lhcb_" + suffix,
+                   "#it{A_{CP}(K^{+}K^{#minus})} LHCb " + title,
+                   {700.0 * units::fs},
+                   0.,
+                   5.3e-4 * scale,
+                   0.},
+                  {ObsType::dacp,
+                   "dacp_lhcb_" + suffix,
+                   "#it{#DeltaA_{CP}} LHCb " + title,
+                   {694.6 * units::fs, 640.7 * units::fs},
+                   0.,
+                   2.9e-4 * scale,
+                   0.},
+              },
+          // Run 2 value (averaged between CDP and CDS)
+          .cor_stat = {1., 0.07, 1.},
+          .cor_syst = {1., 0., 1.},
+      };
+    }
+
     // Check the internal consistency of all datasets
     for (const auto& [id, dataset] : d) {
       for (const auto& m : dataset.measurements) {

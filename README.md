@@ -17,8 +17,7 @@ which are mostly based on the article
 
 The impact of using different assumptions for the final-state corrections for DeltaY(D0 -> h- h+) can be tested, too.
 
-The statistical treatment is frequentist and relies on the GammaCombo package (see
-[gammacombo](https://gammacombo.github.io) for details).
+The statistical treatment is frequentist and relies on the [GammaCombo](https://gammacombo.github.io) package.
 
 Additionally, the folder `BLUE/main` contains executables to perform single-observable averages of charm quantities
 (e.g. for DeltaY, CP violation in D0 -> KS KS decays, D(s)+ -> eta(')h+ branching fractions and CP asymmetries, yCP
@@ -28,15 +27,21 @@ copy of its library.
 
 ## Install
 
-Get the source code from GitHub, add the charm-fitter submodule and build the project:
+Get the source code from GitHub and add the charm-fitter submodule:
 
     git clone https://github.com/gammacombo/gammacombo.git core
     cd core
     git checkout charm-fitter
     git submodule init
     git submodule update
-    # The following command is optional if you need to setup a software environment on a machine with CVMFS installed
+
+The following command is optional, if you need to setup a software environment on a machine with
+[CernVM-FS](https://cernvm.cern.ch/fs/) installed:
+
     source scripts/setup-env-cvmfs.sh
+
+Then, build the project in the folder `<build-dir>`:
+
     cmake -B <build-dir>
     cmake --build <build-dir> [-j <n-cores>]
     cmake --install <build-dir>
@@ -56,11 +61,14 @@ The configuration files that steer what plots should be produced, the scan range
 [config/charm-combo/plotting](config/charm-combo/plotting).
 In particular:
 - `WA-<date>.py` prepares the plots for the world average at a given date;
-- `LHCb-R12-vs-R1.py` shows the precision improvement between LHCb Run 1 and 2;
+- [LHCb-R12-vs-R1.py](config/charm-combo/plotting/LHCb-R12-vs-R1.py) shows the precision improvement between LHCb
+Run 1 and 2;
+- [`LHCb-upgrades-projections.py`](config/charm-combo/plotting/LHCb-upgrades-projections.py) shows the foreseen impact
+of LHCb Upgrade I and II with respect to the precision at the end of LHCb Run 2. Precision extrapolations are made
+using the script [scripts/extrapolate-precision.py](scripts/extrapolate-precision.py).
 For example, you can plot the results of the world average of 2025 with
 
     python scripts/charm-combo.py --config config/charm-combo/plotting/WA-2025-06.py -a all --rescan
-
 
 Analogous plots for the subset of WS/RS D0 -> Kpi measurements can be obtained through a sibling script,
 see `python scripts/ws-combo.py -h`.

@@ -2,6 +2,8 @@
 #include <Combiner.h>
 #include <GammaComboEngine.h>
 #include <OptParser.h>
+#include <PDF_Abs.h>
+#include <ParameterCache.h>
 
 // CharmFitter
 #include <CharmUtils.h>
@@ -68,6 +70,22 @@ namespace {
       if (dy_fsc_hypo == hypotheses::dy_fsc::none) {
         pdfs.push_back(351);  // DY_pipipi0 Run 2
       }
+    } else if (period == "UI") {
+      pdfs = {
+          168,  // yCP - yCP(RS)
+          218,  // DeltaY(h- h+)
+          248,  // Acp(h- h+)
+          308,  // D0 -> K+ pi-
+          348,  // D0 -> KS pi- pi+
+      };
+    } else if (period == "UII") {
+      pdfs = {
+          169,  // yCP - yCP(RS)
+          219,  // DeltaY(h- h+)
+          249,  // Acp(h- h+)
+          309,  // D0 -> K+ pi-
+          349,  // D0 -> KS pi- pi+
+      };
     } else {
       throw std::runtime_error(
           std::format("lhcb_pdfs ERROR The list of the LHCb results from the period '{}' is not supported", period));
@@ -94,6 +112,7 @@ namespace {
     mix mix_param;
     bool dcs_cpv;
     bool help;
+    std::string truth_parfile;
     std::vector<char*> combiner_argv;
   };
 
@@ -125,6 +144,10 @@ namespace {
               << "  --dcs-cpv\n"
               << "      Allow for CP violation in doubly Cabibbo-suppressed D0 -> K+ pi- decays.\n"
               << "      If not set, the `Acp_KP` parameter is automatically fixed to zero in all combiners.\n\n"
+              << "  --truth-parfile [path]\n"
+              << "      Set the observables of PDFs whose observable source is \"truth\" to their true values\n"
+              << "      evaluated using the parameters found in the given file, instead of the default values\n"
+              << "      in CharmParameters.cpp.\n\n"
               << "The chosen configuration is encoded in the name of every combiner (and hence in all output\n"
               << "file names) as <combiner-name>_<dy_fsc>-dyfsc_<acp>_<mix>[_dcs-cpv].\n\n"
               << "-------------------------------------------------------------------------------------------"
@@ -156,6 +179,7 @@ namespace {
     mix mix_param = mix::theo;
     bool dcs_cpv = false;
     bool help = false;
+    std::string truth_parfile;
 
     std::set<int> to_remove;
     for (int i = 1; i < argc; ++i) {
@@ -168,6 +192,10 @@ namespace {
       } else if (!strcmp(argv[i], "--dcs-cpv")) {
         dcs_cpv = true;
         to_remove.insert(i);
+      } else if (!strcmp(argv[i], "--truth-parfile")) {
+        if (i == argc - 1) throw std::runtime_error("main ERROR Option \"--truth-parfile\" requires an argument");
+        to_remove.insert({i, i + 1});
+        truth_parfile = argv[i + 1];
       } else if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")) {
         help = true;
       }
@@ -180,7 +208,7 @@ namespace {
       if (!to_remove.contains(i)) combiner_argv.emplace_back(argv[i]);
     }
 
-    return {dy_fsc_hypo, acp_param, mix_param, dcs_cpv, help, std::move(combiner_argv)};
+    return {dy_fsc_hypo, acp_param, mix_param, dcs_cpv, help, truth_parfile, std::move(combiner_argv)};
   }
 }  // namespace
 
@@ -193,6 +221,8 @@ namespace {
  *   --mix [pheno|theo] Choose the mixing parametrisation (default: `theo`).
  *   --dcs-cpv Do allow for CP violation in doubly Cabibbo-suppressed D0 -> K+ pi- decays.
  *       If not set, Acp_KP=0 is added to the fixed parameters of every combiner.
+ *   --truth-parfile [path] Set the observables of PDFs whose observable source is "truth" to their true values
+ *       evaluated using the parameters found in the given file, instead of the default values in CharmParameters.cpp.
  *
  * The chosen configuration is encoded in the name of every combiner (and hence in all output file names) as
  * `<combiner_name>_<dy_fsc>-dyfsc_<acp>_<mix>[_dcs-cpv]`.
@@ -205,6 +235,7 @@ int main(int argc, char* argv[]) {
   const auto acp_param = parsed_args.acp_param;
   const auto mix_param = parsed_args.mix_param;
   const bool dcs_cpv = parsed_args.dcs_cpv;
+  const std::string truth_parfile = parsed_args.truth_parfile;
   std::vector<char*> combiner_argv = std::move(parsed_args.combiner_argv);
 
   if (parsed_args.help) {
@@ -288,6 +319,9 @@ int main(int argc, char* argv[]) {
   gc.addPdf(161, new PDF_yCP_minus_yCP_RS("WA-2018", mix_param),                 "yCP-yCP(RS)  WA       2018                  ");
   gc.addPdf(162, new PDF_yCP_minus_yCP_RS("WA-2022", mix_param),                 "yCP-yCP(RS)  WA       2022                  ");
 
+  gc.addPdf(168, new PDF_yCP_minus_yCP_RS("truth", "LHCb-UI", mix_param),        "yCP-yCP(RS)  LHCb     Upgrade I            ");
+  gc.addPdf(169, new PDF_yCP_minus_yCP_RS("truth", "LHCb-UII", mix_param),       "yCP-yCP(RS)  LHCb     Upgrade II           ");
+
   // D0 -> h+ h-
   if (dy_fsc_hypo == dy_fsc::none) {
     gc.addPdf(170, new PDF_DY("Belle+BaBar", dy_fsc_hypo, acp_param, mix_param), "DY           B-Factories                    ");  // Included in WA >= 2019
@@ -301,6 +335,11 @@ int main(int argc, char* argv[]) {
   gc.addPdf(201, new PDF_DY("WA-2020", dy_fsc_hypo, acp_param, mix_param),       "DY           WA       2020                  ");
   gc.addPdf(202, new PDF_DY("WA-2021", dy_fsc_hypo, acp_param, mix_param),       "DY           WA       2021                  ");
 
+  gc.addPdf(218, new PDF_DY("truth", "LHCb-UI", dy_fsc_hypo, acp_param, mix_param),
+                                                                                 "DY           LHCb     Upgrade I            ");
+  gc.addPdf(219, new PDF_DY("truth", "LHCb-UII", dy_fsc_hypo, acp_param, mix_param),
+                                                                                 "DY           LHCb     Upgrade II           ");
+
   gc.addPdf(220, new PDF_AcpHH("BaBar", dy_fsc_hypo, acp_param, mix_param),      "ACP(KK/PP)   BaBar                           ");
   gc.addPdf(221, new PDF_AcpHH("Belle", dy_fsc_hypo, acp_param, mix_param),      "ACP(KK/PP)   Belle                           ");
   gc.addPdf(222, new PDF_AcpHH("CDF", dy_fsc_hypo, acp_param, mix_param),        "ACP(KK/PP)   CDF                             ");
@@ -309,6 +348,11 @@ int main(int argc, char* argv[]) {
   gc.addSubsetPdf(224, new PDF_AcpHH("LHCb-R12", dy_fsc_hypo, acp_param, mix_param), 0, 1, 4, 5, 6, 7,
                                                                                  "ACP(KK/PP)   LHCb     DeltaACP R12, ACPKK R1");  // Supersedes 223, superseded by 225
   gc.addPdf(225, new PDF_AcpHH("LHCb-R12", dy_fsc_hypo, acp_param, mix_param),   "ACP(KK/PP)   LHCb     Run1+2                ");  // Supersedes 223, 224
+
+  gc.addPdf(248, new PDF_AcpHH("truth", "LHCb-UI", "LHCb-UI", dy_fsc_hypo, acp_param, mix_param),
+                                                                                 "ACP(KK/PP)   LHCb     Upgrade I             ");
+  gc.addPdf(249, new PDF_AcpHH("truth", "LHCb-UII", "LHCb-UII", dy_fsc_hypo, acp_param, mix_param),
+                                                                                 "ACP(KK/PP)   LHCb     Upgrade II            ");
 
   // D0 -> K+ pi-
 
@@ -330,6 +374,9 @@ int main(int argc, char* argv[]) {
   gc.addPdf(287, new PDF_WS("LHCb-R2-DT", mix_param),                            "WS/RS        LHCb     Run 2    [B -> D* mu] ");
   gc.addPdf(288, new PDF_WS("LHCb-R12-DT", mix_param),                           "WS/RS        LHCb     Run 1+2  [B -> D* mu] ");  // Supersedes 282, 287
 
+  gc.addPdf(308, new PDF_WS("truth", "LHCb-UI", mix_param),                      "WS/RS        LHCb     Upgrade I             ");
+  gc.addPdf(309, new PDF_WS("truth", "LHCb-UII", mix_param),                     "WS/RS        LHCb     Upgrade II            ");
+
   // D0 -> K- pi+
 
   gc.addPdf(310, new PDF_DY_RS("LHCb-R2-prompt", mix_param),                     "DY(RS)       LHCb     Run 2    [D* -> D0 pi] ");
@@ -344,6 +391,9 @@ int main(int argc, char* argv[]) {
   gc.addPdf(325, new PDF_BinFlip("LHCb-R2-SL", mix_param),                       "Bin-flip     LHCb     Run 2    [B -> D0 mu] ");
   gc.addPdf(326, new PDF_BinFlip("LHCb-R2", mix_param),                          "Bin-flip     LHCb     Run 2                 ");
   gc.addPdf(327, new PDF_XY("Belle-Belle2", mix_param),                          "KS pi+ pi-   Belle+Belle2 (951+408 fb-1)    ");  // Supersedes 321
+
+  gc.addPdf(348, new PDF_BinFlip("truth", "LHCb-UI", mix_param),                 "KS pi+ pi-   LHCb     Upgrade I             ");
+  gc.addPdf(349, new PDF_BinFlip("truth", "LHCb-UII", mix_param),                "KS pi+ pi-   LHCb     Upgrade II            ");
 
   // D0 -> pi+ pi- pi0
 
@@ -363,9 +413,24 @@ int main(int argc, char* argv[]) {
 
   // --- Nuisance parameters ---
 
-  gc.addPdf(390, new PDF_scan_DY_RS(mix_param),                                      "ScanDYRS     This is just a nuisance parameter");
+  gc.addPdf(390, new PDF_scan_DY_RS(mix_param),                                  "ScanDYRS     This is just a nuisance parameter");
 
   // clang-format on
+
+  if (!truth_parfile.empty()) {
+    std::cout << "INFO Setting the observables of PDFs with observable source \"truth\" to their true values, "
+              << "using the parameters in " << truth_parfile << std::endl;
+    ParameterCache parCache{};
+    if (!parCache.loadPoints(TString(truth_parfile))) {
+      throw std::runtime_error(std::format("main ERROR Could not load parameters from \"{}\"", truth_parfile));
+    }
+    for (PDF_Abs* pdf : gc.getPdfs()) {
+      if (pdf->getObservableSourceString() == "truth") {
+        pdf->loadExtParameters(&parCache);
+        pdf->setObservables("truth");
+      }
+    }
+  }
 
   ///////////////////////////////////////////////////
   //
@@ -464,7 +529,13 @@ int main(int argc, char* argv[]) {
   for (const auto pdf : lhcb_pdfs("R12", dy_fsc_hypo)) gc.getCombiner(301)->addPdf(gc[pdf]);
   for (const auto pdf : cf_pdfs) gc.getCombiner(301)->addPdf(gc[pdf]);
 
-  // Impact of LHCb upgrades -------------------------------------------------------------------------------------------
+  gc.newCombiner(400, "LHCb-UI", "LHCb Upgrade I (50 fb-1)");
+  for (const auto pdf : lhcb_pdfs("UI", dy_fsc_hypo)) gc.getCombiner(400)->addPdf(gc[pdf]);
+  for (const auto pdf : cf_pdfs) gc.getCombiner(400)->addPdf(gc[pdf]);
+
+  gc.newCombiner(450, "LHCb-UII", "LHCb Upgrade II (300 fb-1)");
+  for (const auto pdf : lhcb_pdfs("UII", dy_fsc_hypo)) gc.getCombiner(450)->addPdf(gc[pdf]);
+  for (const auto pdf : cf_pdfs) gc.getCombiner(450)->addPdf(gc[pdf]);
 
   ///////////////////////////////////////////////////
   //

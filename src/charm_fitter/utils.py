@@ -942,10 +942,18 @@ def scans_1d(combiners: list[Combiner], args: argparse.Namespace, dy_fsc_compari
 
     cmds = []
     for combiner in combiners:
+        pars_with_none_scan = {scan.par for scan in combiner.scans_1d if scan.dy_fsc == DYFsc.NONE}
         for scan in combiner.scans_1d:
-            if (scan.dy_fsc != DYFsc.NONE and not dy_fsc_comparison) or (
-                scan.dy_fsc == DYFsc.NONE and dy_fsc_comparison
-            ):
+            # Parameters with a `DYFsc.NONE` scan may have additional scans at other FSC hypotheses, meant only for
+            # the FSC-hypotheses-comparison plots; skip them accordingly. Parameters with no `DYFsc.NONE` scan (e.g.
+            # `cot_delta_HH`/`r_HH`/`delta_HH`) have no such alternative and should always be scanned outside of the
+            # comparison.
+            if scan.par in pars_with_none_scan:
+                if (scan.dy_fsc != DYFsc.NONE and not dy_fsc_comparison) or (
+                    scan.dy_fsc == DYFsc.NONE and dy_fsc_comparison
+                ):
+                    continue
+            elif dy_fsc_comparison:
                 continue
             par = scan.par
             if par == "Acp_KP" and not args.dcs_cpv:
@@ -980,10 +988,16 @@ def scans_2d(combiners: list[Combiner], args: argparse.Namespace, dy_fsc_compari
 
     cmds = []
     for combiner in combiners:
+        pairs_with_none_scan = {(scan.xpar, scan.ypar) for scan in combiner.scans_2d if scan.dy_fsc == DYFsc.NONE}
         for scan in combiner.scans_2d:
-            if (scan.dy_fsc != DYFsc.NONE and not dy_fsc_comparison) or (
-                scan.dy_fsc == DYFsc.NONE and dy_fsc_comparison
-            ):
+            # See the analogous comment in `scans_1d` for why parameter pairs without a `DYFsc.NONE` scan (e.g.
+            # `cot_delta_HH`/`r_HH`/`delta_HH`) are always scanned outside of the comparison.
+            if (scan.xpar, scan.ypar) in pairs_with_none_scan:
+                if (scan.dy_fsc != DYFsc.NONE and not dy_fsc_comparison) or (
+                    scan.dy_fsc == DYFsc.NONE and dy_fsc_comparison
+                ):
+                    continue
+            elif dy_fsc_comparison:
                 continue
             (xpar, ypar) = scan.xpar, scan.ypar
             if "Acp_KP" in (xpar, ypar) and not args.dcs_cpv:
