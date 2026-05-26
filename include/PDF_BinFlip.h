@@ -23,6 +23,7 @@
 class PDF_BinFlip : public PDF_Charm {
  public:
   PDF_BinFlip(TString measurement_id, parametrisations::mix mix_param);
+  PDF_BinFlip(TString obs_id, TString unc_id, parametrisations::mix mix_param);
   void initObservables() override;
   void initRelations() override;
   void setCorrelations(TString measurement_id) override;
@@ -33,4 +34,5 @@ class PDF_BinFlip : public PDF_Charm {
   std::set<std::string> getParameterNames() const override;
   const parametrisations::mix mix_param;
   const TString measurement_id;
+  const TString unc_id;
 };

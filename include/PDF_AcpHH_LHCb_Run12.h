@@ -8,14 +8,12 @@
 
 #include "CharmUtils.h"
 
-#include <PDF_Charm.h>
+#include "PDF_AcpHH.h"
 
 #include <TString.h>
 
 #include <set>
 #include <string>
-
-class RooArgList;
 
 /**
  * Models the LHCb measurements of DeltaACP and of ACP(K- K+) performed during Run 1 and 2.
@@ -24,7 +22,7 @@ class RooArgList;
  * DeltaY(h- h+) are assumed to be uncorrelated (due, in particular, to the kinematic equalisation performed in these
  * last measurements).
  */
-class PDF_AcpHH_LHCb_Run12 : public PDF_Charm {
+class PDF_AcpHH_LHCb_Run12 : public PDF_AcpHH {
  public:
   PDF_AcpHH_LHCb_Run12(hypotheses::dy_fsc, parametrisations::acp, parametrisations::mix);
   void initObservables() override;
@@ -32,13 +30,4 @@ class PDF_AcpHH_LHCb_Run12 : public PDF_Charm {
   void setCorrelations(TString c) override;
   void setObservables(TString c) override;
   void setUncertainties(TString c) override;
-
- private:
-  // Helper functions to avoid boilerplate code
-  void add_acpkk(RooArgList* theory, TString name, double avg_time);
-  void add_dacp(RooArgList* theory, TString name, double avg_time_kk, double avg_time_pipi);
-  std::set<std::string> getParameterNames() const override;
-  const hypotheses::dy_fsc dy_fsc_hypo;
-  const parametrisations::acp acp_param;
-  const parametrisations::mix mix_param;
 };

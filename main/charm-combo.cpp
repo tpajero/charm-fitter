@@ -4,6 +4,7 @@
 
 // CharmFitter
 #include <CharmUtils.h>
+#include <PDF_AcpHH.h>
 #include <PDF_AcpHH_LHCb_Run12.h>
 #include <PDF_BES_CLEO_K3pi_Kpipi0.h>
 #include <PDF_BES_Kpi.h>
@@ -66,6 +67,22 @@ namespace {
       if (dy_fsc_hypo == hypotheses::dy_fsc::none) {
         pdfs.push_back(351);  // DY_pipipi0 Run 2
       }
+    } else if (period == "UI") {
+      pdfs = {
+          168,  // yCP - yCP(RS)
+          218,  // DeltaY(h- h+)
+          248,  // Acp(h- h+)
+          308,  // D0 -> K+ pi-
+          348,  // D0 -> KS pi- pi+
+      };
+    } else if (period == "UII") {
+      pdfs = {
+          169,  // yCP - yCP(RS)
+          219,  // DeltaY(h- h+)
+          249,  // Acp(h- h+)
+          309,  // D0 -> K+ pi-
+          349,  // D0 -> KS pi- pi+
+      };
     } else {
       throw std::runtime_error(
           std::format("lhcb_pdfs ERROR The list of the LHCb results from the period '{}' is not supported", period));
@@ -271,6 +288,9 @@ int main(int argc, char* argv[]) {
   gc.addPdf(161, new PDF_yCP_minus_yCP_RS("WA-2018", mix_param),                 "yCP-yCP(RS)  WA       2018                  ");
   gc.addPdf(162, new PDF_yCP_minus_yCP_RS("WA-2022", mix_param),                 "yCP-yCP(RS)  WA       2022                  ");
 
+  gc.addPdf(168, new PDF_yCP_minus_yCP_RS("truth", "LHCb-UI", mix_param),        "yCP-yCP(RS)  LHCb     Upgrade I            ");
+  gc.addPdf(169, new PDF_yCP_minus_yCP_RS("truth", "LHCb-UII", mix_param),       "yCP-yCP(RS)  LHCb     Upgrade II           ");
+
   // D0 -> h+ h-
   if (dy_fsc_hypo == dy_fsc::none) {
     gc.addPdf(170, new PDF_DY("Belle+BaBar", dy_fsc_hypo, acp_param, mix_param), "DY           B-Factories                    ");  // Included in WA >= 2019
@@ -284,11 +304,21 @@ int main(int argc, char* argv[]) {
   gc.addPdf(201, new PDF_DY("WA-2020", dy_fsc_hypo, acp_param, mix_param),       "DY           WA       2020                  ");
   gc.addPdf(202, new PDF_DY("WA-2021", dy_fsc_hypo, acp_param, mix_param),       "DY           WA       2021                  ");
 
+  gc.addPdf(218, new PDF_DY("truth", "LHCb-UI", dy_fsc_hypo, acp_param, mix_param),
+                                                                                 "DY           LHCb     Upgrade I            ");
+  gc.addPdf(219, new PDF_DY("truth", "LHCb-UII", dy_fsc_hypo, acp_param, mix_param),
+                                                                                 "DY           LHCb     Upgrade II           ");
+
   gc.addSubsetPdf(220, new PDF_AcpHH_LHCb_Run12(dy_fsc_hypo, acp_param, mix_param), 0, 1, 4, 5,
                                                                                  "ACP(KK/PP)   LHCb     Run1                  ");  // Superseded by 221, 222
   gc.addSubsetPdf(221, new PDF_AcpHH_LHCb_Run12(dy_fsc_hypo, acp_param, mix_param), 0, 1, 4, 5, 6, 7,
                                                                                  "ACP(KK/PP)   LHCb     DeltaACP R12, ACPKK R1");  // Supersedes 220, superseded by 222
   gc.addPdf(222, new PDF_AcpHH_LHCb_Run12(dy_fsc_hypo, acp_param, mix_param),    "ACP(KK/PP)   LHCb     Run1+2                ");  // Supersedes 220, 221
+
+  gc.addPdf(248, new PDF_AcpHH("truth", "LHCb-UI", dy_fsc_hypo, acp_param, mix_param),
+                                                                                 "ACP(KK/PP)   LHCb     Upgrade I             ");
+  gc.addPdf(249, new PDF_AcpHH("truth", "LHCb-UII", dy_fsc_hypo, acp_param, mix_param),
+                                                                                 "ACP(KK/PP)   LHCb     Upgrade II            ");
 
   // D0 -> K+ pi-
 
@@ -310,6 +340,9 @@ int main(int argc, char* argv[]) {
   gc.addPdf(287, new PDF_WS("LHCb-R2-DT", mix_param),                            "WS/RS        LHCb     Run 2    [B -> D* mu] ");
   gc.addPdf(288, new PDF_WS("LHCb-R12-DT", mix_param),                           "WS/RS        LHCb     Run 1+2  [B -> D* mu] ");  // Supersedes 282, 287
 
+  gc.addPdf(308, new PDF_WS("truth", "LHCb-UI", mix_param),                      "WS/RS        LHCb     Upgrade I             ");
+  gc.addPdf(309, new PDF_WS("truth", "LHCb-UII", mix_param),                     "WS/RS        LHCb     Upgrade II            ");
+
   // D0 -> K- pi+
 
   gc.addPdf(310, new PDF_DY_RS("LHCb-R2-prompt", mix_param),                     "DY(RS)       LHCb     Run 2    [D* -> D0 pi] ");
@@ -324,6 +357,9 @@ int main(int argc, char* argv[]) {
   gc.addPdf(325, new PDF_BinFlip("LHCb-R2-SL", mix_param),                       "Bin-flip     LHCb     Run 2    [B -> D0 mu] ");
   gc.addPdf(326, new PDF_BinFlip("LHCb-R2", mix_param),                          "Bin-flip     LHCb     Run 2                 ");
   gc.addPdf(327, new PDF_XY("Belle-Belle2", mix_param),                          "KS pi+ pi-   Belle+Belle2 (951+408 fb-1)    ");  // Supersedes 321
+
+  gc.addPdf(348, new PDF_BinFlip("truth", "LHCb-UI", mix_param),                 "KS pi+ pi-   LHCb     Upgrade I             ");
+  gc.addPdf(349, new PDF_BinFlip("truth", "LHCb-UII", mix_param),                "KS pi+ pi-   LHCb     Upgrade II            ");
 
   // D0 -> pi+ pi- pi0
 
@@ -343,7 +379,7 @@ int main(int argc, char* argv[]) {
 
   // --- Nuisance parameters ---
 
-  gc.addPdf(390, new PDF_scan_DY_RS(mix_param),                                      "ScanDYRS     This is just a nuisance parameter");
+  gc.addPdf(390, new PDF_scan_DY_RS(mix_param),                                  "ScanDYRS     This is just a nuisance parameter");
 
   // clang-format on
 
@@ -454,7 +490,13 @@ int main(int argc, char* argv[]) {
   for (const auto pdf : lhcb_pdfs("R12", dy_fsc_hypo)) gc.getCombiner(301)->addPdf(gc[pdf]);
   for (const auto pdf : cf_pdfs) gc.getCombiner(301)->addPdf(gc[pdf]);
 
-  // Impact of LHCb upgrades -------------------------------------------------------------------------------------------
+  gc.newCombiner(400, "LHCb-UI", "LHCb Upgrade I (50 fb-1)");
+  for (const auto pdf : lhcb_pdfs("UI", dy_fsc_hypo)) gc.getCombiner(400)->addPdf(gc[pdf]);
+  for (const auto pdf : cf_pdfs) gc.getCombiner(400)->addPdf(gc[pdf]);
+
+  gc.newCombiner(450, "LHCb-UII", "LHCb Upgrade II (300 fb-1)");
+  for (const auto pdf : lhcb_pdfs("UII", dy_fsc_hypo)) gc.getCombiner(450)->addPdf(gc[pdf]);
+  for (const auto pdf : cf_pdfs) gc.getCombiner(450)->addPdf(gc[pdf]);
 
   ///////////////////////////////////////////////////
   //
