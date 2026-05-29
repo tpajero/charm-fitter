@@ -33,20 +33,37 @@ repo_path = Path(__file__).resolve().parents[2]
 # CharmFitter scans and plotting ---------------------------------------------------------------------------------------
 
 
-class MixParam(Enum):
-    """Enumeration for the mixing parametrisations."""
-
-    PHENO = "pheno"
-    THEO = "theo"
-    D0_TO_KPI = "d0-to-kpi"
-
-
 class DYFsc(Enum):
-    """Enumeration for the DeltaY final-state-correction hypotheses."""
+    """Enumeration for the final-state-correction hypotheses for DeltaY(h- h+).
+
+    Values must match those defined in `str_repr` in src/CharmUtils.cpp.
+    """
 
     NONE = "no"
     PARTIAL = "partial"
     FULL = "full"
+
+
+class AcpParam(Enum):
+    """Enumeration for the aCP(h- h+) parametrisations.
+
+    Values must match those defined in `str_repr` in src/CharmUtils.cpp.
+    """
+
+    ACP_DY = "acp-dy"
+    ACP_COT = "acp-cot"
+    R_DELTA = "r-delta"
+
+
+class MixParam(Enum):
+    """Enumeration for the mixing parametrisations.
+
+    Values must match those defined in `str_repr` in src/CharmUtils.cpp.
+    """
+
+    PHENO = "pheno"
+    THEO = "theo"
+    D0_TO_KPI = "d0-to-kpi"
 
 
 @dataclass(frozen=True)
@@ -70,18 +87,21 @@ class Parameter:
         unit: Unit of the parameter (e.g. "deg", "%"). All ranges are defined in terms of these units.
         description: Human-readable description.
         transf: Optional transformation applied to values to move from scan units to plot units (and possibly variables).
+        dy_fsc_hypos: List of DeltaY final-state-correction hypotheses that can be used when scanning the parameter likelihood.
         mix_params: List of mixing parametrisations that can be used when scanning the parameter likelihood.
-        dy_fsc_param: List of DeltaY final-state-correction hypotheses that can be used when scanning the parameter likelihood.
         plot_opts_1d: Options for 1D plots.
         scan_1d: Sets whether a 1D scan for the parameter should be performed, or if the parameter depends on a
             different one that will be independently scanned.
     """
 
+    def _default_dyfsc():
+        return [DYFsc.NONE, DYFsc.PARTIAL, DYFsc.FULL]
+
+    def _default_acp():
+        return [AcpParam.ACP_DY, AcpParam.ACP_COT, AcpParam.R_DELTA]
+
     def _default_mix():
         return [MixParam.PHENO, MixParam.THEO]
-
-    def _default_dyfsc():
-        return [DYFsc.NONE, DYFsc.PARTIAL]
 
     name: str
     scan_range: tuple[float, float]
@@ -93,8 +113,9 @@ class Parameter:
     unit: str = ""
     description: str = ""
     transf: Callable[[float], float] | None = None
+    dy_fsc_hypos: list[DYFsc] = field(default_factory=_default_dyfsc)
+    acp_params: list[AcpParam] = field(default_factory=_default_acp)
     mix_params: list[MixParam] = field(default_factory=_default_mix)
-    dy_fsc_param: list[DYFsc] = field(default_factory=_default_dyfsc)
     plot_opts_1d: PlotOpts1D = PlotOpts1D()
     scan_1d: bool = True
 
@@ -651,14 +672,34 @@ def _combiner_file_string(pdf_ids: list[int]):
     return "empty+" + "+".join([str(pdf_id) for pdf_id in sorted(pdf_ids)])
 
 
+def _viable_acp_params(xpar: Parameter, ypar: Parameter | None = None) -> list[AcpParam]:
+    """Get the aCP(h- h+) parametrisations that are usable for the given parameter(s)."""
+    return [
+        acp_param
+        for acp_param in AcpParam
+        if all(acp_param in params for params in [xpar.acp_params] + ([ypar.acp_params] if ypar is not None else []))
+    ]
+
+
+def _pick_acp_param(viable_acp_params: list[AcpParam], acp: AcpParam | None = None) -> AcpParam | None:
+    """Pick the aCP(h- h+) parametrisation to use, in order of preference, among the viable ones."""
+    if acp is not None:
+        return acp
+    for acp_param in (AcpParam.ACP_DY, AcpParam.ACP_COT, AcpParam.R_DELTA):
+        if acp_param in viable_acp_params:
+            return acp_param
+    return None
+
+
 def _get_prefix(
     args_prefix: str,
     xpar: Parameter,
     ypar: Parameter | None = None,
     *,
-    dcs_cpv: bool | None = None,
-    mix: MixParam | None = None,
     dy_fsc: DYFsc = DYFsc.NONE,
+    acp: AcpParam | None = None,
+    mix: MixParam | None = None,
+    dcs_cpv: bool | None = None,
 ):
     """Get the prefix of the scanner ROOT file that is read to produce Matplotlib plots.
 
@@ -669,17 +710,37 @@ def _get_prefix(
     if MixParam.D0_TO_KPI in xpar.mix_params or (ypar is not None and MixParam.D0_TO_KPI in ypar.mix_params):
         return args_prefix
 
-    param = (
+    acp_param = _pick_acp_param(_viable_acp_params(xpar, ypar), acp)
+    if acp_param is None:
+        raise ValueError(
+            f"No viable aCP parametrisation for parameter {xpar.name}"
+            if ypar is None
+            else f"No viable aCP parametrisation for parameters {xpar.name} and {ypar.name}"
+        )
+
+    mix_param = (
         mix
         if mix is not None
         else MixParam.PHENO
         if MixParam.THEO not in xpar.mix_params or (ypar is not None and MixParam.THEO not in ypar.mix_params)
         else MixParam.THEO
     )
-    args_prefix = args_prefix.replace("_scanner", f"_{param.value}_{dy_fsc.value}_dyfsc_scanner")
-    if dcs_cpv is not None and not dcs_cpv:
-        args_prefix = args_prefix.replace("_scanner", "_noDcsCpv_scanner")
+
+    args_prefix = args_prefix.replace("_scanner", f"_{dy_fsc.value}-dyfsc_{acp_param.value}_{mix_param.value}_scanner")
+
+    if dcs_cpv is not None and dcs_cpv:
+        args_prefix = args_prefix.replace("_scanner", "_dcs-cpv_scanner")
     return args_prefix
+
+
+def _dy_fsc_label(cfg: ModuleType, dy_fsc: DYFsc, acp_param: AcpParam) -> str:
+    """Get the LaTeX label describing a DeltaY(h- h+) final-state-correction hypothesis.
+
+    The formula for DYFsc.FULL depends on the aCP(h- h+) parametrisation used, so `cfg.dy_fsc_labels[DYFsc.FULL]`
+    may be a dict keyed by AcpParam instead of a plain string.
+    """
+    label = cfg.dy_fsc_labels[dy_fsc]
+    return label[acp_param] if isinstance(label, dict) else label
 
 
 def _dcs_cpv_label(dcs_cpv: bool | None, args: argparse.Namespace, cfg: ModuleType):
@@ -796,8 +857,8 @@ def scans_2d(args: argparse.Namespace, cfg: ModuleType, plots_2d: list[Plot2D] |
                         prefix = _get_prefix(
                             args.prefix,
                             xpar,
-                            dcs_cpv=args.dcs_cpv if hasattr(args, "dcs_cpv") else None,
                             dy_fsc=cfg.dy_fsc_baseline if hasattr(cfg, "dy_fsc_baseline") else None,
+                            dcs_cpv=args.dcs_cpv if hasattr(args, "dcs_cpv") else None,
                         ).replace("_scanner", "")
                         parfile = f"plots/par/{prefix}_{cfg.baseline_combiner}_{xpar.name}.dat"
                 if parfile is not None and Path(parfile).is_file():
@@ -833,12 +894,17 @@ def compare_dy_fsc_hypotheses_scans_2d(
         xname, yname = plot_params.params
         xpar, ypar = cfg.parameters[xname], cfg.parameters[yname]
         for dy_fsc in dy_fscs:
-            if dy_fsc == DYFsc.NONE:
+            if dy_fsc == DYFsc.NONE or any(dy_fsc not in params for params in [xpar.dy_fsc_hypos, ypar.dy_fsc_hypos]):
                 continue
             extra_opts = args.extra_opts
             if any(MixParam.THEO not in params for params in [xpar.mix_params, ypar.mix_params]):
                 extra_opts += " --mix pheno"
             extra_opts += f" --dy-fsc {dy_fsc.value}"
+            acp_param = _pick_acp_param(_viable_acp_params(xpar, ypar))
+            if acp_param is None:
+                raise ValueError(f"Cannot find a viable acp_param for {xpar.name} and {ypar.name}")
+            if acp_param != AcpParam.ACP_DY:
+                extra_opts += f" --acp {acp_param.value}"
             for combiner_id in combiners_ids:
                 xrange = plot_params.xrange if plot_params.xrange is not None else xpar.scan_range_2d
                 yrange = plot_params.yrange if plot_params.yrange is not None else ypar.scan_range_2d
@@ -987,9 +1053,9 @@ def plots_2d(
                         args.prefix,
                         xpar,
                         ypar,
-                        dcs_cpv=dcs_cpv,
-                        mix=mix,
                         dy_fsc=cfg.dy_fsc_baseline if hasattr(cfg, "dy_fsc_baseline") else None,
+                        mix=mix,
+                        dcs_cpv=dcs_cpv,
                     )
                 )
 
@@ -1056,6 +1122,10 @@ def compare_dy_fsc_hypotheses_plots_2d(
         if any(name == "Acp_KP" for name in [xname, yname]) and not args.dcs_cpv:
             continue
         xpar, ypar = cfg.parameters[xname], cfg.parameters[yname]
+        viable_dy_fscs = [
+            dy_fsc for dy_fsc in dy_fscs if all(dy_fsc in params for params in [xpar.dy_fsc_hypos, ypar.dy_fsc_hypos])
+        ]
+        acp_param = _pick_acp_param(_viable_acp_params(xpar, ypar))
 
         for combiner_id in combiners_ids:
             plot = Plotter(
@@ -1079,16 +1149,13 @@ def compare_dy_fsc_hypotheses_plots_2d(
                 legfontsize=12,
             )
 
-            for i, dy_fsc in enumerate(dy_fscs):
-                prefix = _get_prefix(args.prefix, xpar, ypar, dcs_cpv=args.dcs_cpv, dy_fsc=dy_fsc)
-                label = cfg.dy_fsc_labels[dy_fsc] + _dcs_cpv_label(args.dcs_cpv, args, cfg)
-                col = colors[i] if colors is not None and i < len(colors) else cfg.colors_2d[len(dy_fscs) - 1 - i]
-                ls = (
-                    line_styles[i]
-                    if line_styles is not None and i < len(line_styles)
-                    else cfg.ls_2d[len(dy_fscs) - 1 - i]
-                )
-                marker = markers[i] if markers is not None and i < len(markers) else cfg.markers[len(dy_fscs) - 1 - i]
+            for i, dy_fsc in enumerate(viable_dy_fscs):
+                prefix = _get_prefix(args.prefix, xpar, ypar, dy_fsc=dy_fsc, acp=acp_param, dcs_cpv=args.dcs_cpv)
+                label = _dy_fsc_label(cfg, dy_fsc, acp_param) + _dcs_cpv_label(args.dcs_cpv, args, cfg)
+                n = len(viable_dy_fscs)
+                col = colors[i] if colors is not None and i < len(colors) else cfg.colors_2d[n - 1 - i]
+                ls = line_styles[i] if line_styles is not None and i < len(line_styles) else cfg.ls_2d[n - 1 - i]
+                marker = markers[i] if markers is not None and i < len(markers) else cfg.markers[n - 1 - i]
                 plot.add_scan(
                     f"{prefix}_{combiner_id}",
                     pars=[xpar.name, ypar.name],
@@ -1189,8 +1256,8 @@ def parse_args(*, combo: str = "charm", dcs_cpv_default: bool = False) -> argpar
         )
     args = parser.parse_args()
     args.dcs_cpv_default = dcs_cpv_default
-    if combo != "ws" and not args.dcs_cpv:
-        args.extra_opts += " --no-dcs-cpv"
+    if combo != "ws" and args.dcs_cpv:
+        args.extra_opts += " --dcs-cpv"
     if not args.config.is_absolute():
         args.config = repo_path / args.config
     if not args.savedir.is_absolute():

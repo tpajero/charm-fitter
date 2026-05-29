@@ -20,7 +20,7 @@ class RooArgList;
 
 class PDF_AcpHH_LHCb_Run12 : public PDF_Charm {
  public:
-  PDF_AcpHH_LHCb_Run12(parametrisations::mix mix_param, parametrisations::dy_fsc dy_fsc_param);
+  PDF_AcpHH_LHCb_Run12(hypotheses::dy_fsc, parametrisations::acp, parametrisations::mix);
   void initObservables() override;
   void initRelations() override;
   void setCorrelations(TString c) override;
@@ -32,7 +32,8 @@ class PDF_AcpHH_LHCb_Run12 : public PDF_Charm {
   void add_acpkk(RooArgList* theory, TString name, double avg_time);
   void add_dacp(RooArgList* theory, TString name, double avg_time_kk, double avg_time_pipi);
   std::set<std::string> getParameterNames() const override;
-  const parametrisations::dy_fsc dy_fsc_param;
+  const hypotheses::dy_fsc dy_fsc_hypo;
+  const parametrisations::acp acp_param;
   const parametrisations::mix mix_param;
 };
 

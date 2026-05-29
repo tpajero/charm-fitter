@@ -19,36 +19,16 @@
 #include <stdexcept>
 #include <vector>
 
-PDF_AcpHH_LHCb_Run12::PDF_AcpHH_LHCb_Run12(const parametrisations::mix mix_param,
-                                           const parametrisations::dy_fsc dy_fsc_param)
-    : PDF_Charm{8}, mix_param{mix_param}, dy_fsc_param{dy_fsc_param} {
-  name = "Charm_AcpHH_LHCb_Run12_Run1-2";
+PDF_AcpHH_LHCb_Run12::PDF_AcpHH_LHCb_Run12(hypotheses::dy_fsc dy_fsc_hypo, parametrisations::acp acp_param,
+                                           parametrisations::mix mix_param)
+    : PDF_Charm{8}, dy_fsc_hypo{dy_fsc_hypo}, acp_param{acp_param}, mix_param{mix_param} {
+  name = "Charm_AcpHH_LHCb_Run12";
   initialise("lhcb-run12", "lhcb-run12", "lhcb-run12");
 }
 
 std::set<std::string> PDF_AcpHH_LHCb_Run12::getParameterNames() const {
-  std::set<std::string> names = {"Acp_KK", "Acp_PP"};
-  using parametrisations::mix;
-  switch (mix_param) {
-  case mix::pheno:
-    names.insert({"x", "y", "qop", "phi"});
-    break;
-  case mix::theo:
-    names.insert({"x12", "y12", "phiM"});
-    break;
-  default:
-    throw std::runtime_error(std::format(
-        "PDF_AcpHH_LHCb_Run12::getParameterNames ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
-  }
-  using parametrisations::dy_fsc;
-  switch (dy_fsc_param) {
-  case dy_fsc::none:
-  case dy_fsc::partial:
-    break;
-  case dy_fsc::full:
-    names.insert({"cot_delta_KK", "cot_delta_PP"});
-    break;
-  }
+  std::set<std::string> names = utils::acp_hh_parameters_names(acp_param, {"KK", "PP"});
+  names.merge(utils::dy_hh_parameters_names(dy_fsc_hypo, acp_param, mix_param, {"KK", "PP"}));
   return names;
 }
 
@@ -139,16 +119,19 @@ void PDF_AcpHH_LHCb_Run12::setCorrelations(const TString c) {
 
 void PDF_AcpHH_LHCb_Run12::add_acpkk(RooArgList* theory, TString name, double avg_time) {
   theory->add(*(Utils::makeTheoryVar(name,
-                                     std::format("Acp_KK + {:.5e} * ({})", avg_time / constants::d0_lifetime,
-                                                 utils::dy_hh_expression(mix_param, dy_fsc_param, "KK")),
+                                     std::format("{} + {:.5e} * ({})", utils::acp_expression(acp_param, "KK"),
+                                                 avg_time / constants::d0_lifetime,
+                                                 utils::dy_hh_expression(dy_fsc_hypo, acp_param, mix_param, "KK")),
                                      parameters)));
 }
 
 void PDF_AcpHH_LHCb_Run12::add_dacp(RooArgList* theory, TString name, double avg_time_kk, double avg_time_pp) {
-  theory->add(*(Utils::makeTheoryVar(
-      name,
-      std::format("Acp_KK + {:.5e} * ({}) - Acp_PP - {:.5e} * ({})", avg_time_kk / constants::d0_lifetime,
-                  utils::dy_hh_expression(mix_param, dy_fsc_param, "KK"), avg_time_pp / constants::d0_lifetime,
-                  utils::dy_hh_expression(mix_param, dy_fsc_param, "PP")),
-      parameters)));
+  theory->add(
+      *(Utils::makeTheoryVar(name,
+                             std::format("{} + {:.5e} * ({}) - ({}) - {:.5e} * ({})",
+                                         utils::acp_expression(acp_param, "KK"), avg_time_kk / constants::d0_lifetime,
+                                         utils::dy_hh_expression(dy_fsc_hypo, acp_param, mix_param, "KK"),
+                                         utils::acp_expression(acp_param, "PP"), avg_time_pp / constants::d0_lifetime,
+                                         utils::dy_hh_expression(dy_fsc_hypo, acp_param, mix_param, "PP")),
+                             parameters)));
 }
