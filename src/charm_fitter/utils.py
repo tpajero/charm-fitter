@@ -1,5 +1,8 @@
 import logging
 from math import floor, log, sqrt
+from pathlib import Path
+
+repo_path = Path(__file__).resolve().parents[2]
 
 
 class Measurement:
@@ -94,3 +97,18 @@ class Measurement:
             if self.sys2:
                 err2 += (self.sys2) ** 2
             return sqrt(err2)
+
+
+def setup_matplotlib(*, style="lhcb", usetex: bool = True) -> None:
+    """Set the style for matplotlib plots."""
+    from importlib.resources import files
+
+    import matplotlib
+    import matplotlib.pyplot as plt
+
+    plt.style.use(files("charm_fitter") / "styles" / f"{style}.mplstyle")
+    plt.rcParams["text.usetex"] = usetex
+    if usetex:
+        # Fix problems with rendering of minus sign in PDF
+        matplotlib.use("pgf")
+        plt.rcParams.update({"pgf.texsystem": "pdflatex"})

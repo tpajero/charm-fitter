@@ -2,15 +2,15 @@
 
 import importlib
 import os
-import sys
 from argparse import ArgumentParser
 from contextlib import contextmanager
+from importlib.resources import files
 
 import matplotlib.pyplot as plt
-from utils import plotter, run_commands
+
+from charm_fitter.plotting import plotter, run_commands
 
 charm_fitter_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
-sys.path.append(os.path.abspath(os.path.join(charm_fitter_dir, "..")))
 
 
 @contextmanager
@@ -243,7 +243,10 @@ def make_plots_2d(combiners, cfg, savedir):
 
     for plot_2d in cfg.plots_2d:
         xpar, ypar = cfg.params[plot_2d.pars[0]], cfg.params[plot_2d.pars[1]]
-        if any(combiner > 1000 for combiner in combiners) and "Acp_KP" in [xpar.id, ypar.id]:
+        if any(combiner > 1000 for combiner in combiners) and "Acp_KP" in [
+            xpar.id,
+            ypar.id,
+        ]:
             continue
         param = "phenomenological" if "pheno" in [xpar.parametrisation, ypar.parametrisation] else "theoretical"
         plot = plotter(
@@ -303,7 +306,7 @@ def make_plots_2d_acp(cfg, savedir, no_dcs_cpv=False):
 
 
 if __name__ == "__main__":
-    plt.style.use(os.path.join(charm_fitter_dir, "scripts/lhcb.mplstyle"))
+    plt.style.use(files("charm_fitter") / "styles/lhcb.mplstyle")
 
     # Parse the arguments
     args = parse_args()

@@ -2,17 +2,11 @@
 
 import os
 import subprocess
-import sys
 from multiprocessing import Pool
 
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.ticker import MaxNLocator
-from scipy.stats import chi2
-
-charm_fitter_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
-sys.path.append(os.path.abspath(os.path.join(charm_fitter_dir, "..")))
-from scripts.gc_mpl_tools import (
+from gc_core.mpl_tools import (
     lhcb_2d_cols,
     lhcb_cols,
     lhcb_ls,
@@ -21,6 +15,8 @@ from scripts.gc_mpl_tools import (
     print_interval,
     read_gc_scan,
 )
+from matplotlib.ticker import MaxNLocator
+from scipy.stats import chi2
 
 
 def run_command(cmd, verbose=False):

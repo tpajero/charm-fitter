@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 """Plot the values of all existing measurements of ACP(D0 -> KS KS)."""
 
+import argparse
 import logging
-import os
-from argparse import ArgumentParser
 from math import log
+from pathlib import Path
 
 import matplotlib.pyplot as plt
-from utils import Measurement
+
+from charm_fitter.utils import Measurement, repo_path, setup_matplotlib
 
 
-def get_measures(comb):
+def get_measures(comb: str) -> list[Measurement]:
     """Get the list of measurements to be shown for a given summary plot.
 
     :param comb: Identifier for a given summary plot.
@@ -43,7 +44,7 @@ def get_measures(comb):
     return measures
 
 
-def get_units_label(units):
+def get_units_label(units: float) -> str:
     raw_exp = log(units) / log(10)
     exp = round(raw_exp)
     if abs(exp - raw_exp) > 1e-2:
@@ -51,7 +52,7 @@ def get_units_label(units):
     return r"\%" if exp == -2 else f"10^{{{exp}}}"
 
 
-def plot_average(date, out_dir):
+def plot_average(date: str, out_dir: Path) -> None:
     measures = get_measures(date)
     n_meas = len(measures)
     if n_meas == 0:
@@ -122,15 +123,14 @@ def plot_average(date, out_dir):
         )
 
     # Save figure
-    os.makedirs(out_dir, exist_ok=True)
+    out_dir.mkdir(parents=True, exist_ok=True)
     fig_name = f"acp-d0-to-ksks-{date}"
     for ext in ["pdf"]:
         plt.savefig(f"{out_dir}/{fig_name}.{ext}")
 
 
-def parse_args():
-    cwd = os.path.dirname(os.path.realpath(__file__))
-    parser = ArgumentParser()
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
     parser.add_argument(
         "-c",
         "--date",
@@ -142,16 +142,23 @@ def parse_args():
     parser.add_argument(
         "-o",
         "--outdir",
-        type=str,
-        default=os.path.join(cwd, "figs"),
+        type=Path,
+        default=repo_path / "plots" / "BLUE" / "d0-to-ksks",
         help="Output directory for saving the plots",
+    )
+    parser.add_argument(
+        "--no-latex",
+        dest="latex",
+        default=True,
+        action="store_false",
+        help="Disable LaTeX in Matplotlib text processing (needed for, e.g., Gitlab CI)",
     )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     logging.basicConfig(encoding="utf-8", level=logging.INFO)
-    cwd = os.path.dirname(os.path.realpath(__file__))
-    plt.style.use(os.path.join(cwd, "lhcb.mplstyle"))
+
     args = parse_args()
+    setup_matplotlib(usetex=args.latex)
     plot_average(args.date, args.outdir)

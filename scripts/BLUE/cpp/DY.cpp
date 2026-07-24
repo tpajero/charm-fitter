@@ -4,7 +4,7 @@
  * Date: October 2022
  *
  * Code to perform the average of DeltaY (a.k.a. -A_Gamma) measurements
- *performed to date. Values are expressed in units of 10^-4.
+ * performed to date. Values are expressed in units of 10^-4.
  *
  * The code is based on the BLUE package (https://blue.hepforge.org/).
  * Run it from a root interactive session through:
