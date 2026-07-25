@@ -75,11 +75,11 @@ def plot_average(date: str, out_dir: Path) -> None:
     plt.xlabel(r"$A_{CP}(D^0 \to K^0_S K^0_S)$ $[\%]$", fontsize=24, ha="center")
 
     # Plot the measures and their numerical values
-    x_text = max([meas.m + meas.err() for meas in measures]) + 0.05 * (x_max - x_min)
+    x_text = max([meas.val + meas.err() for meas in measures]) + 0.05 * (x_max - x_min)
     for i in range(n_meas):
         meas = measures[i]
         plt.errorbar(
-            meas.m / units,
+            meas.val / units,
             n_meas - 1 - i,
             xerr=meas.err() / units,
             fmt=".",
@@ -88,7 +88,7 @@ def plot_average(date: str, out_dir: Path) -> None:
             color=meas.color,
         )
         plt.errorbar(
-            meas.m / units,
+            meas.val / units,
             n_meas - 1 - i,
             xerr=meas.stat / units,
             capsize=5,
@@ -114,7 +114,7 @@ def plot_average(date: str, out_dir: Path) -> None:
         )
     if "World" in measures[-1].label:
         plt.plot(
-            [measures[-1].m / units, measures[-1].m / units],
+            [measures[-1].val / units, measures[-1].val / units],
             [y_min, y_max],
             linestyle="--",
             linewidth=1,

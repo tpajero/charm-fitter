@@ -176,10 +176,8 @@ def make_plot(comb: str, final_state: str, dy_notation: bool, out_dir: Path) -> 
     n_meas = len(measures)
     for i in range(n_meas):
         meas = measures[i]
-        if not dy_notation:
-            meas.m = -meas.m
         plt.errorbar(
-            meas.m,
+            meas.val if dy_notation else -meas.val,
             n_meas - 1 - i,
             xerr=meas.err(),
             fmt=".",
@@ -188,7 +186,7 @@ def make_plot(comb: str, final_state: str, dy_notation: bool, out_dir: Path) -> 
             color=meas.color if comb != "lhcb" else "k",
         )
         plt.errorbar(
-            meas.m,
+            meas.val if dy_notation else -meas.val,
             n_meas - 1 - i,
             xerr=meas.stat,
             capsize=7,
@@ -214,8 +212,9 @@ def make_plot(comb: str, final_state: str, dy_notation: bool, out_dir: Path) -> 
             )
 
     # Vertical line for world average
+    avg = measures[-1].val if dy_notation else -measures[-1].val
     plt.plot(
-        [measures[-1].m, measures[-1].m],
+        [avg, avg],
         [y_min, y_max],
         linestyle="--",
         linewidth=1,
