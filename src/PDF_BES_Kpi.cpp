@@ -45,8 +45,6 @@ void PDF_BES_Kpi::initParameters() {
     break;
   case theory_config::theoretical:
     parameters->add(*(p.get("phiG")));
-    [[fallthrough]];
-  case theory_config::superweak:
     parameters->add(*(p.get("x12")));
     parameters->add(*(p.get("y12")));
     parameters->add(*(p.get("phiM")));
@@ -69,10 +67,6 @@ void PDF_BES_Kpi::initRelations() {
   case theory_config::theoretical:
     boost::replace_all(a_kpi_formula, "y", CharmUtils::y_to_theoretical);
     boost::replace_all(a_kpi_pipipi0_formula, "y", CharmUtils::y_to_theoretical);
-    break;
-  case theory_config::superweak:
-    boost::replace_all(a_kpi_formula, "y", CharmUtils::y_to_superweak);
-    boost::replace_all(a_kpi_pipipi0_formula, "y", CharmUtils::y_to_superweak);
     break;
   default:
     std::cout << "PDF_BES_Kpi_1d::initRelations : ERROR : theory_config not supported." << std::endl;

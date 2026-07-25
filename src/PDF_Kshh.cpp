@@ -48,7 +48,6 @@ void PDF_Kshh::initParameters() {
     break;
   case theory_config::theoretical:
     parameters->add(*(p.get("phiG")));
-  case theory_config::superweak:
     parameters->add(*(p.get("x12")));
     parameters->add(*(p.get("y12")));
     parameters->add(*(p.get("phiM")));
@@ -96,35 +95,6 @@ void PDF_Kshh::initRelations() {
                                        "-0.5 * TMath::ATan("
                                        "      (pow(x12,2) * sin(2*phiM) + pow(y12,2) * sin(2*phiG))"
                                        "    / (pow(x12,2) * cos(2*phiM) + pow(y12,2) * cos(2*phiG)))",
-                                       parameters)));
-    break;
-  case theory_config::superweak:
-    theory->add(*(Utils::makeTheoryVar("x_th", "x_th",
-                                       "pow(2,-0.5) * pow( "
-                                       "    pow(x12,2) - pow(y12,2) + pow( "
-                                       "       + pow(pow(x12,2) + pow(y12,2),2)"
-                                       "       - pow(2 * x12 * y12 * sin(phiM),2),"
-                                       "    0.5)"
-                                       ",0.5) * TMath::Sign(1., cos(phiM))",
-                                       parameters)));
-    theory->add(*(Utils::makeTheoryVar("y_th", "y_th",
-                                       "pow(2,-0.5) * pow( "
-                                       "    pow(y12,2) - pow(x12,2) + pow( "
-                                       "       + pow(pow(x12,2) + pow(y12,2),2)"
-                                       "       - pow(2 * x12 * y12 * sin(phiM),2),"
-                                       "    0.5)"
-                                       ",0.5)",
-                                       parameters)));
-    theory->add(*(Utils::makeTheoryVar("qop_th", "qop_th",
-                                       "pow(  (pow(x12,2) + pow(y12,2) + 2 * x12 * y12 * sin(phiM))"
-                                       "    / pow(                                                      "
-                                       "        pow(pow(x12,2) + pow(y12,2),2)                      "
-                                       "      - pow(2 * x12 * y12 * sin(phiM),2), 0.5), 0.5)",
-                                       parameters)));
-    theory->add(*(Utils::makeTheoryVar("phi_th", "phi_th",
-                                       "-0.5 * TMath::ATan("
-                                       "       pow(x12,2) * sin(2*phiM)"
-                                       "    / (pow(x12,2) * cos(2*phiM) + pow(y12,2)))",
                                        parameters)));
     break;
   default:

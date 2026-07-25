@@ -55,11 +55,6 @@ void PDF_XY::initParameters() {
     parameters->add(*(p.get("phiM")));
     parameters->add(*(p.get("phiG")));
     break;
-  case theory_config::superweak:
-    parameters->add(*(p.get("x12")));
-    parameters->add(*(p.get("y12")));
-    parameters->add(*(p.get("phiM")));
-    break;
   default:
     std::cout << "PDF_XY::initRelations : ERROR : "
                  "theory_config not supported."
@@ -79,10 +74,6 @@ void PDF_XY::initRelations() {
   case theory_config::theoretical:
     theory->add(*(Utils::makeTheoryVar("x_th", "x_th", CharmUtils::x_to_theoretical, parameters)));
     theory->add(*(Utils::makeTheoryVar("y_th", "y_th", CharmUtils::y_to_theoretical, parameters)));
-    break;
-  case theory_config::superweak:
-    theory->add(*(Utils::makeTheoryVar("x_th", "x_th", CharmUtils::x_to_superweak, parameters)));
-    theory->add(*(Utils::makeTheoryVar("y_th", "y_th", CharmUtils::y_to_superweak, parameters)));
     break;
   default:
     std::cout << "PDF_XY::initRelations : ERROR : "

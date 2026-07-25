@@ -51,7 +51,6 @@ void PDF_BinFlip::initParameters() {
     break;
   case theory_config::theoretical:
     parameters->add(*(p.get("phiG")));
-  case theory_config::superweak:
     parameters->add(*(p.get("x12")));
     parameters->add(*(p.get("y12")));
     parameters->add(*(p.get("phiM")));
@@ -90,12 +89,6 @@ void PDF_BinFlip::initRelations() {
     theory->add(*(Utils::makeTheoryVar("y_th", "y_th", " y12*cos(phiG)", parameters)));
     theory->add(*(Utils::makeTheoryVar("dx_th", "dx_th", "-y12*sin(phiG)", parameters)));
     theory->add(*(Utils::makeTheoryVar("dy_th", "dy_th", " x12*sin(phiM)", parameters)));
-    break;
-  case theory_config::superweak:
-    theory->add(*(Utils::makeTheoryVar("x_th", "x_th", "x12*cos(phiM)", parameters)));
-    theory->add(*(Utils::makeTheoryVar("y_th", "y_th", "y12", parameters)));
-    theory->add(*(Utils::makeTheoryVar("dx_th", "dx_th", "0", parameters)));
-    theory->add(*(Utils::makeTheoryVar("dy_th", "dy_th", "x12*sin(phiM)", parameters)));
     break;
   default:
     std::cout << "PDF_BinFlip::initRelations : ERROR : "

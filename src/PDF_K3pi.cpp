@@ -29,13 +29,11 @@ namespace {
             "                  + 1 / (qop+1) * (y*cos(Delta_K3pi + phi) + x*sin(Delta_K3pi + phi)))"},
            {theory_config::theoretical,
             "-k_K3pi * (y12 * cos(Delta_K3pi) * cos(phiG) + x12 * sin(Delta_K3pi) * cos(phiM))"},
-           {theory_config::superweak, "-k_K3pi * (y12 * cos(Delta_K3pi) + x12 * sin(Delta_K3pi) * cos(phiM))"},
        }},
       {"c2",
        {
            {theory_config::phenomenological, "(x * x + y * y) / 4"},
            {theory_config::theoretical, "(x12 * x12 + y12 * y12) / 4"},
-           {theory_config::superweak, "(x12 * x12 + y12 * y12) / 4"},
        }},
   };
 }

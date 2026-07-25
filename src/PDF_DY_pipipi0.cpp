@@ -37,7 +37,6 @@ void PDF_DY_pipipi0::initParameters() {
     param_names.insert(param_names.end(), {"x", "y", "qop", "phi"});
     break;
   case theory_config::theoretical:
-  case theory_config::superweak:
     param_names.insert(param_names.end(), {"x12", "y12", "phiM"});
     break;
   default:

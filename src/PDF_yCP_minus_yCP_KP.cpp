@@ -46,7 +46,6 @@ void PDF_yCP_minus_yCP_KP::initParameters() {
     break;
   case theory_config::theoretical:
     parameters->add(*(p.get("phiG")));
-  case theory_config::superweak:
     parameters->add(*(p.get("x12")));
     parameters->add(*(p.get("y12")));
     break;
@@ -76,10 +75,6 @@ void PDF_yCP_minus_yCP_KP::initRelations() {
                                        "y12*cos(phiG)"
                                        "+ 2 * sqrt(R_Kpi/100) * y12 * cos(Delta_Kpi) * cos(phiG)",
                                        parameters)));
-    break;
-  case theory_config::superweak:
-    theory->add(*(Utils::makeTheoryVar("yCP_minus_yCP_KP_th", "yCP_minus_yCP_KP_th",
-                                       "y12 + 2 * sqrt(R_Kpi/100) * y12 * cos(Delta_Kpi)", parameters)));
     break;
   default:
     std::cout << "PDF_yCP::initRelations : ERROR : "
