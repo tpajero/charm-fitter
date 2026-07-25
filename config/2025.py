@@ -1,10 +1,4 @@
-import os
-import sys
-
-config_dir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
-sys.path.append(os.path.abspath(config_dir))
-
-from classes import Parameter, Plot2d, Subcombination
+from charm_fitter.utils import Parameter, Plot2d, Subcombination
 
 # List all CharmCombo parameters with the properties to be used for plotting.
 params = {

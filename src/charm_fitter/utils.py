@@ -1,38 +1,45 @@
 import logging
+from dataclasses import dataclass
 from math import floor, log, sqrt
+from pathlib import Path
+
+repo_path = Path(__file__).resolve().parents[2]
 
 
+@dataclass(frozen=True)
 class Measurement:
-    """Class to define the objects storing the information relative to a single measurement."""
+    """Class to define the objects storing the information relative to a single measurement for BLUE combinations."""
 
-    def __init__(self, label, arxiv, m, stat, sys=None, sys2=None):
-        self.label = label
-        self.arxiv = arxiv
-        self.m = m
-        self.stat = stat
-        self.sys = sys
-        self.sys2 = sys2
+    label: str
+    arxiv: str
+    val: float
+    stat: float
+    sys: float | None = None
+    sys2: float | None = None
 
+    def __post_init__(self):
         if "BaBar" in self.label:
-            self.color = "g"
+            color = "g"
         elif "Belle" in self.label:
-            self.color = "r"
+            color = "r"
         elif "BES" in self.label:
-            self.color = "g"
+            color = "g"
         elif "CDF" in self.label:
-            self.color = "m"
+            color = "m"
         elif "CLEO" in self.label:
-            self.color = "m"
+            color = "m"
         elif "CMS" in self.label:
-            self.color = "g"
+            color = "g"
         elif "LHCb" in self.label:
-            self.color = "b"
+            color = "b"
         elif any(s in self.label for s in ["average", "PDG"]):
-            self.color = "k"
+            color = "k"
         else:
             raise RuntimeError(f"The label {self.label} is not supported")
 
-    def result_str(self, units=1):
+        object.__setattr__(self, "color", color)
+
+    def result_str(self, units: float = 1.0) -> str:
         def _ndigits_to_print(stat, sys=None, sys2=None):
             """Given three uncertainties, return the number of digits after the comma to be printed according to PDG
             conventions. Assumes that the input measurements have the right number of digits according to PDG
@@ -69,7 +76,7 @@ class Measurement:
             )
             return ndig - main_exp - 1
 
-        val = self.m / units
+        val = self.val / units
         stat = self.stat / units
         sys = self.sys / units if self.sys else None
         sys2 = self.sys2 / units if self.sys2 else None
@@ -94,3 +101,50 @@ class Measurement:
             if self.sys2:
                 err2 += (self.sys2) ** 2
             return sqrt(err2)
+
+
+class Parameter:
+    """Class to define the objects related to a scan parameter in a single place."""
+
+    def __init__(self, identifier, title, range1d, parametrisation, range2d=None, degrees=False):
+        assert parametrisation in ["theo", "pheno", "both"]
+        self.id = identifier
+        self.title = title
+        self.parametrisation = parametrisation
+        self.range1d = range1d
+        self.range2d = range2d if range2d else range1d
+        self.degrees = degrees
+        if self.degrees:
+            self.title += r"\,[^\circ]$"
+
+
+class Plot2d:
+    """Class to define the properties of 2D plots."""
+
+    def __init__(self, pars, logo="r", legpos="l"):
+        self.pars = pars
+        self.logo = logo
+        self.legpos = legpos
+
+
+class Subcombination:
+    """Class to define the PDFs and title of a subcombination of measurements."""
+
+    def __init__(self, title, pdfs):
+        self.title = title
+        self.pdfs = pdfs
+
+
+def setup_matplotlib(*, style="lhcb", usetex: bool = True) -> None:
+    """Set the style for matplotlib plots."""
+    from importlib.resources import files
+
+    import matplotlib
+    import matplotlib.pyplot as plt
+
+    plt.style.use(files("charm_fitter") / "styles" / f"{style}.mplstyle")
+    plt.rcParams["text.usetex"] = usetex
+    if usetex:
+        # Fix problems with rendering of minus sign in PDF
+        matplotlib.use("pgf")
+        plt.rcParams.update({"pgf.texsystem": "pdflatex"})

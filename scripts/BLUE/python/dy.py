@@ -1,13 +1,20 @@
 #!/usr/bin/env python3
-"""Produce the plot with the world average of the DeltaY parameter."""
+"""Produce the plot with the world average of the DeltaY parameter.
 
+To check what options are available, run:
+
+   python dy.py -h
+
+"""
+
+import argparse
 import logging
-import os
-from argparse import ArgumentParser
+from pathlib import Path
 
 import matplotlib
 import matplotlib.pyplot as plt
-from utils import Measurement
+
+from charm_fitter.utils import Measurement, repo_path, setup_matplotlib
 
 measures = {
     "babar-2012": {"all": Measurement("BaBar 2012", "1209.3896", -8.8, 25.5, 5.8)},
@@ -77,7 +84,7 @@ measures = {
 }
 
 
-def get_measures(comb, final_state="all"):
+def get_measures(comb: str, final_state: str = "all") -> list[Measurement]:
     """Get the list of measurements to be shown for a given summary plot.
 
     :param comb: Identifier for a given summary plot.
@@ -105,7 +112,7 @@ def get_measures(comb, final_state="all"):
     return comb_measures
 
 
-def get_xy_ranges(comb, final_state, dy_notation):
+def get_xy_ranges(comb: str, final_state: str, dy_notation: bool) -> tuple[tuple[float, float], tuple[float, float]]:
     """Get the x and y ranges for a given summary plot."""
     n_meas = len(get_measures(comb, final_state))
     if "lhcb" in comb:
@@ -138,7 +145,7 @@ def get_xy_ranges(comb, final_state, dy_notation):
     return (x_min, x_max), (y_min, y_max)
 
 
-def get_x_text(comb, final_state, dy_notation):
+def get_x_text(comb: str, final_state: str, dy_notation: bool) -> int:
     if dy_notation:
         if "lhcb" in comb:
             return 30 if final_state == "pipi" else 26
@@ -150,7 +157,7 @@ def get_x_text(comb, final_state, dy_notation):
         return x_text_lhcb[final_state] if "lhcb" in comb else x_text_wa[final_state]
 
 
-def make_plot(comb, final_state, dy_notation, out_dir):
+def make_plot(comb: str, final_state: str, dy_notation: bool, out_dir: Path) -> None:
     if comb == "lhcb":
         fig, ax = plt.subplots(figsize=(6, 6))
     else:
@@ -169,10 +176,8 @@ def make_plot(comb, final_state, dy_notation, out_dir):
     n_meas = len(measures)
     for i in range(n_meas):
         meas = measures[i]
-        if not dy_notation:
-            meas.m = -meas.m
         plt.errorbar(
-            meas.m,
+            meas.val if dy_notation else -meas.val,
             n_meas - 1 - i,
             xerr=meas.err(),
             fmt=".",
@@ -181,7 +186,7 @@ def make_plot(comb, final_state, dy_notation, out_dir):
             color=meas.color if comb != "lhcb" else "k",
         )
         plt.errorbar(
-            meas.m,
+            meas.val if dy_notation else -meas.val,
             n_meas - 1 - i,
             xerr=meas.stat,
             capsize=7,
@@ -207,8 +212,9 @@ def make_plot(comb, final_state, dy_notation, out_dir):
             )
 
     # Vertical line for world average
+    avg = measures[-1].val if dy_notation else -measures[-1].val
     plt.plot(
-        [measures[-1].m, measures[-1].m],
+        [avg, avg],
         [y_min, y_max],
         linestyle="--",
         linewidth=1,
@@ -219,7 +225,7 @@ def make_plot(comb, final_state, dy_notation, out_dir):
     plt.plot([x_min, x_max], [0.5, 0.5], linestyle="-", linewidth=1, color="k")
 
     # Save figure
-    os.makedirs(out_dir, exist_ok=True)
+    out_dir.mkdir(parents=True, exist_ok=True)
     obs = "dy" if dy_notation else "agamma"
     fig_name = f"{obs}-{comb}"
     if final_state != "all":
@@ -228,9 +234,8 @@ def make_plot(comb, final_state, dy_notation, out_dir):
         plt.savefig(f"{out_dir}/{fig_name}.{ext}")
 
 
-def parse_args():
-    cwd = os.path.dirname(os.path.realpath(__file__))
-    parser = ArgumentParser()
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
     parser.add_argument(
         "-c",
         "--comb",
@@ -255,17 +260,23 @@ def parse_args():
     parser.add_argument(
         "-o",
         "--outdir",
-        type=str,
-        default=os.path.join(cwd, "figs"),
+        type=Path,
+        default=repo_path / "plots" / "BLUE" / "dy",
         help="Output directory for saving the plots",
+    )
+    parser.add_argument(
+        "--no-latex",
+        dest="latex",
+        default=True,
+        action="store_false",
+        help="Disable LaTeX in Matplotlib text processing (needed for, e.g., Gitlab CI)",
     )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     logging.basicConfig(encoding="utf-8", level=logging.INFO)
-    cwd = os.path.dirname(os.path.realpath(__file__))
-    plt.style.use(os.path.join(cwd, "lhcb.mplstyle"))
 
     args = parse_args()
+    setup_matplotlib(usetex=args.latex)
     make_plot(args.comb, args.fs, args.dy_notation, args.outdir)

@@ -1,19 +1,25 @@
 #!/usr/bin/env python3
 """Plot the values of all existing measurements of ACP and BF of D(s)+ -> eta(') h+ decays,
 plus the PDG 2025 average.
+
+To check what options are available, run:
+
+   python d-to-etah.py -h
+
 """
 
+import argparse
 import itertools
 import logging
-import os
-from argparse import ArgumentParser
 from math import log
+from pathlib import Path
 
 import matplotlib.pyplot as plt
-from utils import Measurement
+
+from charm_fitter.utils import Measurement, repo_path, setup_matplotlib
 
 
-def get_measures(meas_type, decay, date):
+def get_measures(meas_type: str, decay: str, date: str) -> list[Measurement]:
     """Get the list of measurements to be shown for a given summary plot.
 
     :param meas_type: 'BF' or 'ACP'
@@ -202,7 +208,7 @@ def get_measures(meas_type, decay, date):
         raise RuntimeError(f"The combination for {date} is not supported")
 
 
-def get_decay_label(decay):
+def get_decay_label(decay: str) -> str:
     dp = "D^+"
     ds = "D^+_s"
     eta = r"\eta"
@@ -218,7 +224,7 @@ def get_decay_label(decay):
     return lab
 
 
-def get_xrange_and_units(meas_type, decay, date):
+def get_xrange_and_units(meas_type: str, decay: str, date: str) -> tuple[tuple[float, float], float]:
     """Get the x range and the units for a given summary plot."""
     xranges = {
         "BF": {
@@ -267,7 +273,7 @@ def get_xrange_and_units(meas_type, decay, date):
     return xranges[meas_type][decay], units[meas_type][decay]
 
 
-def get_units_label(units):
+def get_units_label(units: float) -> str:
     raw_exp = log(units) / log(10)
     exp = round(raw_exp)
     if abs(exp - raw_exp) > 1e-2:
@@ -275,7 +281,7 @@ def get_units_label(units):
     return r"\%" if exp == -2 else f"10^{{{exp}}}"
 
 
-def plot_average(meas_type, decay, date, out_dir):
+def plot_average(meas_type: str, decay: str, date: str, out_dir: Path) -> None:
     measures = get_measures(meas_type, decay, date)
     n_meas = len(measures)
     if n_meas == 0:
@@ -297,11 +303,11 @@ def plot_average(meas_type, decay, date, out_dir):
     )
 
     # Plot the measures and their numerical values
-    x_text = max([meas.m + meas.err() for meas in measures]) + 0.05 * (x_max - x_min)
+    x_text = max([meas.val + meas.err() for meas in measures]) + 0.05 * (x_max - x_min)
     for i in range(n_meas):
         meas = measures[i]
         plt.errorbar(
-            meas.m / units,
+            meas.val / units,
             n_meas - 1 - i,
             xerr=meas.err() / units,
             fmt=".",
@@ -310,7 +316,7 @@ def plot_average(meas_type, decay, date, out_dir):
             color=meas.color,
         )
         plt.errorbar(
-            meas.m / units,
+            meas.val / units,
             n_meas - 1 - i,
             xerr=meas.stat / units,
             capsize=5,
@@ -327,7 +333,7 @@ def plot_average(meas_type, decay, date, out_dir):
 
     # Vertical line for world average
     plt.plot(
-        [measures[-1].m / units, measures[-1].m / units],
+        [measures[-1].val / units, measures[-1].val / units],
         [y_min, y_max],
         linestyle="--",
         linewidth=1,
@@ -344,15 +350,14 @@ def plot_average(meas_type, decay, date, out_dir):
     )
 
     # Save figure
-    os.makedirs(out_dir, exist_ok=True)
+    out_dir.mkdir(parents=True, exist_ok=True)
     fig_name = f"{meas_type.lower()}-{decay}-{date}"
     for ext in ["pdf"]:
         plt.savefig(f"{out_dir}/{fig_name}.{ext}")
 
 
-def parse_args():
-    cwd = os.path.dirname(os.path.realpath(__file__))
-    parser = ArgumentParser()
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
     parser.add_argument(
         "-c",
         "--date",
@@ -364,19 +369,25 @@ def parse_args():
     parser.add_argument(
         "-o",
         "--outdir",
-        type=str,
-        default=os.path.join(cwd, "figs"),
+        type=Path,
+        default=repo_path / "plots" / "BLUE" / "d-to-etah",
         help="Output directory for saving the plots",
+    )
+    parser.add_argument(
+        "--no-latex",
+        dest="latex",
+        default=True,
+        action="store_false",
+        help="Disable LaTeX in Matplotlib text processing (needed for, e.g., Gitlab CI)",
     )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     logging.basicConfig(encoding="utf-8", level=logging.INFO)
-    cwd = os.path.dirname(os.path.realpath(__file__))
-    plt.style.use(os.path.join(cwd, "lhcb.mplstyle"))
 
     args = parse_args()
+    setup_matplotlib(usetex=args.latex)
 
     for m, d, e, h in itertools.product(["BF", "ACP"], ["dp", "ds"], ["eta", "etap"], ["pi", "k"]):
         plot_average(m, f"{d}-to-{e}{h}", args.date, args.outdir)

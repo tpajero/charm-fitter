@@ -1,18 +1,12 @@
 """Make and read scans, and plot them in matplotlib."""
 
-import os
 import subprocess
-import sys
 from multiprocessing import Pool
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.ticker import MaxNLocator
-from scipy.stats import chi2
-
-charm_fitter_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
-sys.path.append(os.path.abspath(os.path.join(charm_fitter_dir, "..")))
-from scripts.gc_mpl_tools import (
+from gc_core.mpl_tools import (
     lhcb_2d_cols,
     lhcb_cols,
     lhcb_ls,
@@ -21,6 +15,8 @@ from scripts.gc_mpl_tools import (
     print_interval,
     read_gc_scan,
 )
+from matplotlib.ticker import MaxNLocator
+from scipy.stats import chi2
 
 
 def run_command(cmd, verbose=False):
@@ -39,10 +35,10 @@ def getfnames(prefix, xpar, ypar=None):
 
     bfname = fname.replace("scanner/", "par/").replace("_scanner", "").replace(".root", ".dat")
 
-    if not os.path.exists(fname):
+    if not Path(fname).exists():
         raise FileNotFoundError(f"Cannot find scan file {fname}")
 
-    if not os.path.exists(bfname):
+    if not Path(bfname).exists():
         raise FileNotFoundError(f"Cannot find fit result file {bfname}")
 
     return fname, bfname
@@ -55,7 +51,7 @@ def print_cl(prefix, xpar, ypar=None, prob=True):
     pref = prefix.split("scanner")[1]
     suff = "Prob" if prob else "Plugin"
     fname = f"plots/cl/clintervals{pref}_{xpar}_{suff}.py"
-    if not os.path.exists(fname):
+    if not Path(fname).exists():
         return
 
     try:

@@ -1,0 +1,36 @@
+# This is the CI/CD pipeline for the repository mirror in Gitlab.
+
+stages:
+  - pre-commit
+  - build-and-test
+
+variables:
+  NO_LBLOGIN: "1"
+
+check-formatting:
+  stage: pre-commit
+  tags:
+    - cvmfs
+  image: gitlab-registry.cern.ch/lhcb-docker/os-base/alma9-devel:latest
+  variables:
+    PRE_COMMIT_HOME: ${CI_PROJECT_DIR}/.cache/pre-commit
+  cache:
+    paths:
+      - ${PRE_COMMIT_HOME}
+  before_script:
+    - |
+      python3 -m venv ${CI_PROJECT_DIR}/.cache/pre-commit-venv
+      source ${CI_PROJECT_DIR}/.cache/pre-commit-venv/bin/activate
+      pip install --upgrade pip
+      pip install -U pre-commit
+  script:
+    - pre-commit run --all-files --show-diff-on-failure
+
+trigger-pipeline:
+  stage: build-and-test
+  trigger:
+    project: gammacombo/core
+    branch: charm-fitter
+    strategy: depend
+  variables:
+    CHARM_BRANCH: $CI_COMMIT_REF_NAME
