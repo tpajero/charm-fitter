@@ -166,11 +166,11 @@ void ParametersCharmCombo::defineParameters() {
   p->phys = range(-1e4, 1e4);
 
   p = newParameter("qop");
-  p->title = "|#it{q/p}|#minus1";
-  p->startvalue = -0.02;
+  p->title = "|#it{q/p}|";
+  p->startvalue = 0.98;
   p->unit = "";
-  p->scan = range(-0.25, 0.25);
-  p->phys = range(-1., 1e4);
+  p->scan = range(0.75, 1.25);
+  p->phys = range(0., 1e4);
 
   p = newParameter("phi");
   p->title = "#it{#phi}_{2} [rad]";

@@ -60,15 +60,14 @@ void PDF_yCP_plus_yCP_RS::initRelations() {
   theory = new RooArgList("theory");
   switch (th_cfg) {
   case theory_config::phenomenological:
-    theory->add(
-        *(Utils::makeTheoryVar("yCP_plus_yCP_RS_th", "yCP_plus_yCP_RS_th",
-                               "0.5*( "
-                               "      y*(qop+1 + 1/(qop+1))*cos(phi)"
-                               "    - x*(qop+1 - 1/(qop+1))*sin(phi)"
-                               " + sqrt(R_Kpi/100) * ("
-                               "    - (y * cos(Delta_Kpi) - x * sin(Delta_Kpi)) * (qop+1 + 1/(qop+1)) * cos(phi)"
-                               "    + (x * cos(Delta_Kpi) + y * sin(Delta_Kpi)) * (qop+1 - 1/(qop+1)) * sin(phi)))",
-                               parameters)));
+    theory->add(*(Utils::makeTheoryVar("yCP_plus_yCP_RS_th", "yCP_plus_yCP_RS_th",
+                                       "0.5*( "
+                                       "      y*(qop + 1/qop)*cos(phi)"
+                                       "    - x*(qop - 1/qop)*sin(phi)"
+                                       " + sqrt(R_Kpi/100) * ("
+                                       "    - (y * cos(Delta_Kpi) - x * sin(Delta_Kpi)) * (qop + 1/qop) * cos(phi)"
+                                       "    + (x * cos(Delta_Kpi) + y * sin(Delta_Kpi)) * (qop - 1/qop) * sin(phi)))",
+                                       parameters)));
     break;
   case theory_config::theoretical:
     theory->add(*(Utils::makeTheoryVar("yCP_plus_yCP_RS_th", "yCP_plus_yCP_RS_th",

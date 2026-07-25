@@ -68,20 +68,20 @@ void PDF_BinFlip::initRelations() {
   switch (th_cfg) {
   case theory_config::phenomenological:
     theory->add(*(Utils::makeTheoryVar("x_th", "x_th",
-                                       "0.5*(  x*cos(phi)*(qop+1 + 1/(qop+1))"
-                                       "     + y*sin(phi)*(qop+1 - 1/(qop+1)))",
+                                       "0.5*(  x*cos(phi)*(qop + 1/qop)"
+                                       "     + y*sin(phi)*(qop - 1/qop))",
                                        parameters)));
     theory->add(*(Utils::makeTheoryVar("y_th", "y_th",
-                                       "0.5*(  y*cos(phi)*(qop+1 + 1./(qop+1))"
-                                       "     - x*sin(phi)*(qop+1 - 1./(qop+1)))",
+                                       "0.5*(  y*cos(phi)*(qop + 1./qop)"
+                                       "     - x*sin(phi)*(qop - 1./qop))",
                                        parameters)));
     theory->add(*(Utils::makeTheoryVar("dx_th", "dx_th",
-                                       "0.5*(  x*cos(phi)*(qop+1 - 1./(qop+1))"
-                                       "     + y*sin(phi)*(qop+1 + 1./(qop+1)))",
+                                       "0.5*(  x*cos(phi)*(qop - 1./qop)"
+                                       "     + y*sin(phi)*(qop + 1./qop))",
                                        parameters)));
     theory->add(*(Utils::makeTheoryVar("dy_th", "dy_th",
-                                       "0.5*(  y*cos(phi)*(qop+1 - 1./(qop+1))"
-                                       "     - x*sin(phi)*(qop+1 + 1./(qop+1)))",
+                                       "0.5*(  y*cos(phi)*(qop - 1./qop)"
+                                       "     - x*sin(phi)*(qop + 1./qop))",
                                        parameters)));
     break;
   case theory_config::theoretical:

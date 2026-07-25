@@ -66,7 +66,7 @@ void PDF_Kshh::initRelations() {
   case theory_config::phenomenological:
     theory->add(*(Utils::makeTheoryVar("x_th", "x_th", "x", parameters)));
     theory->add(*(Utils::makeTheoryVar("y_th", "y_th", "y", parameters)));
-    theory->add(*(Utils::makeTheoryVar("qop_th", "qop_th", "qop+1", parameters)));
+    theory->add(*(Utils::makeTheoryVar("qop_th", "qop_th", "qop", parameters)));
     theory->add(*(Utils::makeTheoryVar("phi_th", "phi_th", "phi", parameters)));
     break;
   case theory_config::theoretical:

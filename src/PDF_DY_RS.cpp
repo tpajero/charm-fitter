@@ -58,12 +58,11 @@ void PDF_DY_RS::initRelations() {
   theory = new RooArgList("theory");  ///< the order of this list must match that of the COR matrix!
   switch (th_cfg) {
   case theory_config::phenomenological:
-    theory->add(
-        *(Utils::makeTheoryVar("DY_RS_th", "DY_RS_th",
-                               "0.5 * pow(R_Kpi/100, 0.5) * "
-                               "(  (y*cos(Delta_Kpi) - x*sin(Delta_Kpi))*((qop+1) - 1/(qop+1) - Acp_KP/100)*cos(phi)"
-                               " - (x*cos(Delta_Kpi) + y*sin(Delta_Kpi))*((qop+1) + 1/(qop+1)             )*sin(phi))",
-                               parameters)));
+    theory->add(*(Utils::makeTheoryVar("DY_RS_th", "DY_RS_th",
+                                       "0.5 * pow(R_Kpi/100, 0.5) * "
+                                       "(  (y*cos(Delta_Kpi) - x*sin(Delta_Kpi))*(qop - 1/qop - Acp_KP/100)*cos(phi)"
+                                       " - (x*cos(Delta_Kpi) + y*sin(Delta_Kpi))*(qop + 1/qop             )*sin(phi))",
+                                       parameters)));
     break;
   case theory_config::theoretical:
     theory->add(

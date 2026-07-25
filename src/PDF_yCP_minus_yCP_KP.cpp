@@ -63,11 +63,11 @@ void PDF_yCP_minus_yCP_KP::initRelations() {
   case theory_config::phenomenological:
     theory->add(*(Utils::makeTheoryVar("yCP_minus_yCP_KP_th", "yCP_minus_yCP_KP_th",
                                        " 0.5*( "
-                                       "       y*(qop+1 + 1/(qop+1))*cos(phi)"
-                                       "     - x*(qop+1 - 1/(qop+1))*sin(phi))"
+                                       "       y*(qop + 1/qop)*cos(phi)"
+                                       "     - x*(qop - 1/qop)*sin(phi))"
                                        " + sqrt(R_Kpi/100) * cos(Delta_Kpi) * ("
-                                       "      y * (qop+1 + 1/(qop+1)) * cos(phi)"
-                                       "    - x * (qop+1 - 1/(qop+1)) * sin(phi))",
+                                       "      y * (qop + 1/qop) * cos(phi)"
+                                       "    - x * (qop - 1/qop) * sin(phi))",
                                        parameters)));
     break;
   case theory_config::theoretical:

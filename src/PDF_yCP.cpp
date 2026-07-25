@@ -58,8 +58,8 @@ void PDF_yCP::initRelations() {
   switch (th_cfg) {
   case theory_config::phenomenological:
     theory->add(*(Utils::makeTheoryVar("yCP_th", "yCP_th",
-                                       "0.5*(  y * (qop+1 + 1/(qop+1)) * cos(phi)"
-                                       "     - x * (qop+1 - 1/(qop+1)) * sin(phi))",
+                                       "0.5*(  y * (qop + 1/qop) * cos(phi)"
+                                       "     - x * (qop - 1/qop) * sin(phi))",
                                        parameters)));
     break;
   case theory_config::theoretical:

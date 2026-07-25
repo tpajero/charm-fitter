@@ -47,8 +47,8 @@ std::string CharmUtils::get_dy_expression(const theory_config th_cfg, const FSC 
   std::string expression;
   switch (th_cfg) {
   case theory_config::phenomenological:
-    expression = "0.5 * (- y*(qop+1 - 1/(qop+1))*cos(phi)"
-                 "       + x*(qop+1 + 1/(qop+1))*sin(phi))";
+    expression = "0.5 * (- y*(qop - 1/qop)*cos(phi)"
+                 "       + x*(qop + 1/qop)*sin(phi))";
     switch (fsc) {
     case FSC::none:
       break;

@@ -25,8 +25,8 @@ namespace {
       {"c1",
        {
            {theory_config::phenomenological,
-            "- k_K3pi * 0.5 * (      (qop+1) * (y*cos(Delta_K3pi - phi) + x*sin(Delta_K3pi - phi)) "
-            "                  + 1 / (qop+1) * (y*cos(Delta_K3pi + phi) + x*sin(Delta_K3pi + phi)))"},
+            "- k_K3pi * 0.5 * (      qop * (y*cos(Delta_K3pi - phi) + x*sin(Delta_K3pi - phi)) "
+            "                  + 1 / qop * (y*cos(Delta_K3pi + phi) + x*sin(Delta_K3pi + phi)))"},
            {theory_config::theoretical,
             "-k_K3pi * (y12 * cos(Delta_K3pi) * cos(phiG) + x12 * sin(Delta_K3pi) * cos(phiM))"},
        }},

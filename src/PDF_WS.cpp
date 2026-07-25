@@ -26,7 +26,7 @@ namespace {
   std::map<std::string, std::map<theory_config, std::string>> theory_expressions = {
       {"y'+",
        {
-           {theory_config::phenomenological, "(qop+1)*(  y * cos(Delta_Kpi - phi)"
+           {theory_config::phenomenological, "qop*(  y * cos(Delta_Kpi - phi)"
                                              "         + x * sin(Delta_Kpi - phi))"},
            {theory_config::theoretical, "  y12 * cos(Delta_Kpi + phiG)"
                                         "+ x12 * sin(Delta_Kpi + phiM)"},
@@ -34,7 +34,7 @@ namespace {
        }},
       {"y'-",
        {
-           {theory_config::phenomenological, "1/(qop+1)*(  y * cos(Delta_Kpi + phi)"
+           {theory_config::phenomenological, "1/qop*(  y * cos(Delta_Kpi + phi)"
                                              "           + x * sin(Delta_Kpi + phi))"},
            {theory_config::theoretical, "  y12 * cos(Delta_Kpi-phiG)"
                                         "+ x12 * sin(Delta_Kpi-phiM)"},
@@ -42,7 +42,7 @@ namespace {
        }},
       {"x'2+",
        {
-           {theory_config::phenomenological, "pow((qop+1)*(  x * cos(Delta_Kpi - phi)"
+           {theory_config::phenomenological, "pow(qop*(  x * cos(Delta_Kpi - phi)"
                                              "             - y * sin(Delta_Kpi - phi)),2)"},
            {theory_config::theoretical, "pow(- y12 * sin(Delta_Kpi + phiG)"
                                         "    + x12 * cos(Delta_Kpi + phiM), 2)"},
@@ -50,7 +50,7 @@ namespace {
        }},
       {"x'2-",
        {
-           {theory_config::phenomenological, "pow(1/(qop+1)*(  x * cos(Delta_Kpi + phi)"
+           {theory_config::phenomenological, "pow(1/qop*(  x * cos(Delta_Kpi + phi)"
                                              "               - y * sin(Delta_Kpi + phi)),2)"},
            {theory_config::theoretical, "pow(- y12 * sin(Delta_Kpi-phiG)"
                                         "    + x12 * cos(Delta_Kpi-phiM),2)"},
@@ -58,31 +58,29 @@ namespace {
        }},
       {"c",
        {
-           {theory_config::phenomenological,
-            "0.5 * (      (qop+1)*(  y*cos(Delta_Kpi - phi) + x*sin(Delta_Kpi - phi)) "
-            "       + 1 / (qop+1)*(  y*cos(Delta_Kpi + phi) + x*sin(Delta_Kpi + phi)))"},
+           {theory_config::phenomenological, "0.5 * (      qop*(  y*cos(Delta_Kpi - phi) + x*sin(Delta_Kpi - phi)) "
+                                             "       + 1 / qop*(  y*cos(Delta_Kpi + phi) + x*sin(Delta_Kpi + phi)))"},
            {theory_config::theoretical, "y12 * cos(Delta_Kpi) * cos(phiG) + x12 * sin(Delta_Kpi) * cos(phiM)"},
            {theory_config::d0_to_kpi, "yp"},
        }},
       {"c'",
        {
-           {theory_config::phenomenological, "0.125 * (pow(x, 2) + pow(y, 2)) * (pow(qop + 1, 2) + pow(qop + 1, -2))"},
+           {theory_config::phenomenological, "0.125 * (pow(x, 2) + pow(y, 2)) * (pow(qop, 2) + pow(qop, -2))"},
            {theory_config::theoretical, "0.25 * (pow(x12, 2) + pow(y12, 2))"
                                         "+ 0.25 * R_Kpi / 100 * (pow(y12, 2) - pow(x12, 2))"},  // 2nd order corrections
            {theory_config::d0_to_kpi, "(pow(yp, 2) + xp2) / 4"},
        }},
       {"dc",
        {
-           {theory_config::phenomenological,
-            "0.5 * (      (qop+1)*(  y*cos(Delta_Kpi - phi) + x*sin(Delta_Kpi - phi)) "
-            "       - 1 / (qop+1)*(  y*cos(Delta_Kpi + phi) + x*sin(Delta_Kpi + phi)))"},
+           {theory_config::phenomenological, "0.5 * (      qop*(  y*cos(Delta_Kpi - phi) + x*sin(Delta_Kpi - phi)) "
+                                             "       - 1 / qop*(  y*cos(Delta_Kpi + phi) + x*sin(Delta_Kpi + phi)))"},
            {theory_config::theoretical, "  x12 * cos(Delta_Kpi) * sin(phiM)"
                                         "- y12 * sin(Delta_Kpi) * sin(phiG)"},
            {theory_config::d0_to_kpi, "dyp"},
        }},
       {"dc'",
        {
-           {theory_config::phenomenological, "1 / 8 * (pow(x, 2) + pow(y, 2)) * (pow(qop + 1, 2) - pow(qop + 1, -2))"},
+           {theory_config::phenomenological, "1 / 8 * (pow(x, 2) + pow(y, 2)) * (pow(qop, 2) - pow(qop, -2))"},
            {theory_config::theoretical, "0.5 * x12 * y12 * sin(phiM - phiG)"},
            {theory_config::d0_to_kpi, "(2 * yp * dyp + pow(dyp, 2) + dxp2) / 4"},
        }},
