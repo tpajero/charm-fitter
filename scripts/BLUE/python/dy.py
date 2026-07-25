@@ -231,7 +231,7 @@ def make_plot(comb: str, final_state: str, dy_notation: bool, out_dir: Path) -> 
     if final_state != "all":
         fig_name += f"-{final_state}"
     for ext in ["pdf"]:
-        plt.savefig(f"{out_dir}/{fig_name}.{ext}")
+        plt.savefig(out_dir / f"{fig_name}.{ext}")
 
 
 def parse_args() -> argparse.Namespace:

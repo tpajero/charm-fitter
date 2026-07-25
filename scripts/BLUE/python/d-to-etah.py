@@ -353,7 +353,7 @@ def plot_average(meas_type: str, decay: str, date: str, out_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     fig_name = f"{meas_type.lower()}-{decay}-{date}"
     for ext in ["pdf"]:
-        plt.savefig(f"{out_dir}/{fig_name}.{ext}")
+        plt.savefig(out_dir / f"{fig_name}.{ext}")
 
 
 def parse_args() -> argparse.Namespace:

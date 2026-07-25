@@ -9,8 +9,6 @@ variables:
 
 check-formatting:
   stage: pre-commit
-  tags:
-    - cvmfs
   image: gitlab-registry.cern.ch/lhcb-docker/os-base/alma9-devel:latest
   variables:
     PRE_COMMIT_HOME: ${CI_PROJECT_DIR}/.cache/pre-commit

@@ -3,7 +3,7 @@
  * Author: tommaso.pajero@cern.ch
  * Date: September 2024
  *
- * Code to perform the average of ACP(D0 -> KS KS) measurements performed to date.
+ * Code to perform the average of ACP(D0 -> KS KS) measurements.
  *
  * The code is based on the BLUE package (https://blue.hepforge.org/).
  * Run it from a root interactive session through:

@@ -132,7 +132,7 @@ def plot_average(date: str, out_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     fig_name = f"acp-d0-to-ksks-{date}"
     for ext in ["pdf"]:
-        plt.savefig(f"{out_dir}/{fig_name}.{ext}")
+        plt.savefig(out_dir / f"{fig_name}.{ext}")
 
 
 def parse_args() -> argparse.Namespace:
