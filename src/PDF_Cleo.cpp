@@ -42,7 +42,6 @@ void PDF_Cleo::initParameters() {
     break;
   case theory_config::theoretical:
     parameters->add(*(p.get("phiG")));
-  case theory_config::superweak:
     parameters->add(*(p.get("phiM")));
     parameters->add(*(p.get("x12")));
     parameters->add(*(p.get("y12")));
@@ -75,20 +74,6 @@ void PDF_Cleo::initRelations() {
                                        "      pow(y12,2) - pow(x12,2) "
                                        "    + pow(  pow(pow(x12,2) + pow(y12,2),2) "
                                        "          - pow(2 * x12 * y12 * sin(phiM - phiG),2), 0.5), 0.5)",
-                                       parameters)));
-    break;
-  case theory_config::superweak:
-    theory->add(*(Utils::makeTheoryVar("x2_th", "x2_th",
-                                       "0.5 * ("
-                                       "      pow(x12,2) - pow(y12,2) "
-                                       "    + pow(  pow(pow(x12,2) + pow(y12,2),2) "
-                                       "          - pow(2 * x12 * y12 * sin(phiM),2), 0.5))",
-                                       parameters)));
-    theory->add(*(Utils::makeTheoryVar("y_th", "y_th",
-                                       "pow(2, -0.5) * pow("
-                                       "      pow(y12,2) - pow(x12,2) "
-                                       "    + pow(  pow(pow(x12,2) + pow(y12,2),2) "
-                                       "          - pow(2 * x12 * y12 * sin(phiM),2), 0.5), 0.5)",
                                        parameters)));
     break;
   default:

@@ -28,8 +28,6 @@ namespace {
            {theory_config::phenomenological, "y*cos(Delta_Kpi) + x*sin(Delta_Kpi)"},
            {theory_config::theoretical, "  y12 * cos(Delta_Kpi) * TMath::Sign(1.,cos(phiG)) "
                                         "+ x12 * sin(Delta_Kpi) * TMath::Sign(1.,cos(phiM))"},
-           {theory_config::superweak, "  y12 * cos(Delta_Kpi)                            "
-                                      "+ x12 * sin(Delta_Kpi) * TMath::Sign(1.,cos(phiM))"},
            {theory_config::d0_to_kpi, "yp"},
        }},
       {"x'2",
@@ -37,8 +35,6 @@ namespace {
            {theory_config::phenomenological, "pow(x*cos(Delta_Kpi) - y*sin(Delta_Kpi),2)"},
            {theory_config::theoretical, "pow(- y12*sin(Delta_Kpi) * TMath::Sign(1.,cos(phiG))"
                                         "    + x12*cos(Delta_Kpi) * TMath::Sign(1.,cos(phiM)), 2)"},
-           {theory_config::superweak, "pow(- y12*sin(Delta_Kpi)                            "
-                                      "    + x12*cos(Delta_Kpi) * TMath::Sign(1.,cos(phiM)), 2)"},
            {theory_config::d0_to_kpi, "xp2"},
        }},
   };
@@ -64,7 +60,6 @@ void PDF_WS_NoCPV::initParameters() {
     break;
   case theory_config::theoretical:
     param_names.emplace_back("phiG");
-  case theory_config::superweak:
     param_names.insert(param_names.end(), {"x12", "y12", "phiM"});
     break;
   case theory_config::d0_to_kpi:

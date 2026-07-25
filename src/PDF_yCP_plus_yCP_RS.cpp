@@ -44,7 +44,6 @@ void PDF_yCP_plus_yCP_RS::initParameters() {
     break;
   case theory_config::theoretical:
     parameters->add(*(p.get("phiG")));
-  case theory_config::superweak:
     parameters->add(*(p.get("phiM")));
     parameters->add(*(p.get("x12")));
     parameters->add(*(p.get("y12")));
@@ -76,14 +75,6 @@ void PDF_yCP_plus_yCP_RS::initRelations() {
                                        " y12 * cos(phiG)"
                                        " + sqrt(R_Kpi/100) * ("
                                        "     - y12 * cos(Delta_Kpi) * cos(phiG)"
-                                       "     + x12 * sin(Delta_Kpi) * cos(phiM))",
-                                       parameters)));
-    break;
-  case theory_config::superweak:
-    theory->add(*(Utils::makeTheoryVar("yCP_plus_yCP_RS_th", "yCP_plus_yCP_RS_th",
-                                       " y12"
-                                       " + sqrt(R_Kpi/100) * ("
-                                       "     - y12 * cos(Delta_Kpi)"
                                        "     + x12 * sin(Delta_Kpi) * cos(phiM))",
                                        parameters)));
     break;

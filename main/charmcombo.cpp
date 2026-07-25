@@ -96,9 +96,6 @@ int main(int argc, char* argv[]) {
       } else if (!strcmp(argv[i + 1], "theoretical")) {
         th_cfg = theory_config::theoretical;
         combiner_name = "theoretical";
-      } else if (!strcmp(argv[i + 1], "superweak")) {
-        th_cfg = theory_config::superweak;
-        combiner_name = "superweak";
       } else {
         std::cerr << "Option " << argv[i + 1] << " is not supported by --param" << std::endl;
         exit(1);

@@ -30,8 +30,6 @@ namespace {
                                              "         + x * sin(Delta_Kpi - phi))"},
            {theory_config::theoretical, "  y12 * cos(Delta_Kpi + phiG)"
                                         "+ x12 * sin(Delta_Kpi + phiM)"},
-           {theory_config::superweak, "  y12 * cos(Delta_Kpi)"
-                                      "+ x12 * sin(Delta_Kpi + phiM)"},
            {theory_config::d0_to_kpi, "yp + dyp"},
        }},
       {"y'-",
@@ -40,8 +38,6 @@ namespace {
                                              "           + x * sin(Delta_Kpi + phi))"},
            {theory_config::theoretical, "  y12 * cos(Delta_Kpi-phiG)"
                                         "+ x12 * sin(Delta_Kpi-phiM)"},
-           {theory_config::superweak, "(  y12 * cos(Delta_Kpi)"
-                                      " + x12 * sin(Delta_Kpi-phiM))"},
            {theory_config::d0_to_kpi, "yp - dyp"},
        }},
       {"x'2+",
@@ -50,8 +46,6 @@ namespace {
                                              "             - y * sin(Delta_Kpi - phi)),2)"},
            {theory_config::theoretical, "pow(- y12 * sin(Delta_Kpi + phiG)"
                                         "    + x12 * cos(Delta_Kpi + phiM), 2)"},
-           {theory_config::superweak, "pow(- y12 * sin(Delta_Kpi)"
-                                      "    + x12 * cos(Delta_Kpi + phiM), 2)"},
            {theory_config::d0_to_kpi, "xp2 + dxp2"},
        }},
       {"x'2-",
@@ -60,8 +54,6 @@ namespace {
                                              "               - y * sin(Delta_Kpi + phi)),2)"},
            {theory_config::theoretical, "pow(- y12 * sin(Delta_Kpi-phiG)"
                                         "    + x12 * cos(Delta_Kpi-phiM),2)"},
-           {theory_config::superweak, "pow((- y12 * sin(Delta_Kpi)"
-                                      "     + x12 * cos(Delta_Kpi-phiM)),2)"},
            {theory_config::d0_to_kpi, "xp2 - dxp2"},
        }},
       {"c",
@@ -70,7 +62,6 @@ namespace {
             "0.5 * (      (qop+1)*(  y*cos(Delta_Kpi - phi) + x*sin(Delta_Kpi - phi)) "
             "       + 1 / (qop+1)*(  y*cos(Delta_Kpi + phi) + x*sin(Delta_Kpi + phi)))"},
            {theory_config::theoretical, "y12 * cos(Delta_Kpi) * cos(phiG) + x12 * sin(Delta_Kpi) * cos(phiM)"},
-           {theory_config::superweak, "y12 * cos(Delta_Kpi) + x12 * sin(Delta_Kpi) * cos(phiM)"},
            {theory_config::d0_to_kpi, "yp"},
        }},
       {"c'",
@@ -78,8 +69,6 @@ namespace {
            {theory_config::phenomenological, "0.125 * (pow(x, 2) + pow(y, 2)) * (pow(qop + 1, 2) + pow(qop + 1, -2))"},
            {theory_config::theoretical, "0.25 * (pow(x12, 2) + pow(y12, 2))"
                                         "+ 0.25 * R_Kpi / 100 * (pow(y12, 2) - pow(x12, 2))"},  // 2nd order corrections
-           {theory_config::superweak, "0.25 * (pow(x12, 2) + pow(y12, 2))"
-                                      "+ 0.25 * R_Kpi / 100 * (pow(y12, 2) - pow(x12, 2))"},  // 2nd order corrections
            {theory_config::d0_to_kpi, "(pow(yp, 2) + xp2) / 4"},
        }},
       {"dc",
@@ -89,14 +78,12 @@ namespace {
             "       - 1 / (qop+1)*(  y*cos(Delta_Kpi + phi) + x*sin(Delta_Kpi + phi)))"},
            {theory_config::theoretical, "  x12 * cos(Delta_Kpi) * sin(phiM)"
                                         "- y12 * sin(Delta_Kpi) * sin(phiG)"},
-           {theory_config::superweak, "x12 * cos(Delta_Kpi) * sin(phiM)"},
            {theory_config::d0_to_kpi, "dyp"},
        }},
       {"dc'",
        {
            {theory_config::phenomenological, "1 / 8 * (pow(x, 2) + pow(y, 2)) * (pow(qop + 1, 2) - pow(qop + 1, -2))"},
            {theory_config::theoretical, "0.5 * x12 * y12 * sin(phiM - phiG)"},
-           {theory_config::superweak, "0.5 * x12 * y12 * sin(phiM)"},
            {theory_config::d0_to_kpi, "(2 * yp * dyp + pow(dyp, 2) + dxp2) / 4"},
        }},
   };
@@ -163,7 +150,7 @@ PDF_WS::PDF_WS(const TString val, TString err, const theory_config th_cfg) : PDF
 void PDF_WS::initParameters() {
   std::vector<std::string> param_names = {"R_Kpi"};
   if (th_cfg != theory_config::d0_to_kpi) param_names.emplace_back("Delta_Kpi");
-  if (th_cfg != theory_config::superweak) param_names.emplace_back("Acp_KP");
+  param_names.emplace_back("Acp_KP");
   if (nObs == 9) param_names.emplace_back("Acp_KK");
   switch (th_cfg) {
   case theory_config::phenomenological:
@@ -171,7 +158,6 @@ void PDF_WS::initParameters() {
     break;
   case theory_config::theoretical:
     param_names.emplace_back("phiG");
-  case theory_config::superweak:
     param_names.insert(param_names.end(), {"x12", "y12", "phiM"});
     break;
   case theory_config::d0_to_kpi:
@@ -208,13 +194,11 @@ void PDF_WS::initRelationsCCPrime() {
   theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "R_Kpi", parameters)));
   theory->add(*(Utils::makeTheoryVar("c_th", "c_th", theory_expressions["c"][th_cfg], parameters)));
   theory->add(*(Utils::makeTheoryVar("c'_th", "c'_th", theory_expressions["c'"][th_cfg], parameters)));
-  theory->add(
-      *(Utils::makeTheoryVar("AD_th", "AD_th", th_cfg != theory_config::superweak ? "Acp_KP" : "0", parameters)));
+  theory->add(*(Utils::makeTheoryVar("AD_th", "AD_th", "Acp_KP", parameters)));
   theory->add(*(Utils::makeTheoryVar("dc_th", "dc_th", theory_expressions["dc"][th_cfg], parameters)));
   theory->add(*(Utils::makeTheoryVar("dc'_th", "dc'_th", theory_expressions["dc'"][th_cfg], parameters)));
   if (nObs == 9) {
-    theory->add(*(Utils::makeTheoryVar(
-        "ADt_th", "ADt_th", th_cfg != theory_config::superweak ? "Acp_KP - 2 * Acp_KK" : "- 2 * Acp_KK", parameters)));
+    theory->add(*(Utils::makeTheoryVar("ADt_th", "ADt_th", "Acp_KP - 2 * Acp_KK", parameters)));
     theory->add(*(Utils::makeTheoryVar("dc~_th", "dc~_th",
                                        theory_expressions["dc"][th_cfg] + " - 2 * sqrt(R_Kpi / 100) * (" +
                                            CharmUtils::get_dy_expression(th_cfg, FSC::none, "KK") + ")" +
@@ -234,20 +218,17 @@ void PDF_WS::initRelationsRAXY() {
   theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "R_Kpi", parameters)));
   theory->add(*(Utils::makeTheoryVar("y'+_th", "y'+_th", theory_expressions["y'+"][th_cfg], parameters)));
   theory->add(*(Utils::makeTheoryVar("x'2+_th", "x'2+_th", theory_expressions["x'2+"][th_cfg], parameters)));
-  theory->add(
-      *(Utils::makeTheoryVar("AD_th", "AD_th", th_cfg != theory_config::superweak ? "Acp_KP" : "0", parameters)));
+  theory->add(*(Utils::makeTheoryVar("AD_th", "AD_th", "Acp_KP", parameters)));
   theory->add(*(Utils::makeTheoryVar("y'-_th", "y'-_th", theory_expressions["y'-"][th_cfg], parameters)));
   theory->add(*(Utils::makeTheoryVar("x'2-_th", "x'2-_th", theory_expressions["x'2-"][th_cfg], parameters)));
 }
 
 void PDF_WS::initRelationsRRXY() {
   theory = new RooArgList("theory");
-  std::string cpv_correction_p = th_cfg != theory_config::superweak ? " * (1 + Acp_KP / 100)" : "";
-  std::string cpv_correction_m = th_cfg != theory_config::superweak ? " * (1 - Acp_KP / 100)" : "";
-  theory->add(*(Utils::makeTheoryVar("RD_p_th", "RD_p_th", "R_Kpi" + cpv_correction_p, parameters)));
+  theory->add(*(Utils::makeTheoryVar("RD_p_th", "RD_p_th", "R_Kpi * (1 + Acp_KP / 100)", parameters)));
   theory->add(*(Utils::makeTheoryVar("y'+_th", "y'+_th", theory_expressions["y'+"][th_cfg], parameters)));
   theory->add(*(Utils::makeTheoryVar("x'2+_th", "x'2+_th", theory_expressions["x'2+"][th_cfg], parameters)));
-  theory->add(*(Utils::makeTheoryVar("RD_m_th", "RD_m_th", "R_Kpi" + cpv_correction_m, parameters)));
+  theory->add(*(Utils::makeTheoryVar("RD_m_th", "RD_m_th", "R_Kpi * (1 - Acp_KP / 100)", parameters)));
   theory->add(*(Utils::makeTheoryVar("y'-_th", "y'-_th", theory_expressions["y'-"][th_cfg], parameters)));
   theory->add(*(Utils::makeTheoryVar("x'2-_th", "x'2-_th", theory_expressions["x'2-"][th_cfg], parameters)));
 }

@@ -50,7 +50,6 @@ void PDF_AcpHH_LHCb_Run12::initParameters() {
     parameters->add(*(p.get("phi")));
     break;
   case theory_config::theoretical:
-  case theory_config::superweak:
     parameters->add(*(p.get("x12")));
     parameters->add(*(p.get("y12")));
     parameters->add(*(p.get("phiM")));

@@ -33,9 +33,6 @@ std::ostream& operator<<(std::ostream& os, const theory_config th_cfg) {
   case theory_config::theoretical:
     os << "theoretical (x12, y12, phiM, phiG)";
     break;
-  case theory_config::superweak:
-    os << "superweak (x12, y12, phiM, phiG)";
-    break;
   case theory_config::d0_to_kpi:
     os << "D0 -> Kpi (yp, xp2, dyp, dxp2)";
     break;
@@ -64,7 +61,6 @@ std::string CharmUtils::get_dy_expression(const theory_config th_cfg, const FSC 
     }
     break;
   case theory_config::theoretical:
-  case theory_config::superweak:
     expression = "-x12 * sin(phiM)";
     switch (fsc) {
     case FSC::none:

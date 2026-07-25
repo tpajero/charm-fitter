@@ -46,7 +46,6 @@ void PDF_Kpipi0::initParameters() {
     break;
   case theory_config::theoretical:
     parameters->add(*(p.get("phiG")));
-  case theory_config::superweak:
     parameters->add(*(p.get("x12")));
     parameters->add(*(p.get("y12")));
     parameters->add(*(p.get("phiM")));
@@ -73,16 +72,6 @@ void PDF_Kpipi0::initRelations() {
                                        parameters)));
     theory->add(*(Utils::makeTheoryVar("ypp_th", "ypp_th",
                                        "  y12 * cos(Delta_Kpipi0) * cos(phiG)"
-                                       "+ x12 * sin(Delta_Kpipi0) * cos(phiM)",
-                                       parameters)));
-    break;
-  case theory_config::superweak:
-    theory->add(*(Utils::makeTheoryVar("xpp_th", "xpp_th",
-                                       "  x12*cos(Delta_Kpipi0) * cos(phiM)"
-                                       "- y12*sin(Delta_Kpipi0)            ",
-                                       parameters)));
-    theory->add(*(Utils::makeTheoryVar("ypp_th", "ypp_th",
-                                       "  y12 * cos(Delta_Kpipi0)            "
                                        "+ x12 * sin(Delta_Kpipi0) * cos(phiM)",
                                        parameters)));
     break;

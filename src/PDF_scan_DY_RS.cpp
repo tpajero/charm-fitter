@@ -32,7 +32,7 @@ void PDF_scan_DY_RS::initParameters() {
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");
   parameters->add(*(p.get("R_Kpi")));
-  if (th_cfg != theory_config::superweak) parameters->add(*(p.get("Acp_KP")));
+  parameters->add(*(p.get("Acp_KP")));
   parameters->add(*(p.get("Delta_Kpi")));
   parameters->add(*(p.get("DY_RS")));
 
@@ -45,7 +45,6 @@ void PDF_scan_DY_RS::initParameters() {
     break;
   case theory_config::theoretical:
     parameters->add(*(p.get("phiG")));
-  case theory_config::superweak:
     parameters->add(*(p.get("x12")));
     parameters->add(*(p.get("y12")));
     parameters->add(*(p.get("phiM")));
@@ -76,12 +75,6 @@ void PDF_scan_DY_RS::initRelations() {
                                "(  (-y12*cos(Delta_Kpi)*cos(phiG) + x12*sin(Delta_Kpi)*cos(phiM))*(Acp_KP/100)*0.5"
                                " + (+y12*sin(Delta_Kpi)*sin(phiG) + x12*cos(Delta_Kpi)*sin(phiM))                 ))",
                                parameters)));
-    break;
-  case theory_config::superweak:
-    theory->add(*(Utils::makeTheoryVar("DY_RS_scan_th", "DY_RS_scan_th",
-                                       "DY_RS - abs(100 * pow(R_Kpi/100, 0.5) * "
-                                       "            x12 * cos(Delta_Kpi) * sin(phiM))",
-                                       parameters)));
     break;
   default:
     std::cout << "PDF_scan_DY_RS::initRelations : ERROR : "
