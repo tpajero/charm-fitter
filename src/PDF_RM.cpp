@@ -17,7 +17,9 @@
 
 #include <TString.h>
 
+#include <format>
 #include <iostream>
+#include <stdexcept>
 
 PDF_RM::PDF_RM(const TString measurement_id, const parametrisations::mix mix_param) : PDF_Abs{1}, mix_param{mix_param} {
   name = "RM_" + measurement_id;
@@ -47,10 +49,8 @@ void PDF_RM::initParameters() {
     parameters->add(*(p.get("phiG")));
     break;
   default:
-    std::cout << "PDF_RM::initParameters : ERROR : "
-                 "parametrisations::mix not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_RM::initParameters ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
 }
 
@@ -69,10 +69,8 @@ void PDF_RM::initRelations() {
                                        parameters)));
     break;
   default:
-    std::cout << "PDF_RM::initRelations : ERROR : "
-                 "parametrisations::mix not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_RM::initRelations ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
 }
 
@@ -93,8 +91,7 @@ void PDF_RM::setObservables(const TString c) {
     obsValSource = "https://inspirehep.net/literature/1423070";
     setObservable("RM_obs", 2 * 0.48e-4);
   } else {
-    std::cout << "PDF_RM::setObservables() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_RM::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
@@ -108,8 +105,7 @@ void PDF_RM::setUncertainties(const TString c) {
     StatErr[0] = 2 * 0.18e-4;
     SystErr[0] = 0;
   } else {
-    std::cout << "PDF_RM::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_RM::setUncertainties ERROR config {} not found", c.Data()));
   }
 }
 

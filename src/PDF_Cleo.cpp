@@ -15,7 +15,9 @@
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
+#include <format>
 #include <iostream>
+#include <stdexcept>
 #include <vector>
 
 PDF_Cleo::PDF_Cleo(const TString measurement_id, const parametrisations::mix mix_param)
@@ -49,10 +51,8 @@ void PDF_Cleo::initParameters() {
     parameters->add(*(p.get("y12")));
     break;
   default:
-    std::cout << "PDF_Cleo::initParameters : ERROR : "
-                 "parametrisations::mix not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_Cleo::initParameters ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
 }
 
@@ -80,10 +80,8 @@ void PDF_Cleo::initRelations() {
                                        parameters)));
     break;
   default:
-    std::cout << "PDF_Cleo::initRelations : ERROR : "
-                 "parametrisations::mix not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_Cleo::initRelations ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
   theory->add(*(Utils::makeTheoryVar("cos_th", "cos_th", "cos(Delta_Kpi)", parameters)));
   theory->add(*(Utils::makeTheoryVar("sin_th", "sin_th", "-sin(Delta_Kpi)", parameters)));
@@ -111,8 +109,7 @@ void PDF_Cleo::setObservables(const TString c) {
     setObservable("cos_obs", 0.81);
     setObservable("sin_obs", -0.01);
   } else {
-    std::cout << "PDF_Cleo::setObservables() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_Cleo::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
@@ -130,8 +127,7 @@ void PDF_Cleo::setUncertainties(const TString c) {
     SystErr[3] = 0;
     SystErr[4] = 0;
   } else {
-    std::cout << "PDF_Cleo::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_Cleo::setUncertainties ERROR config {} not found", c.Data()));
   }
 }
 
@@ -150,8 +146,7 @@ void PDF_Cleo::setCorrelations(const TString c) {
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
   } else {
-    std::cout << "PDF_Cleo::setCorrelations() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_Cleo::setCorrelations ERROR config {} not found", c.Data()));
   }
 }
 

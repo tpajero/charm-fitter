@@ -18,6 +18,7 @@
 
 #include <format>
 #include <iostream>
+#include <stdexcept>
 #include <vector>
 
 PDF_AcpHH_LHCb_Run12::PDF_AcpHH_LHCb_Run12(const parametrisations::mix mix_param,
@@ -52,10 +53,8 @@ void PDF_AcpHH_LHCb_Run12::initParameters() {
     parameters->add(*(p.get("phiM")));
     break;
   default:
-    std::cout << "PDF_AcpHH_LHCb_Run12::initParameters : ERROR : "
-                 "parametrisations::mix not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_AcpHH_LHCb_Run12::initParameters ERROR Parametrisation {} not supported",
+                                         utils::to_string(mix_param)));
   }
   using parametrisations::dy_fsc;
   switch (dy_fsc_param) {

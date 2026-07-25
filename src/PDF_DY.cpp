@@ -15,7 +15,9 @@
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
+#include <format>
 #include <iostream>
+#include <stdexcept>
 
 PDF_DY::PDF_DY(const TString measurement_id, const parametrisations::mix mix_param,
                const parametrisations::dy_fsc dy_fsc_param)
@@ -48,10 +50,8 @@ void PDF_DY::initParameters() {
     parameters->add(*(p.get("phiM")));
     break;
   default:
-    std::cout << "PDF_DY::initParameters : ERROR : "
-                 "parametrisations::mix not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_DY::initParameters ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
   using parametrisations::dy_fsc;
   switch (dy_fsc_param) {
@@ -115,9 +115,8 @@ void PDF_DY::setObservables(const TString c) {
     setObservable("DY_KK_obs", -0.20e-4);
     setObservable("DY_PP_obs", -3.53e-4);
   } else {
-    std::cout << "PDF_DY::setObservables() : ERROR : config " << c << " not found for " << nObs << " DY observables."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_DY::setObservables ERROR config {} not found for {} DY observables", c.Data(), nObs));
   }
 }
 
@@ -146,9 +145,8 @@ void PDF_DY::setUncertainties(const TString c) {
     StatErr[1] = 2.36e-4;
     SystErr[1] = 0.39e-4;
   } else {
-    std::cout << "PDF_DY::setUncertainties() : ERROR : config " << c << " not found for " << nObs << " DY observables."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_DY::setUncertainties ERROR config {} not found for {} DY observables", c.Data(), nObs));
   }
 }
 
@@ -162,9 +160,8 @@ void PDF_DY::setCorrelations(const TString c) {
   else if (nObs == 2 && c.EqualTo("WA2021"))
     corSystMatrix[0][1] = 0.68;  // np.sum(np.square([0.18, 0.21, 0.06, 0.01, 0.07])) / 0.32 / 0.39
   else {
-    std::cout << "PDF_DY::setCorrelations() : ERROR : config " << c << " not found for " << nObs << " DY observables."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_DY::setCorrelations ERROR config {} not found for {} DY observables", c.Data(), nObs));
   }
 }
 

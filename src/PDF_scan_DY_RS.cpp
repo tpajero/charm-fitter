@@ -15,7 +15,9 @@
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
+#include <format>
 #include <iostream>
+#include <stdexcept>
 
 PDF_scan_DY_RS::PDF_scan_DY_RS(const parametrisations::mix mix_param) : PDF_Abs{1}, mix_param{mix_param} {
   name = "scan_DY_RS";
@@ -51,10 +53,8 @@ void PDF_scan_DY_RS::initParameters() {
     parameters->add(*(p.get("phiM")));
     break;
   default:
-    std::cout << "PDF_scan_DY_RS::initParameters : ERROR : "
-                 "parametrisations::mix not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_scan_DY_RS::initParameters ERROR Parametrisation {} not supported",
+                                         utils::to_string(mix_param)));
   }
 }
 
@@ -77,10 +77,8 @@ void PDF_scan_DY_RS::initRelations() {
                                        parameters)));
     break;
   default:
-    std::cout << "PDF_scan_DY_RS::initRelations : ERROR : "
-                 "parametrisations::mix not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_scan_DY_RS::initRelations ERROR Parametrisation {} not supported",
+                                         utils::to_string(mix_param)));
   }
 }
 

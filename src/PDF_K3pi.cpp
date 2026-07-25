@@ -16,7 +16,9 @@
 #include <RooRealVar.h>
 
 #include <algorithm>
+#include <format>
 #include <map>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -86,8 +88,7 @@ void PDF_K3pi::setObservables(const TString c) {
     setObservable("c1_obs", 3e-4);
     setObservable("c2_obs", 4.8e-5);
   } else {
-    std::cout << "PDF_K3pi::setObservables() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_K3pi::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
@@ -99,8 +100,7 @@ void PDF_K3pi::setUncertainties(const TString c) {
     StatErr[2] = 1.8e-5;
     std::ranges::fill(SystErr, 0);
   } else {
-    std::cout << "PDF_K3pi::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_K3pi::setUncertainties ERROR config {} not found", c.Data()));
   }
 }
 
@@ -117,8 +117,7 @@ void PDF_K3pi::setCorrelations(const TString c) {
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, corrs);
   } else {
-    std::cout << "PDF_K3pi::setCorrelations() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_K3pi::setCorrelations ERROR config {} not found", c.Data()));
   }
 }
 

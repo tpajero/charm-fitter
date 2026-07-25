@@ -18,7 +18,9 @@
 #include <TString.h>
 
 #include <algorithm>
+#include <format>
 #include <iostream>
+#include <stdexcept>
 
 PDF_XY::PDF_XY(const TString measurement_id, const parametrisations::mix mix_param) : PDF_Abs{2}, mix_param{mix_param} {
   name = "XY_" + measurement_id;
@@ -57,10 +59,8 @@ void PDF_XY::initParameters() {
     parameters->add(*(p.get("phiG")));
     break;
   default:
-    std::cout << "PDF_XY::initRelations : ERROR : "
-                 "parametrisations::mix not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_XY::initRelations ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
 }
 
@@ -78,10 +78,8 @@ void PDF_XY::initRelations() {
     theory->add(*(Utils::makeTheoryVar("y_th", "y_th", utils::y_expression(mix_param), parameters)));
     break;
   default:
-    std::cout << "PDF_XY::initRelations : ERROR : "
-                 "parametrisations::mix not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_XY::initRelations ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
 }
 
@@ -113,8 +111,7 @@ void PDF_XY::setObservables(const TString c) {
     setObservable("x_obs", 4.0e-3);
     setObservable("y_obs", 2.9e-3);
   } else {
-    std::cout << "PDF_XY::setObservables() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_XY::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
@@ -141,8 +138,7 @@ void PDF_XY::setUncertainties(const TString c) {
     SystErr[0] = 0.4e-3;  // x
     SystErr[1] = 0.3e-3;  // y
   } else {
-    std::cout << "PDF_XY::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_XY::setUncertainties ERROR config {} not found", c.Data()));
   }
 }
 
@@ -161,8 +157,7 @@ void PDF_XY::setCorrelations(const TString c) {
     // Correlations are negligible
     corSource = "https://arxiv.org/abs/2410.22961";
   } else {
-    std::cout << "PDF_XY::setCorrelations() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_XY::setCorrelations ERROR config {} not found", c.Data()));
   }
 }
 

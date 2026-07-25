@@ -16,7 +16,9 @@
 #include <RooRealVar.h>
 
 #include <algorithm>
+#include <format>
 #include <iostream>
+#include <stdexcept>
 #include <vector>
 
 PDF_BinFlip::PDF_BinFlip(const TString measurement_id, const parametrisations::mix mix_param)
@@ -58,10 +60,8 @@ void PDF_BinFlip::initParameters() {
     parameters->add(*(p.get("phiM")));
     break;
   default:
-    std::cout << "PDF_BinFlip::initParameters : ERROR : "
-                 "parametrisations::mix not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_BinFlip::initParameters ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
 }
 
@@ -94,10 +94,8 @@ void PDF_BinFlip::initRelations() {
     theory->add(*(Utils::makeTheoryVar("dy_th", "dy_th", " x12*sin(phiM)", parameters)));
     break;
   default:
-    std::cout << "PDF_BinFlip::initRelations : ERROR : "
-                 "parametrisations::mix not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_BinFlip::initRelations ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
 }
 
@@ -139,8 +137,7 @@ void PDF_BinFlip::setObservables(const TString c) {
     setObservable("dx_obs", -0.29e-3);
     setObservable("dy_obs", 0.31e-3);
   } else {
-    std::cout << "PDF_BinFlip::setObservables() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_BinFlip::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
@@ -183,8 +180,7 @@ void PDF_BinFlip::setUncertainties(const TString c) {
     SystErr[2] = 0.013e-3;  // dx
     SystErr[3] = 0.128e-3;  // dy
   } else {
-    std::cout << "PDF_BinFlip::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_BinFlip::setUncertainties ERROR config {} not found", c.Data()));
   }
 }
 
@@ -262,8 +258,7 @@ void PDF_BinFlip::setCorrelations(const TString c) {
     };
     corSystMatrix = Utils::buildCorMatrix(nObs, dataSyst);
   } else {
-    std::cout << "PDF_BinFlip::setCorrelations() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_BinFlip::setCorrelations ERROR config {} not found", c.Data()));
   }
 }
 

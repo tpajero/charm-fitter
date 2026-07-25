@@ -15,6 +15,9 @@
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
+#include <format>
+#include <stdexcept>
+
 PDF_DY_RS::PDF_DY_RS(const TString measurement_id, const parametrisations::mix mix_param)
     : PDF_Abs{1}, mix_param{mix_param} {
   name = "DY_RS_" + measurement_id;
@@ -49,10 +52,8 @@ void PDF_DY_RS::initParameters() {
     parameters->add(*(p.get("phiM")));
     break;
   default:
-    std::cout << "PDF_DY_RS::initParameters : ERROR : "
-                 "parametrisations::mix not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_DY_RS::initParameters ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
 }
 
@@ -75,10 +76,8 @@ void PDF_DY_RS::initRelations() {
                                        parameters)));
     break;
   default:
-    std::cout << "PDF_DY_RS::initRelations : ERROR : "
-                 "parametrisations::mix not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_DY_RS::initRelations ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
 }
 
@@ -96,8 +95,7 @@ void PDF_DY_RS::setObservables(const TString c) {
     obsValSource = "https://inspirehep.net/literature/1864385";
     setObservable("DY_RS_obs", -0.36e-4);
   } else {
-    std::cout << "PDF_DY_RS::setObservables() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_DY_RS::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
@@ -107,8 +105,7 @@ void PDF_DY_RS::setUncertainties(const TString c) {
     StatErr[0] = 0.50e-4;
     SystErr[0] = 0.23e-4;
   } else {
-    std::cout << "PDF_DY_RS::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_DY_RS::setUncertainties ERROR config {} not found", c.Data()));
   }
 }
 

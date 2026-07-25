@@ -1,3 +1,5 @@
+#include <format>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -73,9 +75,8 @@ namespace {
       }
       return list;
     } else {
-      std::cerr << "The list of the LHCb results from the period `" << run << "` is not supported. Exiting..."
-                << std::endl;
-      exit(1);
+      throw std::runtime_error(
+          std::format("get_lhcb_pdfs ERROR The list of the LHCb results from the period `{}` is not supported", run));
     }
   }
 }  // namespace
@@ -100,8 +101,7 @@ int main(int argc, char* argv[]) {
         mix_param = mix::theo;
         combiner_name = "theoretical";
       } else {
-        std::cerr << "Option " << argv[i + 1] << " is not supported by --param" << std::endl;
-        exit(1);
+        throw std::runtime_error(std::format("main ERROR Option {} is not supported by --param", argv[i + 1]));
       }
     }
   }

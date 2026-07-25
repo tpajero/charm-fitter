@@ -16,8 +16,10 @@
 #include <RooRealVar.h>
 
 #include <algorithm>
+#include <format>
 #include <iostream>
 #include <map>
+#include <stdexcept>
 #include <vector>
 
 namespace {
@@ -69,9 +71,8 @@ void PDF_WS_NoCPV::initParameters() {
     param_names.insert(param_names.end(), {"yp", "xp2"});
     break;
   default:
-    std::cout << "PDF_WS_NoCPV::initParameters : ERROR : parametrisations::mix " << mix_param << " not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_WS_NoCPV::initParameters ERROR Parametrisation {} not supported",
+                                         utils::to_string(mix_param)));
   }
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");
@@ -113,8 +114,7 @@ void PDF_WS_NoCPV::setObservables(const TString c) {
     setObservable("yp_obs", 4.6e-3);
     setObservable("xp2_obs", 0.9e-4);
   } else {
-    std::cout << "PDF_WS_NoCPV::setObservables() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_WS_NoCPV::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
@@ -138,8 +138,7 @@ void PDF_WS_NoCPV::setUncertainties(const TString c) {
     StatErr[2] = 2.2e-4;   // x'2
     std::ranges::fill(SystErr, 0.);
   } else {
-    std::cout << "PDF_WS_NoCPV::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_WS_NoCPV::setUncertainties ERROR config {} not found", c.Data()));
   }
 }
 
@@ -179,8 +178,7 @@ void PDF_WS_NoCPV::setCorrelations(const TString c) {
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
   } else {
-    std::cout << "PDF_WS_NoCPV::setCorrelations() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_WS_NoCPV::setCorrelations ERROR config {} not found", c.Data()));
   }
 }
 

@@ -16,8 +16,10 @@
 #include <RooRealVar.h>
 
 #include <algorithm>
+#include <format>
 #include <iostream>
 #include <map>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -110,13 +112,13 @@ PDF_WS::PDF_WS(const TString measurement_id, const parametrisations::mix mix_par
   else if (measurement_id.EqualTo("LHCb_DT_Run12"))
     label = "WS/RS LHCb dt (Run 1+2)";
   else {
-    std::cerr << "PDF_WS: Measurement ID " << measurement_id << " not supported\n";
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_WS::PDF_WS ERROR Measurement ID {} not supported", measurement_id.Data()));
   }
 
   if (ws_param == WS_parametrisation::ccprime && !measurement_id.BeginsWith("LHCb_Prompt_Run12")) {
-    std::cerr << "The c/c' parametrisation was introduced only with the LHCb Run 2 measurement\n";
-    exit(1);
+    throw std::runtime_error(
+        "PDF_WS::PDF_WS ERROR The c/c' parametrisation was introduced only with the LHCb Run 2 measurement");
   }
 
   name = "WS_" + measurement_id;
@@ -135,7 +137,7 @@ PDF_WS::PDF_WS(const TString val, TString err, const parametrisations::mix mix_p
   if (err.EqualTo("LHCb_Run12"))
     label = "WS/RS LHCb prompt (Run 1+2)";
   else
-    exit(1);
+    throw std::runtime_error(std::format("PDF_WS::PDF_WS ERROR Measurement ID {} not supported", err.Data()));
 
   name = "WS_" + err;
   initParameters();
@@ -165,8 +167,8 @@ void PDF_WS::initParameters() {
     param_names.insert(param_names.end(), {"yp", "dyp", "xp2", "dxp2"});
     break;
   default:
-    std::cout << "PDF_WS::initParameters : ERROR : parametrisations::mix " << mix_param << " not supported.\n";
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_WS::initParameters ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");
@@ -185,8 +187,8 @@ void PDF_WS::initRelations() {
     initRelationsCCPrime();
     break;
   default:
-    std::cout << "PDF_WS::initRelations : ERROR : ws_param not supported.\n";
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_WS::initRelations ERROR WS parametrisation {} not supported", static_cast<int>(ws_param)));
   }
 }
 
@@ -268,8 +270,8 @@ void PDF_WS::initObservables(const TString setName) {
     }
     break;
   default:
-    std::cout << "PDF_WS::initRelations : ERROR : ws_param not supported.\n";
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_WS::initObservables ERROR WS parametrisation {} not supported", static_cast<int>(ws_param)));
   }
 }
 
@@ -356,8 +358,7 @@ void PDF_WS::setObservables(const TString c) {
     setObservable("y'-_obs", 6.81e-3);
     setObservable("x'2-_obs", -4.86e-5);
   } else {
-    std::cout << "PDF_WS::setObservables() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_WS::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
@@ -449,8 +450,7 @@ void PDF_WS::setUncertainties(const TString c) {
     StatErr[5] = 1.665e-4;  // x'2-
     std::ranges::fill(SystErr, 0.);
   } else {
-    std::cout << "PDF_WS::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_WS::setUncertainties ERROR config {} not found", c.Data()));
   }
 }
 
@@ -586,8 +586,7 @@ void PDF_WS::setCorrelations(const TString c) {
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, data);
   } else {
-    std::cout << "PDF_WS::setCorrelations() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_WS::setCorrelations ERROR config {} not found", c.Data()));
   }
 }
 

@@ -17,7 +17,9 @@
 
 #include <TString.h>
 
+#include <format>
 #include <iostream>
+#include <stdexcept>
 
 PDF_yCP::PDF_yCP(const TString measurement_id, const parametrisations::mix mix_param)
     : PDF_Abs{1}, mix_param{mix_param} {
@@ -48,10 +50,8 @@ void PDF_yCP::initParameters() {
     parameters->add(*(p.get("y12")));
     break;
   default:
-    std::cout << "PDF_yCP::initParameters : ERROR : "
-                 "parametrisations::mix not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_yCP::initParameters ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
 }
 
@@ -69,10 +69,8 @@ void PDF_yCP::initRelations() {
     theory->add(*(Utils::makeTheoryVar("yCP_th", "yCP_th", "y12*cos(phiG)", parameters)));
     break;
   default:
-    std::cout << "PDF_yCP::initRelations : ERROR : "
-                 "parametrisations::mix not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_yCP::initRelations ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
 }
 
@@ -96,8 +94,7 @@ void PDF_yCP::setObservables(const TString c) {
     obsValSource = "https://inspirehep.net/literature/2035063";
     setObservable("yCP_obs", 6.96e-3);
   } else {
-    std::cout << "PDF_yCP::setObservables() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_yCP::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
@@ -115,8 +112,7 @@ void PDF_yCP::setUncertainties(const TString c) {
     StatErr[0] = 0.26e-3;
     SystErr[0] = 0.13e-3;
   } else {
-    std::cout << "PDF_yCP::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_yCP::setUncertainties ERROR config {} not found", c.Data()));
   }
 }
 

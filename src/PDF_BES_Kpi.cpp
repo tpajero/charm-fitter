@@ -18,7 +18,9 @@
 #include <boost/algorithm/string.hpp>
 
 #include <cmath>
+#include <format>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -51,8 +53,8 @@ void PDF_BES_Kpi::initParameters() {
     parameters->add(*(p.get("phiM")));
     break;
   default:
-    std::cout << "PDF_BES_Kpi::initParameters : ERROR : parametrisations::mix not supported." << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_BES_Kpi::initParameters ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
 }
 
@@ -70,8 +72,8 @@ void PDF_BES_Kpi::initRelations() {
     boost::replace_all(a_kpi_pipipi0_formula, "y", utils::y_expression(mix_param));
     break;
   default:
-    std::cout << "PDF_BES_Kpi_1d::initRelations : ERROR : parametrisations::mix not supported." << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_BES_Kpi::initRelations ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
   using Utils::makeTheoryVar;
   theory->add(*(makeTheoryVar("A_kpi_th", "A_kpi_th", a_kpi_formula, parameters)));
@@ -96,8 +98,7 @@ void PDF_BES_Kpi::setObservables(const TString c) {
     setObservable("rcos_obs", -5.62e-2);
     setObservable("rsin_obs", -1.1e-2);
   } else {
-    std::cout << "PDF_BES_Kpi::setObservables() : ERROR : obs config " << c << " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_BES_Kpi::setObservables ERROR obs config {} not found", c.Data()));
   }
 }
 
@@ -114,8 +115,7 @@ void PDF_BES_Kpi::setUncertainties(const TString c) {
     StatErr[3] = std::sqrt(std::pow(1.2e-2, 2) + std::pow(0.7e-2, 2) + std::pow(0.3e-2, 2));
     SystErr[3] = 0.;
   } else {
-    std::cout << "PDF_BES_Kpi::setObservables() : ERROR : err config " << c << " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_BES_Kpi::setUncertainties ERROR err config {} not found", c.Data()));
   }
 }
 
@@ -142,8 +142,7 @@ void PDF_BES_Kpi::setCorrelations(const TString c) {
     };
     corSystMatrix = Utils::buildCorMatrix(nObs, dataSyst);
   } else {
-    std::cout << "PDF_BES_Kpi::setCorrelations() : ERROR : cor config " << c << " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_BES_Kpi::setCorrelations ERROR cor config {} not found", c.Data()));
   }
 }
 

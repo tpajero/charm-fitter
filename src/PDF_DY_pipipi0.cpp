@@ -15,7 +15,9 @@
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
+#include <format>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -42,8 +44,8 @@ void PDF_DY_pipipi0::initParameters() {
     param_names.insert(param_names.end(), {"x12", "y12", "phiM"});
     break;
   default:
-    std::cout << "PDF_DY_pipipi0::initParameters : ERROR : parametrisations::mix not supported.\n";
-    exit(1);
+    throw std::runtime_error(std::format("PDF_DY_pipipi0::initParameters ERROR Parametrisation {} not supported",
+                                         utils::to_string(mix_param)));
   }
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");
@@ -72,9 +74,8 @@ void PDF_DY_pipipi0::setObservables(const TString c) {
   else if (c.EqualTo("LHCb-R2"))
     setObservable("DY_pipipi0_obs", -1.21e-4);
   else {
-    std::cout << "PDF_DY_pipipi0::setObservables() : ERROR : config " << c << " not found for " << nObs
-              << " DY_pipipi0 observables." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format(
+        "PDF_DY_pipipi0::setObservables ERROR config {} not found for {} DY_pipipi0 observables", c.Data(), nObs));
   }
 }
 
@@ -84,9 +85,8 @@ void PDF_DY_pipipi0::setUncertainties(const TString c) {
     StatErr[0] = 5.97e-4;
     SystErr[0] = 2.01e-4;  // Removed the sys. unc. for the time binning
   } else {
-    std::cout << "PDF_DY_pipipi0::setUncertainties() : ERROR : config " << c << " not found for " << nObs
-              << " DY_pipipi0 observables." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format(
+        "PDF_DY_pipipi0::setUncertainties ERROR config {} not found for {} DY_pipipi0 observables", c.Data(), nObs));
   }
 }
 

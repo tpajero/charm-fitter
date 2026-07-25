@@ -17,7 +17,9 @@
 
 #include <boost/algorithm/string.hpp>
 
+#include <format>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 
 PDF_BES_Kpi_1d::PDF_BES_Kpi_1d(const parametrisations::mix mix_param) : PDF_Abs{1}, mix_param{mix_param} {
@@ -50,10 +52,8 @@ void PDF_BES_Kpi_1d::initParameters() {
     parameters->add(*(p.get("phiM")));
     break;
   default:
-    std::cout << "PDF_BES_Kpi_1d::initParameters : ERROR : "
-                 "parametrisations::mix not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_BES_Kpi_1d::initParameters ERROR Parametrisation {} not supported",
+                                         utils::to_string(mix_param)));
   }
 }
 
@@ -68,10 +68,8 @@ void PDF_BES_Kpi_1d::initRelations() {
     boost::replace_all(a_kpi_formula, "y", utils::y_expression(mix_param));
     break;
   default:
-    std::cout << "PDF_BES_Kpi_1d::initRelations : ERROR : "
-                 "parametrisations::mix not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_BES_Kpi_1d::initRelations ERROR Parametrisation {} not supported",
+                                         utils::to_string(mix_param)));
   }
   theory->add(*(Utils::makeTheoryVar("A_kpi_th", "A_kpi_th", a_kpi_formula, parameters)));
 }
@@ -90,8 +88,7 @@ void PDF_BES_Kpi_1d::setObservables(const TString c) {
     obsValSource = "http://inspirehep.net/record/1291279";
     setObservable("A_kpi_obs", 12.7e-2);
   } else {
-    std::cout << "PDF_BES_Kpi_1d::setObservables() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_BES_Kpi_1d::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
@@ -101,8 +98,7 @@ void PDF_BES_Kpi_1d::setUncertainties(const TString c) {
     StatErr[0] = 1.3e-2;
     SystErr[0] = 0.7e-2;
   } else {
-    std::cout << "PDF_BES_Kpi_1d::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_BES_Kpi_1d::setUncertainties ERROR config {} not found", c.Data()));
   }
 }
 

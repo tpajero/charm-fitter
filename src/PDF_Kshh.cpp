@@ -17,7 +17,9 @@
 
 #include <TString.h>
 
+#include <format>
 #include <iostream>
+#include <stdexcept>
 #include <vector>
 
 PDF_Kshh::PDF_Kshh(const TString measurement_id, const parametrisations::mix mix_param)
@@ -55,10 +57,8 @@ void PDF_Kshh::initParameters() {
     parameters->add(*(p.get("phiM")));
     break;
   default:
-    std::cout << "PDF_Kshh::initParameters : ERROR : "
-                 "parametrisations::mix not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_Kshh::initParameters ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
 }
 
@@ -101,10 +101,8 @@ void PDF_Kshh::initRelations() {
                                        parameters)));
     break;
   default:
-    std::cout << "PDF_Kshh::initRelations : ERROR : "
-                 "parametrisations::mix not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_Kshh::initRelations ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
 }
 
@@ -128,8 +126,7 @@ void PDF_Kshh::setObservables(const TString c) {
     setObservable("qop_obs", 0.90);
     setObservable("phi_obs", Utils::DegToRad(-6.));
   } else {
-    std::cout << "PDF_Kshh::setObservables() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_Kshh::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
@@ -145,8 +142,7 @@ void PDF_Kshh::setUncertainties(const TString c) {
     SystErr[2] = 0;                                                // qop
     SystErr[3] = 0;                                                // phi
   } else {
-    std::cout << "PDF_Kshh::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_Kshh::setUncertainties ERROR config {} not found", c.Data()));
   }
 }
 
@@ -164,8 +160,7 @@ void PDF_Kshh::setCorrelations(const TString c) {
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
   } else {
-    std::cout << "PDF_Kshh::setCorrelations() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_Kshh::setCorrelations ERROR config {} not found", c.Data()));
   }
 }
 

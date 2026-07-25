@@ -4,6 +4,8 @@
  * Needed to plot the y' vs. x'2 contours plot.
  */
 
+#include <format>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -34,9 +36,8 @@ namespace {
       };
       return list;
     } else {
-      std::cerr << "The list of the LHCb results from the period `" << run << "` is not supported. Exiting..."
-                << std::endl;
-      exit(1);
+      throw std::runtime_error(
+          std::format("get_lhcb_pdfs ERROR The list of the LHCb results from the period `{}` is not supported", run));
     }
   }
 }  // namespace
