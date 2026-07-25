@@ -1,11 +1,8 @@
-#include <format>
-#include <stdexcept>
-#include <string>
-#include <vector>
-
+// Core
 #include <Combiner.h>
 #include <GammaComboEngine.h>
 
+// CharmFitter
 #include <CharmUtils.h>
 #include <PDF_AcpHH_LHCb_Run12.h>
 #include <PDF_BES_CLEO_K3pi_Kpipi0.h>
@@ -31,21 +28,16 @@
 #include <PDF_yCP_minus_yCP_RS.h>
 #include <PDF_yCP_plus_yCP_RS.h>
 
-namespace {
-  /**
-   * Clone all combinations to enable the comparison of fits with and without allowing for CPV in DCS decays.
-   */
-  void add_no_dcs_cpv_combiner(GammaComboEngine& gc, const int icomb) {
-    const auto combiner = gc.getCombiner(icomb);
-    const auto name = combiner->getName() + "NoDcsCPV";
-    const auto title = combiner->getTitle() + " (A_{CP}(K#pi) = 0)";
-    gc.cloneCombiner(1000 + icomb, icomb, name, title);
-    return;
-  }
+#include <format>
+#include <set>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
+namespace {
   std::vector<int> get_lhcb_pdfs(const std::string run, const parametrisations::dy_fsc dy_fsc_param) {
     if (run == "run12") {
-      std::vector<int> list = {
+      return std::vector<int>{
           3,   // XY               KSpipi Prompt Run 1
           11,  // RM               K3pi Run 1
           21,  // BinFlip          Run 1
@@ -54,65 +46,101 @@ namespace {
           39,  // WS               Prompt Run 1+2
           61,  // yCP_minus_yCP_RS WA2020          TODO
           64,  // yCP_minus_yCP_RS 2022 prompt
+          72,  // DY average
+          90,  // AcpHH
           // 80,  // DY_RS   2021
           85,  // DY_pipipi0       Run 2
       };
-      using parametrisations::dy_fsc;
-      switch (dy_fsc_param) {
-      // DY average, AcpHH
-      case dy_fsc::none:
-        list.push_back(74);
-        list.push_back(90);
-        break;
-      case dy_fsc::partial:
-        list.push_back(75);
-        list.push_back(91);
-        break;
-      case dy_fsc::full:
-        list.push_back(76);
-        list.push_back(92);
-        break;
-      }
-      return list;
     } else {
       throw std::runtime_error(
           std::format("get_lhcb_pdfs ERROR The list of the LHCb results from the period `{}` is not supported", run));
     }
   }
-}  // namespace
 
-int main(int argc, char* argv[]) {
-  using parametrisations::dy_fsc;
-  using parametrisations::kpi;
-  using parametrisations::mix;
+  struct ParsedArgs {
+    parametrisations::mix mix_param;
+    parametrisations::dy_fsc dy_fsc_param;
+    bool dcs_cpv;
+    std::vector<char*> combiner_argv;
+  };
 
-  // Get the parametrisation and the parameter to prevent CPV in DCS decays
-  mix mix_param = mix::theo;
-  std::string combiner_name;
+  ParsedArgs parse_args(int argc, char* argv[]) {
+    using parametrisations::dy_fsc;
+    using parametrisations::mix;
 
-  int iparam = -1;
-  for (int i = 1; i < argc - 1; ++i) {
-    if (!strcmp(argv[i], "--param")) {
-      iparam = i;
-      if (!strcmp(argv[i + 1], "phenomenological")) {
-        mix_param = mix::pheno;
-        combiner_name = "phenomenological";
-      } else if (!strcmp(argv[i + 1], "theoretical")) {
-        mix_param = mix::theo;
-        combiner_name = "theoretical";
-      } else {
-        throw std::runtime_error(std::format("main ERROR Option {} is not supported by --param", argv[i + 1]));
+    mix mix_param = mix::theo;
+    dy_fsc dy_fsc_param = dy_fsc::none;
+    bool dcs_cpv = true;
+
+    std::set<int> to_remove;
+    for (int i = 1; i < argc; ++i) {
+      if (!strcmp(argv[i], "--mix")) {
+        if (i == argc - 1) throw std::runtime_error("main ERROR Option --mix requires an argument");
+        if (!strcmp(argv[i + 1], "pheno")) {
+          mix_param = mix::pheno;
+        } else if (!strcmp(argv[i + 1], "theo")) {
+          mix_param = mix::theo;
+        } else {
+          throw std::runtime_error(std::format("main ERROR Option \"{}\" is not supported by --mix", argv[i + 1]));
+        }
+        to_remove.insert({i, i + 1});
+      } else if (!strcmp(argv[i], "--dy-fsc")) {
+        if (i == argc - 1) throw std::runtime_error("main ERROR Option --dy-fsc requires an argument");
+        if (!strcmp(argv[i + 1], "none")) {
+          dy_fsc_param = dy_fsc::none;
+        } else if (!strcmp(argv[i + 1], "partial")) {
+          dy_fsc_param = dy_fsc::partial;
+        } else if (!strcmp(argv[i + 1], "full")) {
+          dy_fsc_param = dy_fsc::full;
+        } else {
+          throw std::runtime_error(std::format("main ERROR Option \"{}\" is not supported by --dy-fsc", argv[i + 1]));
+        }
+        to_remove.insert({i, i + 1});
+      } else if (!strcmp(argv[i], "--no-dcs-cpv")) {
+        dcs_cpv = false;
+        to_remove.insert(i);
       }
     }
-  }
-  std::vector<char*> combiner_argv = {};
-  for (int i = 0; i < argc; ++i) {
-    if (iparam == -1 || (i != iparam && i != iparam + 1)) combiner_argv.emplace_back(argv[i]);
-  }
-  std::cout << "INFO: The fitter will be run with the following configuration:\n"
-            << "      Parametrisation: " << mix_param << "\n";
 
-  // Define the combiner
+    // Prepare the arguments to pass to GammaComboEngine and initialise it
+    std::vector<const char*> extra_args;
+    if (!dcs_cpv) { extra_args.insert(extra_args.end(), {"--fix", "Acp_KP=0"}); }
+
+    std::vector<char*> combiner_argv = {};
+    for (int i = 0; i < argc; ++i) {
+      if (!to_remove.contains(i)) combiner_argv.emplace_back(argv[i]);
+    }
+    for (auto arg : extra_args) combiner_argv.emplace_back(const_cast<char*>(arg));
+
+    return {mix_param, dy_fsc_param, dcs_cpv, std::move(combiner_argv)};
+  }
+}  // namespace
+
+/**
+ * Run the combination of measurements of charm mixing and CP violation.
+ *
+ * Accepts all command-line arguments of GammaComboEngine, and in addition:
+ *   --mix [pheno|theo] Choose the mixing parametrisation (default: theo)
+ *   --dy-fsc [none|partial|full] Choose the final-state correction parametrisation to be applied to DeltaY(h-h+).
+ *       Changes the combiner name to <combiner_name>_<dy_fsc>_dyfsc, where <dy_fsc> is one of none, partial, or full.
+ *   --no-dcs-cpv Do not allow for CP violation in doubly Cabibbo-suppressed D0 -> K+ pi- decays.
+ *       It changes the combiner name to `<combiner_name>_noDcsCPV` and automatically adds the `--fix Acp_KP=0`
+ *       argument.
+ */
+int main(int argc, char* argv[]) {
+  auto parsed_args = parse_args(argc, argv);
+  const parametrisations::mix mix_param = parsed_args.mix_param;
+  const parametrisations::dy_fsc dy_fsc_param = parsed_args.dy_fsc_param;
+  const bool dcs_cpv = parsed_args.dcs_cpv;
+  std::vector<char*> combiner_argv = std::move(parsed_args.combiner_argv);
+
+  std::cout << "INFO The combination will be run with the following configuration:\n"
+            << "     Mixing parametrisation: " << mix_param << "\n"
+            << "     DeltaY final-state correction: " << dy_fsc_param << "\n"
+            << "     Allow for CP violation in DCS decays: " << dcs_cpv << std::endl;
+
+  std::string combiner_name = std::format("charm-combo_{}_{}", utils::get_id(mix_param), utils::get_id(dy_fsc_param));
+  if (!dcs_cpv) { combiner_name += "_noDcsCpv"; }
   GammaComboEngine gc(combiner_name, combiner_argv.size(), &combiner_argv[0]);
 
   ///////////////////////////////////////////////////
@@ -120,6 +148,9 @@ int main(int argc, char* argv[]) {
   // define PDFs
   //
   ///////////////////////////////////////////////////
+
+  using parametrisations::dy_fsc;
+  using parametrisations::kpi;
 
   // clang-format off
   gc.addPdf(1, new PDF_XY("BaBar_Kshh", mix_param),                                  "XY KShh      BaBar                          ");
@@ -141,8 +172,8 @@ int main(int argc, char* argv[]) {
   gc.addPdf(30, new PDF_WS_NoCPV("CDF", mix_param),                                  "WS/RS        CDF                            ");
   gc.addPdf(31, new PDF_WS_NoCPV("BaBar", mix_param),                                "WS/RS        BaBar    no CPV                ");
   gc.addPdf(32, new PDF_WS_NoCPV("Belle", mix_param),                                "WS/RS        Belle    no CPV                ");
-  gc.addPdf(33, new PDF_WS_NoCPV("BaBar", mix_param),                                "WS/RS        BaBar                          ");
-  gc.addPdf(34, new PDF_WS_NoCPV("Belle", mix_param),                                "WS/RS        Belle                          ");
+  gc.addPdf(33, new PDF_WS("BaBar", mix_param),                                      "WS/RS        BaBar                          ");
+  gc.addPdf(34, new PDF_WS("Belle", mix_param),                                      "WS/RS        Belle                          ");
   gc.addPdf(35, new PDF_WS("LHCb_DT_Run1", mix_param),                               "WS/RS        LHCb     Run 1    [B -> D* mu] ");
   gc.addPdf(36, new PDF_WS("LHCb_Run1", mix_param),                                  "WS/RS        LHCb     Run 1                 ");
   gc.addPdf(37, new PDF_WS("LHCb_Prompt_2011_2016", mix_param),                      "WS/RS        LHCb     2011-6   [D* -> D0 pi]");
@@ -165,22 +196,19 @@ int main(int argc, char* argv[]) {
   gc.addPdf(63, new PDF_yCP_plus_yCP_RS("WA2020", mix_param),                        "yCP+yCP(RS)  WA       2020                  ");
   gc.addPdf(64, new PDF_yCP_minus_yCP_RS("LHCb2022", mix_param),                     "yCP-yCP(RS)  LHCb     2022                  ");
 
-  gc.addPdf(70, new PDF_DY("WA2019", mix_param, dy_fsc::none),                       "DY           WA       2019     [no FSC]     ");
-  gc.addPdf(71, new PDF_DY("WA2020", mix_param, dy_fsc::none),                       "DY           WA       2020     [no FSC]     ");
-  gc.addPdf(72, new PDF_DY("WA2021", mix_param, dy_fsc::none),                       "DY           WA       2021     [no FSC]     ");
-  gc.addPdf(73, new PDF_DY("Belle&BaBar", mix_param, dy_fsc::none),                  "DY           B-factories       [no FSC]     ");
-  gc.addPdf(74, new PDF_DY("WA2020", mix_param, dy_fsc::partial),                    "DY           WA       2020     [partial FSC]");
-  gc.addPdf(75, new PDF_DY("WA2021", mix_param, dy_fsc::partial),                    "DY           WA       2021     [partial FSC]");
-  gc.addPdf(76, new PDF_DY("WA2021", mix_param, dy_fsc::full),                       "DY           WA       2021     [full FSC]   ");
+  if (dy_fsc_param == dy_fsc::none) {
+    gc.addPdf(70, new PDF_DY("WA2019", mix_param, dy_fsc::none),                       "DY           WA       2019                  ");
+    gc.addPdf(73, new PDF_DY("Belle&BaBar", mix_param, dy_fsc::none),                  "DY           B-factories                    ");
+  }
+  gc.addPdf(71, new PDF_DY("WA2020", mix_param, dy_fsc_param),                       "DY           WA       2020                  ");
+  gc.addPdf(72, new PDF_DY("WA2021", mix_param, dy_fsc_param),                       "DY           WA       2021                  ");
 
   gc.addPdf(80, new PDF_DY_RS("LHCb2021", mix_param),                                "DY(RS)       LHCb     2021                  ");
 
   gc.addPdf(85, new PDF_DY_pipipi0("LHCb-R2", mix_param),                            "DY(pipipi0)  LHCb     Run2                  ");
 
-  gc.addPdf(90, new PDF_AcpHH_LHCb_Run12(mix_param, dy_fsc::none),                   "ACP(KK/PP)   LHCb     Run1+2   [no FSC]     ");
-  gc.addPdf(91, new PDF_AcpHH_LHCb_Run12(mix_param, dy_fsc::partial),                "ACP(KK/PP)   LHCb     Run1+2   [partial FSC]");
-  gc.addPdf(92, new PDF_AcpHH_LHCb_Run12(mix_param, dy_fsc::full),                   "ACP(KK/PP)   LHCb     Run1+2   [full FSC]   ");
-  gc.addSubsetPdf(93, new PDF_AcpHH_LHCb_Run12(mix_param, dy_fsc::none), 0, 1, 4, 5, "ACP(KK/PP)   LHCb     Run1     [no FSC]");
+  gc.addPdf(90, new PDF_AcpHH_LHCb_Run12(mix_param, dy_fsc_param),                   "ACP(KK/PP)   LHCb     Run1+2                ");
+  gc.addSubsetPdf(93, new PDF_AcpHH_LHCb_Run12(mix_param, dy_fsc_param), 0, 1, 4, 5, "ACP(KK/PP)   LHCb     Run1                  ");
 
   gc.addPdf(100, new PDF_scan_DY_RS(mix_param),                                      "ScanDYRS     This is just a nuisance parameter");
 
@@ -194,10 +222,10 @@ int main(int argc, char* argv[]) {
   //
   ///////////////////////////////////////////////////
 
-  gc.newCombiner(0, "emtpy", "empty");
+  gc.newCombiner(0, "empty", "empty");
 
   // WA 2020
-  gc.newCombiner(1, "WA2020", "World average (Dec 2020)", 1, 2, 3, 4, 10, 11, 20, 21, 30, 31, 32, 35, 37, 50, 51);
+  gc.newCombiner(1, "WA-2020", "World average (Dec 2020)", 1, 2, 3, 4, 10, 11, 20, 21, 30, 31, 32, 35, 37, 50, 51);
   gc.getCombiner(1)->addPdf(gc[60]);
   gc.getCombiner(1)->addPdf(gc[61]);
   gc.getCombiner(1)->addPdf(gc[62]);
@@ -205,7 +233,7 @@ int main(int argc, char* argv[]) {
   gc.getCombiner(1)->addPdf(gc[71]);
 
   // WA June 2021
-  gc.cloneCombiner(20, 1, "WA2021", "World average (June 2021)");
+  gc.cloneCombiner(20, 1, "WA-2021", "World average (June 2021)");
   gc.getCombiner(20)->addPdf(gc[22]);  // bin-flip run 2
   gc.getCombiner(20)->delPdf(gc[71]);  // DY WA 2020
   gc.getCombiner(20)->addPdf(gc[72]);  // DY WA 2021
@@ -214,11 +242,11 @@ int main(int argc, char* argv[]) {
   gc.getCombiner(20)->addPdf(gc[54]);  // BES3 + CLEO K3pi, Kpipi0
 
   // WA after LHCb 2022 yCP measurement
-  gc.cloneCombiner(30, 20, "WAFeb2022", "World average (Feb 2022)");
+  gc.cloneCombiner(30, 20, "WA-2022-02", "World average (Feb 2022)");
   gc.getCombiner(30)->addPdf(gc[64]);  // yCP LHCb 2022
 
   // WA after LHCb 2022 yCP measurement - biased
-  gc.cloneCombiner(31, 30, "WAFeb2022_biased",
+  gc.cloneCombiner(31, 30, "WA-2022-02-biased",
                    "World average (Feb 2022) #minus no #it{y}_{#it{CP}}^{#it{K^{#minus}#pi^{+}}} correction");
   gc.getCombiner(31)->delPdf(gc[60]);
   gc.getCombiner(31)->delPdf(gc[61]);
@@ -228,8 +256,8 @@ int main(int argc, char* argv[]) {
   gc.getCombiner(31)->addPdf(gc[110]);
   gc.getCombiner(31)->addPdf(gc[111]);
 
-  // WA September 2022 - no FSC
-  gc.cloneCombiner(40, 30, "WASept2022NoFSC", "World average (Sept 2022)");
+  // WA September 2022
+  gc.cloneCombiner(40, 30, "WA-2022-09", "World average (Sept 2022)");
   gc.getCombiner(40)->delPdf(gc[51]);  // old BESIII measurement of delta_Kpi
   gc.getCombiner(40)->addPdf(gc[52]);  // new BESIII measurement of delta_Kpi
   gc.getCombiner(40)->addPdf(gc[53]);  // F+_pipipi0
@@ -237,96 +265,58 @@ int main(int argc, char* argv[]) {
   gc.getCombiner(40)->addPdf(gc[24]);  // bin-flip LHCb Run 2
   gc.getCombiner(40)->addPdf(gc[90]);  // ACP(KK) + DeltaACP LHCb Run 1+2
 
-  // WA September 2022 - partial FSC
-  gc.cloneCombiner(41, 40, "WASept2022PartialFSC", "World average (Sept 2022)");
-  gc.getCombiner(41)->delPdf(gc[72]);  // DY WA 2021 (no FSC)
-  gc.getCombiner(41)->addPdf(gc[75]);  // DY WA 2021 (partial FSC)
-  gc.getCombiner(41)->addPdf(gc[73]);  // B-factories provide KK + PP only and are not included in 75
-                                       // when fsr != dy_fsc::none.
-  gc.getCombiner(41)->delPdf(gc[90]);  // ACP(KK) + DeltaACP LHCb Run 1+2 (no FSC)
-  gc.getCombiner(41)->addPdf(gc[91]);  // ACP(KK) + DeltaACP LHCb Run 1+2 (partial FSC)
-
-  // WA September 2022 - full FSC
-  gc.cloneCombiner(42, 41, "WASept2022FullFSC", "World average (Sept 2022)");
-  gc.getCombiner(42)->delPdf(gc[75]);  // DY WA 2021 (partial FSC)
-  gc.getCombiner(42)->addPdf(gc[76]);  // DY WA 2021 (partial FSC)
-  gc.getCombiner(42)->delPdf(gc[91]);  // ACP(KK) + DeltaACP LHCb Run 1+2 (partial FSC)
-  gc.getCombiner(42)->addPdf(gc[92]);  // ACP(KK) + DeltaACP LHCb Run 1+2 (full FSC)
-
   // WA March 2024 March before WS/RS
-  gc.cloneCombiner(49, 40, "WAFeb2024NoFSC", "Previous WA");
+  gc.cloneCombiner(49, 40, "WA-2024-02", "World average (Feb 2024)");
   gc.getCombiner(49)->addPdf(gc[85]);  // DY(pi+ pi- pi0) from LHCb Run 2
 
   // WA March 2024 - no FSC
-  gc.cloneCombiner(50, 40, "WAMar2024NoFSC", "World average (March 2024)");
+  gc.cloneCombiner(50, 40, "WA-2024-03", "World average (March 2024)");
   gc.getCombiner(50)->delPdf(gc[37]);  // WS/RS in D0 -> Kpi from LHCb 2011-2016
   gc.getCombiner(50)->addPdf(gc[39]);  // WS/RS in D0 -> Kpi from LHCb Run 1+2
   gc.getCombiner(50)->addPdf(gc[85]);  // DY(pi+ pi- pi0) from LHCb Run 2
 
   // WA March 2024 with parametrisation of prompt LHCb WS/RS decays from Sec. 9 - no FSC
-  gc.cloneCombiner(51, 50, "WAMar2024NoFSC_WSsec9", "World average (March 2024, prompt WS/RS from Sec. 9)");
+  gc.cloneCombiner(51, 50, "WA-2024-03-WSsec9", "World average (March 2024, prompt WS/RS from Sec. 9)");
   gc.getCombiner(51)->delPdf(gc[39]);  // WS/RS in D0 -> Kpi from LHCb Run 1+2
   gc.getCombiner(51)->addPdf(gc[38]);  // WS/RS in D0 -> Kpi from LHCb Run 1+2
 
-  // WA March 2024 without measurement of CPV in the decay (to test the sensitivity of WS/RS to ACP(KK)
-  gc.cloneCombiner(52, 50, "WAMar2024NoFSC_noDcsCpv", "No direct measurements");
-  gc.getCombiner(52)->delPdf(gc[90]);  // Delta_ACP and ACP(KK)
-
   // WA Sept 2024 (new BESIII F+(pi+pi-pi0))
-  gc.cloneCombiner(53, 50, "WASep2024NoFSC", "World average (Sep 2024)");
+  gc.cloneCombiner(53, 50, "WA-2024-09", "World average (Sep 2024)");
   gc.getCombiner(53)->addPdf(gc[55]);  // BESIII measurement of Fp_pipipi0
 
   // WA October 2024 (new WS/RS with DT Run 2 data)
-  gc.cloneCombiner(54, 53, "WAOct2024NoFSC", "World average (October 2024)");
+  gc.cloneCombiner(54, 53, "WA-2024-10", "World average (October 2024)");
   gc.getCombiner(54)->delPdf(gc[35]);  // WS/RS in D0 -> Kpi from LHCb Run 1 DT
   gc.getCombiner(54)->addPdf(gc[41]);  // WS/RS in D0 -> Kpi from LHCb Run 1+2 DT
 
   // WA October 2025 (new BinFlip from Belle + Belle 2, new BESIII Delta_Kpi, no new LHCb D0 -> K3pi Run 2) ------------
-  gc.cloneCombiner(55, 54, "WAOct2025NoFSC", "World average (October 2025)");
+  gc.cloneCombiner(55, 54, "WA-2025-10", "World average (October 2025)");
   gc.getCombiner(55)->delPdf(gc[20]);  // D0 -> KS hh from Belle
   gc.getCombiner(55)->addPdf(gc[6]);   // D0 -> KS pi pi BinFlip Belle + Belle 2
   gc.getCombiner(55)->delPdf(gc[52]);  // D0 -> Kpi BESIII 3   fb
   gc.getCombiner(55)->addPdf(gc[56]);  // D0 -> Kpi BESIII 3+7 fb
 
-  gc.cloneCombiner(56, 55, "WAOct2025PartialFSC", "World average (October 2025, partial FSC)");
-  gc.getCombiner(56)->delPdf(gc[72],  // DY  no FSC
-                             gc[90]   // ACP no FSC
-  );
-  gc.getCombiner(56)->addPdf(gc[75],  // DY  partial FSC
-                             gc[91]   // ACP partial FSC
-  );
-
-  gc.cloneCombiner(57, 55, "WAOct2025FullFSC", "World average (October 2025, full FSC)");
-  gc.getCombiner(57)->delPdf(gc[72],  // DY  no FSC
-                             gc[90]   // ACP no FSC
-  );
-  gc.getCombiner(57)->addPdf(gc[76],  // DY  full FSC
-                             gc[92]   // ACP full FSC
-  );
-
   // LHCb-only averages ------------------------------------------------------------------------------------------------
 
-  gc.newCombiner(300, "LHCbMar2024NoFSC", "LHCb average (May 2024)");
+  gc.newCombiner(300, "LHCb-2024-05", "LHCb average (May 2024)");
   for (const auto imeas : get_lhcb_pdfs("run12", dy_fsc::none)) gc.getCombiner(300)->addPdf(gc[imeas]);
 
   // LHCb-only + charm factories averages ------------------------------------------------------------------------------
 
-  gc.cloneCombiner(400, 300, "LHCbCFMar2024NoFSC", "LHCb + Charm factories average (May 2024)");
+  gc.cloneCombiner(400, 300, "LHCb-CF-2024-05", "LHCb + Charm factories average (May 2024)");
   for (auto imeas : {50, 52, 53}) gc.getCombiner(400)->addPdf(gc[imeas]);
 
   // Impact of LHCb upgrades -------------------------------------------------------------------------------------------
 
   // WA before LHCb Run 2
-  gc.newCombiner(500, "LHCb_Run1", "World average before LHCb Run 2");
-  for (auto imeas : {1, 2, 3, 4, 10, 11, 20, 21, 30, 31, 32, 35, 36, 50, 52, 60, 61, 62, 63, 70, 93})
-    gc.getCombiner(500)->addPdf(gc[imeas]);
+  if (dy_fsc_param == dy_fsc::none) {
+    gc.newCombiner(500, "LHCb-Run1", "World average before LHCb Run 2");
+    for (auto imeas : {1, 2, 3, 4, 10, 11, 20, 21, 30, 31, 32, 35, 36, 50, 52, 60, 61, 62, 63, 70, 93})
+      gc.getCombiner(500)->addPdf(gc[imeas]);
+  }
 
   // WA after LHCb Run 2
-  gc.cloneCombiner(501, 50, "LHCb_Run2", "World average after LHCb Run 2");
-
-  // Clone all combiners for no DCS CPV hypothesis -------------------------------------------------------------------
-
-  for (const auto id : gc.getCombinersIds()) add_no_dcs_cpv_combiner(gc, id);
+  gc.cloneCombiner(501, 50, "LHCb-Run2", "World average after LHCb Run 2");
 
   ///////////////////////////////////////////////////
   //
