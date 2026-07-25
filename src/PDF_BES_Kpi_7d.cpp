@@ -19,7 +19,7 @@
 #include <boost/algorithm/string.hpp>
 #include <vector>
 
-PDF_BES_Kpi_7d::PDF_BES_Kpi_7d(const theory_config th_cfg) : PDF_Abs{7}, th_cfg{th_cfg} {
+PDF_BES_Kpi_7d::PDF_BES_Kpi_7d(const parametrisations::mix mix_param) : PDF_Abs{7}, mix_param{mix_param} {
   name = "charm-bes-kpi-2025";
   initParameters();
   initRelations();
@@ -36,18 +36,19 @@ void PDF_BES_Kpi_7d::initParameters() {
   parameters->add(*(p.get("R_Kpi")));
   parameters->add(*(p.get("Delta_Kpi")));
   parameters->add(*(p.get("F_pipipi0")));
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     parameters->add(*(p.get("y")));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     parameters->add(*(p.get("phiG")));
     parameters->add(*(p.get("x12")));
     parameters->add(*(p.get("y12")));
     parameters->add(*(p.get("phiM")));
     break;
   default:
-    std::cout << "PDF_BES_Kpi_7d::initParameters : ERROR : theory_config not supported." << std::endl;
+    std::cout << "PDF_BES_Kpi_7d::initParameters : ERROR : parametrisations::mix not supported." << std::endl;
     std::exit(1);
   }
 }
@@ -57,15 +58,16 @@ void PDF_BES_Kpi_7d::initRelations() {
   std::string a_kpi_formula = "(2 * sqrt(R_Kpi) * cos(Delta_Kpi) + y) / (1 + R_Kpi)";
   std::string a_kpi_pipipi0_formula = "F_pipipi0 * (2 * sqrt(R_Kpi) * cos(Delta_Kpi) + y)"
                                       "/ (1 + R_Kpi + (1 - F_pipipi0) * (-2 * sqrt(R_Kpi) * cos(Delta_Kpi) + y))";
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     break;
-  case theory_config::theoretical:
-    boost::replace_all(a_kpi_formula, "y", CharmUtils::y_to_theoretical);
-    boost::replace_all(a_kpi_pipipi0_formula, "y", CharmUtils::y_to_theoretical);
+  case mix::theo:
+    boost::replace_all(a_kpi_formula, "y", utils::y_expression(mix_param));
+    boost::replace_all(a_kpi_pipipi0_formula, "y", utils::y_expression(mix_param));
     break;
   default:
-    std::cout << "PDF_BES_Kpi_7d::initRelations : ERROR : theory_config not supported." << std::endl;
+    std::cout << "PDF_BES_Kpi_7d::initRelations : ERROR : parametrisations::mix not supported." << std::endl;
     std::exit(1);
   }
   using Utils::makeTheoryVar;

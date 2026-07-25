@@ -15,7 +15,8 @@
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
-PDF_DY_RS::PDF_DY_RS(const TString measurement_id, const theory_config th_cfg) : PDF_Abs{1}, th_cfg{th_cfg} {
+PDF_DY_RS::PDF_DY_RS(const TString measurement_id, const parametrisations::mix mix_param)
+    : PDF_Abs{1}, mix_param{mix_param} {
   name = "DY_RS_" + measurement_id;
   initParameters();
   initRelations();
@@ -33,14 +34,15 @@ void PDF_DY_RS::initParameters() {
   parameters->add(*(p.get("Acp_KP")));
   parameters->add(*(p.get("Delta_Kpi")));
 
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     parameters->add(*(p.get("x")));
     parameters->add(*(p.get("y")));
     parameters->add(*(p.get("qop")));
     parameters->add(*(p.get("phi")));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     parameters->add(*(p.get("phiG")));
     parameters->add(*(p.get("x12")));
     parameters->add(*(p.get("y12")));
@@ -48,7 +50,7 @@ void PDF_DY_RS::initParameters() {
     break;
   default:
     std::cout << "PDF_DY_RS::initParameters : ERROR : "
-                 "theory_config not supported."
+                 "parametrisations::mix not supported."
               << std::endl;
     exit(1);
   }
@@ -56,15 +58,16 @@ void PDF_DY_RS::initParameters() {
 
 void PDF_DY_RS::initRelations() {
   theory = new RooArgList("theory");  ///< the order of this list must match that of the COR matrix!
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     theory->add(*(Utils::makeTheoryVar("DY_RS_th", "DY_RS_th",
                                        "0.5 * pow(R_Kpi, 0.5) * "
                                        "(  (y*cos(Delta_Kpi) - x*sin(Delta_Kpi))*(qop - 1/qop - Acp_KP)*cos(phi)"
                                        " - (x*cos(Delta_Kpi) + y*sin(Delta_Kpi))*(qop + 1/qop         )*sin(phi))",
                                        parameters)));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     theory->add(*(Utils::makeTheoryVar("DY_RS_th", "DY_RS_th",
                                        "pow(R_Kpi, 0.5) * "
                                        "(  (-y12*cos(Delta_Kpi)*cos(phiG) + x12*sin(Delta_Kpi)*cos(phiM))*Acp_KP*0.5"
@@ -73,7 +76,7 @@ void PDF_DY_RS::initRelations() {
     break;
   default:
     std::cout << "PDF_DY_RS::initRelations : ERROR : "
-                 "theory_config not supported."
+                 "parametrisations::mix not supported."
               << std::endl;
     exit(1);
   }

@@ -19,7 +19,8 @@
 #include <iostream>
 #include <vector>
 
-PDF_BinFlip::PDF_BinFlip(const TString measurement_id, const theory_config th_cfg) : PDF_Abs{4}, th_cfg{th_cfg} {
+PDF_BinFlip::PDF_BinFlip(const TString measurement_id, const parametrisations::mix mix_param)
+    : PDF_Abs{4}, mix_param{mix_param} {
   name = "BinFlip_" + measurement_id;
   TString label;
   if (measurement_id.EqualTo("LHCb_Run1"))
@@ -42,14 +43,15 @@ PDF_BinFlip::PDF_BinFlip(const TString measurement_id, const theory_config th_cf
 void PDF_BinFlip::initParameters() {
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     parameters->add(*(p.get("x")));
     parameters->add(*(p.get("y")));
     parameters->add(*(p.get("qop")));
     parameters->add(*(p.get("phi")));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     parameters->add(*(p.get("phiG")));
     parameters->add(*(p.get("x12")));
     parameters->add(*(p.get("y12")));
@@ -57,7 +59,7 @@ void PDF_BinFlip::initParameters() {
     break;
   default:
     std::cout << "PDF_BinFlip::initParameters : ERROR : "
-                 "theory_config not supported."
+                 "parametrisations::mix not supported."
               << std::endl;
     exit(1);
   }
@@ -65,8 +67,9 @@ void PDF_BinFlip::initParameters() {
 
 void PDF_BinFlip::initRelations() {
   theory = new RooArgList("theory");  ///< the order of this list must match that of the COR matrix!
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     theory->add(*(Utils::makeTheoryVar("x_th", "x_th",
                                        "0.5*(  x*cos(phi)*(qop + 1/qop)"
                                        "     + y*sin(phi)*(qop - 1/qop))",
@@ -84,7 +87,7 @@ void PDF_BinFlip::initRelations() {
                                        "     - x*sin(phi)*(qop + 1./qop))",
                                        parameters)));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     theory->add(*(Utils::makeTheoryVar("x_th", "x_th", " x12*cos(phiM)", parameters)));
     theory->add(*(Utils::makeTheoryVar("y_th", "y_th", " y12*cos(phiG)", parameters)));
     theory->add(*(Utils::makeTheoryVar("dx_th", "dx_th", "-y12*sin(phiG)", parameters)));
@@ -92,7 +95,7 @@ void PDF_BinFlip::initRelations() {
     break;
   default:
     std::cout << "PDF_BinFlip::initRelations : ERROR : "
-                 "theory_config not supported."
+                 "parametrisations::mix not supported."
               << std::endl;
     exit(1);
   }

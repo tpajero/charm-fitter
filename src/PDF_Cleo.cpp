@@ -18,7 +18,8 @@
 #include <iostream>
 #include <vector>
 
-PDF_Cleo::PDF_Cleo(const TString measurement_id, const theory_config th_cfg) : PDF_Abs{5}, th_cfg{th_cfg} {
+PDF_Cleo::PDF_Cleo(const TString measurement_id, const parametrisations::mix mix_param)
+    : PDF_Abs{5}, mix_param{mix_param} {
   name = "CLEO";
   initParameters();
   initRelations();
@@ -35,12 +36,13 @@ void PDF_Cleo::initParameters() {
   parameters->add(*(p.get("R_Kpi")));
   parameters->add(*(p.get("Delta_Kpi")));
 
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     parameters->add(*(p.get("x")));
     parameters->add(*(p.get("y")));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     parameters->add(*(p.get("phiG")));
     parameters->add(*(p.get("phiM")));
     parameters->add(*(p.get("x12")));
@@ -48,7 +50,7 @@ void PDF_Cleo::initParameters() {
     break;
   default:
     std::cout << "PDF_Cleo::initParameters : ERROR : "
-                 "theory_config not supported."
+                 "parametrisations::mix not supported."
               << std::endl;
     exit(1);
   }
@@ -57,12 +59,13 @@ void PDF_Cleo::initParameters() {
 void PDF_Cleo::initRelations() {
   theory = new RooArgList("theory");
   theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "R_Kpi", parameters)));
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     theory->add(*(Utils::makeTheoryVar("x2_th", "x2_th", "x*x", parameters)));
     theory->add(*(Utils::makeTheoryVar("y_th", "y_th", "y", parameters)));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     theory->add(*(Utils::makeTheoryVar("x2_th", "x2_th",
                                        "0.5 * ("
                                        "      pow(x12,2) - pow(y12,2) "
@@ -78,7 +81,7 @@ void PDF_Cleo::initRelations() {
     break;
   default:
     std::cout << "PDF_Cleo::initRelations : ERROR : "
-                 "theory_config not supported."
+                 "parametrisations::mix not supported."
               << std::endl;
     exit(1);
   }

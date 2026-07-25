@@ -20,7 +20,7 @@
 #include <algorithm>
 #include <iostream>
 
-PDF_XY::PDF_XY(const TString measurement_id, const theory_config th_cfg) : PDF_Abs{2}, th_cfg{th_cfg} {
+PDF_XY::PDF_XY(const TString measurement_id, const parametrisations::mix mix_param) : PDF_Abs{2}, mix_param{mix_param} {
   name = "XY_" + measurement_id;
 
   TString label = measurement_id;
@@ -44,12 +44,13 @@ PDF_XY::PDF_XY(const TString measurement_id, const theory_config th_cfg) : PDF_A
 void PDF_XY::initParameters() {
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     parameters->add(*(p.get("x")));
     parameters->add(*(p.get("y")));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     parameters->add(*(p.get("x12")));
     parameters->add(*(p.get("y12")));
     parameters->add(*(p.get("phiM")));
@@ -57,7 +58,7 @@ void PDF_XY::initParameters() {
     break;
   default:
     std::cout << "PDF_XY::initRelations : ERROR : "
-                 "theory_config not supported."
+                 "parametrisations::mix not supported."
               << std::endl;
     exit(1);
   }
@@ -66,18 +67,19 @@ void PDF_XY::initParameters() {
 void PDF_XY::initRelations() {
   theory = new RooArgList("theory");  ///< the order of this list must match that of the COR matrix!
 
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     theory->add(*(Utils::makeTheoryVar("x_th", "x_th", "x", parameters)));
     theory->add(*(Utils::makeTheoryVar("y_th", "y_th", "y", parameters)));
     break;
-  case theory_config::theoretical:
-    theory->add(*(Utils::makeTheoryVar("x_th", "x_th", CharmUtils::x_to_theoretical, parameters)));
-    theory->add(*(Utils::makeTheoryVar("y_th", "y_th", CharmUtils::y_to_theoretical, parameters)));
+  case mix::theo:
+    theory->add(*(Utils::makeTheoryVar("x_th", "x_th", utils::x_expression(mix_param), parameters)));
+    theory->add(*(Utils::makeTheoryVar("y_th", "y_th", utils::y_expression(mix_param), parameters)));
     break;
   default:
     std::cout << "PDF_XY::initRelations : ERROR : "
-                 "theory_config not supported."
+                 "parametrisations::mix not supported."
               << std::endl;
     exit(1);
   }

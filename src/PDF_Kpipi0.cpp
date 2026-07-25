@@ -18,7 +18,8 @@
 #include <iostream>
 #include <vector>
 
-PDF_Kpipi0::PDF_Kpipi0(const TString measurement_id, const theory_config th_cfg) : PDF_Abs{2}, th_cfg{th_cfg} {
+PDF_Kpipi0::PDF_Kpipi0(const TString measurement_id, const parametrisations::mix mix_param)
+    : PDF_Abs{2}, mix_param{mix_param} {
   name = measurement_id + "_Kpipi0";
   TString label;
   if (measurement_id.EqualTo("BaBar"))
@@ -39,12 +40,13 @@ void PDF_Kpipi0::initParameters() {
   parameters = new RooArgList("parameters");
   parameters->add(*(p.get("Delta_Kpipi0")));
 
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     parameters->add(*(p.get("x")));
     parameters->add(*(p.get("y")));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     parameters->add(*(p.get("phiG")));
     parameters->add(*(p.get("x12")));
     parameters->add(*(p.get("y12")));
@@ -52,7 +54,7 @@ void PDF_Kpipi0::initParameters() {
     break;
   default:
     std::cout << "PDF_Kpipi0::initParameters : ERROR : "
-                 "theory_config not supported."
+                 "parametrisations::mix not supported."
               << std::endl;
     exit(1);
   }
@@ -60,12 +62,13 @@ void PDF_Kpipi0::initParameters() {
 
 void PDF_Kpipi0::initRelations() {
   theory = new RooArgList("theory");
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     theory->add(*(Utils::makeTheoryVar("xpp_th", "xpp_th", "x*cos(Delta_Kpipi0) - y*sin(Delta_Kpipi0)", parameters)));
     theory->add(*(Utils::makeTheoryVar("ypp_th", "ypp_th", "y*cos(Delta_Kpipi0) + x*sin(Delta_Kpipi0)", parameters)));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     theory->add(*(Utils::makeTheoryVar("xpp_th", "xpp_th",
                                        "  x12*cos(Delta_Kpipi0) * cos(phiM)"
                                        "- y12*sin(Delta_Kpipi0) * cos(phiG)",
@@ -77,7 +80,7 @@ void PDF_Kpipi0::initRelations() {
     break;
   default:
     std::cout << "PDF_Kpipi0::initRelations : ERROR : "
-                 "theory_config not supported."
+                 "parametrisations::mix not supported."
               << std::endl;
     exit(1);
   }

@@ -19,7 +19,8 @@
 
 #include <iostream>
 
-PDF_yCP::PDF_yCP(const TString measurement_id, const theory_config th_cfg) : PDF_Abs{1}, th_cfg{th_cfg} {
+PDF_yCP::PDF_yCP(const TString measurement_id, const parametrisations::mix mix_param)
+    : PDF_Abs{1}, mix_param{mix_param} {
   name = "yCP_" + measurement_id;
   initParameters();
   initRelations();
@@ -34,20 +35,21 @@ void PDF_yCP::initParameters() {
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");
 
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     parameters->add(*(p.get("x")));
     parameters->add(*(p.get("y")));
     parameters->add(*(p.get("qop")));
     parameters->add(*(p.get("phi")));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     parameters->add(*(p.get("phiG")));
     parameters->add(*(p.get("y12")));
     break;
   default:
     std::cout << "PDF_yCP::initParameters : ERROR : "
-                 "theory_config not supported."
+                 "parametrisations::mix not supported."
               << std::endl;
     exit(1);
   }
@@ -55,19 +57,20 @@ void PDF_yCP::initParameters() {
 
 void PDF_yCP::initRelations() {
   theory = new RooArgList("theory");
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     theory->add(*(Utils::makeTheoryVar("yCP_th", "yCP_th",
                                        "0.5*(  y * (qop + 1/qop) * cos(phi)"
                                        "     - x * (qop - 1/qop) * sin(phi))",
                                        parameters)));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     theory->add(*(Utils::makeTheoryVar("yCP_th", "yCP_th", "y12*cos(phiG)", parameters)));
     break;
   default:
     std::cout << "PDF_yCP::initRelations : ERROR : "
-                 "theory_config not supported."
+                 "parametrisations::mix not supported."
               << std::endl;
     exit(1);
   }

@@ -20,7 +20,8 @@
 #include <iostream>
 #include <vector>
 
-PDF_Kshh::PDF_Kshh(const TString measurement_id, const theory_config th_cfg) : PDF_Abs{4}, th_cfg{th_cfg} {
+PDF_Kshh::PDF_Kshh(const TString measurement_id, const parametrisations::mix mix_param)
+    : PDF_Abs{4}, mix_param{mix_param} {
   name = "Kshh_" + measurement_id;
   initParameters();
   initRelations();
@@ -39,14 +40,15 @@ void PDF_Kshh::initParameters() {
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");
 
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     parameters->add(*(p.get("x")));
     parameters->add(*(p.get("y")));
     parameters->add(*(p.get("qop")));
     parameters->add(*(p.get("phi")));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     parameters->add(*(p.get("phiG")));
     parameters->add(*(p.get("x12")));
     parameters->add(*(p.get("y12")));
@@ -54,7 +56,7 @@ void PDF_Kshh::initParameters() {
     break;
   default:
     std::cout << "PDF_Kshh::initParameters : ERROR : "
-                 "theory_config not supported."
+                 "parametrisations::mix not supported."
               << std::endl;
     exit(1);
   }
@@ -62,14 +64,15 @@ void PDF_Kshh::initParameters() {
 
 void PDF_Kshh::initRelations() {
   theory = new RooArgList("theory");  ///< the order of this list must match that of the COR matrix!
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     theory->add(*(Utils::makeTheoryVar("x_th", "x_th", "x", parameters)));
     theory->add(*(Utils::makeTheoryVar("y_th", "y_th", "y", parameters)));
     theory->add(*(Utils::makeTheoryVar("qop_th", "qop_th", "qop", parameters)));
     theory->add(*(Utils::makeTheoryVar("phi_th", "phi_th", "phi", parameters)));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     theory->add(*(Utils::makeTheoryVar("x_th", "x_th",
                                        "pow(2,-0.5) * pow( "
                                        "    pow(x12,2) - pow(y12,2) + pow( "
@@ -99,7 +102,7 @@ void PDF_Kshh::initRelations() {
     break;
   default:
     std::cout << "PDF_Kshh::initRelations : ERROR : "
-                 "theory_config not supported."
+                 "parametrisations::mix not supported."
               << std::endl;
     exit(1);
   }

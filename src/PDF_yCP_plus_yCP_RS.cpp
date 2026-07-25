@@ -17,8 +17,8 @@
 
 #include <iostream>
 
-PDF_yCP_plus_yCP_RS::PDF_yCP_plus_yCP_RS(const TString measurement_id, const theory_config th_cfg)
-    : PDF_Abs{1}, th_cfg{th_cfg} {
+PDF_yCP_plus_yCP_RS::PDF_yCP_plus_yCP_RS(const TString measurement_id, const parametrisations::mix mix_param)
+    : PDF_Abs{1}, mix_param{mix_param} {
   name = "yCP_plus_yCP_RS_" + measurement_id;
   initParameters();
   initRelations();
@@ -35,14 +35,15 @@ void PDF_yCP_plus_yCP_RS::initParameters() {
 
   parameters->add(*(p.get("R_Kpi")));
   parameters->add(*(p.get("Delta_Kpi")));
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     parameters->add(*(p.get("x")));
     parameters->add(*(p.get("y")));
     parameters->add(*(p.get("qop")));
     parameters->add(*(p.get("phi")));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     parameters->add(*(p.get("phiG")));
     parameters->add(*(p.get("phiM")));
     parameters->add(*(p.get("x12")));
@@ -50,7 +51,7 @@ void PDF_yCP_plus_yCP_RS::initParameters() {
     break;
   default:
     std::cout << "PDF_yCP::initParameters : ERROR : "
-                 "theory_config not supported."
+                 "parametrisations::mix not supported."
               << std::endl;
     exit(1);
   }
@@ -58,8 +59,9 @@ void PDF_yCP_plus_yCP_RS::initParameters() {
 
 void PDF_yCP_plus_yCP_RS::initRelations() {
   theory = new RooArgList("theory");
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     theory->add(*(Utils::makeTheoryVar("yCP_plus_yCP_RS_th", "yCP_plus_yCP_RS_th",
                                        "0.5*( "
                                        "      y*(qop + 1/qop)*cos(phi)"
@@ -69,7 +71,7 @@ void PDF_yCP_plus_yCP_RS::initRelations() {
                                        "    + (x * cos(Delta_Kpi) + y * sin(Delta_Kpi)) * (qop - 1/qop) * sin(phi)))",
                                        parameters)));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     theory->add(*(Utils::makeTheoryVar("yCP_plus_yCP_RS_th", "yCP_plus_yCP_RS_th",
                                        " y12 * cos(phiG)"
                                        " + sqrt(R_Kpi) * ("
@@ -79,7 +81,7 @@ void PDF_yCP_plus_yCP_RS::initRelations() {
     break;
   default:
     std::cout << "PDF_yCP::initRelations : ERROR : "
-                 "theory_config not supported."
+                 "parametrisations::mix not supported."
               << std::endl;
     exit(1);
   }

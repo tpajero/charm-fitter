@@ -19,7 +19,7 @@
 
 #include <iostream>
 
-PDF_RM::PDF_RM(const TString measurement_id, const theory_config th_cfg) : PDF_Abs{1}, th_cfg{th_cfg} {
+PDF_RM::PDF_RM(const TString measurement_id, const parametrisations::mix mix_param) : PDF_Abs{1}, mix_param{mix_param} {
   name = "RM_" + measurement_id;
   initParameters();
   initRelations();
@@ -34,12 +34,13 @@ void PDF_RM::initParameters() {
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");
 
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     parameters->add(*(p.get("x")));
     parameters->add(*(p.get("y")));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     parameters->add(*(p.get("x12")));
     parameters->add(*(p.get("y12")));
     parameters->add(*(p.get("phiM")));
@@ -47,7 +48,7 @@ void PDF_RM::initParameters() {
     break;
   default:
     std::cout << "PDF_RM::initParameters : ERROR : "
-                 "theory_config not supported."
+                 "parametrisations::mix not supported."
               << std::endl;
     exit(1);
   }
@@ -55,11 +56,12 @@ void PDF_RM::initParameters() {
 
 void PDF_RM::initRelations() {
   theory = new RooArgList("theory");
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     theory->add(*(Utils::makeTheoryVar("RM_th", "RM_th", "(pow(x,2) + pow(y,2))/2", parameters)));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     theory->add(*(Utils::makeTheoryVar("RM_th", "RM_th",
                                        "0.5 * pow( "
                                        "    + pow(pow(x12,2) + pow(y12,2),2)"
@@ -68,7 +70,7 @@ void PDF_RM::initRelations() {
     break;
   default:
     std::cout << "PDF_RM::initRelations : ERROR : "
-                 "theory_config not supported."
+                 "parametrisations::mix not supported."
               << std::endl;
     exit(1);
   }

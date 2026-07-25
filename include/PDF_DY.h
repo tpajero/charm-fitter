@@ -15,7 +15,7 @@
 
 class PDF_DY : public PDF_Abs {
  public:
-  PDF_DY(TString measurement_id, theory_config th_cf, FSC fsc);
+  PDF_DY(TString measurement_id, parametrisations::mix mix_param, parametrisations::dy_fsc dy_fsc_param);
   void buildPdf() override;
   void initObservables(TString setName);
   void initParameters() override;
@@ -25,8 +25,8 @@ class PDF_DY : public PDF_Abs {
   void setUncertainties(TString measurement_id) override;
 
  private:
-  const FSC fsc;
-  const theory_config th_cfg;
+  const parametrisations::dy_fsc dy_fsc_param;
+  const parametrisations::mix mix_param;
 };
 
 #endif
