@@ -1,8 +1,8 @@
 """Make and read scans, and plot them in matplotlib."""
 
-import os
 import subprocess
 from multiprocessing import Pool
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -35,10 +35,10 @@ def getfnames(prefix, xpar, ypar=None):
 
     bfname = fname.replace("scanner/", "par/").replace("_scanner", "").replace(".root", ".dat")
 
-    if not os.path.exists(fname):
+    if not Path(fname).exists():
         raise FileNotFoundError(f"Cannot find scan file {fname}")
 
-    if not os.path.exists(bfname):
+    if not Path(bfname).exists():
         raise FileNotFoundError(f"Cannot find fit result file {bfname}")
 
     return fname, bfname
@@ -51,7 +51,7 @@ def print_cl(prefix, xpar, ypar=None, prob=True):
     pref = prefix.split("scanner")[1]
     suff = "Prob" if prob else "Plugin"
     fname = f"plots/cl/clintervals{pref}_{xpar}_{suff}.py"
-    if not os.path.exists(fname):
+    if not Path(fname).exists():
         return
 
     try:

@@ -5,17 +5,17 @@ import os
 from argparse import ArgumentParser
 from contextlib import contextmanager
 from importlib.resources import files
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 
 from charm_fitter.plotting import plotter, run_commands
-
-charm_fitter_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
+from charm_fitter.utils import repo_path
 
 
 @contextmanager
 def cwd(path):
-    oldpwd = os.getcwd()
+    oldpwd = Path.cwd()
     os.chdir(path)
     try:
         yield
@@ -50,8 +50,8 @@ def parse_args():
         default=55,
         help="Numerical ID of the combiner to be run",
     )
-    parser.add_argument("--config", type=str, default="config/2025.py", help="Configuration file")
-    parser.add_argument("-s", "--savedir", type=str, default="plots/matplotlib", help="Output directory")
+    parser.add_argument("--config", type=Path, default=repo_path / "config/2025.py", help="Configuration file")
+    parser.add_argument("-s", "--savedir", type=Path, default=repo_path / "plots/matplotlib", help="Output directory")
     parser.add_argument(
         "-i",
         "--interactive",
@@ -207,8 +207,8 @@ def dirname_from_combiners(combiners):
 def make_plots_1d(combiners, cfg, savedir):
     """Plot the 1D comparison of a set of combiners, for all parameters in the combination."""
 
-    out_dir = os.path.join(savedir, dirname_from_combiners(combiners), "1d")
-    os.makedirs(out_dir, exist_ok=True)
+    out_dir = Path(savedir) / dirname_from_combiners(combiners) / "1d"
+    out_dir.mkdir(parents=True, exist_ok=True)
 
     for par in cfg.params.values():
         if any(combiner > 1000 for combiner in combiners) and par.id == "Acp_KP":
@@ -216,7 +216,7 @@ def make_plots_1d(combiners, cfg, savedir):
         param = "phenomenological" if par.parametrisation == "pheno" else "theoretical"
         plot = plotter(
             dim=1,
-            save=f"{out_dir}/{par.id}.pdf",
+            save=str(out_dir / f"{par.id}.pdf"),
             xtitle=par.title,
             xangle=par.degrees,
             cls="r",
@@ -238,8 +238,8 @@ def make_plots_1d(combiners, cfg, savedir):
 def make_plots_2d(combiners, cfg, savedir):
     """Plot the 2D comparison of a set of combiners, for all pairs parameters in the configuration file."""
 
-    out_dir = os.path.join(savedir, dirname_from_combiners(combiners), "2d")
-    os.makedirs(out_dir, exist_ok=True)
+    out_dir = Path(savedir) / dirname_from_combiners(combiners) / "2d"
+    out_dir.mkdir(parents=True, exist_ok=True)
 
     for plot_2d in cfg.plots_2d:
         xpar, ypar = cfg.params[plot_2d.pars[0]], cfg.params[plot_2d.pars[1]]
@@ -251,7 +251,7 @@ def make_plots_2d(combiners, cfg, savedir):
         param = "phenomenological" if "pheno" in [xpar.parametrisation, ypar.parametrisation] else "theoretical"
         plot = plotter(
             dim=2,
-            save=f"{out_dir}/{xpar.id}-{ypar.id}.pdf",
+            save=str(out_dir / f"{xpar.id}-{ypar.id}.pdf"),
             xtitle=xpar.title,
             ytitle=ypar.title,
             xrange=xpar.range2d,
@@ -275,14 +275,14 @@ def make_plots_2d(combiners, cfg, savedir):
 
 
 def make_plots_2d_acp(cfg, savedir, no_dcs_cpv=False):
-    out_dir = os.path.join(savedir, str(list(cfg.combiners_acp(False).keys())[-1]))
-    os.makedirs(out_dir, exist_ok=True)
+    out_dir = Path(savedir) / str(list(cfg.combiners_acp(False).keys())[-1])
+    out_dir.mkdir(parents=True, exist_ok=True)
 
     xpar, ypar = cfg.params["Acp_KK"], cfg.params["Acp_PP"]
     suffix = "-no-dcs-cpv" if no_dcs_cpv else ""
     plot = plotter(
         dim=2,
-        save=f"{out_dir}/{xpar.id}-{ypar.id}{suffix}.pdf",
+        save=str(out_dir / f"{xpar.id}-{ypar.id}{suffix}.pdf"),
         xtitle=xpar.title,
         ytitle=ypar.title,
         xrange=xpar.range2d,
@@ -310,19 +310,19 @@ if __name__ == "__main__":
 
     # Parse the arguments
     args = parse_args()
-    if not os.path.isabs(args.config):
-        args.config = os.path.join(charm_fitter_dir, args.config)
-    if not os.path.isabs(args.savedir):
-        args.savedir = os.path.join(charm_fitter_dir, args.savedir)
-    os.makedirs(args.savedir, exist_ok=True)
-    os.makedirs(os.path.join(charm_fitter_dir, "plots/corr"), exist_ok=True)
+    if not args.config.is_absolute():
+        args.config = repo_path / args.config
+    if not args.savedir.is_absolute():
+        args.savedir = repo_path / args.savedir
+    args.savedir.mkdir(parents=True, exist_ok=True)
+    (repo_path / "plots/corr").mkdir(parents=True, exist_ok=True)
 
     # Import plots configuration
     spec = importlib.util.spec_from_file_location("module", args.config)
     cfg = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(cfg)
 
-    with cwd(charm_fitter_dir):
+    with cwd(repo_path):
         # Run 1D scans and make plots
         if any(x in ["all", "scans-1d"] for x in args.actions):
             run_scans_1d(args, cfg)

@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """Plot the values of all existing measurements of ACP and BF of D(s)+ -> eta(') h+ decays,
 plus the PDG 2025 average.
+
+To check what options are available, run:
+
+   python d-to-etah.py -h
+
 """
 
 import argparse

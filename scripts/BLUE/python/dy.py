@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Produce the plot with the world average of the DeltaY parameter."""
+"""Produce the plot with the world average of the DeltaY parameter.
+
+To check what options are available, run:
+
+   python dy.py -h
+
+"""
 
 import argparse
 import logging

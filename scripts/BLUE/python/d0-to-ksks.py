@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Plot the values of all existing measurements of ACP(D0 -> KS KS)."""
+"""Plot the values of all existing measurements of ACP(D0 -> KS KS).
+
+To check what options are available, run:
+
+   python d0-to-ksks.py -h
+
+"""
 
 import argparse
 import logging
