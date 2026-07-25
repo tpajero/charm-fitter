@@ -1,4 +1,4 @@
-from charm_fitter.classes import Parameter, Plot2d, Subcombination
+from charm_fitter.utils import Parameter, Plot2d, Subcombination
 
 # List all CharmCombo parameters with the properties to be used for plotting.
 params = {
