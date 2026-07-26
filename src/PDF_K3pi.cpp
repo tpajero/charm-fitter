@@ -81,7 +81,7 @@ void PDF_K3pi::setObservables(const TString c) {
     setObservablesToy();
   else if (c.EqualTo("LHCb-run1")) {
     obsValSource = "https://arxiv.org/abs/1602.07224v2";
-    setObservable("r_K3pi_obs", 5.67);
+    setObservable("r_K3pi_obs", 5.67e-2);
     setObservable("c1_obs", 0.03);
     setObservable("c2_obs", 0.48);
   } else {
@@ -93,7 +93,7 @@ void PDF_K3pi::setObservables(const TString c) {
 void PDF_K3pi::setUncertainties(const TString c) {
   if (c.EqualTo("LHCb-run1")) {
     obsErrSource = "https://arxiv.org/abs/1602.07224v2";
-    StatErr[0] = 0.12;
+    StatErr[0] = 0.12e-2;
     StatErr[1] = 0.18;
     StatErr[2] = 0.18;
     std::ranges::fill(SystErr, 0);

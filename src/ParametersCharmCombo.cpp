@@ -55,19 +55,19 @@ void ParametersCharmCombo::defineParameters() {
 
   // Ratio of the magnitudes of the decay amplitudes of D0 -> K+ pi- pi- pi+ to D0 -> K- pi- pi+ pi+
   p = newParameter("r_K3pi");
-  p->title = "#it{r_{K3#pi}} [%]";
-  p->startvalue = 5.5;
+  p->title = "#it{r_{K3#pi}}";
+  p->startvalue = 5.5e-2;
   p->unit = "";
-  p->scan = range(4, 6);
-  p->phys = range(0, 1e4);
+  p->scan = range(4e-2, 6e-2);
+  p->phys = range(0., 1e2);
 
   // Ratio of the magnitudes of the decay amplitudes of D0 -> K+ pi- pi0 to D0 -> K- pi+ pi0
   p = newParameter("r_Kpipi0");
-  p->title = "#it{r_{K#pi#pi^{0}}} [%]";
-  p->startvalue = 4.4;
+  p->title = "#it{r_{K#pi#pi^{0}}}";
+  p->startvalue = 4.4e-2;
   p->unit = "";
-  p->scan = range(4, 6);
-  p->phys = range(0, 1e4);
+  p->scan = range(4e-2, 6e-2);
+  p->phys = range(0., 1e2);
 
   // Coherence parameters for the decay amplitudes of D0 -> K+ pi- pi- pi+ to D0 -> K- pi- pi+ pi+
   p = newParameter("k_K3pi");
