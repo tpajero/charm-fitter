@@ -81,8 +81,8 @@ void PDF_BES_CLEO_K3pi_Kpipi0::setObservables(const TString c) {
     setObservable("Delta_K3pi_obs", DegToRad(26));
     setObservable("k_Kpipi0_obs", 0.79);
     setObservable("Delta_Kpipi0_obs", DegToRad(-16));
-    setObservable("r_K3pi_obs", 5.46);
-    setObservable("r_Kpipi0_obs", 4.41);
+    setObservable("r_K3pi_obs", 5.46e-2);
+    setObservable("r_Kpipi0_obs", 4.41e-2);
   } else {
     std::cout << "PDF_BES_CLEO_K3pi_Kpipi0::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
@@ -97,8 +97,8 @@ void PDF_BES_CLEO_K3pi_Kpipi0::setUncertainties(const TString c) {
     StatErr[1] = DegToRad(18);  // Delta_K3pi
     StatErr[2] = 0.04;          // k_Kpipi0
     StatErr[3] = DegToRad(11);  // Delta_Kpipi0
-    StatErr[4] = 0.08;          // r_K3pi
-    StatErr[5] = 0.11;          // r_Kpipi0
+    StatErr[4] = 0.08e-2;       // r_K3pi
+    StatErr[5] = 0.11e-2;       // r_Kpipi0
 
     std::ranges::fill(SystErr, 0.);
   } else {

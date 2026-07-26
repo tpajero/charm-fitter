@@ -102,9 +102,9 @@ void PDF_Cleo::setObservables(const TString c) {
     setObservablesToy();
   else if (c.EqualTo("Cleo-c")) {
     obsValSource = "https://inspirehep.net/literature/1189182";
-    setObservable("RD_obs", 0.533);
-    setObservable("x2_obs", 6.);
-    setObservable("y_obs", 4.2);
+    setObservable("RD_obs", 5.33e-3);
+    setObservable("x2_obs", 0.6e-3);
+    setObservable("y_obs", 4.2e-2);
     setObservable("cos_obs", 0.81);
     setObservable("sin_obs", -0.01);
   } else {
@@ -116,11 +116,11 @@ void PDF_Cleo::setObservables(const TString c) {
 void PDF_Cleo::setUncertainties(const TString c) {
   if (c.EqualTo("Cleo-c")) {
     obsErrSource = "https://inspirehep.net/literature/1189182";
-    StatErr[0] = sqrt(pow(0.107, 2) + pow(0.045, 2));  // RD
-    StatErr[1] = sqrt(pow(23., 2) + pow(11., 2));      // x2
-    StatErr[2] = sqrt(pow(2., 2) + pow(1.0, 2));       // y
-    StatErr[3] = sqrt(pow(0.20, 2) + pow(0.06, 2));    // cos
-    StatErr[4] = sqrt(pow(0.41, 2) + pow(0.04, 2));    // sin
+    StatErr[0] = sqrt(pow(1.07e-3, 2) + pow(0.45e-3, 2));  // RD
+    StatErr[1] = sqrt(pow(2.3e-3, 2) + pow(1.1e-3, 2));    // x2
+    StatErr[2] = sqrt(pow(2e-2, 2) + pow(1e-2, 2));        // y
+    StatErr[3] = sqrt(pow(0.20, 2) + pow(0.06, 2));        // cos
+    StatErr[4] = sqrt(pow(0.41, 2) + pow(0.04, 2));        // sin
     SystErr[0] = 0;
     SystErr[1] = 0;
     SystErr[2] = 0;

@@ -25,8 +25,8 @@ namespace {
       {"c1",
        {
            {theory_config::phenomenological,
-            "- k_K3pi * 0.5 * (      (qop+1) * (y*cos(Delta_K3pi - phi) + x*sin(Delta_K3pi - phi)) "
-            "                  + 1 / (qop+1) * (y*cos(Delta_K3pi + phi) + x*sin(Delta_K3pi + phi)))"},
+            "- k_K3pi * 0.5 * (      qop * (y*cos(Delta_K3pi - phi) + x*sin(Delta_K3pi - phi)) "
+            "                  + 1 / qop * (y*cos(Delta_K3pi + phi) + x*sin(Delta_K3pi + phi)))"},
            {theory_config::theoretical,
             "-k_K3pi * (y12 * cos(Delta_K3pi) * cos(phiG) + x12 * sin(Delta_K3pi) * cos(phiM))"},
        }},
@@ -81,9 +81,9 @@ void PDF_K3pi::setObservables(const TString c) {
     setObservablesToy();
   else if (c.EqualTo("LHCb-run1")) {
     obsValSource = "https://arxiv.org/abs/1602.07224v2";
-    setObservable("r_K3pi_obs", 5.67);
-    setObservable("c1_obs", 0.03);
-    setObservable("c2_obs", 0.48);
+    setObservable("r_K3pi_obs", 5.67e-2);
+    setObservable("c1_obs", 3e-4);
+    setObservable("c2_obs", 4.8e-5);
   } else {
     std::cout << "PDF_K3pi::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
@@ -93,9 +93,9 @@ void PDF_K3pi::setObservables(const TString c) {
 void PDF_K3pi::setUncertainties(const TString c) {
   if (c.EqualTo("LHCb-run1")) {
     obsErrSource = "https://arxiv.org/abs/1602.07224v2";
-    StatErr[0] = 0.12;
-    StatErr[1] = 0.18;
-    StatErr[2] = 0.18;
+    StatErr[0] = 0.12e-2;
+    StatErr[1] = 1.8e-3;
+    StatErr[2] = 1.8e-5;
     std::ranges::fill(SystErr, 0);
   } else {
     std::cout << "PDF_K3pi::setUncertainties() : ERROR : config " + c + " not found." << std::endl;

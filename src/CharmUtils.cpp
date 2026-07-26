@@ -47,16 +47,16 @@ std::string CharmUtils::get_dy_expression(const theory_config th_cfg, const FSC 
   std::string expression;
   switch (th_cfg) {
   case theory_config::phenomenological:
-    expression = "0.5 * (- y*(qop+1 - 1/(qop+1))*cos(phi)"
-                 "       + x*(qop+1 + 1/(qop+1))*sin(phi))";
+    expression = "0.5 * (- y*(qop - 1/qop)*cos(phi)"
+                 "       + x*(qop + 1/qop)*sin(phi))";
     switch (fsc) {
     case FSC::none:
       break;
     case FSC::partial:
-      expression += " + y * Acp_HH / 100";
+      expression += " + y * Acp_HH";
       break;
     case FSC::full:
-      expression += " + y * Acp_HH / 100 * (1 + x / y * cot_delta_HH)";
+      expression += " + y * Acp_HH * (1 + x / y * cot_delta_HH)";
       break;
     }
     break;
@@ -66,10 +66,10 @@ std::string CharmUtils::get_dy_expression(const theory_config th_cfg, const FSC 
     case FSC::none:
       break;
     case FSC::partial:
-      expression += " + y12 * Acp_HH / 100";
+      expression += " + y12 * Acp_HH";
       break;
     case FSC::full:
-      expression += " + y12 * Acp_HH / 100 * (1 + x12 / y12 * cot_delta_HH)";
+      expression += " + y12 * Acp_HH * (1 + x12 / y12 * cot_delta_HH)";
       break;
     }
     break;

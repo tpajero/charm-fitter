@@ -23,51 +23,51 @@ void ParametersCharmCombo::defineParameters() {
 
   // CP asymmetry in the decay (``direct'' CP asymmetry) of D0 -> K+ K-
   p = newParameter("Acp_KK");
-  p->title = "#it{a}_{#it{K}^{+}#it{K}^{#minus}}^{d} [%]";
-  p->startvalue = 0.08;
+  p->title = "#it{a}_{#it{K}^{+}#it{K}^{#minus}}^{d}";
+  p->startvalue = 8e-4;
   p->unit = "";
-  p->scan = range(-2, 2);
-  p->phys = range(-100, 100);
+  p->scan = range(-2e-2, 2e-2);
+  p->phys = range(-1., 1.);
 
   // CP asymmetry in the decay (``direct'' CP asymmetry) of D0 -> pi+ pi-
   p = newParameter("Acp_PP");
-  p->title = "#it{a}_{#it{#pi}^{+}#it{#pi}^{#minus}}^{d} [%]";
-  p->startvalue = 0.24;
+  p->title = "#it{a}_{#it{#pi}^{+}#it{#pi}^{#minus}}^{d}";
+  p->startvalue = 2.4e-3;
   p->unit = "";
-  p->scan = range(-2, 2);
-  p->phys = range(-100, 100);
+  p->scan = range(-2e-2, 2e-2);
+  p->phys = range(-1., 1.);
 
   // CP asymmetry in the decay (``direct'' CP asymmetry) of D0 -> K+ pi-
   p = newParameter("Acp_KP");
-  p->title = "#it{a}_{#it{K}^{+}#it{#pi}^{#minus}}^{d} [%]";
-  p->startvalue = -0.6;
+  p->title = "#it{a}_{#it{K}^{+}#it{#pi}^{#minus}}^{d}";
+  p->startvalue = -6e-3;
   p->unit = "";
-  p->scan = range(-2.5, 2);
-  p->phys = range(-100, 100);
+  p->scan = range(-2.5e-2, 2e-2);
+  p->phys = range(-1., 1.);
 
   // Ratio of the squared magnitudes of the decay amplitudes of D0 -> K+ pi- to D0 -> K- pi+
   p = newParameter("R_Kpi");
-  p->title = "#it{R_{K#pi}} [%]";
-  p->startvalue = 0.343;
+  p->title = "#it{R_{K#pi}}";
+  p->startvalue = 3.43e-3;
   p->unit = "";
-  p->scan = range(0.33, 0.36);
-  p->phys = range(0, 1e4);
+  p->scan = range(3.3e-3, 3.6e-3);
+  p->phys = range(0., 1e2);
 
   // Ratio of the magnitudes of the decay amplitudes of D0 -> K+ pi- pi- pi+ to D0 -> K- pi- pi+ pi+
   p = newParameter("r_K3pi");
-  p->title = "#it{r_{K3#pi}} [%]";
-  p->startvalue = 5.5;
+  p->title = "#it{r_{K3#pi}}";
+  p->startvalue = 5.5e-2;
   p->unit = "";
-  p->scan = range(4, 6);
-  p->phys = range(0, 1e4);
+  p->scan = range(4e-2, 6e-2);
+  p->phys = range(0., 1e2);
 
   // Ratio of the magnitudes of the decay amplitudes of D0 -> K+ pi- pi0 to D0 -> K- pi+ pi0
   p = newParameter("r_Kpipi0");
-  p->title = "#it{r_{K#pi#pi^{0}}} [%]";
-  p->startvalue = 4.4;
+  p->title = "#it{r_{K#pi#pi^{0}}}";
+  p->startvalue = 4.4e-2;
   p->unit = "";
-  p->scan = range(4, 6);
-  p->phys = range(0, 1e4);
+  p->scan = range(4e-2, 6e-2);
+  p->phys = range(0., 1e2);
 
   // Coherence parameters for the decay amplitudes of D0 -> K+ pi- pi- pi+ to D0 -> K- pi- pi+ pi+
   p = newParameter("k_K3pi");
@@ -149,28 +149,46 @@ void ParametersCharmCombo::defineParameters() {
   p->force = range(0, 1);
 
   /**
-   * Phenomenological parametrisation
+   * Notes on D0 mixing:
+   *
+   * By default, we rely on the theoretical parametrisation (see https://arxiv.org/abs/2001.07207).
+   *
+   * The phenomenological parametrisation is also implemented, with the definition
+   *
+   *     |D_1,2> = p |D0> \pm q |anti-D0>
+   *
+   * and the following conventions:
+   *
+   *   1. CP|D0> = - |anti-D0>
+   *   2. |D_1(2)> is the approximately CP-odd (CP-even) mass eigenstate
+   *   3. x = (m_2 - m_1) / Gamma; y = (Gamma_2 - Gamma_1) / (2 Gamma)
    */
+
+  constexpr double x12_start = 4.1e-3;
+  constexpr double y12_start = 6.6e-3;
+
+  // Phenomenological parametrisation ----------------------------------------------------------------------------------
+
   p = newParameter("x");
-  p->title = "#it{x} [%]";
-  p->startvalue = 0.4;
+  p->title = "#it{x}";
+  p->startvalue = x12_start;
   p->unit = "";
-  p->scan = range(-0.4, 1.);
-  p->phys = range(-1e4, 1e4);
+  p->scan = range(-4e-3, 1e-2);
+  p->phys = range(-1e2, 1e2);
 
   p = newParameter("y");
-  p->title = "#it{y} [%]";
-  p->startvalue = 0.63;
+  p->title = "#it{y}";
+  p->startvalue = y12_start;
   p->unit = "";
-  p->scan = range(0.1, 1);
-  p->phys = range(-1e4, 1e4);
+  p->scan = range(1e-3, 1e-2);
+  p->phys = range(-1e2, 1e2);
 
   p = newParameter("qop");
-  p->title = "|#it{q/p}|#minus1";
-  p->startvalue = -0.02;
+  p->title = "|#it{q/p}|";
+  p->startvalue = 0.98;
   p->unit = "";
-  p->scan = range(-0.25, 0.25);
-  p->phys = range(-1., 1e4);
+  p->scan = range(0.75, 1.25);
+  p->phys = range(0., 1e4);
 
   p = newParameter("phi");
   p->title = "#it{#phi}_{2} [rad]";
@@ -179,22 +197,21 @@ void ParametersCharmCombo::defineParameters() {
   p->scan = range(-0.6, 0.6);
   p->phys = range(DegToRad(-180.), DegToRad(180.));
 
-  /**
-   * Theoretical parametrisation
-   */
+  // Theoretical parametrisation ---------------------------------------------------------------------------------------
+
   p = newParameter("x12");
-  p->title = "#it{x}_{12} [%]";
-  p->startvalue = 0.4;
+  p->title = "#it{x}_{12}";
+  p->startvalue = x12_start;
   p->unit = "";
-  p->scan = range(0, 1);
-  p->phys = range(0, 1e4);
+  p->scan = range(0., 1e-2);
+  p->phys = range(0., 1e2);
 
   p = newParameter("y12");
-  p->title = "#it{y}_{12} [%]";
-  p->startvalue = 0.63;
+  p->title = "#it{y}_{12}";
+  p->startvalue = y12_start;
   p->unit = "";
-  p->scan = range(0., 1.1);
-  p->phys = range(0, 1e4);
+  p->scan = range(0., 1.1e-2);
+  p->phys = range(0., 1e2);
 
   p = newParameter("phiM");
   p->title = "#it{#phi}^{#it{M}}_{2} [rad]";
@@ -210,15 +227,18 @@ void ParametersCharmCombo::defineParameters() {
   p->scan = range(-0.3, 0.3);
   p->phys = range(DegToRad(-180.), DegToRad(180.));
 
+  // Other parameters --------------------------------------------------------------------------------------------------
+
   // Nuisance parameter to get predictions for CP violation in RS decays
   p = newParameter("DY_RS");
-  p->title = "#||{#Delta#it{Y}_{#it{K}^{#minus}#pi^{+}}}  [10^{#minus4}]";
-  p->startvalue = 0.05;
+  p->title = "#||{#Delta#it{Y}_{#it{K}^{#minus}#pi^{+}}}";
+  p->startvalue = 5e-6;
   p->unit = "";
-  p->scan = range(0., 1.);
-  p->phys = range(0., 1e4);
+  p->scan = range(0., 1e-4);
+  p->phys = range(0., 1.);
 
-  // Parameters for (D0 -> Kpi)-only combination
+  // Parameters for (D0 -> Kpi)-only combination -----------------------------------------------------------------------
+
   p = newParameter("xp2");
   p->title = "#it{x'}^{2} [10^{#minus4}]";
   p->startvalue = 0.24;

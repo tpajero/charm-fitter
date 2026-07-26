@@ -58,20 +58,18 @@ void PDF_DY_RS::initRelations() {
   theory = new RooArgList("theory");  ///< the order of this list must match that of the COR matrix!
   switch (th_cfg) {
   case theory_config::phenomenological:
-    theory->add(
-        *(Utils::makeTheoryVar("DY_RS_th", "DY_RS_th",
-                               "0.5 * pow(R_Kpi/100, 0.5) * "
-                               "(  (y*cos(Delta_Kpi) - x*sin(Delta_Kpi))*((qop+1) - 1/(qop+1) - Acp_KP/100)*cos(phi)"
-                               " - (x*cos(Delta_Kpi) + y*sin(Delta_Kpi))*((qop+1) + 1/(qop+1)             )*sin(phi))",
-                               parameters)));
+    theory->add(*(Utils::makeTheoryVar("DY_RS_th", "DY_RS_th",
+                                       "0.5 * pow(R_Kpi, 0.5) * "
+                                       "(  (y*cos(Delta_Kpi) - x*sin(Delta_Kpi))*(qop - 1/qop - Acp_KP)*cos(phi)"
+                                       " - (x*cos(Delta_Kpi) + y*sin(Delta_Kpi))*(qop + 1/qop         )*sin(phi))",
+                                       parameters)));
     break;
   case theory_config::theoretical:
-    theory->add(
-        *(Utils::makeTheoryVar("DY_RS_th", "DY_RS_th",
-                               "pow(R_Kpi/100, 0.5) * "
-                               "(  (-y12*cos(Delta_Kpi)*cos(phiG) + x12*sin(Delta_Kpi)*cos(phiM))*(Acp_KP/100)*0.5"
-                               " + ( y12*sin(Delta_Kpi)*sin(phiG) + x12*cos(Delta_Kpi)*sin(phiM))                 )",
-                               parameters)));
+    theory->add(*(Utils::makeTheoryVar("DY_RS_th", "DY_RS_th",
+                                       "pow(R_Kpi, 0.5) * "
+                                       "(  (-y12*cos(Delta_Kpi)*cos(phiG) + x12*sin(Delta_Kpi)*cos(phiM))*Acp_KP*0.5"
+                                       " + ( y12*sin(Delta_Kpi)*sin(phiG) + x12*cos(Delta_Kpi)*sin(phiM))           )",
+                                       parameters)));
     break;
   default:
     std::cout << "PDF_DY_RS::initRelations : ERROR : "
@@ -93,7 +91,7 @@ void PDF_DY_RS::setObservables(const TString c) {
     setObservablesToy();
   else if (c.EqualTo("LHCb2021")) {
     obsValSource = "https://inspirehep.net/literature/1864385";
-    setObservable("DY_RS_obs", -0.36e-2);
+    setObservable("DY_RS_obs", -0.36e-4);
   } else {
     std::cout << "PDF_DY_RS::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
@@ -103,8 +101,8 @@ void PDF_DY_RS::setObservables(const TString c) {
 void PDF_DY_RS::setUncertainties(const TString c) {
   if (c.EqualTo("LHCb2021")) {
     obsErrSource = "https://inspirehep.net/literature/1864385";
-    StatErr[0] = 0.50e-2;
-    SystErr[0] = 0.23e-2;
+    StatErr[0] = 0.50e-4;
+    SystErr[0] = 0.23e-4;
   } else {
     std::cout << "PDF_DY_RS::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
     exit(1);

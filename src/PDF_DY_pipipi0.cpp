@@ -68,7 +68,7 @@ void PDF_DY_pipipi0::setObservables(const TString c) {
   else if (c.EqualTo("toy"))
     setObservablesToy();
   else if (c.EqualTo("LHCb-R2"))
-    setObservable("DY_pipipi0_obs", -1.21e-2);
+    setObservable("DY_pipipi0_obs", -1.21e-4);
   else {
     std::cout << "PDF_DY_pipipi0::setObservables() : ERROR : config " << c << " not found for " << nObs
               << " DY_pipipi0 observables." << std::endl;
@@ -79,8 +79,8 @@ void PDF_DY_pipipi0::setObservables(const TString c) {
 void PDF_DY_pipipi0::setUncertainties(const TString c) {
   obsErrSource = "https://arxiv.org/abs/2405.06556";
   if (c.EqualTo("LHCb-R2")) {
-    StatErr[0] = 5.97e-2;
-    SystErr[0] = 2.01e-2;  // Removed the sys. unc. for the time binning
+    StatErr[0] = 5.97e-4;
+    SystErr[0] = 2.01e-4;  // Removed the sys. unc. for the time binning
   } else {
     std::cout << "PDF_DY_pipipi0::setUncertainties() : ERROR : config " << c << " not found for " << nObs
               << " DY_pipipi0 observables." << std::endl;

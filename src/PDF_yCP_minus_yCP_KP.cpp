@@ -63,17 +63,17 @@ void PDF_yCP_minus_yCP_KP::initRelations() {
   case theory_config::phenomenological:
     theory->add(*(Utils::makeTheoryVar("yCP_minus_yCP_KP_th", "yCP_minus_yCP_KP_th",
                                        " 0.5*( "
-                                       "       y*(qop+1 + 1/(qop+1))*cos(phi)"
-                                       "     - x*(qop+1 - 1/(qop+1))*sin(phi))"
-                                       " + sqrt(R_Kpi/100) * cos(Delta_Kpi) * ("
-                                       "      y * (qop+1 + 1/(qop+1)) * cos(phi)"
-                                       "    - x * (qop+1 - 1/(qop+1)) * sin(phi))",
+                                       "       y*(qop + 1/qop)*cos(phi)"
+                                       "     - x*(qop - 1/qop)*sin(phi))"
+                                       " + sqrt(R_Kpi) * cos(Delta_Kpi) * ("
+                                       "      y * (qop + 1/qop) * cos(phi)"
+                                       "    - x * (qop - 1/qop) * sin(phi))",
                                        parameters)));
     break;
   case theory_config::theoretical:
     theory->add(*(Utils::makeTheoryVar("yCP_minus_yCP_KP_th", "yCP_minus_yCP_KP_th",
                                        "y12*cos(phiG)"
-                                       "+ 2 * sqrt(R_Kpi/100) * y12 * cos(Delta_Kpi) * cos(phiG)",
+                                       "+ 2 * sqrt(R_Kpi) * y12 * cos(Delta_Kpi) * cos(phiG)",
                                        parameters)));
     break;
   default:
@@ -97,7 +97,7 @@ void PDF_yCP_minus_yCP_KP::setObservables(const TString c) {
     setObservablesToy();
   else if (c.EqualTo("WA2020")) {
     obsValSource = "https://cds.cern.ch/record/2747731";
-    setObservable("yCP_minus_yCP_KP_obs", 0.732);
+    setObservable("yCP_minus_yCP_KP_obs", 0.732e-2);
   } else {
     std::cout << "PDF_yCP_minus_yCP_KP::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
@@ -107,7 +107,7 @@ void PDF_yCP_minus_yCP_KP::setObservables(const TString c) {
 void PDF_yCP_minus_yCP_KP::setUncertainties(const TString c) {
   if (c.EqualTo("WA2020")) {
     obsErrSource = "https://cds.cern.ch/record/2747731";
-    StatErr[0] = 3.068;
+    StatErr[0] = 3.068e-2;
     SystErr[0] = 0.;
   } else {
     std::cout << "PDF_yCP_minus_yCP_KP::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
