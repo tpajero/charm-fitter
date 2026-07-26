@@ -96,8 +96,8 @@ void PDF_Kpipi0::setObservables(const TString c) {
     setObservablesToy();
   else if (c.EqualTo("BaBar")) {
     obsValSource = "https://inspirehep.net/literature/791715";
-    setObservable("xpp_obs", 2.61);
-    setObservable("ypp_obs", -0.06);
+    setObservable("xpp_obs", 2.61e-2);
+    setObservable("ypp_obs", -0.06e-2);
   } else {
     std::cout << "PDF_Kpipi0::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
@@ -107,8 +107,8 @@ void PDF_Kpipi0::setObservables(const TString c) {
 void PDF_Kpipi0::setUncertainties(const TString c) {
   if (c.EqualTo("BaBar")) {
     obsErrSource = "https://inspirehep.net/literature/791715";
-    StatErr[0] = pow(pow(0.625, 2) + pow(0.39, 2), 0.5);  // x''
-    StatErr[1] = pow(pow(0.595, 2) + pow(0.34, 2), 0.5);  // y''
+    StatErr[0] = pow(pow(0.625e-2, 2) + pow(0.39e-2, 2), 0.5);  // x''
+    StatErr[1] = pow(pow(0.595e-2, 2) + pow(0.34e-2, 2), 0.5);  // y''
   } else {
     std::cout << "PDF_Kpipi0::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
     exit(1);

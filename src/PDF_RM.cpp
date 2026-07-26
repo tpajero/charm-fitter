@@ -86,10 +86,10 @@ void PDF_RM::setObservables(const TString c) {
     setObservablesToy();
   else if (c.EqualTo("HFLAV2016")) {
     obsValSource = "https://hflav-eos.web.cern.ch/hflav-eos/charm/CHARM21/results_mixing.html";
-    setObservable("RM_obs", 1.30);
+    setObservable("RM_obs", 1.30e-4);
   } else if (c.EqualTo("LHCb_K3pi_Run1")) {
     obsValSource = "https://inspirehep.net/literature/1423070";
-    setObservable("RM_obs", 2 * 0.48);
+    setObservable("RM_obs", 2 * 0.48e-4);
   } else {
     std::cout << "PDF_RM::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
@@ -99,11 +99,11 @@ void PDF_RM::setObservables(const TString c) {
 void PDF_RM::setUncertainties(const TString c) {
   if (c.EqualTo("HFLAV2016")) {
     obsErrSource = "https://hflav-eos.web.cern.ch/hflav-eos/charm/CHARM21/results_mixing.html";
-    StatErr[0] = 2.69;
+    StatErr[0] = 2.69e-4;
     SystErr[0] = 0;
   } else if (c.EqualTo("LHCb_K3pi_Run1")) {
     obsErrSource = "https://inspirehep.net/literature/1423070";
-    StatErr[0] = 2 * 0.18;
+    StatErr[0] = 2 * 0.18e-4;
     SystErr[0] = 0;
   } else {
     std::cout << "PDF_RM::setUncertainties() : ERROR : config " + c + " not found." << std::endl;

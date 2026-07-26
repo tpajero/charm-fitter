@@ -120,8 +120,8 @@ void PDF_Kshh::setObservables(const TString c) {
     setObservablesToy();
   else if (c.EqualTo("Belle")) {
     obsValSource = "https://inspirehep.net/literature/1289224";
-    setObservable("x_obs", 0.56);
-    setObservable("y_obs", 0.30);
+    setObservable("x_obs", 0.56e-2);
+    setObservable("y_obs", 0.30e-2);
     setObservable("qop_obs", 0.90);
     setObservable("phi_obs", Utils::DegToRad(-6.));
   } else {
@@ -133,8 +133,8 @@ void PDF_Kshh::setObservables(const TString c) {
 void PDF_Kshh::setUncertainties(const TString c) {
   if (c.EqualTo("Belle")) {
     obsErrSource = "https://inspirehep.net/literature/1289224";
-    StatErr[0] = sqrt(pow(0.19, 2) + pow(0.093, 2));               // x
-    StatErr[1] = sqrt(pow(0.15, 2) + pow(0.068, 2));               // y
+    StatErr[0] = sqrt(pow(0.19e-2, 2) + pow(0.093e-2, 2));         // x
+    StatErr[1] = sqrt(pow(0.15e-2, 2) + pow(0.068e-2, 2));         // y
     StatErr[2] = sqrt(pow(0.155, 2) + pow(0.071, 2));              // qop
     StatErr[3] = Utils::DegToRad(sqrt(pow(11, 2) + pow(4.6, 2)));  // phi
     SystErr[0] = 0;                                                // x

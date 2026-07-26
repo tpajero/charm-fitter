@@ -149,21 +149,39 @@ void ParametersCharmCombo::defineParameters() {
   p->force = range(0, 1);
 
   /**
-   * Phenomenological parametrisation
+   * Notes on D0 mixing:
+   *
+   * By default, we rely on the theoretical parametrisation (see https://arxiv.org/abs/2001.07207).
+   *
+   * The phenomenological parametrisation is also implemented, with the definition
+   *
+   *     |D_1,2> = p |D0> \pm q |anti-D0>
+   *
+   * and the following conventions:
+   *
+   *   1. CP|D0> = - |anti-D0>
+   *   2. |D_1(2)> is the approximately CP-odd (CP-even) mass eigenstate
+   *   3. x = (m_2 - m_1) / Gamma; y = (Gamma_2 - Gamma_1) / (2 Gamma)
    */
+
+  constexpr double x12_start = 4.1e-3;
+  constexpr double y12_start = 6.6e-3;
+
+  // Phenomenological parametrisation ----------------------------------------------------------------------------------
+
   p = newParameter("x");
-  p->title = "#it{x} [%]";
-  p->startvalue = 0.4;
+  p->title = "#it{x}";
+  p->startvalue = x12_start;
   p->unit = "";
-  p->scan = range(-0.4, 1.);
-  p->phys = range(-1e4, 1e4);
+  p->scan = range(-4e-3, 1e-2);
+  p->phys = range(-1e2, 1e2);
 
   p = newParameter("y");
-  p->title = "#it{y} [%]";
-  p->startvalue = 0.63;
+  p->title = "#it{y}";
+  p->startvalue = y12_start;
   p->unit = "";
-  p->scan = range(0.1, 1);
-  p->phys = range(-1e4, 1e4);
+  p->scan = range(1e-3, 1e-2);
+  p->phys = range(-1e2, 1e2);
 
   p = newParameter("qop");
   p->title = "|#it{q/p}|";
@@ -179,22 +197,21 @@ void ParametersCharmCombo::defineParameters() {
   p->scan = range(-0.6, 0.6);
   p->phys = range(DegToRad(-180.), DegToRad(180.));
 
-  /**
-   * Theoretical parametrisation
-   */
+  // Theoretical parametrisation ---------------------------------------------------------------------------------------
+
   p = newParameter("x12");
-  p->title = "#it{x}_{12} [%]";
-  p->startvalue = 0.4;
+  p->title = "#it{x}_{12}";
+  p->startvalue = x12_start;
   p->unit = "";
-  p->scan = range(0, 1);
-  p->phys = range(0, 1e4);
+  p->scan = range(0., 1e-2);
+  p->phys = range(0., 1e2);
 
   p = newParameter("y12");
-  p->title = "#it{y}_{12} [%]";
-  p->startvalue = 0.63;
+  p->title = "#it{y}_{12}";
+  p->startvalue = y12_start;
   p->unit = "";
-  p->scan = range(0., 1.1);
-  p->phys = range(0, 1e4);
+  p->scan = range(0., 1.1e-2);
+  p->phys = range(0., 1e2);
 
   p = newParameter("phiM");
   p->title = "#it{#phi}^{#it{M}}_{2} [rad]";
@@ -210,15 +227,18 @@ void ParametersCharmCombo::defineParameters() {
   p->scan = range(-0.3, 0.3);
   p->phys = range(DegToRad(-180.), DegToRad(180.));
 
+  // Other parameters --------------------------------------------------------------------------------------------------
+
   // Nuisance parameter to get predictions for CP violation in RS decays
   p = newParameter("DY_RS");
-  p->title = "#||{#Delta#it{Y}_{#it{K}^{#minus}#pi^{+}}} [%]";
-  p->startvalue = 5e-4;
+  p->title = "#||{#Delta#it{Y}_{#it{K}^{#minus}#pi^{+}}}";
+  p->startvalue = 5e-6;
   p->unit = "";
-  p->scan = range(0., 1e-2);
-  p->phys = range(0., 1e2);
+  p->scan = range(0., 1e-4);
+  p->phys = range(0., 1.);
 
-  // Parameters for (D0 -> Kpi)-only combination
+  // Parameters for (D0 -> Kpi)-only combination -----------------------------------------------------------------------
+
   p = newParameter("xp2");
   p->title = "#it{x'}^{2} [10^{#minus4}]";
   p->startvalue = 0.24;

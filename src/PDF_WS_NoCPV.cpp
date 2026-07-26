@@ -96,18 +96,18 @@ void PDF_WS_NoCPV::setObservables(const TString c) {
   else if (c.EqualTo("CDF")) {
     obsValSource = "https://inspirehep.net/literature/1254229";
     setObservable("RD_obs", 0.00351);
-    setObservable("yp_obs", 0.43);
-    setObservable("xp2_obs", 0.8);
+    setObservable("yp_obs", 4.3e-3);
+    setObservable("xp2_obs", 0.8e-4);
   } else if (c.EqualTo("BaBar")) {
     obsValSource = "https://inspirehep.net/literature/746245";
     setObservable("RD_obs", 0.00303);
-    setObservable("yp_obs", 0.97);
-    setObservable("xp2_obs", -2.2);
+    setObservable("yp_obs", 9.7e-3);
+    setObservable("xp2_obs", -2.2e-4);
   } else if (c.EqualTo("Belle")) {
     obsValSource = "https://inspirehep.net/literature/1277238";
     setObservable("RD_obs", 0.00353);
-    setObservable("yp_obs", 0.46);
-    setObservable("xp2_obs", 0.9);
+    setObservable("yp_obs", 4.6e-3);
+    setObservable("xp2_obs", 0.9e-4);
   } else {
     std::cout << "PDF_WS_NoCPV::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
@@ -118,20 +118,20 @@ void PDF_WS_NoCPV::setUncertainties(const TString c) {
   if (c.EqualTo("CDF")) {
     obsErrSource = "https://inspirehep.net/literature/1254229";
     StatErr[0] = 0.00035;  // RD
-    StatErr[1] = 0.43;     // y'
-    StatErr[2] = 1.8;      // x'2
+    StatErr[1] = 4.3e-3;   // y'
+    StatErr[2] = 1.8e-4;   // x'2
     std::ranges::fill(SystErr, 0.);
   } else if (c.EqualTo("BaBar")) {
     obsErrSource = "https://inspirehep.net/literature/746245";
     StatErr[0] = pow(pow(0.00016, 2) + pow(0.00010, 2), 0.5);  // RD
-    StatErr[1] = pow(pow(0.44, 2) + pow(0.31, 2), 0.5);        // y'+
-    StatErr[2] = pow(pow(3.0, 2) + pow(2.1, 2), 0.5);          // x'2+
+    StatErr[1] = pow(pow(4.4e-3, 2) + pow(3.1e-3, 2), 0.5);    // y'+
+    StatErr[2] = pow(pow(3.0e-4, 2) + pow(2.1e-4, 2), 0.5);    // x'2+
     std::ranges::fill(SystErr, 0.);
   } else if (c.EqualTo("Belle")) {
     obsErrSource = "https://inspirehep.net/literature/1277238";
     StatErr[0] = 0.00013;  // RD
-    StatErr[1] = 0.34;     // y'
-    StatErr[2] = 2.2;      // x'2
+    StatErr[1] = 3.4e-3;   // y'
+    StatErr[2] = 2.2e-4;   // x'2
     std::ranges::fill(SystErr, 0.);
   } else {
     std::cout << "PDF_WS_NoCPV::setUncertainties() : ERROR : config " + c + " not found." << std::endl;

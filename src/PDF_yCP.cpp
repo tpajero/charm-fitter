@@ -85,13 +85,13 @@ void PDF_yCP::setObservables(const TString c) {
     setObservablesToy();
   else if (c.EqualTo("WA2020")) {
     obsValSource = "https://cds.cern.ch/record/2747731";
-    setObservable("yCP_obs", -0.370);
+    setObservable("yCP_obs", -3.70e-3);
   } else if (c.EqualTo("WA2020_biased")) {
     obsValSource = "HFLAV";
-    setObservable("yCP_obs", 0.719);
+    setObservable("yCP_obs", 7.19e-3);
   } else if (c.EqualTo("LHCb2022_biased")) {
     obsValSource = "https://inspirehep.net/literature/2035063";
-    setObservable("yCP_obs", 0.696);
+    setObservable("yCP_obs", 6.96e-3);
   } else {
     std::cout << "PDF_yCP::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
@@ -101,16 +101,16 @@ void PDF_yCP::setObservables(const TString c) {
 void PDF_yCP::setUncertainties(const TString c) {
   if (c.EqualTo("WA2020")) {
     obsErrSource = "https://cds.cern.ch/record/2747731";
-    StatErr[0] = 0.704;
+    StatErr[0] = 7.04e-3;
     SystErr[0] = 0;
   } else if (c.EqualTo("WA2020_biased")) {
     obsValSource = "HFLAV";
-    StatErr[0] = 0.113;
+    StatErr[0] = 1.13e-3;
     SystErr[0] = 0;
   } else if (c.EqualTo("LHCb2022_biased")) {
     obsValSource = "https://inspirehep.net/literature/2035063";
-    StatErr[0] = 0.026;
-    SystErr[0] = 0.013;
+    StatErr[0] = 0.26e-3;
+    SystErr[0] = 0.13e-3;
   } else {
     std::cout << "PDF_yCP::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
     exit(1);

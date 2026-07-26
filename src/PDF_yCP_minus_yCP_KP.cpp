@@ -97,7 +97,7 @@ void PDF_yCP_minus_yCP_KP::setObservables(const TString c) {
     setObservablesToy();
   else if (c.EqualTo("WA2020")) {
     obsValSource = "https://cds.cern.ch/record/2747731";
-    setObservable("yCP_minus_yCP_KP_obs", 0.732);
+    setObservable("yCP_minus_yCP_KP_obs", 0.732e-2);
   } else {
     std::cout << "PDF_yCP_minus_yCP_KP::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
@@ -107,7 +107,7 @@ void PDF_yCP_minus_yCP_KP::setObservables(const TString c) {
 void PDF_yCP_minus_yCP_KP::setUncertainties(const TString c) {
   if (c.EqualTo("WA2020")) {
     obsErrSource = "https://cds.cern.ch/record/2747731";
-    StatErr[0] = 3.068;
+    StatErr[0] = 3.068e-2;
     SystErr[0] = 0.;
   } else {
     std::cout << "PDF_yCP_minus_yCP_KP::setUncertainties() : ERROR : config " + c + " not found." << std::endl;

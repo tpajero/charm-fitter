@@ -54,9 +54,9 @@ void PDF_BES_Kpi_7d::initParameters() {
 
 void PDF_BES_Kpi_7d::initRelations() {
   theory = new RooArgList("theory");
-  std::string a_kpi_formula = "(2 * 10 * sqrt(100 * R_Kpi) * cos(Delta_Kpi) + y) / (1 + R_Kpi)";
-  std::string a_kpi_pipipi0_formula = "F_pipipi0 * (2 * 10 * sqrt(100 * R_Kpi) * cos(Delta_Kpi) + y)"
-                                      "/ (1 + R_Kpi + (1 - F_pipipi0) * (-2 * sqrt(R_Kpi) * cos(Delta_Kpi) + y/100.))";
+  std::string a_kpi_formula = "(2 * sqrt(R_Kpi) * cos(Delta_Kpi) + y) / (1 + R_Kpi)";
+  std::string a_kpi_pipipi0_formula = "F_pipipi0 * (2 * sqrt(R_Kpi) * cos(Delta_Kpi) + y)"
+                                      "/ (1 + R_Kpi + (1 - F_pipipi0) * (-2 * sqrt(R_Kpi) * cos(Delta_Kpi) + y))";
   switch (th_cfg) {
   case theory_config::phenomenological:
     break;
@@ -95,8 +95,8 @@ void PDF_BES_Kpi_7d::initObservables() {
 void PDF_BES_Kpi_7d::setObservables(const TString c) {
   if (c.EqualTo("3+7fb")) {
     obsValSource = "https://arxiv.org/pdf/2208.09402v2.pdf, https://arxiv.org/pdf/2506.07907";
-    setObservable("A_kpi_obs", 13.2);
-    setObservable("A_kpi_pipipi0_obs", 13.0);
+    setObservable("A_kpi_obs", 13.2e-2);
+    setObservable("A_kpi_pipipi0_obs", 13.0e-2);
     setObservable("rcos_3fb_obs", -5.62e-2);
     setObservable("rsin_3fb_obs", -1.1e-2);
     setObservable("rcos_7fbCP_obs", -7.0e-2);
@@ -111,10 +111,10 @@ void PDF_BES_Kpi_7d::setObservables(const TString c) {
 void PDF_BES_Kpi_7d::setUncertainties(const TString c) {
   if (c.EqualTo("3+7fb")) {
     obsErrSource = "https://arxiv.org/pdf/2208.09402v2.pdf, https://arxiv.org/pdf/2506.07907";
-    StatErr[0] = 1.1;
-    SystErr[0] = 0.7;
-    StatErr[1] = 1.2;
-    SystErr[1] = 0.8;
+    StatErr[0] = 1.1e-2;
+    SystErr[0] = 0.7e-2;
+    StatErr[1] = 1.2e-2;
+    SystErr[1] = 0.8e-2;
     StatErr[2] = 0.81e-2;
     SystErr[2] = std::sqrt(std::pow(0.50e-2, 2) + std::pow(0.10e-2, 2));
     StatErr[3] = 1.2e-2;

@@ -90,7 +90,7 @@ void PDF_scan_DY_RS::initObservables() {
 void PDF_scan_DY_RS::setObservables() { setObservable("DY_RS_scan_obs", 0.); }
 
 void PDF_scan_DY_RS::setUncertainties() {
-  StatErr[0] = 5e-5;
+  StatErr[0] = 5e-7;
   SystErr[0] = 0.;
 }
 

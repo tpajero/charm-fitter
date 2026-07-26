@@ -58,7 +58,7 @@ void PDF_BES_Kpi_1d::initParameters() {
 
 void PDF_BES_Kpi_1d::initRelations() {
   theory = new RooArgList("theory");
-  std::string a_kpi_formula = "(2 * 10 * sqrt(100 * R_Kpi) * cos(Delta_Kpi) + y) / (1 + R_Kpi)";
+  std::string a_kpi_formula = "(2 * sqrt(R_Kpi) * cos(Delta_Kpi) + y) / (1 + R_Kpi)";
   switch (th_cfg) {
   case theory_config::phenomenological:
     break;
@@ -86,7 +86,7 @@ void PDF_BES_Kpi_1d::setObservables(const TString c) {
     setObservablesToy();
   else if (c.EqualTo("BES")) {
     obsValSource = "http://inspirehep.net/record/1291279";
-    setObservable("A_kpi_obs", 12.7);
+    setObservable("A_kpi_obs", 12.7e-2);
   } else {
     std::cout << "PDF_BES_Kpi_1d::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
@@ -96,8 +96,8 @@ void PDF_BES_Kpi_1d::setObservables(const TString c) {
 void PDF_BES_Kpi_1d::setUncertainties(const TString c) {
   if (c.EqualTo("BES")) {
     obsErrSource = "http://inspirehep.net/record/1291279";
-    StatErr[0] = 1.3;
-    SystErr[0] = 0.7;
+    StatErr[0] = 1.3e-2;
+    SystErr[0] = 0.7e-2;
   } else {
     std::cout << "PDF_BES_Kpi_1d::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
     exit(1);

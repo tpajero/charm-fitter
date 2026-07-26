@@ -96,20 +96,20 @@ void PDF_XY::setObservables(const TString c) {
     setObservablesToy();
   else if (c.EqualTo("BaBar_Kshh")) {
     obsValSource = "https://inspirehep.net/literature/853279";
-    setObservable("x_obs", 0.16);
-    setObservable("y_obs", 0.57);
+    setObservable("x_obs", 1.6e-3);
+    setObservable("y_obs", 5.7e-3);
   } else if (c.EqualTo("BaBar_pipipi0")) {
     obsValSource = "https://inspirehep.net/literature/1441203";
-    setObservable("x_obs", 1.5);
-    setObservable("y_obs", 0.2);
+    setObservable("x_obs", 15e-3);
+    setObservable("y_obs", 2e-3);
   } else if (c.EqualTo("LHCb_KSpipi")) {
     obsValSource = "https://inspirehep.net/literature/1396327";
-    setObservable("x_obs", -0.86);
-    setObservable("y_obs", 0.03);
+    setObservable("x_obs", -8.6e-3);
+    setObservable("y_obs", 0.3e-3);
   } else if (c.EqualTo("Belle_Belle2")) {
     obsValSource = "https://arxiv.org/abs/2410.22961";
-    setObservable("x_obs", 0.40);
-    setObservable("y_obs", 0.29);
+    setObservable("x_obs", 4.0e-3);
+    setObservable("y_obs", 2.9e-3);
   } else {
     std::cout << "PDF_XY::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
@@ -119,25 +119,25 @@ void PDF_XY::setObservables(const TString c) {
 void PDF_XY::setUncertainties(const TString c) {
   if (c.EqualTo("BaBar_Kshh")) {
     obsErrSource = "https://inspirehep.net/literature/853279";
-    StatErr[0] = sqrt(pow(0.23, 2) + pow(0.12, 2) + pow(0.08, 2));  // x
-    StatErr[1] = sqrt(pow(0.20, 2) + pow(0.13, 2) + pow(0.07, 2));  // y
+    StatErr[0] = sqrt(pow(2.3e-3, 2) + pow(1.2e-3, 2) + pow(0.8e-3, 2));  // x
+    StatErr[1] = sqrt(pow(2.0e-3, 2) + pow(1.3e-3, 2) + pow(0.7e-3, 2));  // y
     std::ranges::fill(SystErr, 0.);
   } else if (c.EqualTo("BaBar_pipipi0")) {
     obsErrSource = "https://inspirehep.net/literature/1441203";
-    StatErr[0] = sqrt(pow(1.2, 2) + pow(0.6, 2));  // x
-    StatErr[1] = sqrt(pow(0.9, 2) + pow(0.5, 2));  // y
+    StatErr[0] = sqrt(pow(12e-3, 2) + pow(6e-3, 2));  // x
+    StatErr[1] = sqrt(pow(9e-3, 2) + pow(5e-3, 2));   // y
     std::ranges::fill(SystErr, 0.);
   } else if (c.EqualTo("LHCb_KSpipi")) {
     obsErrSource = "https://inspirehep.net/literature/1396327";
-    StatErr[0] = sqrt(pow(0.53, 2) + pow(0.17, 2));  // x
-    StatErr[1] = sqrt(pow(0.46, 2) + pow(0.13, 2));  // y
+    StatErr[0] = sqrt(pow(5.3e-3, 2) + pow(1.7e-3, 2));  // x
+    StatErr[1] = sqrt(pow(4.6e-3, 2) + pow(1.3e-3, 2));  // y
     std::ranges::fill(SystErr, 0.);
   } else if (c.EqualTo("Belle_Belle2")) {
     obsErrSource = "https://arxiv.org/abs/2410.22961";
-    StatErr[0] = 0.17;  // x
-    StatErr[1] = 0.14;  // y
-    SystErr[0] = 0.04;  // x
-    SystErr[1] = 0.03;  // y
+    StatErr[0] = 1.7e-3;  // x
+    StatErr[1] = 1.4e-3;  // y
+    SystErr[0] = 0.4e-3;  // x
+    SystErr[1] = 0.3e-3;  // y
   } else {
     std::cout << "PDF_XY::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
     exit(1);

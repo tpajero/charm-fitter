@@ -278,79 +278,79 @@ void PDF_WS::setObservables(const TString c) {
     obsValSource = "https://inspirehep.net/literature/746245";
     // setObservable("RD_obs", 0.00303); TODO
     setObservable("RD_p_obs", 0.00297);
-    setObservable("y'+_obs", 0.98);
-    setObservable("x'2+_obs", -2.4);
+    setObservable("y'+_obs", 9.8e-3);
+    setObservable("x'2+_obs", -2.4e-4);
     // setObservable("AD_obs", -2.1e-2); TODO
     setObservable("RD_m_obs", 0.00309);
-    setObservable("y'-_obs", 0.96);
-    setObservable("x'2-_obs", -2.0);
+    setObservable("y'-_obs", 9.6e-3);
+    setObservable("x'2-_obs", -2.0e-4);
   } else if (c.EqualTo("Belle")) {
     obsValSource = "http://belle.kek.jp/belle/theses/doctor/lmzhang06/phd-mix-400.ps.gz";
     setObservable("RD_p_obs", 0.00373);
-    setObservable("y'+_obs", -0.12);
-    setObservable("x'2+_obs", 3.2);
+    setObservable("y'+_obs", -1.2e-3);
+    setObservable("x'2+_obs", 3.2e-4);
     setObservable("RD_m_obs", 0.00356);
-    setObservable("y'-_obs", 0.2);
-    setObservable("x'2-_obs", 0.6);
+    setObservable("y'-_obs", 2e-3);
+    setObservable("x'2-_obs", 0.6e-4);
   } else if (c.EqualTo("LHCb_DT_Run1")) {
     obsValSource = "https://inspirehep.net/literature/1499047";
     setObservable("RD_p_obs", 0.00338);
-    setObservable("y'+_obs", 0.581);
-    setObservable("x'2+_obs", -0.19);
+    setObservable("y'+_obs", 5.81e-3);
+    setObservable("x'2+_obs", -1.9e-5);
     setObservable("RD_m_obs", 0.00360);
-    setObservable("y'-_obs", 0.332);
-    setObservable("x'2-_obs", 0.79);
+    setObservable("y'-_obs", 3.32e-3);
+    setObservable("x'2-_obs", 7.9e-5);
   } else if (c.EqualTo("LHCb_Run1")) {
     obsValSource = "https://inspirehep.net/literature/1499047";
     setObservable("RD_p_obs", 0.003474);
-    setObservable("y'+_obs", 0.597);
-    setObservable("x'2+_obs", 0.11);
+    setObservable("y'+_obs", 5.97e-3);
+    setObservable("x'2+_obs", 1.1e-5);
     setObservable("RD_m_obs", 0.003591);
-    setObservable("y'-_obs", 0.450);
-    setObservable("x'2-_obs", 0.61);
+    setObservable("y'-_obs", 4.50e-3);
+    setObservable("x'2-_obs", 6.1e-5);
   } else if (c.EqualTo("LHCb_Prompt_2011_2016")) {
     obsValSource = "https://inspirehep.net/literature/1642234";
     setObservable("RD_p_obs", 0.003454);
-    setObservable("y'+_obs", 0.501);
-    setObservable("x'2+_obs", 0.61);
+    setObservable("y'+_obs", 5.01e-3);
+    setObservable("x'2+_obs", 6.1e-5);
     setObservable("RD_m_obs", 0.003454);
-    setObservable("y'-_obs", 0.554);
-    setObservable("x'2-_obs", 0.16);
+    setObservable("y'-_obs", 5.54e-3);
+    setObservable("x'2-_obs", 1.6e-5);
   } else if (c.EqualTo("LHCb_Prompt_Run12_sec9")) {
     obsValSource = "https://indico.cern.ch/event/1355805/";
     setObservable("RD_obs", 0.003427);
-    setObservable("c_obs", 0.528);
-    setObservable("c'_obs", 0.120);
+    setObservable("c_obs", 5.28e-3);
+    setObservable("c'_obs", 1.20e-5);
     setObservable("AD_obs", -0.66e-2);
-    setObservable("dc_obs", 0.020);
-    setObservable("dc'_obs", -0.007);
+    setObservable("dc_obs", 2.0e-4);
+    setObservable("dc'_obs", -0.7e-6);
   } else if (c.EqualTo("LHCb_Prompt_Run12_appB")) {
     obsValSource = "https://indico.cern.ch/event/1355805/";
     setObservable("RD_obs", 0.003427);
-    setObservable("c_obs", 0.528);
-    setObservable("c'_obs", 0.120);
+    setObservable("c_obs", 5.28e-3);
+    setObservable("c'_obs", 1.20e-5);
     setObservable("AD_obs", -0.9e-2);
-    setObservable("dc_obs", -0.01);
-    setObservable("dc'_obs", 0.046);
+    setObservable("dc_obs", -0.1e-3);
+    setObservable("dc'_obs", 4.6e-6);
     setObservable("ADt_obs", -0.82e-2);
-    setObservable("dc~_obs", 0.032);
-    setObservable("dc'~_obs", -0.020);
+    setObservable("dc~_obs", 3.2e-4);
+    setObservable("dc'~_obs", -2.0e-6);
   } else if (c.EqualTo("LHCb_DT_Run2")) {
     obsValSource = "https://indico.cern.ch/event/1423686/contributions/6139348/, LHCb-PAPER-2024-044";
     setObservable("RD_p_obs", 0.00355);
-    setObservable("y'+_obs", 0.356);
-    setObservable("x'2+_obs", 1.086);
+    setObservable("y'+_obs", 3.56e-3);
+    setObservable("x'2+_obs", 1.086e-4);
     setObservable("RD_m_obs", 0.00339);
-    setObservable("y'-_obs", 0.811);
-    setObservable("x'2-_obs", -1.129);
+    setObservable("y'-_obs", 8.11e-3);
+    setObservable("x'2-_obs", -1.129e-4);
   } else if (c.EqualTo("LHCb_DT_Run12")) {
     obsValSource = "https://indico.cern.ch/event/1423686/contributions/6139348/, LHCb-PAPER-2024-044";
     setObservable("RD_p_obs", 0.00350);
-    setObservable("y'+_obs", 0.414);
-    setObservable("x'2+_obs", 0.784);
+    setObservable("y'+_obs", 4.14e-3);
+    setObservable("x'2+_obs", 7.84e-5);
     setObservable("RD_m_obs", 0.00344);
-    setObservable("y'-_obs", 0.681);
-    setObservable("x'2-_obs", -0.486);
+    setObservable("y'-_obs", 6.81e-3);
+    setObservable("x'2-_obs", -4.86e-5);
   } else {
     std::cout << "PDF_WS::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
@@ -362,87 +362,87 @@ void PDF_WS::setUncertainties(const TString c) {
     obsErrSource = "https://inspirehep.net/literature/746245";
     // StatErr[0] = 0.000189; // RD TODO
     StatErr[0] = 0.000267;  // RD+
-    StatErr[1] = 0.78;      // y'+
-    StatErr[2] = 5.2;       // x'2+
+    StatErr[1] = 7.8e-3;    // y'+
+    StatErr[2] = 5.2e-4;    // x'2+
     // StatErr[3] = 5.4e-2;    // AD TODO
     StatErr[3] = 0.000267;  // RD-
-    StatErr[4] = 0.75;      // y'-
-    StatErr[5] = 5.0;       // x'2-
+    StatErr[4] = 7.5e-3;    // y'-
+    StatErr[5] = 5.0e-4;    // x'2-
     std::ranges::fill(SystErr, 0.);
   } else if (c.EqualTo("Belle")) {
     obsErrSource = "http://belle.kek.jp/belle/theses/doctor/lmzhang06/phd-mix-400.ps.gz";
     StatErr[0] = 0.00024;  // RD+
-    StatErr[1] = 0.57;     // y'+
-    StatErr[2] = 3.1;      // x'2+
+    StatErr[1] = 5.7e-3;   // y'+
+    StatErr[2] = 3.1e-4;   // x'2+
     StatErr[3] = 0.00024;  // RD-
-    StatErr[4] = 0.54;     // y'-
-    StatErr[5] = 2.9;      // x'2-
+    StatErr[4] = 5.4e-3;   // y'-
+    StatErr[5] = 2.9e-4;   // x'2-
     std::ranges::fill(SystErr, 0.);
   } else if (c.EqualTo("LHCb_DT_Run1")) {
     obsErrSource = "https://inspirehep.net/literature/1499047";
-    StatErr[0] = pow(pow(0.0015, 2) + pow(0.0006, 2), 0.5);  // RD+
-    StatErr[1] = pow(pow(0.525, 2) + pow(0.032, 2), 0.5);    // y'+
-    StatErr[2] = pow(pow(4.46, 2) + pow(0.31, 2), 0.5);      // x'2+
-    StatErr[3] = pow(pow(0.0015, 2) + pow(0.0007, 2), 0.5);  // RD-
-    StatErr[4] = pow(pow(0.521, 2) + pow(0.040, 2), 0.5);    // y'-
-    StatErr[5] = pow(pow(4.31, 2) + pow(0.38, 2), 0.5);      // x'2-
+    StatErr[0] = pow(pow(0.0015, 2) + pow(0.0006, 2), 0.5);    // RD+
+    StatErr[1] = pow(pow(5.25e-3, 2) + pow(0.32e-3, 2), 0.5);  // y'+
+    StatErr[2] = pow(pow(4.46e-4, 2) + pow(0.31e-4, 2), 0.5);  // x'2+
+    StatErr[3] = pow(pow(0.0015, 2) + pow(0.0007, 2), 0.5);    // RD-
+    StatErr[4] = pow(pow(5.21e-3, 2) + pow(0.40e-3, 2), 0.5);  // y'-
+    StatErr[5] = pow(pow(4.31e-4, 2) + pow(0.38e-4, 2), 0.5);  // x'2-
     std::ranges::fill(SystErr, 0.);
   } else if (c.EqualTo("LHCb_Run1")) {
     obsErrSource = "https://inspirehep.net/literature/1499047";
     StatErr[0] = 0.00081;  // RD+
-    StatErr[1] = 0.125;    // y'+
-    StatErr[2] = 0.65;     // x'2+
+    StatErr[1] = 1.25e-3;  // y'+
+    StatErr[2] = 6.5e-5;   // x'2+
     StatErr[3] = 0.00081;  // RD-
-    StatErr[4] = 0.121;    // y'-
-    StatErr[5] = 0.61;     // x'2-
+    StatErr[4] = 1.21e-3;  // y'-
+    StatErr[5] = 6.1e-5;   // x'2-
     std::ranges::fill(SystErr, 0.);
   } else if (c.EqualTo("LHCb_Prompt_2011_2016")) {
     obsErrSource = "https://inspirehep.net/literature/1642234";
     StatErr[0] = 0.000045;  // RD+
-    StatErr[1] = 0.074;     // y'+
-    StatErr[2] = 0.37;      // x'2+
+    StatErr[1] = 7.4e-4;    // y'+
+    StatErr[2] = 3.7e-5;    // x'2+
     StatErr[3] = 0.000045;  // RD-
-    StatErr[4] = 0.074;     // y'-
-    StatErr[5] = 0.39;      // x'2-
+    StatErr[4] = 7.4e-4;    // y'-
+    StatErr[5] = 3.9e-5;    // x'2-
     std::ranges::fill(SystErr, 0.);
   } else if (c.EqualTo("LHCb_Prompt_Run12_sec9")) {
     obsErrSource = "https://indico.cern.ch/event/1355805/";
     StatErr[0] = 0.000019;  // RD
-    StatErr[1] = 0.033;     // c
-    StatErr[2] = 0.035;     // c'
+    StatErr[1] = 3.3e-4;    // c
+    StatErr[2] = 3.5e-6;    // c'
     StatErr[3] = 0.57e-2;   // AD
-    StatErr[4] = 0.034;     // dc
-    StatErr[5] = 0.036;     // dc'
+    StatErr[4] = 3.4e-4;    // dc
+    StatErr[5] = 3.6e-6;    // dc'
     std::ranges::fill(SystErr, 0.);
   } else if (c.EqualTo("LHCb_Prompt_Run12_appB")) {
     obsErrSource = "https://indico.cern.ch/event/1355805/";
     StatErr[0] = 0.000019;  // RD
-    StatErr[1] = 0.033;     // c
-    StatErr[2] = 0.035;     // c'
+    StatErr[1] = 3.3e-4;    // c
+    StatErr[2] = 3.5e-6;    // c'
     StatErr[3] = 2.0e-2;    // AD
-    StatErr[4] = 0.10;      // dc
-    StatErr[5] = 0.098;     // dc'
+    StatErr[4] = 1.0e-3;    // dc
+    StatErr[5] = 9.8e-6;    // dc'
     StatErr[6] = 0.59e-2;   // ADt
-    StatErr[7] = 0.036;     // dc~
-    StatErr[8] = 0.038;     // dc'~
+    StatErr[7] = 3.6e-4;    // dc~
+    StatErr[8] = 3.8e-6;    // dc'~
     std::ranges::fill(SystErr, 0.);
   } else if (c.EqualTo("LHCb_DT_Run2")) {
     obsErrSource = "https://indico.cern.ch/event/1423686/contributions/6139348/, LHCb-PAPER-2024-044";
-    StatErr[0] = 0.00008;  // RD+
-    StatErr[1] = 0.225;    // y'+
-    StatErr[2] = 1.623;    // x'2+
-    StatErr[3] = 0.00008;  // RD-
-    StatErr[4] = 0.236;    // y'-
-    StatErr[5] = 1.859;    // x'2-
+    StatErr[0] = 0.00008;   // RD+
+    StatErr[1] = 2.25e-3;   // y'+
+    StatErr[2] = 1.623e-4;  // x'2+
+    StatErr[3] = 0.00008;   // RD-
+    StatErr[4] = 2.36e-3;   // y'-
+    StatErr[5] = 1.859e-4;  // x'2-
     std::ranges::fill(SystErr, 0.);
   } else if (c.EqualTo("LHCb_DT_Run12")) {
     obsErrSource = "https://indico.cern.ch/event/1423686/contributions/6139348/, LHCb-PAPER-2024-044";
-    StatErr[0] = 0.00007;  // RD+
-    StatErr[1] = 0.204;    // y'+
-    StatErr[2] = 1.522;    // x'2+
-    StatErr[3] = 0.00007;  // RD-
-    StatErr[4] = 0.211;    // y'-
-    StatErr[5] = 1.665;    // x'2-
+    StatErr[0] = 0.00007;   // RD+
+    StatErr[1] = 2.04e-3;   // y'+
+    StatErr[2] = 1.522e-4;  // x'2+
+    StatErr[3] = 0.00007;   // RD-
+    StatErr[4] = 2.11e-3;   // y'-
+    StatErr[5] = 1.665e-4;  // x'2-
     std::ranges::fill(SystErr, 0.);
   } else {
     std::cout << "PDF_WS::setUncertainties() : ERROR : config " + c + " not found." << std::endl;

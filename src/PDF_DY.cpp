@@ -97,19 +97,19 @@ void PDF_DY::setObservables(const TString c) {
   else if (c.EqualTo("toy"))
     setObservablesToy();
   else if (nObs == 1 && c.EqualTo("WA2019"))
-    setObservable("DY_obs", 3.2e-2);
+    setObservable("DY_obs", 3.2e-4);
   else if (nObs == 1 && c.EqualTo("WA2020"))
-    setObservable("DY_obs", 3.1e-2);
+    setObservable("DY_obs", 3.1e-4);
   else if (nObs == 1 && c.EqualTo("WA2021"))
-    setObservable("DY_obs", -0.92e-2);
+    setObservable("DY_obs", -0.92e-4);
   else if (nObs == 1 && c.EqualTo("Belle&BaBar"))
-    setObservable("DY_obs", -1.68e-2);
+    setObservable("DY_obs", -1.68e-4);
   else if (nObs == 2 && c.EqualTo("WA2020")) {
-    setObservable("DY_KK_obs", 4.99e-2);
-    setObservable("DY_PP_obs", -2.40e-2);
+    setObservable("DY_KK_obs", 4.99e-4);
+    setObservable("DY_PP_obs", -2.40e-4);
   } else if (nObs == 2 && c.EqualTo("WA2021")) {
-    setObservable("DY_KK_obs", -0.20e-2);
-    setObservable("DY_PP_obs", -3.53e-2);
+    setObservable("DY_KK_obs", -0.20e-4);
+    setObservable("DY_PP_obs", -3.53e-4);
   } else {
     std::cout << "PDF_DY::setObservables() : ERROR : config " << c << " not found for " << nObs << " DY observables."
               << std::endl;
@@ -120,27 +120,27 @@ void PDF_DY::setObservables(const TString c) {
 void PDF_DY::setUncertainties(const TString c) {
   obsErrSource = "https://github.com/tpajero/charm-fitter/tree/master/charmcombo/blue/DY.cpp";
   if (nObs == 1 && c.EqualTo("WA2019")) {
-    StatErr[0] = 2.6e-2;
+    StatErr[0] = 2.6e-4;
     SystErr[0] = 0.;
   } else if (nObs == 1 && c.EqualTo("WA2020")) {
-    StatErr[0] = 2.0e-2;
+    StatErr[0] = 2.0e-4;
     SystErr[0] = 0.;
   } else if (nObs == 1 && c.EqualTo("WA2021")) {
-    StatErr[0] = 1.11e-2;
-    SystErr[0] = 0.33e-2;
+    StatErr[0] = 1.11e-4;
+    SystErr[0] = 0.33e-4;
   } else if (nObs == 1 && c.EqualTo("Belle&BaBar")) {
-    StatErr[0] = 15.75e-2;
-    SystErr[0] = 4.81e-2;
+    StatErr[0] = 15.75e-4;
+    SystErr[0] = 4.81e-4;
   } else if (nObs == 2 && c.EqualTo("WA2020")) {
-    StatErr[0] = 2.35e-2;
-    SystErr[0] = 0.57e-2;
-    StatErr[1] = 4.30e-2;
-    SystErr[1] = 0.70e-2;
+    StatErr[0] = 2.35e-4;
+    SystErr[0] = 0.57e-4;
+    StatErr[1] = 4.30e-4;
+    SystErr[1] = 0.70e-4;
   } else if (nObs == 2 && c.EqualTo("WA2021")) {
-    StatErr[0] = 1.28e-2;
-    SystErr[0] = 0.32e-2;
-    StatErr[1] = 2.36e-2;
-    SystErr[1] = 0.39e-2;
+    StatErr[0] = 1.28e-4;
+    SystErr[0] = 0.32e-4;
+    StatErr[1] = 2.36e-4;
+    SystErr[1] = 0.39e-4;
   } else {
     std::cout << "PDF_DY::setUncertainties() : ERROR : config " << c << " not found for " << nObs << " DY observables."
               << std::endl;

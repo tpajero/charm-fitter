@@ -102,36 +102,36 @@ void PDF_AcpHH_LHCb_Run12::initObservables() {
 
 void PDF_AcpHH_LHCb_Run12::setObservables(const TString c) {
   obsValSource = "https://cds.cern.ch/record/2799916/";
-  setObservable("acp_d0_to_kk_run1_mu_obs", -6.0e-2);
-  setObservable("acp_d0_to_kk_run1_prompt_obs", 14.0e-2);
-  setObservable("acp_d0_to_kk_run2_cdp_obs", 13.6e-2);
-  setObservable("acp_d0_to_kk_run2_cds_obs", 2.8e-2);
-  setObservable("dacp_run1_mu_obs", 14.0e-2);
-  setObservable("dacp_run1_prompt_obs", -10.0e-2);
-  setObservable("dacp_run2_mu_obs", -9.0e-2);
-  setObservable("dacp_run2_prompt_obs", -18.2e-2);
+  setObservable("acp_d0_to_kk_run1_mu_obs", -6.0e-4);
+  setObservable("acp_d0_to_kk_run1_prompt_obs", 14.0e-4);
+  setObservable("acp_d0_to_kk_run2_cdp_obs", 13.6e-4);
+  setObservable("acp_d0_to_kk_run2_cds_obs", 2.8e-4);
+  setObservable("dacp_run1_mu_obs", 14.0e-4);
+  setObservable("dacp_run1_prompt_obs", -10.0e-4);
+  setObservable("dacp_run2_mu_obs", -9.0e-4);
+  setObservable("dacp_run2_prompt_obs", -18.2e-4);
 }
 
 void PDF_AcpHH_LHCb_Run12::setUncertainties(const TString c) {
   obsErrSource = "https://cds.cern.ch/record/2799916/";
 
-  StatErr[0] = 15.0e-2;
-  StatErr[1] = 15.0e-2;
-  StatErr[2] = 8.8e-2;
-  StatErr[3] = 6.7e-2;
-  StatErr[4] = 16.0e-2;
-  StatErr[5] = 8.0e-2;
-  StatErr[6] = 8.0e-2;
-  StatErr[7] = 3.2e-2;
+  StatErr[0] = 15.0e-4;
+  StatErr[1] = 15.0e-4;
+  StatErr[2] = 8.8e-4;
+  StatErr[3] = 6.7e-4;
+  StatErr[4] = 16.0e-4;
+  StatErr[5] = 8.0e-4;
+  StatErr[6] = 8.0e-4;
+  StatErr[7] = 3.2e-4;
 
-  SystErr[0] = 10.0e-2;
-  SystErr[1] = 10.0e-2;
-  SystErr[2] = 1.6e-2;
-  SystErr[3] = 2.0e-2;
-  SystErr[4] = 8.0e-2;
-  SystErr[5] = 3.0e-2;
-  SystErr[6] = 5.0e-2;
-  SystErr[7] = 0.9e-2;
+  SystErr[0] = 10.0e-4;
+  SystErr[1] = 10.0e-4;
+  SystErr[2] = 1.6e-4;
+  SystErr[3] = 2.0e-4;
+  SystErr[4] = 8.0e-4;
+  SystErr[5] = 3.0e-4;
+  SystErr[6] = 5.0e-4;
+  SystErr[7] = 0.9e-4;
 }
 
 void PDF_AcpHH_LHCb_Run12::setCorrelations(const TString c) {
@@ -173,7 +173,7 @@ void PDF_AcpHH_LHCb_Run12::buildPdf() {
 void PDF_AcpHH_LHCb_Run12::add_acpkk(RooArgList* theory, TString name, double avg_time) {
   theory->add(*(Utils::makeTheoryVar(
       name, name,
-      boost::str(boost::format("100 * Acp_KK + %.5f * " + CharmUtils::get_dy_expression(th_cfg, fsc, "KK")) %
+      boost::str(boost::format("Acp_KK + %.5f * " + CharmUtils::get_dy_expression(th_cfg, fsc, "KK")) %
                  (avg_time / d0_lifetime))
           .c_str(),
       parameters)));
@@ -182,8 +182,8 @@ void PDF_AcpHH_LHCb_Run12::add_acpkk(RooArgList* theory, TString name, double av
 void PDF_AcpHH_LHCb_Run12::add_dacp(RooArgList* theory, TString name, double avg_time_kk, double avg_time_pp) {
   theory->add(*(Utils::makeTheoryVar(
       name, name,
-      boost::str(boost::format("   100 * Acp_KK + %.5f * " + CharmUtils::get_dy_expression(th_cfg, fsc, "KK") +
-                               " - 100 * Acp_PP - %.5f * " + CharmUtils::get_dy_expression(th_cfg, fsc, "PP")) %
+      boost::str(boost::format(" Acp_KK + %.5f * " + CharmUtils::get_dy_expression(th_cfg, fsc, "KK") +
+                               "-Acp_PP - %.5f * " + CharmUtils::get_dy_expression(th_cfg, fsc, "PP")) %
                  (avg_time_kk / d0_lifetime) % (avg_time_pp / d0_lifetime))
           .c_str(),
       parameters)));

@@ -91,7 +91,7 @@ void PDF_DY_RS::setObservables(const TString c) {
     setObservablesToy();
   else if (c.EqualTo("LHCb2021")) {
     obsValSource = "https://inspirehep.net/literature/1864385";
-    setObservable("DY_RS_obs", -0.36e-2);
+    setObservable("DY_RS_obs", -0.36e-4);
   } else {
     std::cout << "PDF_DY_RS::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
@@ -101,8 +101,8 @@ void PDF_DY_RS::setObservables(const TString c) {
 void PDF_DY_RS::setUncertainties(const TString c) {
   if (c.EqualTo("LHCb2021")) {
     obsErrSource = "https://inspirehep.net/literature/1864385";
-    StatErr[0] = 0.50e-2;
-    SystErr[0] = 0.23e-2;
+    StatErr[0] = 0.50e-4;
+    SystErr[0] = 0.23e-4;
   } else {
     std::cout << "PDF_DY_RS::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
