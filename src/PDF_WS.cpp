@@ -200,13 +200,13 @@ void PDF_WS::initRelationsCCPrime() {
     theory->add(*(Utils::makeTheoryVar("dc~_th", "dc~_th",
                                        theory_expressions["dc"][th_cfg] + " - 2 * sqrt(R_Kpi) * (" +
                                            CharmUtils::get_dy_expression(th_cfg, FSC::none, "KK") + ")" +
-                                           " - Acp_KK / 100 * (" + theory_expressions["c"][th_cfg] + ")",
+                                           " - Acp_KK * (" + theory_expressions["c"][th_cfg] + ")",
                                        parameters)));
     theory->add(*(Utils::makeTheoryVar("dc'~_th", "dc'~_th",
                                        theory_expressions["dc'"][th_cfg] + " - 2 * sqrt(R_Kpi) * (" +
                                            theory_expressions["c"][th_cfg] + ") * (" +
                                            CharmUtils::get_dy_expression(th_cfg, FSC::none, "KK") + ")" +
-                                           " - 2 * Acp_KK / 100 * (" + theory_expressions["c'"][th_cfg] + ")",
+                                           " - 2 * Acp_KK * (" + theory_expressions["c'"][th_cfg] + ")",
                                        parameters)));
   }
 }
@@ -223,10 +223,10 @@ void PDF_WS::initRelationsRAXY() {
 
 void PDF_WS::initRelationsRRXY() {
   theory = new RooArgList("theory");
-  theory->add(*(Utils::makeTheoryVar("RD_p_th", "RD_p_th", "R_Kpi * (1 + Acp_KP / 100)", parameters)));
+  theory->add(*(Utils::makeTheoryVar("RD_p_th", "RD_p_th", "R_Kpi * (1 + Acp_KP)", parameters)));
   theory->add(*(Utils::makeTheoryVar("y'+_th", "y'+_th", theory_expressions["y'+"][th_cfg], parameters)));
   theory->add(*(Utils::makeTheoryVar("x'2+_th", "x'2+_th", theory_expressions["x'2+"][th_cfg], parameters)));
-  theory->add(*(Utils::makeTheoryVar("RD_m_th", "RD_m_th", "R_Kpi * (1 - Acp_KP / 100)", parameters)));
+  theory->add(*(Utils::makeTheoryVar("RD_m_th", "RD_m_th", "R_Kpi * (1 - Acp_KP)", parameters)));
   theory->add(*(Utils::makeTheoryVar("y'-_th", "y'-_th", theory_expressions["y'-"][th_cfg], parameters)));
   theory->add(*(Utils::makeTheoryVar("x'2-_th", "x'2-_th", theory_expressions["x'2-"][th_cfg], parameters)));
 }
@@ -280,7 +280,7 @@ void PDF_WS::setObservables(const TString c) {
     setObservable("RD_p_obs", 0.00297);
     setObservable("y'+_obs", 0.98);
     setObservable("x'2+_obs", -2.4);
-    // setObservable("AD_obs", -2.1); TODO
+    // setObservable("AD_obs", -2.1e-2); TODO
     setObservable("RD_m_obs", 0.00309);
     setObservable("y'-_obs", 0.96);
     setObservable("x'2-_obs", -2.0);
@@ -321,7 +321,7 @@ void PDF_WS::setObservables(const TString c) {
     setObservable("RD_obs", 0.003427);
     setObservable("c_obs", 0.528);
     setObservable("c'_obs", 0.120);
-    setObservable("AD_obs", -0.66);
+    setObservable("AD_obs", -0.66e-2);
     setObservable("dc_obs", 0.020);
     setObservable("dc'_obs", -0.007);
   } else if (c.EqualTo("LHCb_Prompt_Run12_appB")) {
@@ -329,10 +329,10 @@ void PDF_WS::setObservables(const TString c) {
     setObservable("RD_obs", 0.003427);
     setObservable("c_obs", 0.528);
     setObservable("c'_obs", 0.120);
-    setObservable("AD_obs", -0.9);
+    setObservable("AD_obs", -0.9e-2);
     setObservable("dc_obs", -0.01);
     setObservable("dc'_obs", 0.046);
-    setObservable("ADt_obs", -0.82);
+    setObservable("ADt_obs", -0.82e-2);
     setObservable("dc~_obs", 0.032);
     setObservable("dc'~_obs", -0.020);
   } else if (c.EqualTo("LHCb_DT_Run2")) {
@@ -364,7 +364,7 @@ void PDF_WS::setUncertainties(const TString c) {
     StatErr[0] = 0.000267;  // RD+
     StatErr[1] = 0.78;      // y'+
     StatErr[2] = 5.2;       // x'2+
-    // StatErr[3] = 5.4;    // AD TODO
+    // StatErr[3] = 5.4e-2;    // AD TODO
     StatErr[3] = 0.000267;  // RD-
     StatErr[4] = 0.75;      // y'-
     StatErr[5] = 5.0;       // x'2-
@@ -410,7 +410,7 @@ void PDF_WS::setUncertainties(const TString c) {
     StatErr[0] = 0.000019;  // RD
     StatErr[1] = 0.033;     // c
     StatErr[2] = 0.035;     // c'
-    StatErr[3] = 0.57;      // AD
+    StatErr[3] = 0.57e-2;   // AD
     StatErr[4] = 0.034;     // dc
     StatErr[5] = 0.036;     // dc'
     std::ranges::fill(SystErr, 0.);
@@ -419,10 +419,10 @@ void PDF_WS::setUncertainties(const TString c) {
     StatErr[0] = 0.000019;  // RD
     StatErr[1] = 0.033;     // c
     StatErr[2] = 0.035;     // c'
-    StatErr[3] = 2.0;       // AD
+    StatErr[3] = 2.0e-2;    // AD
     StatErr[4] = 0.10;      // dc
     StatErr[5] = 0.098;     // dc'
-    StatErr[6] = 0.59;      // ADt
+    StatErr[6] = 0.59e-2;   // ADt
     StatErr[7] = 0.036;     // dc~
     StatErr[8] = 0.038;     // dc'~
     std::ranges::fill(SystErr, 0.);

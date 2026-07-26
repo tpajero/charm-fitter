@@ -23,27 +23,27 @@ void ParametersCharmCombo::defineParameters() {
 
   // CP asymmetry in the decay (``direct'' CP asymmetry) of D0 -> K+ K-
   p = newParameter("Acp_KK");
-  p->title = "#it{a}_{#it{K}^{+}#it{K}^{#minus}}^{d} [%]";
-  p->startvalue = 0.08;
+  p->title = "#it{a}_{#it{K}^{+}#it{K}^{#minus}}^{d}";
+  p->startvalue = 8e-4;
   p->unit = "";
-  p->scan = range(-2, 2);
-  p->phys = range(-100, 100);
+  p->scan = range(-2e-2, 2e-2);
+  p->phys = range(-1., 1.);
 
   // CP asymmetry in the decay (``direct'' CP asymmetry) of D0 -> pi+ pi-
   p = newParameter("Acp_PP");
-  p->title = "#it{a}_{#it{#pi}^{+}#it{#pi}^{#minus}}^{d} [%]";
-  p->startvalue = 0.24;
+  p->title = "#it{a}_{#it{#pi}^{+}#it{#pi}^{#minus}}^{d}";
+  p->startvalue = 2.4e-3;
   p->unit = "";
-  p->scan = range(-2, 2);
-  p->phys = range(-100, 100);
+  p->scan = range(-2e-2, 2e-2);
+  p->phys = range(-1., 1.);
 
   // CP asymmetry in the decay (``direct'' CP asymmetry) of D0 -> K+ pi-
   p = newParameter("Acp_KP");
-  p->title = "#it{a}_{#it{K}^{+}#it{#pi}^{#minus}}^{d} [%]";
-  p->startvalue = -0.6;
+  p->title = "#it{a}_{#it{K}^{+}#it{#pi}^{#minus}}^{d}";
+  p->startvalue = -6e-3;
   p->unit = "";
-  p->scan = range(-2.5, 2);
-  p->phys = range(-100, 100);
+  p->scan = range(-2.5e-2, 2e-2);
+  p->phys = range(-1., 1.);
 
   // Ratio of the squared magnitudes of the decay amplitudes of D0 -> K+ pi- to D0 -> K- pi+
   p = newParameter("R_Kpi");

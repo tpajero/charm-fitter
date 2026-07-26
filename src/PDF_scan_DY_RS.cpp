@@ -63,17 +63,16 @@ void PDF_scan_DY_RS::initRelations() {
   case theory_config::phenomenological:
     theory->add(*(Utils::makeTheoryVar("DY_RS_scan_th", "DY_RS_scan_th",
                                        "DY_RS - abs(0.5 * pow(R_Kpi, 0.5) * "
-                                       "(  (y*cos(Delta_Kpi) - x*sin(Delta_Kpi))*(qop - 1/qop - Acp_KP/100)*cos(phi)"
-                                       " - (x*cos(Delta_Kpi) + y*sin(Delta_Kpi))*(qop + 1/qop             )*sin(phi)))",
+                                       "(  (y*cos(Delta_Kpi) - x*sin(Delta_Kpi))*(qop - 1/qop - Acp_KP)*cos(phi)"
+                                       " - (x*cos(Delta_Kpi) + y*sin(Delta_Kpi))*(qop + 1/qop         )*sin(phi)))",
                                        parameters)));
     break;
   case theory_config::theoretical:
-    theory->add(
-        *(Utils::makeTheoryVar("DY_RS_scan_th", "DY_RS_scan_th",
-                               "DY_RS - abs(pow(R_Kpi, 0.5) * "
-                               "(  (-y12*cos(Delta_Kpi)*cos(phiG) + x12*sin(Delta_Kpi)*cos(phiM))*(Acp_KP/100)*0.5"
-                               " + (+y12*sin(Delta_Kpi)*sin(phiG) + x12*cos(Delta_Kpi)*sin(phiM))                 ))",
-                               parameters)));
+    theory->add(*(Utils::makeTheoryVar("DY_RS_scan_th", "DY_RS_scan_th",
+                                       "DY_RS - abs(pow(R_Kpi, 0.5) * "
+                                       "(  (-y12*cos(Delta_Kpi)*cos(phiG) + x12*sin(Delta_Kpi)*cos(phiM))*Acp_KP*0.5"
+                                       " + (+y12*sin(Delta_Kpi)*sin(phiG) + x12*cos(Delta_Kpi)*sin(phiM))           ))",
+                                       parameters)));
     break;
   default:
     std::cout << "PDF_scan_DY_RS::initRelations : ERROR : "

@@ -53,10 +53,10 @@ std::string CharmUtils::get_dy_expression(const theory_config th_cfg, const FSC 
     case FSC::none:
       break;
     case FSC::partial:
-      expression += " + y * Acp_HH / 100";
+      expression += " + y * Acp_HH";
       break;
     case FSC::full:
-      expression += " + y * Acp_HH / 100 * (1 + x / y * cot_delta_HH)";
+      expression += " + y * Acp_HH * (1 + x / y * cot_delta_HH)";
       break;
     }
     break;
@@ -66,10 +66,10 @@ std::string CharmUtils::get_dy_expression(const theory_config th_cfg, const FSC 
     case FSC::none:
       break;
     case FSC::partial:
-      expression += " + y12 * Acp_HH / 100";
+      expression += " + y12 * Acp_HH";
       break;
     case FSC::full:
-      expression += " + y12 * Acp_HH / 100 * (1 + x12 / y12 * cot_delta_HH)";
+      expression += " + y12 * Acp_HH * (1 + x12 / y12 * cot_delta_HH)";
       break;
     }
     break;

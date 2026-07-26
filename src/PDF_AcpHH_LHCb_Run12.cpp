@@ -173,7 +173,7 @@ void PDF_AcpHH_LHCb_Run12::buildPdf() {
 void PDF_AcpHH_LHCb_Run12::add_acpkk(RooArgList* theory, TString name, double avg_time) {
   theory->add(*(Utils::makeTheoryVar(
       name, name,
-      boost::str(boost::format("Acp_KK + %.5f * " + CharmUtils::get_dy_expression(th_cfg, fsc, "KK")) %
+      boost::str(boost::format("100 * Acp_KK + %.5f * " + CharmUtils::get_dy_expression(th_cfg, fsc, "KK")) %
                  (avg_time / d0_lifetime))
           .c_str(),
       parameters)));
@@ -182,8 +182,8 @@ void PDF_AcpHH_LHCb_Run12::add_acpkk(RooArgList* theory, TString name, double av
 void PDF_AcpHH_LHCb_Run12::add_dacp(RooArgList* theory, TString name, double avg_time_kk, double avg_time_pp) {
   theory->add(*(Utils::makeTheoryVar(
       name, name,
-      boost::str(boost::format("   Acp_KK + %.5f * " + CharmUtils::get_dy_expression(th_cfg, fsc, "KK") +
-                               " - Acp_PP - %.5f * " + CharmUtils::get_dy_expression(th_cfg, fsc, "PP")) %
+      boost::str(boost::format("   100 * Acp_KK + %.5f * " + CharmUtils::get_dy_expression(th_cfg, fsc, "KK") +
+                               " - 100 * Acp_PP - %.5f * " + CharmUtils::get_dy_expression(th_cfg, fsc, "PP")) %
                  (avg_time_kk / d0_lifetime) % (avg_time_pp / d0_lifetime))
           .c_str(),
       parameters)));
