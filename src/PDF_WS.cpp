@@ -25,8 +25,8 @@
 
 namespace {
   using parametrisations::mix;
-  // Map containing the expressions for the observables in the various parametrisations
-  std::map<std::string, std::map<mix, std::string>> theory_expressions = {
+  // Expressions for the observables in the various parametrisations
+  const std::map<std::string, std::map<mix, std::string>> theory_expressions = {
       {"y'+",
        {
            {mix::pheno, "qop*(  y * cos(Delta_Kpi - phi)"
@@ -88,6 +88,17 @@ namespace {
            {mix::d0_to_kpi, "(2 * yp * dyp + pow(dyp, 2) + dxp2) / 4"},
        }},
   };
+
+  std::string get_formula(const std::string observable, const mix mix_param) {
+    try {
+      return theory_expressions.at(observable).at(mix_param);
+    } catch (const std::out_of_range& e) {
+      std::cerr << std::format("Out of range error, parametrisation {} not handled for observable {}: {}",
+                               utils::to_string(mix_param), observable, e.what())
+                << std::endl;
+      throw;
+    }
+  }
 }  // namespace
 
 PDF_WS::PDF_WS(const TString measurement_id, const parametrisations::mix mix_param, parametrisations::kpi p)
@@ -197,45 +208,45 @@ void PDF_WS::initRelationsCCPrime() {
   using parametrisations::dy_fsc;
   theory = new RooArgList("theory");
   theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "R_Kpi", parameters)));
-  theory->add(*(Utils::makeTheoryVar("c_th", "c_th", theory_expressions["c"][mix_param], parameters)));
-  theory->add(*(Utils::makeTheoryVar("c'_th", "c'_th", theory_expressions["c'"][mix_param], parameters)));
+  theory->add(*(Utils::makeTheoryVar("c_th", "c_th", get_formula("c", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("c'_th", "c'_th", get_formula("c'", mix_param), parameters)));
   theory->add(*(Utils::makeTheoryVar("AD_th", "AD_th", "Acp_KP", parameters)));
-  theory->add(*(Utils::makeTheoryVar("dc_th", "dc_th", theory_expressions["dc"][mix_param], parameters)));
-  theory->add(*(Utils::makeTheoryVar("dc'_th", "dc'_th", theory_expressions["dc'"][mix_param], parameters)));
+  theory->add(*(Utils::makeTheoryVar("dc_th", "dc_th", get_formula("dc", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("dc'_th", "dc'_th", get_formula("dc'", mix_param), parameters)));
   if (nObs == 9) {
     theory->add(*(Utils::makeTheoryVar("ADt_th", "ADt_th", "Acp_KP - 2 * Acp_KK", parameters)));
     theory->add(*(Utils::makeTheoryVar(
         "dc~_th", "dc~_th",
-        std::format("{} - 2 * sqrt(R_Kpi) * ({}) - Acp_KK * ({})", theory_expressions["dc"][mix_param],
-                    utils::dy_hh_expression(mix_param, dy_fsc::none, "KK"), theory_expressions["c"][mix_param]),
+        std::format("{} - 2 * sqrt(R_Kpi) * ({}) - Acp_KK * ({})", get_formula("dc", mix_param),
+                    utils::dy_hh_expression(mix_param, dy_fsc::none, "KK"), get_formula("c", mix_param)),
         parameters)));
-    theory->add(*(Utils::makeTheoryVar(
-        "dc'~_th", "dc'~_th",
-        std::format("{} - 2 * sqrt(R_Kpi) * ({}) * ({}) - 2 * Acp_KK * ({})", theory_expressions["dc'"][mix_param],
-                    theory_expressions["c"][mix_param], utils::dy_hh_expression(mix_param, dy_fsc::none, "KK"),
-                    theory_expressions["c'"][mix_param]),
-        parameters)));
+    theory->add(*(Utils::makeTheoryVar("dc'~_th", "dc'~_th",
+                                       std::format("{} - 2 * sqrt(R_Kpi) * ({}) * ({}) - 2 * Acp_KK * ({})",
+                                                   get_formula("dc'", mix_param), get_formula("c", mix_param),
+                                                   utils::dy_hh_expression(mix_param, dy_fsc::none, "KK"),
+                                                   get_formula("c'", mix_param)),
+                                       parameters)));
   }
 }
 
 void PDF_WS::initRelationsRAXY() {
   theory = new RooArgList("theory");
   theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "R_Kpi", parameters)));
-  theory->add(*(Utils::makeTheoryVar("y'+_th", "y'+_th", theory_expressions["y'+"][mix_param], parameters)));
-  theory->add(*(Utils::makeTheoryVar("x'2+_th", "x'2+_th", theory_expressions["x'2+"][mix_param], parameters)));
+  theory->add(*(Utils::makeTheoryVar("y'+_th", "y'+_th", get_formula("y'+", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("x'2+_th", "x'2+_th", get_formula("x'2+", mix_param), parameters)));
   theory->add(*(Utils::makeTheoryVar("AD_th", "AD_th", "Acp_KP", parameters)));
-  theory->add(*(Utils::makeTheoryVar("y'-_th", "y'-_th", theory_expressions["y'-"][mix_param], parameters)));
-  theory->add(*(Utils::makeTheoryVar("x'2-_th", "x'2-_th", theory_expressions["x'2-"][mix_param], parameters)));
+  theory->add(*(Utils::makeTheoryVar("y'-_th", "y'-_th", get_formula("y'-", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("x'2-_th", "x'2-_th", get_formula("x'2-", mix_param), parameters)));
 }
 
 void PDF_WS::initRelationsRRXY() {
   theory = new RooArgList("theory");
   theory->add(*(Utils::makeTheoryVar("RD_p_th", "RD_p_th", "R_Kpi * (1 + Acp_KP)", parameters)));
-  theory->add(*(Utils::makeTheoryVar("y'+_th", "y'+_th", theory_expressions["y'+"][mix_param], parameters)));
-  theory->add(*(Utils::makeTheoryVar("x'2+_th", "x'2+_th", theory_expressions["x'2+"][mix_param], parameters)));
+  theory->add(*(Utils::makeTheoryVar("y'+_th", "y'+_th", get_formula("y'+", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("x'2+_th", "x'2+_th", get_formula("x'2+", mix_param), parameters)));
   theory->add(*(Utils::makeTheoryVar("RD_m_th", "RD_m_th", "R_Kpi * (1 - Acp_KP)", parameters)));
-  theory->add(*(Utils::makeTheoryVar("y'-_th", "y'-_th", theory_expressions["y'-"][mix_param], parameters)));
-  theory->add(*(Utils::makeTheoryVar("x'2-_th", "x'2-_th", theory_expressions["x'2-"][mix_param], parameters)));
+  theory->add(*(Utils::makeTheoryVar("y'-_th", "y'-_th", get_formula("y'-", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("x'2-_th", "x'2-_th", get_formula("x'2-", mix_param), parameters)));
 }
 
 void PDF_WS::initObservables(const TString setName) {
