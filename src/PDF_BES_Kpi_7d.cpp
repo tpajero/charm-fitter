@@ -112,7 +112,7 @@ void PDF_BES_Kpi_7d::setUncertainties(const TString c) {
     StatErr[2] = 0.81e-2;
     SystErr[2] = std::sqrt(std::pow(0.50e-2, 2) + std::pow(0.10e-2, 2));
     StatErr[3] = 1.2e-2;
-    StatErr[3] = std::sqrt(std::pow(0.7e-2, 2) + std::pow(0.3e-2, 2));
+    SystErr[3] = std::sqrt(std::pow(0.7e-2, 2) + std::pow(0.3e-2, 2));
     StatErr[4] = 0.8e-2;
     SystErr[4] = 0.15e-2;
     StatErr[5] = 1.4e-2;
