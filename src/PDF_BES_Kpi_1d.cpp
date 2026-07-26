@@ -58,7 +58,7 @@ void PDF_BES_Kpi_1d::initParameters() {
 
 void PDF_BES_Kpi_1d::initRelations() {
   theory = new RooArgList("theory");
-  std::string a_kpi_formula = "(2 * 10 * sqrt(R_Kpi) * cos(Delta_Kpi) + y) / (1 + R_Kpi/100)";
+  std::string a_kpi_formula = "(2 * 10 * sqrt(100 * R_Kpi) * cos(Delta_Kpi) + y) / (1 + R_Kpi)";
   switch (th_cfg) {
   case theory_config::phenomenological:
     break;

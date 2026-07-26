@@ -62,7 +62,7 @@ void PDF_scan_DY_RS::initRelations() {
   switch (th_cfg) {
   case theory_config::phenomenological:
     theory->add(*(Utils::makeTheoryVar("DY_RS_scan_th", "DY_RS_scan_th",
-                                       "DY_RS - abs(100. * 0.5 * pow(R_Kpi/100, 0.5) * "
+                                       "DY_RS - abs(0.5 * pow(R_Kpi, 0.5) * "
                                        "(  (y*cos(Delta_Kpi) - x*sin(Delta_Kpi))*(qop - 1/qop - Acp_KP/100)*cos(phi)"
                                        " - (x*cos(Delta_Kpi) + y*sin(Delta_Kpi))*(qop + 1/qop             )*sin(phi)))",
                                        parameters)));
@@ -70,7 +70,7 @@ void PDF_scan_DY_RS::initRelations() {
   case theory_config::theoretical:
     theory->add(
         *(Utils::makeTheoryVar("DY_RS_scan_th", "DY_RS_scan_th",
-                               "DY_RS - abs(100 * pow(R_Kpi/100, 0.5) * "
+                               "DY_RS - abs(pow(R_Kpi, 0.5) * "
                                "(  (-y12*cos(Delta_Kpi)*cos(phiG) + x12*sin(Delta_Kpi)*cos(phiM))*(Acp_KP/100)*0.5"
                                " + (+y12*sin(Delta_Kpi)*sin(phiG) + x12*cos(Delta_Kpi)*sin(phiM))                 ))",
                                parameters)));
@@ -91,7 +91,7 @@ void PDF_scan_DY_RS::initObservables() {
 void PDF_scan_DY_RS::setObservables() { setObservable("DY_RS_scan_obs", 0.); }
 
 void PDF_scan_DY_RS::setUncertainties() {
-  StatErr[0] = 0.005;
+  StatErr[0] = 5e-5;
   SystErr[0] = 0.;
 }
 

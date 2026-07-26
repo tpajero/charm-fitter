@@ -57,10 +57,9 @@ void PDF_BES_Kpi::initParameters() {
 
 void PDF_BES_Kpi::initRelations() {
   theory = new RooArgList("theory");
-  std::string a_kpi_formula = "(2 * 10 * sqrt(R_Kpi) * cos(Delta_Kpi) + y) / (1 + R_Kpi/100)";
-  std::string a_kpi_pipipi0_formula =
-      "F_pipipi0 * (2 * 10 * sqrt(R_Kpi) * cos(Delta_Kpi) + y)"
-      "/ (1 + R_Kpi/100. + (1 - F_pipipi0) * (-2 * sqrt(R_Kpi/100.) * cos(Delta_Kpi) + y/100.))";
+  std::string a_kpi_formula = "(2 * 10 * sqrt(100 * R_Kpi) * cos(Delta_Kpi) + y) / (1 + R_Kpi)";
+  std::string a_kpi_pipipi0_formula = "F_pipipi0 * (2 * 10 * sqrt(100 * R_Kpi) * cos(Delta_Kpi) + y)"
+                                      "/ (1 + R_Kpi + (1 - F_pipipi0) * (-2 * sqrt(R_Kpi) * cos(Delta_Kpi) + y/100.))";
   switch (th_cfg) {
   case theory_config::phenomenological:
     break;
@@ -75,8 +74,8 @@ void PDF_BES_Kpi::initRelations() {
   using Utils::makeTheoryVar;
   theory->add(*(makeTheoryVar("A_kpi_th", "A_kpi_th", a_kpi_formula, parameters)));
   theory->add(*(makeTheoryVar("A_kpi_pipipi0_th", "A_kpi_pipipi0_th", a_kpi_pipipi0_formula, parameters)));
-  theory->add(*(makeTheoryVar("rcos_th", "rcos_th", "-10 * sqrt(R_Kpi)*cos(Delta_Kpi)", parameters)));
-  theory->add(*(makeTheoryVar("rsin_th", "rsin_th", " 10 * sqrt(R_Kpi)*sin(Delta_Kpi)", parameters)));
+  theory->add(*(makeTheoryVar("rcos_th", "rcos_th", "-sqrt(R_Kpi)*cos(Delta_Kpi)", parameters)));
+  theory->add(*(makeTheoryVar("rsin_th", "rsin_th", " sqrt(R_Kpi)*sin(Delta_Kpi)", parameters)));
 }
 
 void PDF_BES_Kpi::initObservables() {
@@ -92,8 +91,8 @@ void PDF_BES_Kpi::setObservables(const TString c) {
     obsValSource = "https://arxiv.org/pdf/2208.09402v2.pdf";
     setObservable("A_kpi_obs", 13.2);
     setObservable("A_kpi_pipipi0_obs", 13.0);
-    setObservable("rcos_obs", -5.62);
-    setObservable("rsin_obs", -1.1);
+    setObservable("rcos_obs", -5.62e-2);
+    setObservable("rsin_obs", -1.1e-2);
   } else {
     std::cout << "PDF_BES_Kpi::setObservables() : ERROR : obs config " << c << " not found." << std::endl;
     exit(1);
@@ -108,9 +107,9 @@ void PDF_BES_Kpi::setUncertainties(const TString c) {
     StatErr[1] = 1.2;
     SystErr[1] = 0.8;
     // The stat. errs. for rcos and rsin include both the statistical and systematic components
-    StatErr[2] = std::sqrt(std::pow(0.81, 2) + std::pow(0.50, 2) + std::pow(0.10, 2));
+    StatErr[2] = std::sqrt(std::pow(0.81e-2, 2) + std::pow(0.50e-2, 2) + std::pow(0.10e-2, 2));
     SystErr[2] = 0.;
-    StatErr[3] = std::sqrt(std::pow(1.2, 2) + std::pow(0.7, 2) + std::pow(0.3, 2));
+    StatErr[3] = std::sqrt(std::pow(1.2e-2, 2) + std::pow(0.7e-2, 2) + std::pow(0.3e-2, 2));
     SystErr[3] = 0.;
   } else {
     std::cout << "PDF_BES_Kpi::setObservables() : ERROR : err config " << c << " not found." << std::endl;

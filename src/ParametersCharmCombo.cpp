@@ -47,11 +47,11 @@ void ParametersCharmCombo::defineParameters() {
 
   // Ratio of the squared magnitudes of the decay amplitudes of D0 -> K+ pi- to D0 -> K- pi+
   p = newParameter("R_Kpi");
-  p->title = "#it{R_{K#pi}} [%]";
-  p->startvalue = 0.343;
+  p->title = "#it{R_{K#pi}}";
+  p->startvalue = 3.43e-3;
   p->unit = "";
-  p->scan = range(0.33, 0.36);
-  p->phys = range(0, 1e4);
+  p->scan = range(3.3e-3, 3.6e-3);
+  p->phys = range(0., 1e2);
 
   // Ratio of the magnitudes of the decay amplitudes of D0 -> K+ pi- pi- pi+ to D0 -> K- pi- pi+ pi+
   p = newParameter("r_K3pi");
@@ -212,11 +212,11 @@ void ParametersCharmCombo::defineParameters() {
 
   // Nuisance parameter to get predictions for CP violation in RS decays
   p = newParameter("DY_RS");
-  p->title = "#||{#Delta#it{Y}_{#it{K}^{#minus}#pi^{+}}}  [10^{#minus4}]";
-  p->startvalue = 0.05;
+  p->title = "#||{#Delta#it{Y}_{#it{K}^{#minus}#pi^{+}}} [%]";
+  p->startvalue = 5e-4;
   p->unit = "";
-  p->scan = range(0., 1.);
-  p->phys = range(0., 1e4);
+  p->scan = range(0., 1e-2);
+  p->phys = range(0., 1e2);
 
   // Parameters for (D0 -> Kpi)-only combination
   p = newParameter("xp2");

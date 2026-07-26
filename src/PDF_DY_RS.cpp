@@ -59,7 +59,7 @@ void PDF_DY_RS::initRelations() {
   switch (th_cfg) {
   case theory_config::phenomenological:
     theory->add(*(Utils::makeTheoryVar("DY_RS_th", "DY_RS_th",
-                                       "0.5 * pow(R_Kpi/100, 0.5) * "
+                                       "0.5 * pow(R_Kpi, 0.5) * "
                                        "(  (y*cos(Delta_Kpi) - x*sin(Delta_Kpi))*(qop - 1/qop - Acp_KP/100)*cos(phi)"
                                        " - (x*cos(Delta_Kpi) + y*sin(Delta_Kpi))*(qop + 1/qop             )*sin(phi))",
                                        parameters)));
@@ -67,7 +67,7 @@ void PDF_DY_RS::initRelations() {
   case theory_config::theoretical:
     theory->add(
         *(Utils::makeTheoryVar("DY_RS_th", "DY_RS_th",
-                               "pow(R_Kpi/100, 0.5) * "
+                               "pow(R_Kpi, 0.5) * "
                                "(  (-y12*cos(Delta_Kpi)*cos(phiG) + x12*sin(Delta_Kpi)*cos(phiM))*(Acp_KP/100)*0.5"
                                " + ( y12*sin(Delta_Kpi)*sin(phiG) + x12*cos(Delta_Kpi)*sin(phiM))                 )",
                                parameters)));
