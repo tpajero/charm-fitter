@@ -63,7 +63,6 @@ void PDF_Cleo::initRelations() {
   switch (mix_param) {
   case mix::pheno:
     theory->add(*(Utils::makeTheoryVar("x2_th", "x2_th", "x*x", parameters)));
-    theory->add(*(Utils::makeTheoryVar("y_th", "y_th", "y", parameters)));
     break;
   case mix::theo:
     theory->add(*(Utils::makeTheoryVar("x2_th", "x2_th",
@@ -72,17 +71,12 @@ void PDF_Cleo::initRelations() {
                                        "    + pow(  pow(pow(x12,2) + pow(y12,2),2) "
                                        "          - pow(2 * x12 * y12 * sin(phiM - phiG),2), 0.5))",
                                        parameters)));
-    theory->add(*(Utils::makeTheoryVar("y_th", "y_th",
-                                       "pow(2, -0.5) * pow("
-                                       "      pow(y12,2) - pow(x12,2) "
-                                       "    + pow(  pow(pow(x12,2) + pow(y12,2),2) "
-                                       "          - pow(2 * x12 * y12 * sin(phiM - phiG),2), 0.5), 0.5)",
-                                       parameters)));
     break;
   default:
     throw std::runtime_error(
         std::format("PDF_Cleo::initRelations ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
+  theory->add(*(Utils::makeTheoryVar("y_th", "y_th", utils::y_expression(mix_param), parameters)));
   theory->add(*(Utils::makeTheoryVar("cos_th", "cos_th", "cos(Delta_Kpi)", parameters)));
   theory->add(*(Utils::makeTheoryVar("sin_th", "sin_th", "-sin(Delta_Kpi)", parameters)));
 }

@@ -63,32 +63,16 @@ void PDF_Kshh::initParameters() {
 }
 
 void PDF_Kshh::initRelations() {
-  theory = new RooArgList("theory");  ///< the order of this list must match that of the COR matrix!
+  theory = new RooArgList("theory");
+  theory->add(*(Utils::makeTheoryVar("x_th", "x_th", utils::x_expression(mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("y_th", "y_th", utils::y_expression(mix_param), parameters)));
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    theory->add(*(Utils::makeTheoryVar("x_th", "x_th", "x", parameters)));
-    theory->add(*(Utils::makeTheoryVar("y_th", "y_th", "y", parameters)));
     theory->add(*(Utils::makeTheoryVar("qop_th", "qop_th", "qop", parameters)));
     theory->add(*(Utils::makeTheoryVar("phi_th", "phi_th", "phi", parameters)));
     break;
   case mix::theo:
-    theory->add(*(Utils::makeTheoryVar("x_th", "x_th",
-                                       "pow(2,-0.5) * pow( "
-                                       "    pow(x12,2) - pow(y12,2) + pow( "
-                                       "       + pow(pow(x12,2) + pow(y12,2),2)"
-                                       "       - pow(2 * x12 * y12 * sin(phiM - phiG),2),"
-                                       "    0.5)"
-                                       ",0.5) * TMath::Sign(1., cos(phiM - phiG))",
-                                       parameters)));
-    theory->add(*(Utils::makeTheoryVar("y_th", "y_th",
-                                       "pow(2,-0.5) * pow( "
-                                       "    pow(y12,2) - pow(x12,2) + pow( "
-                                       "       + pow(pow(x12,2) + pow(y12,2),2)"
-                                       "       - pow(2 * x12 * y12 * sin(phiM - phiG),2),"
-                                       "    0.5)"
-                                       ",0.5)",
-                                       parameters)));
     theory->add(*(Utils::makeTheoryVar("qop_th", "qop_th",
                                        "pow(  (pow(x12,2) + pow(y12,2) + 2 * x12 * y12 * sin(phiM - phiG))"
                                        "    /  pow(  pow(pow(x12,2) + pow(y12,2),2)                       "

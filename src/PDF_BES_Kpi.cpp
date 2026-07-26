@@ -59,23 +59,14 @@ void PDF_BES_Kpi::initParameters() {
 }
 
 void PDF_BES_Kpi::initRelations() {
-  theory = new RooArgList("theory");
-  std::string a_kpi_formula = "(2 * sqrt(R_Kpi) * cos(Delta_Kpi) + y) / (1 + R_Kpi)";
-  std::string a_kpi_pipipi0_formula = "F_pipipi0 * (2 * sqrt(R_Kpi) * cos(Delta_Kpi) + y)"
-                                      "/ (1 + R_Kpi + (1 - F_pipipi0) * (-2 * sqrt(R_Kpi) * cos(Delta_Kpi) + y))";
-  using parametrisations::mix;
-  switch (mix_param) {
-  case mix::pheno:
-    break;
-  case mix::theo:
-    boost::replace_all(a_kpi_formula, "y", utils::y_expression(mix_param));
-    boost::replace_all(a_kpi_pipipi0_formula, "y", utils::y_expression(mix_param));
-    break;
-  default:
-    throw std::runtime_error(
-        std::format("PDF_BES_Kpi::initRelations ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
-  }
+  const std::string y = utils::y_expression(mix_param);
+  std::string a_kpi_formula = std::format("(2 * sqrt(R_Kpi) * cos(Delta_Kpi) + {0}) / (1 + R_Kpi)", y);
+  std::string a_kpi_pipipi0_formula =
+      std::format("F_pipipi0 * (2 * sqrt(R_Kpi) * cos(Delta_Kpi) + {0}) "
+                  " / (1 + R_Kpi + (1 - F_pipipi0) * (-2 * sqrt(R_Kpi) * cos(Delta_Kpi) + {0}))",
+                  y);
   using Utils::makeTheoryVar;
+  theory = new RooArgList("theory");
   theory->add(*(makeTheoryVar("A_kpi_th", "A_kpi_th", a_kpi_formula, parameters)));
   theory->add(*(makeTheoryVar("A_kpi_pipipi0_th", "A_kpi_pipipi0_th", a_kpi_pipipi0_formula, parameters)));
   theory->add(*(makeTheoryVar("rcos_th", "rcos_th", "-sqrt(R_Kpi)*cos(Delta_Kpi)", parameters)));

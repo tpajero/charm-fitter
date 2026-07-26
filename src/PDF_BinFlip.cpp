@@ -78,25 +78,17 @@ void PDF_BinFlip::initRelations() {
                                        "0.5*(  y*cos(phi)*(qop + 1./qop)"
                                        "     - x*sin(phi)*(qop - 1./qop))",
                                        parameters)));
-    theory->add(*(Utils::makeTheoryVar("dx_th", "dx_th",
-                                       "0.5*(  x*cos(phi)*(qop - 1./qop)"
-                                       "     + y*sin(phi)*(qop + 1./qop))",
-                                       parameters)));
-    theory->add(*(Utils::makeTheoryVar("dy_th", "dy_th",
-                                       "0.5*(  y*cos(phi)*(qop - 1./qop)"
-                                       "     - x*sin(phi)*(qop + 1./qop))",
-                                       parameters)));
     break;
   case mix::theo:
     theory->add(*(Utils::makeTheoryVar("x_th", "x_th", " x12*cos(phiM)", parameters)));
     theory->add(*(Utils::makeTheoryVar("y_th", "y_th", " y12*cos(phiG)", parameters)));
-    theory->add(*(Utils::makeTheoryVar("dx_th", "dx_th", "-y12*sin(phiG)", parameters)));
-    theory->add(*(Utils::makeTheoryVar("dy_th", "dy_th", " x12*sin(phiM)", parameters)));
     break;
   default:
     throw std::runtime_error(
         std::format("PDF_BinFlip::initRelations ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
+  theory->add(*(Utils::makeTheoryVar("dx_th", "dx_th", utils::dx_expression(mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("dy_th", "dy_th", utils::dy_expression(mix_param), parameters)));
 }
 
 void PDF_BinFlip::initObservables(const TString setName) {

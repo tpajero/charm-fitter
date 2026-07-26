@@ -59,18 +59,8 @@ void PDF_BES_Kpi_1d::initParameters() {
 
 void PDF_BES_Kpi_1d::initRelations() {
   theory = new RooArgList("theory");
-  std::string a_kpi_formula = "(2 * sqrt(R_Kpi) * cos(Delta_Kpi) + y) / (1 + R_Kpi)";
-  using parametrisations::mix;
-  switch (mix_param) {
-  case mix::pheno:
-    break;
-  case mix::theo:
-    boost::replace_all(a_kpi_formula, "y", utils::y_expression(mix_param));
-    break;
-  default:
-    throw std::runtime_error(std::format("PDF_BES_Kpi_1d::initRelations ERROR Parametrisation {} not supported",
-                                         utils::to_string(mix_param)));
-  }
+  std::string a_kpi_formula =
+      std::format("(2 * sqrt(R_Kpi) * cos(Delta_Kpi) + {0}) / (1 + R_Kpi)", utils::y_expression(mix_param));
   theory->add(*(Utils::makeTheoryVar("A_kpi_th", "A_kpi_th", a_kpi_formula, parameters)));
 }
 
