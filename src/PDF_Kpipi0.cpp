@@ -15,16 +15,20 @@
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
+#include <format>
 #include <iostream>
+#include <stdexcept>
 #include <vector>
 
-PDF_Kpipi0::PDF_Kpipi0(const TString measurement_id, const theory_config th_cfg) : PDF_Abs{2}, th_cfg{th_cfg} {
+PDF_Kpipi0::PDF_Kpipi0(const TString measurement_id, const parametrisations::mix mix_param)
+    : PDF_Abs{2}, mix_param{mix_param} {
   name = measurement_id + "_Kpipi0";
   TString label;
   if (measurement_id.EqualTo("BaBar"))
     label = "BaBar #it{K}^{+}#pi^{#minus}#pi^{0}";
   else
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_Kpipi0::PDF_Kpipi0 ERROR Measurement ID {} not supported", measurement_id.Data()));
   initParameters();
   initRelations();
   initObservables(label);
@@ -39,33 +43,33 @@ void PDF_Kpipi0::initParameters() {
   parameters = new RooArgList("parameters");
   parameters->add(*(p.get("Delta_Kpipi0")));
 
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     parameters->add(*(p.get("x")));
     parameters->add(*(p.get("y")));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     parameters->add(*(p.get("phiG")));
     parameters->add(*(p.get("x12")));
     parameters->add(*(p.get("y12")));
     parameters->add(*(p.get("phiM")));
     break;
   default:
-    std::cout << "PDF_Kpipi0::initParameters : ERROR : "
-                 "theory_config not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_Kpipi0::initParameters ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
 }
 
 void PDF_Kpipi0::initRelations() {
   theory = new RooArgList("theory");
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     theory->add(*(Utils::makeTheoryVar("xpp_th", "xpp_th", "x*cos(Delta_Kpipi0) - y*sin(Delta_Kpipi0)", parameters)));
     theory->add(*(Utils::makeTheoryVar("ypp_th", "ypp_th", "y*cos(Delta_Kpipi0) + x*sin(Delta_Kpipi0)", parameters)));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     theory->add(*(Utils::makeTheoryVar("xpp_th", "xpp_th",
                                        "  x12*cos(Delta_Kpipi0) * cos(phiM)"
                                        "- y12*sin(Delta_Kpipi0) * cos(phiG)",
@@ -76,10 +80,8 @@ void PDF_Kpipi0::initRelations() {
                                        parameters)));
     break;
   default:
-    std::cout << "PDF_Kpipi0::initRelations : ERROR : "
-                 "theory_config not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_Kpipi0::initRelations ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
 }
 
@@ -99,8 +101,7 @@ void PDF_Kpipi0::setObservables(const TString c) {
     setObservable("xpp_obs", 2.61e-2);
     setObservable("ypp_obs", -0.06e-2);
   } else {
-    std::cout << "PDF_Kpipi0::setObservables() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_Kpipi0::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
@@ -110,8 +111,7 @@ void PDF_Kpipi0::setUncertainties(const TString c) {
     StatErr[0] = pow(pow(0.625e-2, 2) + pow(0.39e-2, 2), 0.5);  // x''
     StatErr[1] = pow(pow(0.595e-2, 2) + pow(0.34e-2, 2), 0.5);  // y''
   } else {
-    std::cout << "PDF_Kpipi0::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_Kpipi0::setUncertainties ERROR config {} not found", c.Data()));
   }
 }
 
@@ -122,8 +122,7 @@ void PDF_Kpipi0::setCorrelations(const TString c) {
     std::vector<double> dataStat = {1., -0.75, 1.};
     corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
   } else {
-    std::cout << "PDF_Kpipi0::setCorrelations() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_Kpipi0::setCorrelations ERROR config {} not found", c.Data()));
   }
 }
 

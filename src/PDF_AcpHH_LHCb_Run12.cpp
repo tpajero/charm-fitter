@@ -16,17 +16,14 @@
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
-#include <boost/format.hpp>
-
+#include <format>
 #include <iostream>
+#include <stdexcept>
 #include <vector>
 
-namespace {
-  constexpr double d0_lifetime = 4.103e-13;
-}
-
-PDF_AcpHH_LHCb_Run12::PDF_AcpHH_LHCb_Run12(const theory_config th_cfg, const FSC fsc)
-    : PDF_Abs{8}, th_cfg{th_cfg}, fsc{fsc} {
+PDF_AcpHH_LHCb_Run12::PDF_AcpHH_LHCb_Run12(const parametrisations::mix mix_param,
+                                           const parametrisations::dy_fsc dy_fsc_param)
+    : PDF_Abs{8}, mix_param{mix_param}, dy_fsc_param{dy_fsc_param} {
   name = "Charm_AcpHH_LHCb_Run12_Run1-2";
   initParameters();
   initRelations();
@@ -42,29 +39,29 @@ void PDF_AcpHH_LHCb_Run12::initParameters() {
   parameters = new RooArgList("parameters");
   parameters->add(*(p.get("Acp_KK")));
   parameters->add(*(p.get("Acp_PP")));
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     parameters->add(*(p.get("x")));
     parameters->add(*(p.get("y")));
     parameters->add(*(p.get("qop")));
     parameters->add(*(p.get("phi")));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     parameters->add(*(p.get("x12")));
     parameters->add(*(p.get("y12")));
     parameters->add(*(p.get("phiM")));
     break;
   default:
-    std::cout << "PDF_AcpHH_LHCb_Run12::initParameters : ERROR : "
-                 "theory_config not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_AcpHH_LHCb_Run12::initParameters ERROR Parametrisation {} not supported",
+                                         utils::to_string(mix_param)));
   }
-  switch (fsc) {
-  case FSC::none:
-  case FSC::partial:
+  using parametrisations::dy_fsc;
+  switch (dy_fsc_param) {
+  case dy_fsc::none:
+  case dy_fsc::partial:
     break;
-  case FSC::full:
+  case dy_fsc::full:
     parameters->add(*(p.get("cot_delta_KK")));
     parameters->add(*(p.get("cot_delta_PP")));
     break;
@@ -171,20 +168,17 @@ void PDF_AcpHH_LHCb_Run12::buildPdf() {
 }
 
 void PDF_AcpHH_LHCb_Run12::add_acpkk(RooArgList* theory, TString name, double avg_time) {
-  theory->add(*(Utils::makeTheoryVar(
-      name, name,
-      boost::str(boost::format("Acp_KK + %.5f * " + CharmUtils::get_dy_expression(th_cfg, fsc, "KK")) %
-                 (avg_time / d0_lifetime))
-          .c_str(),
-      parameters)));
+  theory->add(*(Utils::makeTheoryVar(name, name,
+                                     std::format("Acp_KK + {:.5e} * ({})", avg_time / constants::d0_lifetime,
+                                                 utils::dy_hh_expression(mix_param, dy_fsc_param, "KK")),
+                                     parameters)));
 }
 
 void PDF_AcpHH_LHCb_Run12::add_dacp(RooArgList* theory, TString name, double avg_time_kk, double avg_time_pp) {
   theory->add(*(Utils::makeTheoryVar(
       name, name,
-      boost::str(boost::format(" Acp_KK + %.5f * " + CharmUtils::get_dy_expression(th_cfg, fsc, "KK") +
-                               "-Acp_PP - %.5f * " + CharmUtils::get_dy_expression(th_cfg, fsc, "PP")) %
-                 (avg_time_kk / d0_lifetime) % (avg_time_pp / d0_lifetime))
-          .c_str(),
+      std::format("Acp_KK + {:.5e} * ({}) - Acp_PP - {:.5e} * ({})", avg_time_kk / constants::d0_lifetime,
+                  utils::dy_hh_expression(mix_param, dy_fsc_param, "KK"), avg_time_pp / constants::d0_lifetime,
+                  utils::dy_hh_expression(mix_param, dy_fsc_param, "PP")),
       parameters)));
 }

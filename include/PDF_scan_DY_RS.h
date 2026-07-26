@@ -15,7 +15,7 @@
 
 class PDF_scan_DY_RS : public PDF_Abs {
  public:
-  PDF_scan_DY_RS(theory_config th_cfg);
+  PDF_scan_DY_RS(parametrisations::mix mix_param);
   void buildPdf() override;
   void initObservables() override;
   void initParameters() override;
@@ -25,7 +25,7 @@ class PDF_scan_DY_RS : public PDF_Abs {
   void setUncertainties();
 
  private:
-  const theory_config th_cfg;
+  const parametrisations::mix mix_param;
 };
 
 #endif

@@ -17,10 +17,12 @@
 
 #include <boost/algorithm/string.hpp>
 
+#include <format>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 
-PDF_BES_Kpi_1d::PDF_BES_Kpi_1d(const theory_config th_cfg) : PDF_Abs{1}, th_cfg{th_cfg} {
+PDF_BES_Kpi_1d::PDF_BES_Kpi_1d(const parametrisations::mix mix_param) : PDF_Abs{1}, mix_param{mix_param} {
   name = "BES";
   initParameters();
   initRelations();
@@ -37,40 +39,28 @@ void PDF_BES_Kpi_1d::initParameters() {
   parameters->add(*(p.get("Delta_Kpi")));
   parameters->add(*(p.get("R_Kpi")));
 
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     parameters->add(*(p.get("x")));
     parameters->add(*(p.get("y")));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     parameters->add(*(p.get("phiG")));
     parameters->add(*(p.get("x12")));
     parameters->add(*(p.get("y12")));
     parameters->add(*(p.get("phiM")));
     break;
   default:
-    std::cout << "PDF_BES_Kpi_1d::initParameters : ERROR : "
-                 "theory_config not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_BES_Kpi_1d::initParameters ERROR Parametrisation {} not supported",
+                                         utils::to_string(mix_param)));
   }
 }
 
 void PDF_BES_Kpi_1d::initRelations() {
   theory = new RooArgList("theory");
-  std::string a_kpi_formula = "(2 * sqrt(R_Kpi) * cos(Delta_Kpi) + y) / (1 + R_Kpi)";
-  switch (th_cfg) {
-  case theory_config::phenomenological:
-    break;
-  case theory_config::theoretical:
-    boost::replace_all(a_kpi_formula, "y", CharmUtils::y_to_theoretical);
-    break;
-  default:
-    std::cout << "PDF_BES_Kpi_1d::initRelations : ERROR : "
-                 "theory_config not supported."
-              << std::endl;
-    exit(1);
-  }
+  std::string a_kpi_formula =
+      std::format("(2 * sqrt(R_Kpi) * cos(Delta_Kpi) + {0}) / (1 + R_Kpi)", utils::y_expression(mix_param));
   theory->add(*(Utils::makeTheoryVar("A_kpi_th", "A_kpi_th", a_kpi_formula, parameters)));
 }
 
@@ -88,8 +78,7 @@ void PDF_BES_Kpi_1d::setObservables(const TString c) {
     obsValSource = "http://inspirehep.net/record/1291279";
     setObservable("A_kpi_obs", 12.7e-2);
   } else {
-    std::cout << "PDF_BES_Kpi_1d::setObservables() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_BES_Kpi_1d::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
@@ -99,8 +88,7 @@ void PDF_BES_Kpi_1d::setUncertainties(const TString c) {
     StatErr[0] = 1.3e-2;
     SystErr[0] = 0.7e-2;
   } else {
-    std::cout << "PDF_BES_Kpi_1d::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_BES_Kpi_1d::setUncertainties ERROR config {} not found", c.Data()));
   }
 }
 

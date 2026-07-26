@@ -17,9 +17,11 @@
 
 #include <TString.h>
 
+#include <format>
 #include <iostream>
+#include <stdexcept>
 
-PDF_RM::PDF_RM(const TString measurement_id, const theory_config th_cfg) : PDF_Abs{1}, th_cfg{th_cfg} {
+PDF_RM::PDF_RM(const TString measurement_id, const parametrisations::mix mix_param) : PDF_Abs{1}, mix_param{mix_param} {
   name = "RM_" + measurement_id;
   initParameters();
   initRelations();
@@ -34,32 +36,32 @@ void PDF_RM::initParameters() {
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");
 
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     parameters->add(*(p.get("x")));
     parameters->add(*(p.get("y")));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     parameters->add(*(p.get("x12")));
     parameters->add(*(p.get("y12")));
     parameters->add(*(p.get("phiM")));
     parameters->add(*(p.get("phiG")));
     break;
   default:
-    std::cout << "PDF_RM::initParameters : ERROR : "
-                 "theory_config not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_RM::initParameters ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
 }
 
 void PDF_RM::initRelations() {
   theory = new RooArgList("theory");
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     theory->add(*(Utils::makeTheoryVar("RM_th", "RM_th", "(pow(x,2) + pow(y,2))/2", parameters)));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     theory->add(*(Utils::makeTheoryVar("RM_th", "RM_th",
                                        "0.5 * pow( "
                                        "    + pow(pow(x12,2) + pow(y12,2),2)"
@@ -67,10 +69,8 @@ void PDF_RM::initRelations() {
                                        parameters)));
     break;
   default:
-    std::cout << "PDF_RM::initRelations : ERROR : "
-                 "theory_config not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_RM::initRelations ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
 }
 
@@ -91,8 +91,7 @@ void PDF_RM::setObservables(const TString c) {
     obsValSource = "https://inspirehep.net/literature/1423070";
     setObservable("RM_obs", 2 * 0.48e-4);
   } else {
-    std::cout << "PDF_RM::setObservables() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_RM::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
@@ -106,8 +105,7 @@ void PDF_RM::setUncertainties(const TString c) {
     StatErr[0] = 2 * 0.18e-4;
     SystErr[0] = 0;
   } else {
-    std::cout << "PDF_RM::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_RM::setUncertainties ERROR config {} not found", c.Data()));
   }
 }
 

@@ -16,31 +16,35 @@
 #include <RooRealVar.h>
 
 #include <algorithm>
+#include <format>
 #include <iostream>
 #include <map>
+#include <stdexcept>
 #include <vector>
 
 namespace {
+  using parametrisations::mix;
   // Map containing the expressions for the observables in the various parametrisations
-  std::map<std::string, std::map<theory_config, std::string>> theory_expressions = {
+  std::map<std::string, std::map<mix, std::string>> theory_expressions = {
       {"y'",
        {
-           {theory_config::phenomenological, "y*cos(Delta_Kpi) + x*sin(Delta_Kpi)"},
-           {theory_config::theoretical, "  y12 * cos(Delta_Kpi) * TMath::Sign(1.,cos(phiG)) "
-                                        "+ x12 * sin(Delta_Kpi) * TMath::Sign(1.,cos(phiM))"},
-           {theory_config::d0_to_kpi, "yp"},
+           {mix::pheno, "y*cos(Delta_Kpi) + x*sin(Delta_Kpi)"},
+           {mix::theo, "  y12 * cos(Delta_Kpi) * TMath::Sign(1.,cos(phiG)) "
+                       "+ x12 * sin(Delta_Kpi) * TMath::Sign(1.,cos(phiM))"},
+           {mix::d0_to_kpi, "yp"},
        }},
       {"x'2",
        {
-           {theory_config::phenomenological, "pow(x*cos(Delta_Kpi) - y*sin(Delta_Kpi),2)"},
-           {theory_config::theoretical, "pow(- y12*sin(Delta_Kpi) * TMath::Sign(1.,cos(phiG))"
-                                        "    + x12*cos(Delta_Kpi) * TMath::Sign(1.,cos(phiM)), 2)"},
-           {theory_config::d0_to_kpi, "xp2"},
+           {mix::pheno, "pow(x*cos(Delta_Kpi) - y*sin(Delta_Kpi),2)"},
+           {mix::theo, "pow(- y12*sin(Delta_Kpi) * TMath::Sign(1.,cos(phiG))"
+                       "    + x12*cos(Delta_Kpi) * TMath::Sign(1.,cos(phiM)), 2)"},
+           {mix::d0_to_kpi, "xp2"},
        }},
   };
 }  // namespace
 
-PDF_WS_NoCPV::PDF_WS_NoCPV(const TString measurement_id, const theory_config th_cfg) : PDF_Abs{3}, th_cfg{th_cfg} {
+PDF_WS_NoCPV::PDF_WS_NoCPV(const TString measurement_id, const parametrisations::mix mix_param)
+    : PDF_Abs{3}, mix_param{mix_param} {
   name = measurement_id + "_WS_NoCPV";
   initParameters();
   initRelations();
@@ -52,22 +56,23 @@ PDF_WS_NoCPV::PDF_WS_NoCPV(const TString measurement_id, const theory_config th_
 }
 
 void PDF_WS_NoCPV::initParameters() {
+  using parametrisations::mix;
   std::vector<std::string> param_names = {"R_Kpi"};
-  if (th_cfg != theory_config::d0_to_kpi) param_names.emplace_back("Delta_Kpi");
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  if (mix_param != mix::d0_to_kpi) param_names.emplace_back("Delta_Kpi");
+  switch (mix_param) {
+  case mix::pheno:
     param_names.insert(param_names.end(), {"x", "y", "qop", "phi"});
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     param_names.emplace_back("phiG");
     param_names.insert(param_names.end(), {"x12", "y12", "phiM"});
     break;
-  case theory_config::d0_to_kpi:
+  case mix::d0_to_kpi:
     param_names.insert(param_names.end(), {"yp", "xp2"});
     break;
   default:
-    std::cout << "PDF_WS_NoCPV::initParameters : ERROR : theory_config " << th_cfg << " not supported." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_WS_NoCPV::initParameters ERROR Parametrisation {} not supported",
+                                         utils::to_string(mix_param)));
   }
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");
@@ -77,8 +82,8 @@ void PDF_WS_NoCPV::initParameters() {
 void PDF_WS_NoCPV::initRelations() {
   theory = new RooArgList("theory");
   theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "R_Kpi", parameters)));
-  theory->add(*(Utils::makeTheoryVar("yp_th", "yp_th", theory_expressions["y'"][th_cfg], parameters)));
-  theory->add(*(Utils::makeTheoryVar("xp2_th", "xp2_th", theory_expressions["x'2"][th_cfg], parameters)));
+  theory->add(*(Utils::makeTheoryVar("yp_th", "yp_th", theory_expressions["y'"][mix_param], parameters)));
+  theory->add(*(Utils::makeTheoryVar("xp2_th", "xp2_th", theory_expressions["x'2"][mix_param], parameters)));
 }
 
 void PDF_WS_NoCPV::initObservables(const TString setName) {
@@ -109,8 +114,7 @@ void PDF_WS_NoCPV::setObservables(const TString c) {
     setObservable("yp_obs", 4.6e-3);
     setObservable("xp2_obs", 0.9e-4);
   } else {
-    std::cout << "PDF_WS_NoCPV::setObservables() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_WS_NoCPV::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
@@ -134,8 +138,7 @@ void PDF_WS_NoCPV::setUncertainties(const TString c) {
     StatErr[2] = 2.2e-4;   // x'2
     std::ranges::fill(SystErr, 0.);
   } else {
-    std::cout << "PDF_WS_NoCPV::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_WS_NoCPV::setUncertainties ERROR config {} not found", c.Data()));
   }
 }
 
@@ -175,8 +178,7 @@ void PDF_WS_NoCPV::setCorrelations(const TString c) {
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
   } else {
-    std::cout << "PDF_WS_NoCPV::setCorrelations() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_WS_NoCPV::setCorrelations ERROR config {} not found", c.Data()));
   }
 }
 

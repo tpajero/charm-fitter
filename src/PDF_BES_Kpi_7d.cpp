@@ -17,9 +17,11 @@
 #include <RooRealVar.h>
 
 #include <boost/algorithm/string.hpp>
+#include <format>
+#include <stdexcept>
 #include <vector>
 
-PDF_BES_Kpi_7d::PDF_BES_Kpi_7d(const theory_config th_cfg) : PDF_Abs{7}, th_cfg{th_cfg} {
+PDF_BES_Kpi_7d::PDF_BES_Kpi_7d(const parametrisations::mix mix_param) : PDF_Abs{7}, mix_param{mix_param} {
   name = "charm-bes-kpi-2025";
   initParameters();
   initRelations();
@@ -36,39 +38,32 @@ void PDF_BES_Kpi_7d::initParameters() {
   parameters->add(*(p.get("R_Kpi")));
   parameters->add(*(p.get("Delta_Kpi")));
   parameters->add(*(p.get("F_pipipi0")));
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     parameters->add(*(p.get("y")));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     parameters->add(*(p.get("phiG")));
     parameters->add(*(p.get("x12")));
     parameters->add(*(p.get("y12")));
     parameters->add(*(p.get("phiM")));
     break;
   default:
-    std::cout << "PDF_BES_Kpi_7d::initParameters : ERROR : theory_config not supported." << std::endl;
-    std::exit(1);
+    throw std::runtime_error(std::format("PDF_BES_Kpi_7d::initParameters ERROR Parametrisation {} not supported",
+                                         utils::to_string(mix_param)));
   }
 }
 
 void PDF_BES_Kpi_7d::initRelations() {
-  theory = new RooArgList("theory");
-  std::string a_kpi_formula = "(2 * sqrt(R_Kpi) * cos(Delta_Kpi) + y) / (1 + R_Kpi)";
-  std::string a_kpi_pipipi0_formula = "F_pipipi0 * (2 * sqrt(R_Kpi) * cos(Delta_Kpi) + y)"
-                                      "/ (1 + R_Kpi + (1 - F_pipipi0) * (-2 * sqrt(R_Kpi) * cos(Delta_Kpi) + y))";
-  switch (th_cfg) {
-  case theory_config::phenomenological:
-    break;
-  case theory_config::theoretical:
-    boost::replace_all(a_kpi_formula, "y", CharmUtils::y_to_theoretical);
-    boost::replace_all(a_kpi_pipipi0_formula, "y", CharmUtils::y_to_theoretical);
-    break;
-  default:
-    std::cout << "PDF_BES_Kpi_7d::initRelations : ERROR : theory_config not supported." << std::endl;
-    std::exit(1);
-  }
+  const std::string y = utils::y_expression(mix_param);
+  std::string a_kpi_formula = std::format("(2 * sqrt(R_Kpi) * cos(Delta_Kpi) + {0}) / (1 + R_Kpi)", y);
+  std::string a_kpi_pipipi0_formula =
+      std::format("F_pipipi0 * (2 * sqrt(R_Kpi) * cos(Delta_Kpi) + {0}) "
+                  " / (1 + R_Kpi + (1 - F_pipipi0) * (-2 * sqrt(R_Kpi) * cos(Delta_Kpi) + {0}))",
+                  y);
   using Utils::makeTheoryVar;
+  theory = new RooArgList("theory");
   theory->add(*(makeTheoryVar("A_kpi_th", "A_kpi_th", a_kpi_formula, parameters)));
   theory->add(*(makeTheoryVar("A_kpi_pipipi0_th", "A_kpi_pipipi0_th", a_kpi_pipipi0_formula, parameters)));
   theory->add(*(makeTheoryVar("rcos_3fb_th", "rcos_3fb_th", "-sqrt(R_Kpi)*cos(Delta_Kpi)", parameters)));
@@ -103,8 +98,7 @@ void PDF_BES_Kpi_7d::setObservables(const TString c) {
     setObservable("rcos_7fb_obs", -4.4e-2);
     setObservable("rsin_7fb_obs", -2.2e-2);
   } else {
-    std::cout << "PDF_BES_Kpi_7d::setObservables() : ERROR : obs config " << c << " not found." << std::endl;
-    std::exit(1);
+    throw std::runtime_error(std::format("PDF_BES_Kpi_7d::setObservables ERROR obs config {} not found", c.Data()));
   }
 }
 
@@ -126,8 +120,7 @@ void PDF_BES_Kpi_7d::setUncertainties(const TString c) {
     StatErr[6] = 1.7e-2;
     SystErr[6] = 0.31e-2;
   } else {
-    std::cout << "PDF_BES_Kpi_7d::setObservables() : ERROR : err config " << c << " not found." << std::endl;
-    std::exit(1);
+    throw std::runtime_error(std::format("PDF_BES_Kpi_7d::setUncertainties ERROR err config {} not found", c.Data()));
   }
 }
 
@@ -160,8 +153,7 @@ void PDF_BES_Kpi_7d::setCorrelations(const TString c) {
     };
     corSystMatrix = Utils::buildCorMatrix(nObs, dataSyst);
   } else {
-    std::cout << "PDF_BES_Kpi_7d::setCorrelations() : ERROR : cor config " << c << " not found." << std::endl;
-    std::exit(1);
+    throw std::runtime_error(std::format("PDF_BES_Kpi_7d::setCorrelations ERROR cor config {} not found", c.Data()));
   }
 }
 

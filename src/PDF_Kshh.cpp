@@ -17,10 +17,13 @@
 
 #include <TString.h>
 
+#include <format>
 #include <iostream>
+#include <stdexcept>
 #include <vector>
 
-PDF_Kshh::PDF_Kshh(const TString measurement_id, const theory_config th_cfg) : PDF_Abs{4}, th_cfg{th_cfg} {
+PDF_Kshh::PDF_Kshh(const TString measurement_id, const parametrisations::mix mix_param)
+    : PDF_Abs{4}, mix_param{mix_param} {
   name = "Kshh_" + measurement_id;
   initParameters();
   initRelations();
@@ -39,53 +42,37 @@ void PDF_Kshh::initParameters() {
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");
 
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     parameters->add(*(p.get("x")));
     parameters->add(*(p.get("y")));
     parameters->add(*(p.get("qop")));
     parameters->add(*(p.get("phi")));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     parameters->add(*(p.get("phiG")));
     parameters->add(*(p.get("x12")));
     parameters->add(*(p.get("y12")));
     parameters->add(*(p.get("phiM")));
     break;
   default:
-    std::cout << "PDF_Kshh::initParameters : ERROR : "
-                 "theory_config not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_Kshh::initParameters ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
 }
 
 void PDF_Kshh::initRelations() {
-  theory = new RooArgList("theory");  ///< the order of this list must match that of the COR matrix!
-  switch (th_cfg) {
-  case theory_config::phenomenological:
-    theory->add(*(Utils::makeTheoryVar("x_th", "x_th", "x", parameters)));
-    theory->add(*(Utils::makeTheoryVar("y_th", "y_th", "y", parameters)));
+  theory = new RooArgList("theory");
+  theory->add(*(Utils::makeTheoryVar("x_th", "x_th", utils::x_expression(mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("y_th", "y_th", utils::y_expression(mix_param), parameters)));
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     theory->add(*(Utils::makeTheoryVar("qop_th", "qop_th", "qop", parameters)));
     theory->add(*(Utils::makeTheoryVar("phi_th", "phi_th", "phi", parameters)));
     break;
-  case theory_config::theoretical:
-    theory->add(*(Utils::makeTheoryVar("x_th", "x_th",
-                                       "pow(2,-0.5) * pow( "
-                                       "    pow(x12,2) - pow(y12,2) + pow( "
-                                       "       + pow(pow(x12,2) + pow(y12,2),2)"
-                                       "       - pow(2 * x12 * y12 * sin(phiM - phiG),2),"
-                                       "    0.5)"
-                                       ",0.5) * TMath::Sign(1., cos(phiM - phiG))",
-                                       parameters)));
-    theory->add(*(Utils::makeTheoryVar("y_th", "y_th",
-                                       "pow(2,-0.5) * pow( "
-                                       "    pow(y12,2) - pow(x12,2) + pow( "
-                                       "       + pow(pow(x12,2) + pow(y12,2),2)"
-                                       "       - pow(2 * x12 * y12 * sin(phiM - phiG),2),"
-                                       "    0.5)"
-                                       ",0.5)",
-                                       parameters)));
+  case mix::theo:
     theory->add(*(Utils::makeTheoryVar("qop_th", "qop_th",
                                        "pow(  (pow(x12,2) + pow(y12,2) + 2 * x12 * y12 * sin(phiM - phiG))"
                                        "    /  pow(  pow(pow(x12,2) + pow(y12,2),2)                       "
@@ -98,10 +85,8 @@ void PDF_Kshh::initRelations() {
                                        parameters)));
     break;
   default:
-    std::cout << "PDF_Kshh::initRelations : ERROR : "
-                 "theory_config not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_Kshh::initRelations ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
 }
 
@@ -125,8 +110,7 @@ void PDF_Kshh::setObservables(const TString c) {
     setObservable("qop_obs", 0.90);
     setObservable("phi_obs", Utils::DegToRad(-6.));
   } else {
-    std::cout << "PDF_Kshh::setObservables() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_Kshh::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
@@ -142,8 +126,7 @@ void PDF_Kshh::setUncertainties(const TString c) {
     SystErr[2] = 0;                                                // qop
     SystErr[3] = 0;                                                // phi
   } else {
-    std::cout << "PDF_Kshh::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_Kshh::setUncertainties ERROR config {} not found", c.Data()));
   }
 }
 
@@ -161,8 +144,7 @@ void PDF_Kshh::setCorrelations(const TString c) {
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
   } else {
-    std::cout << "PDF_Kshh::setCorrelations() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_Kshh::setCorrelations ERROR config {} not found", c.Data()));
   }
 }
 

@@ -15,11 +15,14 @@
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
+#include <format>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
-PDF_DY_pipipi0::PDF_DY_pipipi0(const TString measurement_id, const theory_config th_cfg) : PDF_Abs{1}, th_cfg{th_cfg} {
+PDF_DY_pipipi0::PDF_DY_pipipi0(const TString measurement_id, const parametrisations::mix mix_param)
+    : PDF_Abs{1}, mix_param{mix_param} {
   name = "DY_pipipi0_" + measurement_id;
   initParameters();
   initRelations();
@@ -32,16 +35,17 @@ PDF_DY_pipipi0::PDF_DY_pipipi0(const TString measurement_id, const theory_config
 
 void PDF_DY_pipipi0::initParameters() {
   std::vector<std::string> param_names = {"F_pipipi0"};
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     param_names.insert(param_names.end(), {"x", "y", "qop", "phi"});
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     param_names.insert(param_names.end(), {"x12", "y12", "phiM"});
     break;
   default:
-    std::cout << "PDF_DY_pipipi0::initParameters : ERROR : theory_config not supported.\n";
-    exit(1);
+    throw std::runtime_error(std::format("PDF_DY_pipipi0::initParameters ERROR Parametrisation {} not supported",
+                                         utils::to_string(mix_param)));
   }
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");
@@ -52,7 +56,7 @@ void PDF_DY_pipipi0::initRelations() {
   theory = new RooArgList("theory");
   theory->add(
       *(Utils::makeTheoryVar("DY_pipipi0_th", "DY_pipipi0_th",
-                             "(2 * F_pipipi0 - 1) * (" + CharmUtils::get_dy_expression(th_cfg) + ")", parameters)));
+                             std::format("-(2 * F_pipipi0 - 1) * ({})", utils::dy_expression(mix_param)), parameters)));
 }
 
 void PDF_DY_pipipi0::initObservables(const TString setName) {
@@ -70,9 +74,8 @@ void PDF_DY_pipipi0::setObservables(const TString c) {
   else if (c.EqualTo("LHCb-R2"))
     setObservable("DY_pipipi0_obs", -1.21e-4);
   else {
-    std::cout << "PDF_DY_pipipi0::setObservables() : ERROR : config " << c << " not found for " << nObs
-              << " DY_pipipi0 observables." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format(
+        "PDF_DY_pipipi0::setObservables ERROR config {} not found for {} DY_pipipi0 observables", c.Data(), nObs));
   }
 }
 
@@ -82,9 +85,8 @@ void PDF_DY_pipipi0::setUncertainties(const TString c) {
     StatErr[0] = 5.97e-4;
     SystErr[0] = 2.01e-4;  // Removed the sys. unc. for the time binning
   } else {
-    std::cout << "PDF_DY_pipipi0::setUncertainties() : ERROR : config " << c << " not found for " << nObs
-              << " DY_pipipi0 observables." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format(
+        "PDF_DY_pipipi0::setUncertainties ERROR config {} not found for {} DY_pipipi0 observables", c.Data(), nObs));
   }
 }
 

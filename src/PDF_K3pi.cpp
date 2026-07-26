@@ -16,29 +16,31 @@
 #include <RooRealVar.h>
 
 #include <algorithm>
+#include <format>
 #include <map>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
 namespace {
-  std::map<std::string, std::map<theory_config, std::string>> theory_expressions = {
+  using parametrisations::mix;
+  std::map<std::string, std::map<mix, std::string>> theory_expressions = {
       {"c1",
        {
-           {theory_config::phenomenological,
-            "- k_K3pi * 0.5 * (      qop * (y*cos(Delta_K3pi - phi) + x*sin(Delta_K3pi - phi)) "
-            "                  + 1 / qop * (y*cos(Delta_K3pi + phi) + x*sin(Delta_K3pi + phi)))"},
-           {theory_config::theoretical,
-            "-k_K3pi * (y12 * cos(Delta_K3pi) * cos(phiG) + x12 * sin(Delta_K3pi) * cos(phiM))"},
+           {mix::pheno, "- k_K3pi * 0.5 * (      qop * (y*cos(Delta_K3pi - phi) + x*sin(Delta_K3pi - phi)) "
+                        "                  + 1 / qop * (y*cos(Delta_K3pi + phi) + x*sin(Delta_K3pi + phi)))"},
+           {mix::theo, "-k_K3pi * (y12 * cos(Delta_K3pi) * cos(phiG) + x12 * sin(Delta_K3pi) * cos(phiM))"},
        }},
       {"c2",
        {
-           {theory_config::phenomenological, "(x * x + y * y) / 4"},
-           {theory_config::theoretical, "(x12 * x12 + y12 * y12) / 4"},
+           {mix::pheno, "(x * x + y * y) / 4"},
+           {mix::theo, "(x12 * x12 + y12 * y12) / 4"},
        }},
   };
-}
+}  // namespace
 
-PDF_K3pi::PDF_K3pi(const TString measurement_id, const theory_config th_cfg) : PDF_Abs{3}, th_cfg{th_cfg} {
+PDF_K3pi::PDF_K3pi(const TString measurement_id, const parametrisations::mix mix_param)
+    : PDF_Abs{3}, mix_param{mix_param} {
   name = "K3pi_" + measurement_id;
   initParameters();
   initRelations();
@@ -51,7 +53,8 @@ PDF_K3pi::PDF_K3pi(const TString measurement_id, const theory_config th_cfg) : P
 
 void PDF_K3pi::initParameters() {
   std::vector<std::string> param_names = {"r_K3pi", "k_K3pi", "Delta_K3pi"};
-  if (th_cfg == theory_config::phenomenological)
+  using parametrisations::mix;
+  if (mix_param == mix::pheno)
     param_names.insert(param_names.end(), {"x", "y", "qop", "phi"});
   else
     param_names.insert(param_names.end(), {"x12", "y12", "phiM", "phiG"});
@@ -63,8 +66,8 @@ void PDF_K3pi::initParameters() {
 void PDF_K3pi::initRelations() {
   theory = new RooArgList("theory");  ///< the order of this list must match that of the COR matrix!
   theory->add(*(Utils::makeTheoryVar("r_K3pi_th", "r_K3pi_th", "r_K3pi", parameters)));
-  theory->add(*(Utils::makeTheoryVar("c1_th", "c1_th", theory_expressions["c1"][th_cfg], parameters)));
-  theory->add(*(Utils::makeTheoryVar("c2_th", "c2_th", theory_expressions["c2"][th_cfg], parameters)));
+  theory->add(*(Utils::makeTheoryVar("c1_th", "c1_th", theory_expressions["c1"][mix_param], parameters)));
+  theory->add(*(Utils::makeTheoryVar("c2_th", "c2_th", theory_expressions["c2"][mix_param], parameters)));
 }
 
 void PDF_K3pi::initObservables(const TString label) {
@@ -85,8 +88,7 @@ void PDF_K3pi::setObservables(const TString c) {
     setObservable("c1_obs", 3e-4);
     setObservable("c2_obs", 4.8e-5);
   } else {
-    std::cout << "PDF_K3pi::setObservables() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_K3pi::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
@@ -98,8 +100,7 @@ void PDF_K3pi::setUncertainties(const TString c) {
     StatErr[2] = 1.8e-5;
     std::ranges::fill(SystErr, 0);
   } else {
-    std::cout << "PDF_K3pi::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_K3pi::setUncertainties ERROR config {} not found", c.Data()));
   }
 }
 
@@ -116,8 +117,7 @@ void PDF_K3pi::setCorrelations(const TString c) {
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, corrs);
   } else {
-    std::cout << "PDF_K3pi::setCorrelations() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_K3pi::setCorrelations ERROR config {} not found", c.Data()));
   }
 }
 

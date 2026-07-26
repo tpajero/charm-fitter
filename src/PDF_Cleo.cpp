@@ -15,10 +15,13 @@
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
+#include <format>
 #include <iostream>
+#include <stdexcept>
 #include <vector>
 
-PDF_Cleo::PDF_Cleo(const TString measurement_id, const theory_config th_cfg) : PDF_Abs{5}, th_cfg{th_cfg} {
+PDF_Cleo::PDF_Cleo(const TString measurement_id, const parametrisations::mix mix_param)
+    : PDF_Abs{5}, mix_param{mix_param} {
   name = "CLEO";
   initParameters();
   initRelations();
@@ -35,53 +38,45 @@ void PDF_Cleo::initParameters() {
   parameters->add(*(p.get("R_Kpi")));
   parameters->add(*(p.get("Delta_Kpi")));
 
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     parameters->add(*(p.get("x")));
     parameters->add(*(p.get("y")));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     parameters->add(*(p.get("phiG")));
     parameters->add(*(p.get("phiM")));
     parameters->add(*(p.get("x12")));
     parameters->add(*(p.get("y12")));
     break;
   default:
-    std::cout << "PDF_Cleo::initParameters : ERROR : "
-                 "theory_config not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_Cleo::initParameters ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
 }
 
 void PDF_Cleo::initRelations() {
   theory = new RooArgList("theory");
   theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "R_Kpi", parameters)));
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     theory->add(*(Utils::makeTheoryVar("x2_th", "x2_th", "x*x", parameters)));
-    theory->add(*(Utils::makeTheoryVar("y_th", "y_th", "y", parameters)));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     theory->add(*(Utils::makeTheoryVar("x2_th", "x2_th",
                                        "0.5 * ("
                                        "      pow(x12,2) - pow(y12,2) "
                                        "    + pow(  pow(pow(x12,2) + pow(y12,2),2) "
                                        "          - pow(2 * x12 * y12 * sin(phiM - phiG),2), 0.5))",
                                        parameters)));
-    theory->add(*(Utils::makeTheoryVar("y_th", "y_th",
-                                       "pow(2, -0.5) * pow("
-                                       "      pow(y12,2) - pow(x12,2) "
-                                       "    + pow(  pow(pow(x12,2) + pow(y12,2),2) "
-                                       "          - pow(2 * x12 * y12 * sin(phiM - phiG),2), 0.5), 0.5)",
-                                       parameters)));
     break;
   default:
-    std::cout << "PDF_Cleo::initRelations : ERROR : "
-                 "theory_config not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_Cleo::initRelations ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
+  theory->add(*(Utils::makeTheoryVar("y_th", "y_th", utils::y_expression(mix_param), parameters)));
   theory->add(*(Utils::makeTheoryVar("cos_th", "cos_th", "cos(Delta_Kpi)", parameters)));
   theory->add(*(Utils::makeTheoryVar("sin_th", "sin_th", "-sin(Delta_Kpi)", parameters)));
 }
@@ -108,8 +103,7 @@ void PDF_Cleo::setObservables(const TString c) {
     setObservable("cos_obs", 0.81);
     setObservable("sin_obs", -0.01);
   } else {
-    std::cout << "PDF_Cleo::setObservables() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_Cleo::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
@@ -127,8 +121,7 @@ void PDF_Cleo::setUncertainties(const TString c) {
     SystErr[3] = 0;
     SystErr[4] = 0;
   } else {
-    std::cout << "PDF_Cleo::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_Cleo::setUncertainties ERROR config {} not found", c.Data()));
   }
 }
 
@@ -147,8 +140,7 @@ void PDF_Cleo::setCorrelations(const TString c) {
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
   } else {
-    std::cout << "PDF_Cleo::setCorrelations() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_Cleo::setCorrelations ERROR config {} not found", c.Data()));
   }
 }
 

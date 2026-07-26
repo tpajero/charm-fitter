@@ -15,7 +15,7 @@
 
 class PDF_BES_Kpi_1d : public PDF_Abs {
  public:
-  PDF_BES_Kpi_1d(theory_config th_cfg);
+  PDF_BES_Kpi_1d(parametrisations::mix mix_param);
   void buildPdf() override;
   void initObservables(TString setName);
   void initParameters() override;
@@ -25,7 +25,7 @@ class PDF_BES_Kpi_1d : public PDF_Abs {
   void setUncertainties(TString measurement_id) override;
 
  private:
-  const theory_config th_cfg;
+  const parametrisations::mix mix_param;
 };
 
 #endif

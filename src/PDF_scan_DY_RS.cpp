@@ -15,9 +15,11 @@
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
+#include <format>
 #include <iostream>
+#include <stdexcept>
 
-PDF_scan_DY_RS::PDF_scan_DY_RS(const theory_config th_cfg) : PDF_Abs{1}, th_cfg{th_cfg} {
+PDF_scan_DY_RS::PDF_scan_DY_RS(const parametrisations::mix mix_param) : PDF_Abs{1}, mix_param{mix_param} {
   name = "scan_DY_RS";
   initParameters();
   initRelations();
@@ -36,50 +38,30 @@ void PDF_scan_DY_RS::initParameters() {
   parameters->add(*(p.get("Delta_Kpi")));
   parameters->add(*(p.get("DY_RS")));
 
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     parameters->add(*(p.get("x")));
     parameters->add(*(p.get("y")));
     parameters->add(*(p.get("qop")));
     parameters->add(*(p.get("phi")));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     parameters->add(*(p.get("phiG")));
     parameters->add(*(p.get("x12")));
     parameters->add(*(p.get("y12")));
     parameters->add(*(p.get("phiM")));
     break;
   default:
-    std::cout << "PDF_scan_DY_RS::initParameters : ERROR : "
-                 "theory_config not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_scan_DY_RS::initParameters ERROR Parametrisation {} not supported",
+                                         utils::to_string(mix_param)));
   }
 }
 
 void PDF_scan_DY_RS::initRelations() {
   theory = new RooArgList("theory");
-  switch (th_cfg) {
-  case theory_config::phenomenological:
-    theory->add(*(Utils::makeTheoryVar("DY_RS_scan_th", "DY_RS_scan_th",
-                                       "DY_RS - abs(0.5 * pow(R_Kpi, 0.5) * "
-                                       "(  (y*cos(Delta_Kpi) - x*sin(Delta_Kpi))*(qop - 1/qop - Acp_KP)*cos(phi)"
-                                       " - (x*cos(Delta_Kpi) + y*sin(Delta_Kpi))*(qop + 1/qop         )*sin(phi)))",
-                                       parameters)));
-    break;
-  case theory_config::theoretical:
-    theory->add(*(Utils::makeTheoryVar("DY_RS_scan_th", "DY_RS_scan_th",
-                                       "DY_RS - abs(pow(R_Kpi, 0.5) * "
-                                       "(  (-y12*cos(Delta_Kpi)*cos(phiG) + x12*sin(Delta_Kpi)*cos(phiM))*Acp_KP*0.5"
-                                       " + (+y12*sin(Delta_Kpi)*sin(phiG) + x12*cos(Delta_Kpi)*sin(phiM))           ))",
-                                       parameters)));
-    break;
-  default:
-    std::cout << "PDF_scan_DY_RS::initRelations : ERROR : "
-                 "theory_config not supported."
-              << std::endl;
-    exit(1);
-  }
+  theory->add(*(Utils::makeTheoryVar("DY_RS_scan_th", "DY_RS_scan_th",
+                                     std::format("DY_RS - abs({})", utils::dy_kp_expression(mix_param)), parameters)));
 }
 
 void PDF_scan_DY_RS::initObservables() {

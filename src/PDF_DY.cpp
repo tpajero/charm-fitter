@@ -15,10 +15,14 @@
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
+#include <format>
 #include <iostream>
+#include <stdexcept>
 
-PDF_DY::PDF_DY(const TString measurement_id, const theory_config th_cfg, const FSC fsc)
-    : PDF_Abs{fsc == FSC::none ? 1 : 2}, th_cfg{th_cfg}, fsc{fsc} {
+PDF_DY::PDF_DY(const TString measurement_id, const parametrisations::mix mix_param,
+               const parametrisations::dy_fsc dy_fsc_param)
+    : PDF_Abs{dy_fsc_param == parametrisations::dy_fsc::none ? 1 : 2}, mix_param{mix_param},
+      dy_fsc_param{dy_fsc_param} {
   name = "DY_" + measurement_id;
   initParameters();
   initRelations();
@@ -32,32 +36,32 @@ PDF_DY::PDF_DY(const TString measurement_id, const theory_config th_cfg, const F
 void PDF_DY::initParameters() {
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     parameters->add(*(p.get("x")));
     parameters->add(*(p.get("y")));
     parameters->add(*(p.get("qop")));
     parameters->add(*(p.get("phi")));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     parameters->add(*(p.get("x12")));
     parameters->add(*(p.get("y12")));
     parameters->add(*(p.get("phiM")));
     break;
   default:
-    std::cout << "PDF_DY::initParameters : ERROR : "
-                 "theory_config not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_DY::initParameters ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
-  switch (fsc) {
-  case FSC::none:
+  using parametrisations::dy_fsc;
+  switch (dy_fsc_param) {
+  case dy_fsc::none:
     break;
-  case FSC::partial:
+  case dy_fsc::partial:
     parameters->add(*(p.get("Acp_KK")));
     parameters->add(*(p.get("Acp_PP")));
     break;
-  case FSC::full:
+  case dy_fsc::full:
     parameters->add(*(p.get("Acp_KK")));
     parameters->add(*(p.get("Acp_PP")));
     parameters->add(*(p.get("cot_delta_KK")));
@@ -69,12 +73,12 @@ void PDF_DY::initParameters() {
 void PDF_DY::initRelations() {
   theory = new RooArgList("theory");
   if (nObs == 1) {
-    theory->add(*(Utils::makeTheoryVar("DY_th", "DY_th", CharmUtils::get_dy_expression(th_cfg), parameters)));
+    theory->add(*(Utils::makeTheoryVar("DY_th", "DY_th", utils::dy_hh_expression(mix_param), parameters)));
   } else if (nObs == 2) {
-    theory->add(
-        *(Utils::makeTheoryVar("DY_KK_th", "DY_KK_th", CharmUtils::get_dy_expression(th_cfg, fsc, "KK"), parameters)));
-    theory->add(
-        *(Utils::makeTheoryVar("DY_PP_th", "DY_PP_th", CharmUtils::get_dy_expression(th_cfg, fsc, "PP"), parameters)));
+    theory->add(*(Utils::makeTheoryVar("DY_KK_th", "DY_KK_th", utils::dy_hh_expression(mix_param, dy_fsc_param, "KK"),
+                                       parameters)));
+    theory->add(*(Utils::makeTheoryVar("DY_PP_th", "DY_PP_th", utils::dy_hh_expression(mix_param, dy_fsc_param, "PP"),
+                                       parameters)));
   }
 }
 
@@ -111,9 +115,8 @@ void PDF_DY::setObservables(const TString c) {
     setObservable("DY_KK_obs", -0.20e-4);
     setObservable("DY_PP_obs", -3.53e-4);
   } else {
-    std::cout << "PDF_DY::setObservables() : ERROR : config " << c << " not found for " << nObs << " DY observables."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_DY::setObservables ERROR config {} not found for {} DY observables", c.Data(), nObs));
   }
 }
 
@@ -142,9 +145,8 @@ void PDF_DY::setUncertainties(const TString c) {
     StatErr[1] = 2.36e-4;
     SystErr[1] = 0.39e-4;
   } else {
-    std::cout << "PDF_DY::setUncertainties() : ERROR : config " << c << " not found for " << nObs << " DY observables."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_DY::setUncertainties ERROR config {} not found for {} DY observables", c.Data(), nObs));
   }
 }
 
@@ -158,9 +160,8 @@ void PDF_DY::setCorrelations(const TString c) {
   else if (nObs == 2 && c.EqualTo("WA2021"))
     corSystMatrix[0][1] = 0.68;  // np.sum(np.square([0.18, 0.21, 0.06, 0.01, 0.07])) / 0.32 / 0.39
   else {
-    std::cout << "PDF_DY::setCorrelations() : ERROR : config " << c << " not found for " << nObs << " DY observables."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_DY::setCorrelations ERROR config {} not found for {} DY observables", c.Data(), nObs));
   }
 }
 

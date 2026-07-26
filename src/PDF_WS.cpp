@@ -16,79 +16,93 @@
 #include <RooRealVar.h>
 
 #include <algorithm>
+#include <format>
 #include <iostream>
 #include <map>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
 namespace {
-  // Map containing the expressions for the observables in the various parametrisations
-  std::map<std::string, std::map<theory_config, std::string>> theory_expressions = {
+  using parametrisations::mix;
+  // Expressions for the observables in the various parametrisations
+  const std::map<std::string, std::map<mix, std::string>> theory_expressions = {
       {"y'+",
        {
-           {theory_config::phenomenological, "qop*(  y * cos(Delta_Kpi - phi)"
-                                             "         + x * sin(Delta_Kpi - phi))"},
-           {theory_config::theoretical, "  y12 * cos(Delta_Kpi + phiG)"
-                                        "+ x12 * sin(Delta_Kpi + phiM)"},
-           {theory_config::d0_to_kpi, "yp + dyp"},
+           {mix::pheno, "qop*(  y * cos(Delta_Kpi - phi)"
+                        "         + x * sin(Delta_Kpi - phi))"},
+           {mix::theo, "  y12 * cos(Delta_Kpi + phiG)"
+                       "+ x12 * sin(Delta_Kpi + phiM)"},
+           {mix::d0_to_kpi, "yp + dyp"},
        }},
       {"y'-",
        {
-           {theory_config::phenomenological, "1/qop*(  y * cos(Delta_Kpi + phi)"
-                                             "           + x * sin(Delta_Kpi + phi))"},
-           {theory_config::theoretical, "  y12 * cos(Delta_Kpi-phiG)"
-                                        "+ x12 * sin(Delta_Kpi-phiM)"},
-           {theory_config::d0_to_kpi, "yp - dyp"},
+           {mix::pheno, "1/qop*(  y * cos(Delta_Kpi + phi)"
+                        "           + x * sin(Delta_Kpi + phi))"},
+           {mix::theo, "  y12 * cos(Delta_Kpi-phiG)"
+                       "+ x12 * sin(Delta_Kpi-phiM)"},
+           {mix::d0_to_kpi, "yp - dyp"},
        }},
       {"x'2+",
        {
-           {theory_config::phenomenological, "pow(qop*(  x * cos(Delta_Kpi - phi)"
-                                             "             - y * sin(Delta_Kpi - phi)),2)"},
-           {theory_config::theoretical, "pow(- y12 * sin(Delta_Kpi + phiG)"
-                                        "    + x12 * cos(Delta_Kpi + phiM), 2)"},
-           {theory_config::d0_to_kpi, "xp2 + dxp2"},
+           {mix::pheno, "pow(qop*(  x * cos(Delta_Kpi - phi)"
+                        "             - y * sin(Delta_Kpi - phi)),2)"},
+           {mix::theo, "pow(- y12 * sin(Delta_Kpi + phiG)"
+                       "    + x12 * cos(Delta_Kpi + phiM), 2)"},
+           {mix::d0_to_kpi, "xp2 + dxp2"},
        }},
       {"x'2-",
        {
-           {theory_config::phenomenological, "pow(1/qop*(  x * cos(Delta_Kpi + phi)"
-                                             "               - y * sin(Delta_Kpi + phi)),2)"},
-           {theory_config::theoretical, "pow(- y12 * sin(Delta_Kpi-phiG)"
-                                        "    + x12 * cos(Delta_Kpi-phiM),2)"},
-           {theory_config::d0_to_kpi, "xp2 - dxp2"},
+           {mix::pheno, "pow(1/qop*(  x * cos(Delta_Kpi + phi)"
+                        "               - y * sin(Delta_Kpi + phi)),2)"},
+           {mix::theo, "pow(- y12 * sin(Delta_Kpi-phiG)"
+                       "    + x12 * cos(Delta_Kpi-phiM),2)"},
+           {mix::d0_to_kpi, "xp2 - dxp2"},
        }},
       {"c",
        {
-           {theory_config::phenomenological, "0.5 * (      qop*(  y*cos(Delta_Kpi - phi) + x*sin(Delta_Kpi - phi)) "
-                                             "       + 1 / qop*(  y*cos(Delta_Kpi + phi) + x*sin(Delta_Kpi + phi)))"},
-           {theory_config::theoretical, "y12 * cos(Delta_Kpi) * cos(phiG) + x12 * sin(Delta_Kpi) * cos(phiM)"},
-           {theory_config::d0_to_kpi, "yp"},
+           {mix::pheno, "0.5 * (      qop*(  y*cos(Delta_Kpi - phi) + x*sin(Delta_Kpi - phi)) "
+                        "       + 1 / qop*(  y*cos(Delta_Kpi + phi) + x*sin(Delta_Kpi + phi)))"},
+           {mix::theo, "y12 * cos(Delta_Kpi) * cos(phiG) + x12 * sin(Delta_Kpi) * cos(phiM)"},
+           {mix::d0_to_kpi, "yp"},
        }},
       {"c'",
        {
-           {theory_config::phenomenological, "0.125 * (pow(x, 2) + pow(y, 2)) * (pow(qop, 2) + pow(qop, -2))"},
-           {theory_config::theoretical, "0.25 * (pow(x12, 2) + pow(y12, 2))"
-                                        "+ 0.25 * R_Kpi * (pow(y12, 2) - pow(x12, 2))"},  // 2nd order corrections
-           {theory_config::d0_to_kpi, "(pow(yp, 2) + xp2) / 4"},
+           {mix::pheno, "0.125 * (pow(x, 2) + pow(y, 2)) * (pow(qop, 2) + pow(qop, -2))"},
+           {mix::theo, "0.25 * (pow(x12, 2) + pow(y12, 2))"
+                       "+ 0.25 * R_Kpi * (pow(y12, 2) - pow(x12, 2))"},  // 2nd order corrections
+           {mix::d0_to_kpi, "(pow(yp, 2) + xp2) / 4"},
        }},
       {"dc",
        {
-           {theory_config::phenomenological, "0.5 * (      qop*(  y*cos(Delta_Kpi - phi) + x*sin(Delta_Kpi - phi)) "
-                                             "       - 1 / qop*(  y*cos(Delta_Kpi + phi) + x*sin(Delta_Kpi + phi)))"},
-           {theory_config::theoretical, "  x12 * cos(Delta_Kpi) * sin(phiM)"
-                                        "- y12 * sin(Delta_Kpi) * sin(phiG)"},
-           {theory_config::d0_to_kpi, "dyp"},
+           {mix::pheno, "0.5 * (      qop*(  y*cos(Delta_Kpi - phi) + x*sin(Delta_Kpi - phi)) "
+                        "       - 1 / qop*(  y*cos(Delta_Kpi + phi) + x*sin(Delta_Kpi + phi)))"},
+           {mix::theo, "  x12 * cos(Delta_Kpi) * sin(phiM)"
+                       "- y12 * sin(Delta_Kpi) * sin(phiG)"},
+           {mix::d0_to_kpi, "dyp"},
        }},
       {"dc'",
        {
-           {theory_config::phenomenological, "1 / 8 * (pow(x, 2) + pow(y, 2)) * (pow(qop, 2) - pow(qop, -2))"},
-           {theory_config::theoretical, "0.5 * x12 * y12 * sin(phiM - phiG)"},
-           {theory_config::d0_to_kpi, "(2 * yp * dyp + pow(dyp, 2) + dxp2) / 4"},
+           {mix::pheno, "1 / 8 * (pow(x, 2) + pow(y, 2)) * (pow(qop, 2) - pow(qop, -2))"},
+           {mix::theo, "0.5 * x12 * y12 * sin(phiM - phiG)"},
+           {mix::d0_to_kpi, "(2 * yp * dyp + pow(dyp, 2) + dxp2) / 4"},
        }},
   };
+
+  std::string get_formula(const std::string observable, const mix mix_param) {
+    try {
+      return theory_expressions.at(observable).at(mix_param);
+    } catch (const std::out_of_range& e) {
+      std::cerr << std::format("Out of range error, parametrisation {} not handled for observable {}: {}",
+                               utils::to_string(mix_param), observable, e.what())
+                << std::endl;
+      throw;
+    }
+  }
 }  // namespace
 
-PDF_WS::PDF_WS(const TString measurement_id, const theory_config th_cfg, WS_parametrisation p)
-    : PDF_Abs{measurement_id.EqualTo("LHCb_Prompt_Run12_appB") ? 9 : 6}, th_cfg{th_cfg}, ws_param{p} {
+PDF_WS::PDF_WS(const TString measurement_id, const parametrisations::mix mix_param, parametrisations::kpi p)
+    : PDF_Abs{measurement_id.EqualTo("LHCb_Prompt_Run12_appB") ? 9 : 6}, mix_param{mix_param}, ws_param{p} {
   TString label;
   if (measurement_id.EqualTo("BaBar"))
     label = "WS/RS BaBar CPV";
@@ -109,13 +123,13 @@ PDF_WS::PDF_WS(const TString measurement_id, const theory_config th_cfg, WS_para
   else if (measurement_id.EqualTo("LHCb_DT_Run12"))
     label = "WS/RS LHCb dt (Run 1+2)";
   else {
-    std::cerr << "PDF_WS: Measurement ID " << measurement_id << " not supported\n";
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_WS::PDF_WS ERROR Measurement ID {} not supported", measurement_id.Data()));
   }
 
-  if (ws_param == WS_parametrisation::ccprime && !measurement_id.BeginsWith("LHCb_Prompt_Run12")) {
-    std::cerr << "The c/c' parametrisation was introduced only with the LHCb Run 2 measurement\n";
-    exit(1);
+  if (ws_param == parametrisations::kpi::ccprime && !measurement_id.BeginsWith("LHCb_Prompt_Run12")) {
+    throw std::runtime_error(
+        "PDF_WS::PDF_WS ERROR The c/c' parametrisation was introduced only with the LHCb Run 2 measurement");
   }
 
   name = "WS_" + measurement_id;
@@ -128,12 +142,13 @@ PDF_WS::PDF_WS(const TString measurement_id, const theory_config th_cfg, WS_para
   build();
 }
 
-PDF_WS::PDF_WS(const TString val, TString err, const theory_config th_cfg) : PDF_Abs{6}, th_cfg{th_cfg} {
+PDF_WS::PDF_WS(const TString val, TString err, const parametrisations::mix mix_param)
+    : PDF_Abs{6}, mix_param{mix_param} {
   TString label;
   if (err.EqualTo("LHCb_Run12"))
     label = "WS/RS LHCb prompt (Run 1+2)";
   else
-    exit(1);
+    throw std::runtime_error(std::format("PDF_WS::PDF_WS ERROR Measurement ID {} not supported", err.Data()));
 
   name = "WS_" + err;
   initParameters();
@@ -146,24 +161,25 @@ PDF_WS::PDF_WS(const TString val, TString err, const theory_config th_cfg) : PDF
 }
 
 void PDF_WS::initParameters() {
+  using parametrisations::mix;
   std::vector<std::string> param_names = {"R_Kpi"};
-  if (th_cfg != theory_config::d0_to_kpi) param_names.emplace_back("Delta_Kpi");
+  if (mix_param != mix::d0_to_kpi) param_names.emplace_back("Delta_Kpi");
   param_names.emplace_back("Acp_KP");
   if (nObs == 9) param_names.emplace_back("Acp_KK");
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  switch (mix_param) {
+  case mix::pheno:
     param_names.insert(param_names.end(), {"x", "y", "qop", "phi"});
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     param_names.emplace_back("phiG");
     param_names.insert(param_names.end(), {"x12", "y12", "phiM"});
     break;
-  case theory_config::d0_to_kpi:
+  case mix::d0_to_kpi:
     param_names.insert(param_names.end(), {"yp", "dyp", "xp2", "dxp2"});
     break;
   default:
-    std::cout << "PDF_WS::initParameters : ERROR : theory_config " << th_cfg << " not supported.\n";
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_WS::initParameters ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
   ParametersCharmCombo p;
   parameters = new RooArgList("parameters");
@@ -171,42 +187,44 @@ void PDF_WS::initParameters() {
 }
 
 void PDF_WS::initRelations() {
+  using parametrisations::kpi;
   switch (ws_param) {
-  case WS_parametrisation::raxy:
+  case kpi::raxy:
     initRelationsRAXY();
     break;
-  case WS_parametrisation::rrxy:
+  case kpi::rrxy:
     initRelationsRRXY();
     break;
-  case WS_parametrisation::ccprime:
+  case kpi::ccprime:
     initRelationsCCPrime();
     break;
   default:
-    std::cout << "PDF_WS::initRelations : ERROR : ws_param not supported.\n";
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_WS::initRelations ERROR WS parametrisation {} not supported", static_cast<int>(ws_param)));
   }
 }
 
 void PDF_WS::initRelationsCCPrime() {
+  using parametrisations::dy_fsc;
   theory = new RooArgList("theory");
   theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "R_Kpi", parameters)));
-  theory->add(*(Utils::makeTheoryVar("c_th", "c_th", theory_expressions["c"][th_cfg], parameters)));
-  theory->add(*(Utils::makeTheoryVar("c'_th", "c'_th", theory_expressions["c'"][th_cfg], parameters)));
+  theory->add(*(Utils::makeTheoryVar("c_th", "c_th", get_formula("c", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("c'_th", "c'_th", get_formula("c'", mix_param), parameters)));
   theory->add(*(Utils::makeTheoryVar("AD_th", "AD_th", "Acp_KP", parameters)));
-  theory->add(*(Utils::makeTheoryVar("dc_th", "dc_th", theory_expressions["dc"][th_cfg], parameters)));
-  theory->add(*(Utils::makeTheoryVar("dc'_th", "dc'_th", theory_expressions["dc'"][th_cfg], parameters)));
+  theory->add(*(Utils::makeTheoryVar("dc_th", "dc_th", get_formula("dc", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("dc'_th", "dc'_th", get_formula("dc'", mix_param), parameters)));
   if (nObs == 9) {
     theory->add(*(Utils::makeTheoryVar("ADt_th", "ADt_th", "Acp_KP - 2 * Acp_KK", parameters)));
-    theory->add(*(Utils::makeTheoryVar("dc~_th", "dc~_th",
-                                       theory_expressions["dc"][th_cfg] + " - 2 * sqrt(R_Kpi) * (" +
-                                           CharmUtils::get_dy_expression(th_cfg, FSC::none, "KK") + ")" +
-                                           " - Acp_KK * (" + theory_expressions["c"][th_cfg] + ")",
-                                       parameters)));
+    theory->add(*(Utils::makeTheoryVar(
+        "dc~_th", "dc~_th",
+        std::format("{} - 2 * sqrt(R_Kpi) * ({}) - Acp_KK * ({})", get_formula("dc", mix_param),
+                    utils::dy_hh_expression(mix_param, dy_fsc::none, "KK"), get_formula("c", mix_param)),
+        parameters)));
     theory->add(*(Utils::makeTheoryVar("dc'~_th", "dc'~_th",
-                                       theory_expressions["dc'"][th_cfg] + " - 2 * sqrt(R_Kpi) * (" +
-                                           theory_expressions["c"][th_cfg] + ") * (" +
-                                           CharmUtils::get_dy_expression(th_cfg, FSC::none, "KK") + ")" +
-                                           " - 2 * Acp_KK * (" + theory_expressions["c'"][th_cfg] + ")",
+                                       std::format("{} - 2 * sqrt(R_Kpi) * ({}) * ({}) - 2 * Acp_KK * ({})",
+                                                   get_formula("dc'", mix_param), get_formula("c", mix_param),
+                                                   utils::dy_hh_expression(mix_param, dy_fsc::none, "KK"),
+                                                   get_formula("c'", mix_param)),
                                        parameters)));
   }
 }
@@ -214,27 +232,28 @@ void PDF_WS::initRelationsCCPrime() {
 void PDF_WS::initRelationsRAXY() {
   theory = new RooArgList("theory");
   theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "R_Kpi", parameters)));
-  theory->add(*(Utils::makeTheoryVar("y'+_th", "y'+_th", theory_expressions["y'+"][th_cfg], parameters)));
-  theory->add(*(Utils::makeTheoryVar("x'2+_th", "x'2+_th", theory_expressions["x'2+"][th_cfg], parameters)));
+  theory->add(*(Utils::makeTheoryVar("y'+_th", "y'+_th", get_formula("y'+", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("x'2+_th", "x'2+_th", get_formula("x'2+", mix_param), parameters)));
   theory->add(*(Utils::makeTheoryVar("AD_th", "AD_th", "Acp_KP", parameters)));
-  theory->add(*(Utils::makeTheoryVar("y'-_th", "y'-_th", theory_expressions["y'-"][th_cfg], parameters)));
-  theory->add(*(Utils::makeTheoryVar("x'2-_th", "x'2-_th", theory_expressions["x'2-"][th_cfg], parameters)));
+  theory->add(*(Utils::makeTheoryVar("y'-_th", "y'-_th", get_formula("y'-", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("x'2-_th", "x'2-_th", get_formula("x'2-", mix_param), parameters)));
 }
 
 void PDF_WS::initRelationsRRXY() {
   theory = new RooArgList("theory");
   theory->add(*(Utils::makeTheoryVar("RD_p_th", "RD_p_th", "R_Kpi * (1 + Acp_KP)", parameters)));
-  theory->add(*(Utils::makeTheoryVar("y'+_th", "y'+_th", theory_expressions["y'+"][th_cfg], parameters)));
-  theory->add(*(Utils::makeTheoryVar("x'2+_th", "x'2+_th", theory_expressions["x'2+"][th_cfg], parameters)));
+  theory->add(*(Utils::makeTheoryVar("y'+_th", "y'+_th", get_formula("y'+", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("x'2+_th", "x'2+_th", get_formula("x'2+", mix_param), parameters)));
   theory->add(*(Utils::makeTheoryVar("RD_m_th", "RD_m_th", "R_Kpi * (1 - Acp_KP)", parameters)));
-  theory->add(*(Utils::makeTheoryVar("y'-_th", "y'-_th", theory_expressions["y'-"][th_cfg], parameters)));
-  theory->add(*(Utils::makeTheoryVar("x'2-_th", "x'2-_th", theory_expressions["x'2-"][th_cfg], parameters)));
+  theory->add(*(Utils::makeTheoryVar("y'-_th", "y'-_th", get_formula("y'-", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("x'2-_th", "x'2-_th", get_formula("x'2-", mix_param), parameters)));
 }
 
 void PDF_WS::initObservables(const TString setName) {
   observables = new RooArgList("observables");  // the order of this list must match that of the COR matrix!
+  using parametrisations::kpi;
   switch (ws_param) {
-  case WS_parametrisation::raxy:
+  case kpi::raxy:
     observables->add(*(new RooRealVar("RD_obs", setName + "   #it{R_{K#pi}}", 0., -1e4, 1e4)));
     observables->add(*(new RooRealVar("y'+_obs", setName + "   #it{y'^{+}}", 0., -1e4, 1e4)));
     observables->add(*(new RooRealVar("x'2+_obs", setName + "   #it{x'^{+2}}", 0., -1e4, 1e4)));
@@ -242,7 +261,7 @@ void PDF_WS::initObservables(const TString setName) {
     observables->add(*(new RooRealVar("y'-_obs", setName + "   #it{y'}^{#minus}", 0., -1e4, 1e4)));
     observables->add(*(new RooRealVar("x'2-_obs", setName + "   #it{x'}^{#minus2}", 0., -1e4, 1e4)));
     break;
-  case WS_parametrisation::rrxy:
+  case kpi::rrxy:
     observables->add(*(new RooRealVar("RD_p_obs", setName + "   #it{R_{K#pi}^{+}}", 0., -1e4, 1e4)));
     observables->add(*(new RooRealVar("y'+_obs", setName + "   #it{y'^{+}}", 0., -1e4, 1e4)));
     observables->add(*(new RooRealVar("x'2+_obs", setName + "   #it{x'^{+2}}", 0., -1e4, 1e4)));
@@ -250,7 +269,7 @@ void PDF_WS::initObservables(const TString setName) {
     observables->add(*(new RooRealVar("y'-_obs", setName + "   #it{y'}^{#minus}", 0., -1e4, 1e4)));
     observables->add(*(new RooRealVar("x'2-_obs", setName + "   #it{x'}^{#minus2}", 0., -1e4, 1e4)));
     break;
-  case WS_parametrisation::ccprime:
+  case kpi::ccprime:
     observables->add(*(new RooRealVar("RD_obs", setName + "   #it{R_{K#pi}}", 0., -1e4, 1e4)));
     observables->add(*(new RooRealVar("c_obs", setName + "   #it{c_{K#pi}}", 0., -1e4, 1e4)));
     observables->add(*(new RooRealVar("c'_obs", setName + "   #it{c'_{K#pi}}", 0., -1e4, 1e4)));
@@ -264,8 +283,8 @@ void PDF_WS::initObservables(const TString setName) {
     }
     break;
   default:
-    std::cout << "PDF_WS::initRelations : ERROR : ws_param not supported.\n";
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_WS::initObservables ERROR WS parametrisation {} not supported", static_cast<int>(ws_param)));
   }
 }
 
@@ -352,8 +371,7 @@ void PDF_WS::setObservables(const TString c) {
     setObservable("y'-_obs", 6.81e-3);
     setObservable("x'2-_obs", -4.86e-5);
   } else {
-    std::cout << "PDF_WS::setObservables() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_WS::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
@@ -445,8 +463,7 @@ void PDF_WS::setUncertainties(const TString c) {
     StatErr[5] = 1.665e-4;  // x'2-
     std::ranges::fill(SystErr, 0.);
   } else {
-    std::cout << "PDF_WS::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_WS::setUncertainties ERROR config {} not found", c.Data()));
   }
 }
 
@@ -582,8 +599,7 @@ void PDF_WS::setCorrelations(const TString c) {
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, data);
   } else {
-    std::cout << "PDF_WS::setCorrelations() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_WS::setCorrelations ERROR config {} not found", c.Data()));
   }
 }
 

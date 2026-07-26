@@ -15,12 +15,15 @@
 
 class RooArgList;
 
-enum class WS_parametrisation { raxy, rrxy, ccprime };
+namespace parametrisations {
+  enum class kpi { raxy, rrxy, ccprime };
+}  // namespace parametrisations
 
 class PDF_WS : public PDF_Abs {
  public:
-  PDF_WS(TString measurement_id, theory_config th_cfg, WS_parametrisation p = WS_parametrisation::rrxy);
-  PDF_WS(TString val, TString err, theory_config th_cfg);
+  PDF_WS(TString measurement_id, parametrisations::mix mix_param,
+         parametrisations::kpi p = parametrisations::kpi::rrxy);
+  PDF_WS(TString val, TString err, parametrisations::mix mix_param);
   void buildPdf() override;
   void initObservables(TString setName);
   void initParameters() override;
@@ -35,8 +38,8 @@ class PDF_WS : public PDF_Abs {
   void initRelationsRRXY();
   void initRelationsXYM(RooArgList* theory);
 
-  const theory_config th_cfg;
-  const WS_parametrisation ws_param = WS_parametrisation::rrxy;
+  const parametrisations::mix mix_param;
+  const parametrisations::kpi ws_param = parametrisations::kpi::rrxy;
 };
 
 #endif

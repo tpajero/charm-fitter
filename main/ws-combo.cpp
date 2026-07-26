@@ -4,6 +4,8 @@
  * Needed to plot the y' vs. x'2 contours plot.
  */
 
+#include <format>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -26,7 +28,7 @@ namespace {
     return;
   }
 
-  std::vector<int> get_lhcb_pdfs(const std::string run, const FSC fsc) {
+  std::vector<int> get_lhcb_pdfs(const std::string run, const parametrisations::dy_fsc dy_fsc_param) {
     if (run == "run12") {
       std::vector<int> list = {
           38,  // Prompt Run 1+2
@@ -34,9 +36,8 @@ namespace {
       };
       return list;
     } else {
-      std::cerr << "The list of the LHCb results from the period `" << run << "` is not supported. Exiting..."
-                << std::endl;
-      exit(1);
+      throw std::runtime_error(
+          std::format("get_lhcb_pdfs ERROR The list of the LHCb results from the period `{}` is not supported", run));
     }
   }
 }  // namespace
@@ -46,19 +47,21 @@ int main(int argc, char* argv[]) {
   GammaComboEngine gc("D0ToKPi", argc, &argv[0]);
 
   // Define the PDFs
-  const auto th_cfg = theory_config::d0_to_kpi;
+  const auto mix_param = parametrisations::mix::d0_to_kpi;
+  using parametrisations::kpi;
+
   // clang-format off
-  gc.addPdf(30, new PDF_WS_NoCPV("CDF",   th_cfg),                                         "WS/RS        CDF                            ");
-  gc.addPdf(31, new PDF_WS_NoCPV("BaBar", th_cfg),                                         "WS/RS        BaBar    no CPV                ");
-  gc.addPdf(32, new PDF_WS_NoCPV("Belle", th_cfg),                                         "WS/RS        Belle    no CPV                ");
-  gc.addPdf(33, new PDF_WS_NoCPV("BaBar", th_cfg),                                         "WS/RS        BaBar                          ");
-  gc.addPdf(34, new PDF_WS_NoCPV("Belle", th_cfg),                                         "WS/RS        Belle                          ");
-  gc.addPdf(35, new PDF_WS("LHCb_DT_Run1",           th_cfg),                              "WS/RS        LHCb     Run 1    [B -> D* mu] ");
-  gc.addPdf(36, new PDF_WS("LHCb_Run1",              th_cfg),                              "WS/RS        LHCb     Run 1                 ");
-  gc.addPdf(37, new PDF_WS("LHCb_Prompt_2011_2016",  th_cfg),                              "WS/RS        LHCb     2011-6   [D* -> D0 pi]");
-  gc.addPdf(38, new PDF_WS("LHCb_Prompt_Run12_sec9", th_cfg, WS_parametrisation::ccprime), "WS/RS        LHCb     Run 1-2  [D* -> D0 pi]");
-  gc.addPdf(40, new PDF_WS("LHCb_DT_Run2", th_cfg),                                        "WS/RS        LHCb     Run 2    [B -> D* mu] ");
-  gc.addPdf(41, new PDF_WS("LHCb_DT_Run12", th_cfg),                                       "WS/RS        LHCb     Run 1-2  [B -> D* mu] ");
+  gc.addPdf(30, new PDF_WS_NoCPV("CDF",   mix_param),                          "WS/RS        CDF                            ");
+  gc.addPdf(31, new PDF_WS_NoCPV("BaBar", mix_param),                          "WS/RS        BaBar    no CPV                ");
+  gc.addPdf(32, new PDF_WS_NoCPV("Belle", mix_param),                          "WS/RS        Belle    no CPV                ");
+  gc.addPdf(33, new PDF_WS_NoCPV("BaBar", mix_param),                          "WS/RS        BaBar                          ");
+  gc.addPdf(34, new PDF_WS_NoCPV("Belle", mix_param),                          "WS/RS        Belle                          ");
+  gc.addPdf(35, new PDF_WS("LHCb_DT_Run1",           mix_param),               "WS/RS        LHCb     Run 1    [B -> D* mu] ");
+  gc.addPdf(36, new PDF_WS("LHCb_Run1",              mix_param),               "WS/RS        LHCb     Run 1                 ");
+  gc.addPdf(37, new PDF_WS("LHCb_Prompt_2011_2016",  mix_param),               "WS/RS        LHCb     2011-6   [D* -> D0 pi]");
+  gc.addPdf(38, new PDF_WS("LHCb_Prompt_Run12_sec9", mix_param, kpi::ccprime), "WS/RS        LHCb     Run 1-2  [D* -> D0 pi]");
+  gc.addPdf(40, new PDF_WS("LHCb_DT_Run2", mix_param),                         "WS/RS        LHCb     Run 2    [B -> D* mu] ");
+  gc.addPdf(41, new PDF_WS("LHCb_DT_Run12", mix_param),                        "WS/RS        LHCb     Run 1-2  [B -> D* mu] ");
   // clang-format on
 
   // Define the combinations -------------------------------------------------------------------------------------------

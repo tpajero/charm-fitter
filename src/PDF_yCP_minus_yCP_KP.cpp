@@ -17,10 +17,12 @@
 
 #include <TString.h>
 
+#include <format>
 #include <iostream>
+#include <stdexcept>
 
-PDF_yCP_minus_yCP_KP::PDF_yCP_minus_yCP_KP(const TString measurement_id, const theory_config th_cfg)
-    : PDF_Abs{1}, th_cfg{th_cfg} {
+PDF_yCP_minus_yCP_KP::PDF_yCP_minus_yCP_KP(const TString measurement_id, const parametrisations::mix mix_param)
+    : PDF_Abs{1}, mix_param{mix_param} {
   name = "yCP_minus_yCP_KP_" + measurement_id;
   initParameters();
   initRelations();
@@ -37,30 +39,30 @@ void PDF_yCP_minus_yCP_KP::initParameters() {
 
   parameters->add(*(p.get("R_Kpi")));
   parameters->add(*(p.get("Delta_Kpi")));
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     parameters->add(*(p.get("x")));
     parameters->add(*(p.get("y")));
     parameters->add(*(p.get("qop")));
     parameters->add(*(p.get("phi")));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     parameters->add(*(p.get("phiG")));
     parameters->add(*(p.get("x12")));
     parameters->add(*(p.get("y12")));
     break;
   default:
-    std::cout << "PDF_yCP::initParameters : ERROR : "
-                 "theory_config not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_yCP_minus_yCP_KP::initParameters ERROR Parametrisation {} not supported",
+                                         utils::to_string(mix_param)));
   }
 }
 
 void PDF_yCP_minus_yCP_KP::initRelations() {
   theory = new RooArgList("theory");
-  switch (th_cfg) {
-  case theory_config::phenomenological:
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
     theory->add(*(Utils::makeTheoryVar("yCP_minus_yCP_KP_th", "yCP_minus_yCP_KP_th",
                                        " 0.5*( "
                                        "       y*(qop + 1/qop)*cos(phi)"
@@ -70,17 +72,15 @@ void PDF_yCP_minus_yCP_KP::initRelations() {
                                        "    - x * (qop - 1/qop) * sin(phi))",
                                        parameters)));
     break;
-  case theory_config::theoretical:
+  case mix::theo:
     theory->add(*(Utils::makeTheoryVar("yCP_minus_yCP_KP_th", "yCP_minus_yCP_KP_th",
                                        "y12*cos(phiG)"
                                        "+ 2 * sqrt(R_Kpi) * y12 * cos(Delta_Kpi) * cos(phiG)",
                                        parameters)));
     break;
   default:
-    std::cout << "PDF_yCP::initRelations : ERROR : "
-                 "theory_config not supported."
-              << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_yCP_minus_yCP_KP::initRelations ERROR Parametrisation {} not supported",
+                                         utils::to_string(mix_param)));
   }
 }
 
@@ -99,8 +99,7 @@ void PDF_yCP_minus_yCP_KP::setObservables(const TString c) {
     obsValSource = "https://cds.cern.ch/record/2747731";
     setObservable("yCP_minus_yCP_KP_obs", 0.732e-2);
   } else {
-    std::cout << "PDF_yCP_minus_yCP_KP::setObservables() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_yCP_minus_yCP_KP::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
@@ -110,8 +109,7 @@ void PDF_yCP_minus_yCP_KP::setUncertainties(const TString c) {
     StatErr[0] = 3.068e-2;
     SystErr[0] = 0.;
   } else {
-    std::cout << "PDF_yCP_minus_yCP_KP::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(std::format("PDF_yCP_minus_yCP_KP::setUncertainties ERROR config {} not found", c.Data()));
   }
 }
 
