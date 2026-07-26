@@ -90,7 +90,7 @@ namespace {
   };
 }  // namespace
 
-PDF_WS::PDF_WS(const TString measurement_id, const parametrisations::mix mix_param, WS_parametrisation p)
+PDF_WS::PDF_WS(const TString measurement_id, const parametrisations::mix mix_param, parametrisations::kpi p)
     : PDF_Abs{measurement_id.EqualTo("LHCb_Prompt_Run12_appB") ? 9 : 6}, mix_param{mix_param}, ws_param{p} {
   TString label;
   if (measurement_id.EqualTo("BaBar"))
@@ -116,7 +116,7 @@ PDF_WS::PDF_WS(const TString measurement_id, const parametrisations::mix mix_par
         std::format("PDF_WS::PDF_WS ERROR Measurement ID {} not supported", measurement_id.Data()));
   }
 
-  if (ws_param == WS_parametrisation::ccprime && !measurement_id.BeginsWith("LHCb_Prompt_Run12")) {
+  if (ws_param == parametrisations::kpi::ccprime && !measurement_id.BeginsWith("LHCb_Prompt_Run12")) {
     throw std::runtime_error(
         "PDF_WS::PDF_WS ERROR The c/c' parametrisation was introduced only with the LHCb Run 2 measurement");
   }
@@ -176,14 +176,15 @@ void PDF_WS::initParameters() {
 }
 
 void PDF_WS::initRelations() {
+  using parametrisations::kpi;
   switch (ws_param) {
-  case WS_parametrisation::raxy:
+  case kpi::raxy:
     initRelationsRAXY();
     break;
-  case WS_parametrisation::rrxy:
+  case kpi::rrxy:
     initRelationsRRXY();
     break;
-  case WS_parametrisation::ccprime:
+  case kpi::ccprime:
     initRelationsCCPrime();
     break;
   default:
@@ -239,8 +240,9 @@ void PDF_WS::initRelationsRRXY() {
 
 void PDF_WS::initObservables(const TString setName) {
   observables = new RooArgList("observables");  // the order of this list must match that of the COR matrix!
+  using parametrisations::kpi;
   switch (ws_param) {
-  case WS_parametrisation::raxy:
+  case kpi::raxy:
     observables->add(*(new RooRealVar("RD_obs", setName + "   #it{R_{K#pi}}", 0., -1e4, 1e4)));
     observables->add(*(new RooRealVar("y'+_obs", setName + "   #it{y'^{+}}", 0., -1e4, 1e4)));
     observables->add(*(new RooRealVar("x'2+_obs", setName + "   #it{x'^{+2}}", 0., -1e4, 1e4)));
@@ -248,7 +250,7 @@ void PDF_WS::initObservables(const TString setName) {
     observables->add(*(new RooRealVar("y'-_obs", setName + "   #it{y'}^{#minus}", 0., -1e4, 1e4)));
     observables->add(*(new RooRealVar("x'2-_obs", setName + "   #it{x'}^{#minus2}", 0., -1e4, 1e4)));
     break;
-  case WS_parametrisation::rrxy:
+  case kpi::rrxy:
     observables->add(*(new RooRealVar("RD_p_obs", setName + "   #it{R_{K#pi}^{+}}", 0., -1e4, 1e4)));
     observables->add(*(new RooRealVar("y'+_obs", setName + "   #it{y'^{+}}", 0., -1e4, 1e4)));
     observables->add(*(new RooRealVar("x'2+_obs", setName + "   #it{x'^{+2}}", 0., -1e4, 1e4)));
@@ -256,7 +258,7 @@ void PDF_WS::initObservables(const TString setName) {
     observables->add(*(new RooRealVar("y'-_obs", setName + "   #it{y'}^{#minus}", 0., -1e4, 1e4)));
     observables->add(*(new RooRealVar("x'2-_obs", setName + "   #it{x'}^{#minus2}", 0., -1e4, 1e4)));
     break;
-  case WS_parametrisation::ccprime:
+  case kpi::ccprime:
     observables->add(*(new RooRealVar("RD_obs", setName + "   #it{R_{K#pi}}", 0., -1e4, 1e4)));
     observables->add(*(new RooRealVar("c_obs", setName + "   #it{c_{K#pi}}", 0., -1e4, 1e4)));
     observables->add(*(new RooRealVar("c'_obs", setName + "   #it{c'_{K#pi}}", 0., -1e4, 1e4)));

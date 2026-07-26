@@ -83,6 +83,7 @@ namespace {
 
 int main(int argc, char* argv[]) {
   using parametrisations::dy_fsc;
+  using parametrisations::kpi;
   using parametrisations::mix;
 
   // Get the parametrisation and the parameter to prevent CPV in DCS decays
@@ -121,70 +122,70 @@ int main(int argc, char* argv[]) {
   ///////////////////////////////////////////////////
 
   // clang-format off
-  gc.addPdf(1, new PDF_XY("BaBar_Kshh", mix_param),                                           "XY KShh      BaBar                          ");
-  gc.addPdf(2, new PDF_XY("BaBar_pipipi0", mix_param),                                        "XY pipipi0   BaBar                          ");
-  gc.addPdf(3, new PDF_XY("LHCb_KSpipi", mix_param),                                          "XY KSpipi    LHCb     2011     [D* -> D0 pi]");
-  gc.addPdf(4, new PDF_Kpipi0("BaBar", mix_param),                                            "Kpipi0       BaBar                          ");
-  gc.addPdf(5, new PDF_K3pi("LHCb-run1", mix_param),                                          "K3pi         LHCb     Run 1                 ");
-  gc.addPdf(6, new PDF_XY("Belle_Belle2", mix_param),                                         "XY KSpipi    Belle+Belle2 (951+408 fb-1)    ");
+  gc.addPdf(1, new PDF_XY("BaBar_Kshh", mix_param),                                  "XY KShh      BaBar                          ");
+  gc.addPdf(2, new PDF_XY("BaBar_pipipi0", mix_param),                               "XY pipipi0   BaBar                          ");
+  gc.addPdf(3, new PDF_XY("LHCb_KSpipi", mix_param),                                 "XY KSpipi    LHCb     2011     [D* -> D0 pi]");
+  gc.addPdf(4, new PDF_Kpipi0("BaBar", mix_param),                                   "Kpipi0       BaBar                          ");
+  gc.addPdf(5, new PDF_K3pi("LHCb-run1", mix_param),                                 "K3pi         LHCb     Run 1                 ");
+  gc.addPdf(6, new PDF_XY("Belle_Belle2", mix_param),                                "XY KSpipi    Belle+Belle2 (951+408 fb-1)    ");
 
-  gc.addPdf(10, new PDF_RM("HFLAV2016", mix_param),                                           "R_M          HFLAV    2016                  ");
-  gc.addPdf(11, new PDF_RM("LHCb_K3pi_Run1", mix_param),                                      "R_M K3pi     LHCb                           ");
+  gc.addPdf(10, new PDF_RM("HFLAV2016", mix_param),                                  "R_M          HFLAV    2016                  ");
+  gc.addPdf(11, new PDF_RM("LHCb_K3pi_Run1", mix_param),                             "R_M K3pi     LHCb                           ");
 
-  gc.addPdf(20, new PDF_Kshh("Belle", mix_param),                                             "KShh         Belle                          ");
-  gc.addPdf(21, new PDF_BinFlip("LHCb_Run1", mix_param),                                      "Bin-flip     LHCb     Run 1                 ");
-  gc.addPdf(22, new PDF_BinFlip("LHCb_Run2_prompt", mix_param),                               "Bin-flip     LHCb     Run 2    [D* -> D0 pi]");
-  gc.addPdf(23, new PDF_BinFlip("LHCb_Run2_sl", mix_param),                                   "Bin-flip     LHCb     Run 2    [B -> D0 mu] ");
-  gc.addPdf(24, new PDF_BinFlip("LHCb_Run2", mix_param),                                      "Bin-flip     LHCb     Run 2                 ");
+  gc.addPdf(20, new PDF_Kshh("Belle", mix_param),                                    "KShh         Belle                          ");
+  gc.addPdf(21, new PDF_BinFlip("LHCb_Run1", mix_param),                             "Bin-flip     LHCb     Run 1                 ");
+  gc.addPdf(22, new PDF_BinFlip("LHCb_Run2_prompt", mix_param),                      "Bin-flip     LHCb     Run 2    [D* -> D0 pi]");
+  gc.addPdf(23, new PDF_BinFlip("LHCb_Run2_sl", mix_param),                          "Bin-flip     LHCb     Run 2    [B -> D0 mu] ");
+  gc.addPdf(24, new PDF_BinFlip("LHCb_Run2", mix_param),                             "Bin-flip     LHCb     Run 2                 ");
 
-  gc.addPdf(30, new PDF_WS_NoCPV("CDF", mix_param),                                           "WS/RS        CDF                            ");
-  gc.addPdf(31, new PDF_WS_NoCPV("BaBar", mix_param),                                         "WS/RS        BaBar    no CPV                ");
-  gc.addPdf(32, new PDF_WS_NoCPV("Belle", mix_param),                                         "WS/RS        Belle    no CPV                ");
-  gc.addPdf(33, new PDF_WS_NoCPV("BaBar", mix_param),                                         "WS/RS        BaBar                          ");
-  gc.addPdf(34, new PDF_WS_NoCPV("Belle", mix_param),                                         "WS/RS        Belle                          ");
-  gc.addPdf(35, new PDF_WS("LHCb_DT_Run1", mix_param),                                        "WS/RS        LHCb     Run 1    [B -> D* mu] ");
-  gc.addPdf(36, new PDF_WS("LHCb_Run1", mix_param),                                           "WS/RS        LHCb     Run 1                 ");
-  gc.addPdf(37, new PDF_WS("LHCb_Prompt_2011_2016", mix_param),                               "WS/RS        LHCb     2011-6   [D* -> D0 pi]");
-  gc.addPdf(38, new PDF_WS("LHCb_Prompt_Run12_sec9", mix_param, WS_parametrisation::ccprime), "WS/RS        LHCb     Run 1+2  [D* -> D0 pi]");
-  gc.addPdf(39, new PDF_WS("LHCb_Prompt_Run12_appB", mix_param, WS_parametrisation::ccprime), "WS/RS        LHCb     Run 1+2  [D* -> D0 pi]");
-  gc.addPdf(40, new PDF_WS("LHCb_DT_Run2", mix_param),                                        "WS/RS        LHCb     Run 2    [B -> D* mu] ");
-  gc.addPdf(41, new PDF_WS("LHCb_DT_Run12", mix_param),                                       "WS/RS        LHCb     Run 1-2  [B -> D* mu] ");
+  gc.addPdf(30, new PDF_WS_NoCPV("CDF", mix_param),                                  "WS/RS        CDF                            ");
+  gc.addPdf(31, new PDF_WS_NoCPV("BaBar", mix_param),                                "WS/RS        BaBar    no CPV                ");
+  gc.addPdf(32, new PDF_WS_NoCPV("Belle", mix_param),                                "WS/RS        Belle    no CPV                ");
+  gc.addPdf(33, new PDF_WS_NoCPV("BaBar", mix_param),                                "WS/RS        BaBar                          ");
+  gc.addPdf(34, new PDF_WS_NoCPV("Belle", mix_param),                                "WS/RS        Belle                          ");
+  gc.addPdf(35, new PDF_WS("LHCb_DT_Run1", mix_param),                               "WS/RS        LHCb     Run 1    [B -> D* mu] ");
+  gc.addPdf(36, new PDF_WS("LHCb_Run1", mix_param),                                  "WS/RS        LHCb     Run 1                 ");
+  gc.addPdf(37, new PDF_WS("LHCb_Prompt_2011_2016", mix_param),                      "WS/RS        LHCb     2011-6   [D* -> D0 pi]");
+  gc.addPdf(38, new PDF_WS("LHCb_Prompt_Run12_sec9", mix_param, kpi::ccprime),       "WS/RS        LHCb     Run 1+2  [D* -> D0 pi]");
+  gc.addPdf(39, new PDF_WS("LHCb_Prompt_Run12_appB", mix_param, kpi::ccprime),       "WS/RS        LHCb     Run 1+2  [D* -> D0 pi]");
+  gc.addPdf(40, new PDF_WS("LHCb_DT_Run2", mix_param),                               "WS/RS        LHCb     Run 2    [B -> D* mu] ");
+  gc.addPdf(41, new PDF_WS("LHCb_DT_Run12", mix_param),                              "WS/RS        LHCb     Run 1-2  [B -> D* mu] ");
 
-  gc.addPdf(50, new PDF_Cleo("Cleo-c", mix_param),                                            "Delta_Kpi    Cleo-c                         ");
-  gc.addPdf(51, new PDF_BES_Kpi_1d(mix_param),                                                "Delta_Kpi    BES      3fb      [A_kpi only] ");
-  gc.addPdf(52, new PDF_BES_Kpi(mix_param),                                                   "Delta_Kpi    BES      3fb                   ");
-  gc.addPdf(53, new PDF_Fp_pipipi0("Cleo-c"),                                              "Fpipipi0     Cleo-c                         ");
-  gc.addPdf(54, new PDF_BES_CLEO_K3pi_Kpipi0("BES3-CLEO"),                                 "K3pi-Kpipi0  BES3 + Cleo                    ");
-  gc.addPdf(55, new PDF_Fp_pipipi0("BESIII"),                                              "Fpipipi0     BES3                           ");
-  gc.addPdf(56, new PDF_BES_Kpi_7d(mix_param),                                                "Delta_Kpi    BES3     3+7fb                 ");
+  gc.addPdf(50, new PDF_Cleo("Cleo-c", mix_param),                                   "Delta_Kpi    Cleo-c                         ");
+  gc.addPdf(51, new PDF_BES_Kpi_1d(mix_param),                                       "Delta_Kpi    BES      3fb      [A_kpi only] ");
+  gc.addPdf(52, new PDF_BES_Kpi(mix_param),                                          "Delta_Kpi    BES      3fb                   ");
+  gc.addPdf(53, new PDF_Fp_pipipi0("Cleo-c"),                                        "Fpipipi0     Cleo-c                         ");
+  gc.addPdf(54, new PDF_BES_CLEO_K3pi_Kpipi0("BES3-CLEO"),                           "K3pi-Kpipi0  BES3 + Cleo                    ");
+  gc.addPdf(55, new PDF_Fp_pipipi0("BESIII"),                                        "Fpipipi0     BES3                           ");
+  gc.addPdf(56, new PDF_BES_Kpi_7d(mix_param),                                       "Delta_Kpi    BES3     3+7fb                 ");
 
-  gc.addPdf(60, new PDF_yCP("WA2020", mix_param),                                             "yCP          WA       2020                  ");
-  gc.addPdf(61, new PDF_yCP_minus_yCP_RS("WA2020", mix_param),                                "yCP-yCP(RS)  WA       2020                  ");
-  gc.addPdf(62, new PDF_yCP_minus_yCP_KP("WA2020", mix_param),                                "yCP-yCP(KP)  WA       2020                  ");
-  gc.addPdf(63, new PDF_yCP_plus_yCP_RS("WA2020", mix_param),                                 "yCP+yCP(RS)  WA       2020                  ");
-  gc.addPdf(64, new PDF_yCP_minus_yCP_RS("LHCb2022", mix_param),                              "yCP-yCP(RS)  LHCb     2022                  ");
+  gc.addPdf(60, new PDF_yCP("WA2020", mix_param),                                    "yCP          WA       2020                  ");
+  gc.addPdf(61, new PDF_yCP_minus_yCP_RS("WA2020", mix_param),                       "yCP-yCP(RS)  WA       2020                  ");
+  gc.addPdf(62, new PDF_yCP_minus_yCP_KP("WA2020", mix_param),                       "yCP-yCP(KP)  WA       2020                  ");
+  gc.addPdf(63, new PDF_yCP_plus_yCP_RS("WA2020", mix_param),                        "yCP+yCP(RS)  WA       2020                  ");
+  gc.addPdf(64, new PDF_yCP_minus_yCP_RS("LHCb2022", mix_param),                     "yCP-yCP(RS)  LHCb     2022                  ");
 
-  gc.addPdf(70, new PDF_DY("WA2019", mix_param, dy_fsc::none),                                   "DY           WA       2019     [no FSC]     ");
-  gc.addPdf(71, new PDF_DY("WA2020", mix_param, dy_fsc::none),                                   "DY           WA       2020     [no FSC]     ");
-  gc.addPdf(72, new PDF_DY("WA2021", mix_param, dy_fsc::none),                                   "DY           WA       2021     [no FSC]     ");
-  gc.addPdf(73, new PDF_DY("Belle&BaBar", mix_param, dy_fsc::none),                              "DY           B-factories       [no FSC]     ");
-  gc.addPdf(74, new PDF_DY("WA2020", mix_param, dy_fsc::partial),                                "DY           WA       2020     [partial FSC]");
-  gc.addPdf(75, new PDF_DY("WA2021", mix_param, dy_fsc::partial),                                "DY           WA       2021     [partial FSC]");
-  gc.addPdf(76, new PDF_DY("WA2021", mix_param, dy_fsc::full),                                   "DY           WA       2021     [full FSC]   ");
+  gc.addPdf(70, new PDF_DY("WA2019", mix_param, dy_fsc::none),                       "DY           WA       2019     [no FSC]     ");
+  gc.addPdf(71, new PDF_DY("WA2020", mix_param, dy_fsc::none),                       "DY           WA       2020     [no FSC]     ");
+  gc.addPdf(72, new PDF_DY("WA2021", mix_param, dy_fsc::none),                       "DY           WA       2021     [no FSC]     ");
+  gc.addPdf(73, new PDF_DY("Belle&BaBar", mix_param, dy_fsc::none),                  "DY           B-factories       [no FSC]     ");
+  gc.addPdf(74, new PDF_DY("WA2020", mix_param, dy_fsc::partial),                    "DY           WA       2020     [partial FSC]");
+  gc.addPdf(75, new PDF_DY("WA2021", mix_param, dy_fsc::partial),                    "DY           WA       2021     [partial FSC]");
+  gc.addPdf(76, new PDF_DY("WA2021", mix_param, dy_fsc::full),                       "DY           WA       2021     [full FSC]   ");
 
-  gc.addPdf(80, new PDF_DY_RS("LHCb2021", mix_param),                                         "DY(RS)       LHCb     2021                  ");
+  gc.addPdf(80, new PDF_DY_RS("LHCb2021", mix_param),                                "DY(RS)       LHCb     2021                  ");
 
-  gc.addPdf(85, new PDF_DY_pipipi0("LHCb-R2", mix_param),                                     "DY(pipipi0)  LHCb     Run2                  ");
+  gc.addPdf(85, new PDF_DY_pipipi0("LHCb-R2", mix_param),                            "DY(pipipi0)  LHCb     Run2                  ");
 
-  gc.addPdf(90, new PDF_AcpHH_LHCb_Run12(mix_param, dy_fsc::none),                               "ACP(KK/PP)   LHCb     Run1+2   [no FSC]     ");
-  gc.addPdf(91, new PDF_AcpHH_LHCb_Run12(mix_param, dy_fsc::partial),                            "ACP(KK/PP)   LHCb     Run1+2   [partial FSC]");
-  gc.addPdf(92, new PDF_AcpHH_LHCb_Run12(mix_param, dy_fsc::full),                               "ACP(KK/PP)   LHCb     Run1+2   [full FSC]   ");
-  gc.addSubsetPdf(93, new PDF_AcpHH_LHCb_Run12(mix_param, dy_fsc::none), 0, 1, 4, 5,             "ACP(KK/PP)   LHCb     Run1     [no FSC]");
+  gc.addPdf(90, new PDF_AcpHH_LHCb_Run12(mix_param, dy_fsc::none),                   "ACP(KK/PP)   LHCb     Run1+2   [no FSC]     ");
+  gc.addPdf(91, new PDF_AcpHH_LHCb_Run12(mix_param, dy_fsc::partial),                "ACP(KK/PP)   LHCb     Run1+2   [partial FSC]");
+  gc.addPdf(92, new PDF_AcpHH_LHCb_Run12(mix_param, dy_fsc::full),                   "ACP(KK/PP)   LHCb     Run1+2   [full FSC]   ");
+  gc.addSubsetPdf(93, new PDF_AcpHH_LHCb_Run12(mix_param, dy_fsc::none), 0, 1, 4, 5, "ACP(KK/PP)   LHCb     Run1     [no FSC]");
 
-  gc.addPdf(100, new PDF_scan_DY_RS(mix_param),                                               "ScanDYRS     This is just a nuisance parameter");
+  gc.addPdf(100, new PDF_scan_DY_RS(mix_param),                                      "ScanDYRS     This is just a nuisance parameter");
 
-  gc.addPdf(110, new PDF_yCP("WA2020_biased", mix_param),                                     "yCP          WA       2020     [biased]     ");
-  gc.addPdf(111, new PDF_yCP("LHCb2022_biased", mix_param),                                   "yCP-yCP(RS)  LHCb     2022     [biased]     ");
+  gc.addPdf(110, new PDF_yCP("WA2020_biased", mix_param),                            "yCP          WA       2020     [biased]     ");
+  gc.addPdf(111, new PDF_yCP("LHCb2022_biased", mix_param),                          "yCP-yCP(RS)  LHCb     2022     [biased]     ");
   // clang-format on
 
   ///////////////////////////////////////////////////
