@@ -118,7 +118,7 @@ std::string utils::dy_hh_expression(const parametrisations::mix mix_param, const
     break;
   default:
     throw std::runtime_error(
-        std::format("utils::dy_expression ERROR {} not supported", utils::to_string(dy_fsc_param)));
+        std::format("utils::dy_hh_expression ERROR {} not supported", utils::to_string(dy_fsc_param)));
   }
   boost::replace_all(fs_dependent, "HH", fs);
   if (mix_param == parametrisations::mix::theo) {
@@ -127,6 +127,23 @@ std::string utils::dy_hh_expression(const parametrisations::mix mix_param, const
   }
 
   return fs_dependent.empty() ? fs_independent : std::format("{} + {}", fs_independent, fs_dependent);
+}
+
+std::string utils::dy_kp_expression(const parametrisations::mix mix_param) {
+  using parametrisations::mix;
+  switch (mix_param) {
+  case mix::pheno:
+    return "0.5 * sqrt(R_Kpi) * (  (y*cos(Delta_Kpi) - x*sin(Delta_Kpi))*(qop - 1/qop - Acp_KP)*cos(phi) "
+           "                     - (x*cos(Delta_Kpi) + y*sin(Delta_Kpi))*(qop + 1/qop         )*sin(phi))";
+    break;
+  case mix::theo:
+    return "sqrt(R_Kpi) * (  (-y12*cos(Delta_Kpi)*cos(phiG) + x12*sin(Delta_Kpi)*cos(phiM))*Acp_KP*0.5 "
+           "               + ( y12*sin(Delta_Kpi)*sin(phiG) + x12*cos(Delta_Kpi)*sin(phiM))           )";
+    break;
+  default:
+    throw std::runtime_error(
+        std::format("utils::dy_kp_expression ERROR {} not supported", utils::to_string(mix_param)));
+  }
 }
 
 std::string utils::get_id(const parametrisations::mix par) { return str_repr(par, true); }

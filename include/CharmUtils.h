@@ -51,12 +51,20 @@ namespace parametrisations {
 
 namespace utils {
   // Helper functions to get the expressions of observables in different parametrisations
+
+  /// Mixing parameter x of the phenomenological parametrisation.
   std::string x_expression(parametrisations::mix);
+  /// Mixing parameter y of the phenomenological parametrisation.
   std::string y_expression(parametrisations::mix);
+  /// Observable DeltaX of the bin-flip parametrisation.
   std::string dx_expression(parametrisations::mix);
+  /// Observable DeltaY of the bin-flip parametrisation.
   std::string dy_expression(parametrisations::mix);
+  /// DeltaY(D0 -> h- h+).
   std::string dy_hh_expression(parametrisations::mix, parametrisations::dy_fsc = parametrisations::dy_fsc::none,
                                std::string fs = "");
+  /// DeltaY(D0 -> K- pi+).
+  std::string dy_kp_expression(parametrisations::mix);
 
   std::string get_id(parametrisations::mix par);
   std::string get_id(parametrisations::dy_fsc par);

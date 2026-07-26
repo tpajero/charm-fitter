@@ -58,27 +58,8 @@ void PDF_DY_RS::initParameters() {
 }
 
 void PDF_DY_RS::initRelations() {
-  theory = new RooArgList("theory");  ///< the order of this list must match that of the COR matrix!
-  using parametrisations::mix;
-  switch (mix_param) {
-  case mix::pheno:
-    theory->add(*(Utils::makeTheoryVar("DY_RS_th", "DY_RS_th",
-                                       "0.5 * pow(R_Kpi, 0.5) * "
-                                       "(  (y*cos(Delta_Kpi) - x*sin(Delta_Kpi))*(qop - 1/qop - Acp_KP)*cos(phi)"
-                                       " - (x*cos(Delta_Kpi) + y*sin(Delta_Kpi))*(qop + 1/qop         )*sin(phi))",
-                                       parameters)));
-    break;
-  case mix::theo:
-    theory->add(*(Utils::makeTheoryVar("DY_RS_th", "DY_RS_th",
-                                       "pow(R_Kpi, 0.5) * "
-                                       "(  (-y12*cos(Delta_Kpi)*cos(phiG) + x12*sin(Delta_Kpi)*cos(phiM))*Acp_KP*0.5"
-                                       " + ( y12*sin(Delta_Kpi)*sin(phiG) + x12*cos(Delta_Kpi)*sin(phiM))           )",
-                                       parameters)));
-    break;
-  default:
-    throw std::runtime_error(
-        std::format("PDF_DY_RS::initRelations ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
-  }
+  theory = new RooArgList("theory");
+  theory->add(*(Utils::makeTheoryVar("DY_RS_th", "DY_RS_th", utils::dy_kp_expression(mix_param), parameters)));
 }
 
 void PDF_DY_RS::initObservables(const TString setName) {
