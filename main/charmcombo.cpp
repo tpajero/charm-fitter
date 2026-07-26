@@ -90,7 +90,6 @@ int main(int argc, char* argv[]) {
   std::string combiner_name;
 
   int iparam = -1;
-  int ifsc = -1;
   for (int i = 1; i < argc - 1; ++i) {
     if (!strcmp(argv[i], "--param")) {
       iparam = i;
@@ -107,7 +106,7 @@ int main(int argc, char* argv[]) {
   }
   std::vector<char*> combiner_argv = {};
   for (int i = 0; i < argc; ++i) {
-    if (i != iparam && i != iparam + 1) combiner_argv.emplace_back(argv[i]);
+    if (iparam == -1 || (i != iparam && i != iparam + 1)) combiner_argv.emplace_back(argv[i]);
   }
   std::cout << "INFO: The fitter will be run with the following configuration:\n"
             << "      Parametrisation: " << mix_param << "\n";
