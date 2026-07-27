@@ -7,7 +7,6 @@
 #include <PDF_WS_NoCPV.h>
 
 #include <CharmUtils.h>
-#include <ParametersCharmCombo.h>
 
 #include <Utils.h>
 
@@ -16,6 +15,7 @@
 #include <RooRealVar.h>
 
 #include <algorithm>
+#include <cmath>
 #include <format>
 #include <iostream>
 #include <map>
@@ -44,39 +44,30 @@ namespace {
 }  // namespace
 
 PDF_WS_NoCPV::PDF_WS_NoCPV(const TString measurement_id, const parametrisations::mix mix_param)
-    : PDF_Abs{3}, mix_param{mix_param} {
+    : PDF_Charm{3}, mix_param{mix_param}, measurement_id{measurement_id} {
   name = measurement_id + "_WS_NoCPV";
-  initParameters();
-  initRelations();
-  initObservables(measurement_id);
-  setObservables(measurement_id);
-  setUncertainties(measurement_id);
-  setCorrelations(measurement_id);
-  build();
+  initialise(measurement_id, measurement_id, measurement_id);
 }
 
-void PDF_WS_NoCPV::initParameters() {
+std::set<std::string> PDF_WS_NoCPV::getParameterNames() const {
   using parametrisations::mix;
-  std::vector<std::string> param_names = {"R_Kpi"};
-  if (mix_param != mix::d0_to_kpi) param_names.emplace_back("Delta_Kpi");
+  std::set<std::string> names = {"R_Kpi"};
+  if (mix_param != mix::d0_to_kpi) names.insert("Delta_Kpi");
   switch (mix_param) {
   case mix::pheno:
-    param_names.insert(param_names.end(), {"x", "y", "qop", "phi"});
+    names.insert({"x", "y", "qop", "phi"});
     break;
   case mix::theo:
-    param_names.emplace_back("phiG");
-    param_names.insert(param_names.end(), {"x12", "y12", "phiM"});
+    names.insert({"phiG", "x12", "y12", "phiM"});
     break;
   case mix::d0_to_kpi:
-    param_names.insert(param_names.end(), {"yp", "xp2"});
+    names.insert({"yp", "xp2"});
     break;
   default:
-    throw std::runtime_error(std::format("PDF_WS_NoCPV::initParameters ERROR Parametrisation {} not supported",
+    throw std::runtime_error(std::format("PDF_WS_NoCPV::getParameterNames ERROR Parametrisation {} not supported",
                                          utils::to_string(mix_param)));
   }
-  ParametersCharmCombo p;
-  parameters = new RooArgList("parameters");
-  for (const auto& par : param_names) parameters->add(*(p.get(par)));
+  return names;
 }
 
 void PDF_WS_NoCPV::initRelations() {
@@ -86,11 +77,11 @@ void PDF_WS_NoCPV::initRelations() {
   theory->add(*(Utils::makeTheoryVar("xp2_th", "xp2_th", theory_expressions["x'2"][mix_param], parameters)));
 }
 
-void PDF_WS_NoCPV::initObservables(const TString setName) {
+void PDF_WS_NoCPV::initObservables() {
   observables = new RooArgList("observables");  ///< the order of this list must match that of the COR matrix!
-  observables->add(*(new RooRealVar("RD_obs", setName + "   #it{R_{K#pi}}", 0., -1e4, 1e4)));
-  observables->add(*(new RooRealVar("yp_obs", setName + "   #it{y'}", 0., -1e4, 1e4)));
-  observables->add(*(new RooRealVar("xp2_obs", setName + "   #it{x'}^{2}", 0., -1e4, 1e4)));
+  observables->add(*(new RooRealVar("RD_obs", measurement_id + "   #it{R_{K#pi}}", 0., -1e4, 1e4)));
+  observables->add(*(new RooRealVar("yp_obs", measurement_id + "   #it{y'}", 0., -1e4, 1e4)));
+  observables->add(*(new RooRealVar("xp2_obs", measurement_id + "   #it{x'}^{2}", 0., -1e4, 1e4)));
 }
 
 void PDF_WS_NoCPV::setObservables(const TString c) {
@@ -127,9 +118,9 @@ void PDF_WS_NoCPV::setUncertainties(const TString c) {
     std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("BaBar")) {
     obsErrSource = "https://inspirehep.net/literature/746245";
-    StatErr[0] = pow(pow(0.00016, 2) + pow(0.00010, 2), 0.5);  // RD
-    StatErr[1] = pow(pow(4.4e-3, 2) + pow(3.1e-3, 2), 0.5);    // y'+
-    StatErr[2] = pow(pow(3.0e-4, 2) + pow(2.1e-4, 2), 0.5);    // x'2+
+    StatErr[0] = std::hypot(0.00016, 0.00010);  // RD
+    StatErr[1] = std::hypot(4.4e-3, 3.1e-3);    // y'+
+    StatErr[2] = std::hypot(3.0e-4, 2.1e-4);    // x'2+
     std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("Belle")) {
     obsErrSource = "https://inspirehep.net/literature/1277238";

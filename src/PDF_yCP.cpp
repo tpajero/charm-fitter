@@ -7,7 +7,6 @@
 #include <PDF_yCP.h>
 
 #include <CharmUtils.h>
-#include <ParametersCharmCombo.h>
 
 #include <Utils.h>
 
@@ -23,36 +22,21 @@
 #include <stdexcept>
 
 PDF_yCP::PDF_yCP(const TString measurement_id, const parametrisations::mix mix_param)
-    : PDF_Abs{1}, mix_param{mix_param} {
+    : PDF_Charm{1}, mix_param{mix_param}, measurement_id{measurement_id} {
   name = "yCP_" + measurement_id;
-  initParameters();
-  initRelations();
-  initObservables(measurement_id);
-  setObservables(measurement_id);
-  setUncertainties(measurement_id);
-  setCorrelations(measurement_id);
-  build();
+  initialise(measurement_id, measurement_id, measurement_id);
 }
 
-void PDF_yCP::initParameters() {
-  ParametersCharmCombo p;
-  parameters = new RooArgList("parameters");
-
+std::set<std::string> PDF_yCP::getParameterNames() const {
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    parameters->add(*(p.get("x")));
-    parameters->add(*(p.get("y")));
-    parameters->add(*(p.get("qop")));
-    parameters->add(*(p.get("phi")));
-    break;
+    return {"x", "y", "qop", "phi"};
   case mix::theo:
-    parameters->add(*(p.get("phiG")));
-    parameters->add(*(p.get("y12")));
-    break;
+    return {"phiG", "y12"};
   default:
     throw std::runtime_error(
-        std::format("PDF_yCP::initParameters ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
+        std::format("PDF_yCP::getParameterNames ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
 }
 
@@ -75,9 +59,9 @@ void PDF_yCP::initRelations() {
   }
 }
 
-void PDF_yCP::initObservables(const TString setName) {
+void PDF_yCP::initObservables() {
   observables = new RooArgList("observables");
-  observables->add(*(new RooRealVar("yCP_obs", setName + "   #it{y_{CP}}", 0, -1e4, 1e4)));
+  observables->add(*(new RooRealVar("yCP_obs", measurement_id + "   #it{y_{CP}}", 0, -1e4, 1e4)));
 }
 
 void PDF_yCP::setObservables(const TString c) {
@@ -105,11 +89,11 @@ void PDF_yCP::setUncertainties(const TString c) {
     StatErr[0] = 7.04e-3;
     std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("WA2020_biased")) {
-    obsValSource = "HFLAV";
+    obsErrSource = "HFLAV";
     StatErr[0] = 1.13e-3;
     std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb2022_biased")) {
-    obsValSource = "https://inspirehep.net/literature/2035063";
+    obsErrSource = "https://inspirehep.net/literature/2035063";
     StatErr[0] = 0.26e-3;
     SystErr[0] = 0.13e-3;
   } else {

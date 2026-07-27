@@ -7,7 +7,6 @@
 #include <PDF_BES_Kpi_1d.h>
 
 #include <CharmUtils.h>
-#include <ParametersCharmCombo.h>
 
 #include <Utils.h>
 
@@ -22,39 +21,26 @@
 #include <stdexcept>
 #include <string>
 
-PDF_BES_Kpi_1d::PDF_BES_Kpi_1d(const parametrisations::mix mix_param) : PDF_Abs{1}, mix_param{mix_param} {
+PDF_BES_Kpi_1d::PDF_BES_Kpi_1d(const parametrisations::mix mix_param) : PDF_Charm{1}, mix_param{mix_param} {
   name = "BES";
-  initParameters();
-  initRelations();
-  initObservables(name);
-  setObservables("BES");
-  setUncertainties("BES");
-  setCorrelations("BES");
-  build();
+  initialise("BES", "BES", "BES");
 }
 
-void PDF_BES_Kpi_1d::initParameters() {
-  ParametersCharmCombo p;
-  parameters = new RooArgList("parameters");
-  parameters->add(*(p.get("Delta_Kpi")));
-  parameters->add(*(p.get("R_Kpi")));
-
+std::set<std::string> PDF_BES_Kpi_1d::getParameterNames() const {
+  std::set<std::string> names = {"Delta_Kpi", "R_Kpi"};
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    parameters->add(*(p.get("x")));
-    parameters->add(*(p.get("y")));
+    names.insert({"x", "y"});
     break;
   case mix::theo:
-    parameters->add(*(p.get("phiG")));
-    parameters->add(*(p.get("x12")));
-    parameters->add(*(p.get("y12")));
-    parameters->add(*(p.get("phiM")));
+    names.insert({"phiG", "x12", "y12", "phiM"});
     break;
   default:
-    throw std::runtime_error(std::format("PDF_BES_Kpi_1d::initParameters ERROR Parametrisation {} not supported",
+    throw std::runtime_error(std::format("PDF_BES_Kpi_1d::getParameterNames ERROR Parametrisation {} not supported",
                                          utils::to_string(mix_param)));
   }
+  return names;
 }
 
 void PDF_BES_Kpi_1d::initRelations() {
@@ -64,9 +50,9 @@ void PDF_BES_Kpi_1d::initRelations() {
   theory->add(*(Utils::makeTheoryVar("A_kpi_th", "A_kpi_th", a_kpi_formula, parameters)));
 }
 
-void PDF_BES_Kpi_1d::initObservables(const TString setName) {
+void PDF_BES_Kpi_1d::initObservables() {
   observables = new RooArgList("observables");
-  observables->add(*(new RooRealVar("A_kpi_obs", setName + "   #it{A_{K#pi}^{CP}}", 0., -1e4, 1e4)));
+  observables->add(*(new RooRealVar("A_kpi_obs", name + "   #it{A_{K#pi}^{CP}}", 0., -1e4, 1e4)));
 }
 
 void PDF_BES_Kpi_1d::setObservables(const TString c) {

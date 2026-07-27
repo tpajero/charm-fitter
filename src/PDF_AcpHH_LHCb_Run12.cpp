@@ -7,7 +7,6 @@
 #include <PDF_AcpHH_LHCb_Run12.h>
 
 #include <CharmUtils.h>
-#include <ParametersCharmCombo.h>
 
 #include <Utils.h>
 
@@ -23,38 +22,24 @@
 
 PDF_AcpHH_LHCb_Run12::PDF_AcpHH_LHCb_Run12(const parametrisations::mix mix_param,
                                            const parametrisations::dy_fsc dy_fsc_param)
-    : PDF_Abs{8}, mix_param{mix_param}, dy_fsc_param{dy_fsc_param} {
+    : PDF_Charm{8}, mix_param{mix_param}, dy_fsc_param{dy_fsc_param} {
   name = "Charm_AcpHH_LHCb_Run12_Run1-2";
-  initParameters();
-  initRelations();
-  initObservables();
-  setObservables("lhcb-run12");
-  setUncertainties("lhcb-run12");
-  setCorrelations("lhcb-run12");
-  build();
+  initialise("lhcb-run12", "lhcb-run12", "lhcb-run12");
 }
 
-void PDF_AcpHH_LHCb_Run12::initParameters() {
-  ParametersCharmCombo p;
-  parameters = new RooArgList("parameters");
-  parameters->add(*(p.get("Acp_KK")));
-  parameters->add(*(p.get("Acp_PP")));
+std::set<std::string> PDF_AcpHH_LHCb_Run12::getParameterNames() const {
+  std::set<std::string> names = {"Acp_KK", "Acp_PP"};
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    parameters->add(*(p.get("x")));
-    parameters->add(*(p.get("y")));
-    parameters->add(*(p.get("qop")));
-    parameters->add(*(p.get("phi")));
+    names.insert({"x", "y", "qop", "phi"});
     break;
   case mix::theo:
-    parameters->add(*(p.get("x12")));
-    parameters->add(*(p.get("y12")));
-    parameters->add(*(p.get("phiM")));
+    names.insert({"x12", "y12", "phiM"});
     break;
   default:
-    throw std::runtime_error(std::format("PDF_AcpHH_LHCb_Run12::initParameters ERROR Parametrisation {} not supported",
-                                         utils::to_string(mix_param)));
+    throw std::runtime_error(std::format(
+        "PDF_AcpHH_LHCb_Run12::getParameterNames ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
   using parametrisations::dy_fsc;
   switch (dy_fsc_param) {
@@ -62,10 +47,10 @@ void PDF_AcpHH_LHCb_Run12::initParameters() {
   case dy_fsc::partial:
     break;
   case dy_fsc::full:
-    parameters->add(*(p.get("cot_delta_KK")));
-    parameters->add(*(p.get("cot_delta_PP")));
+    names.insert({"cot_delta_KK", "cot_delta_PP"});
     break;
   }
+  return names;
 }
 
 void PDF_AcpHH_LHCb_Run12::initRelations() {

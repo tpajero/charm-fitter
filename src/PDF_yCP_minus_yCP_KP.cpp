@@ -7,7 +7,6 @@
 #include <PDF_yCP_minus_yCP_KP.h>
 
 #include <CharmUtils.h>
-#include <ParametersCharmCombo.h>
 
 #include <Utils.h>
 
@@ -23,40 +22,26 @@
 #include <stdexcept>
 
 PDF_yCP_minus_yCP_KP::PDF_yCP_minus_yCP_KP(const TString measurement_id, const parametrisations::mix mix_param)
-    : PDF_Abs{1}, mix_param{mix_param} {
+    : PDF_Charm{1}, mix_param{mix_param}, measurement_id{measurement_id} {
   name = "yCP_minus_yCP_KP_" + measurement_id;
-  initParameters();
-  initRelations();
-  initObservables(measurement_id);
-  setObservables(measurement_id);
-  setUncertainties(measurement_id);
-  setCorrelations(measurement_id);
-  build();
+  initialise(measurement_id, measurement_id, measurement_id);
 }
 
-void PDF_yCP_minus_yCP_KP::initParameters() {
-  ParametersCharmCombo p;
-  parameters = new RooArgList("parameters");
-
-  parameters->add(*(p.get("R_Kpi")));
-  parameters->add(*(p.get("Delta_Kpi")));
+std::set<std::string> PDF_yCP_minus_yCP_KP::getParameterNames() const {
+  std::set<std::string> names = {"R_Kpi", "Delta_Kpi"};
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    parameters->add(*(p.get("x")));
-    parameters->add(*(p.get("y")));
-    parameters->add(*(p.get("qop")));
-    parameters->add(*(p.get("phi")));
+    names.insert({"x", "y", "qop", "phi"});
     break;
   case mix::theo:
-    parameters->add(*(p.get("phiG")));
-    parameters->add(*(p.get("x12")));
-    parameters->add(*(p.get("y12")));
+    names.insert({"phiG", "x12", "y12"});
     break;
   default:
-    throw std::runtime_error(std::format("PDF_yCP_minus_yCP_KP::initParameters ERROR Parametrisation {} not supported",
-                                         utils::to_string(mix_param)));
+    throw std::runtime_error(std::format(
+        "PDF_yCP_minus_yCP_KP::getParameterNames ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
+  return names;
 }
 
 void PDF_yCP_minus_yCP_KP::initRelations() {
@@ -85,10 +70,10 @@ void PDF_yCP_minus_yCP_KP::initRelations() {
   }
 }
 
-void PDF_yCP_minus_yCP_KP::initObservables(const TString setName) {
+void PDF_yCP_minus_yCP_KP::initObservables() {
   observables = new RooArgList("observables");
-  observables->add(
-      *(new RooRealVar("yCP_minus_yCP_KP_obs", setName + "   #it{y_{CP}}#minus#it{y_{CP}^{K#pi}}", 0, -1e4, 1e4)));
+  observables->add(*(
+      new RooRealVar("yCP_minus_yCP_KP_obs", measurement_id + "   #it{y_{CP}}#minus#it{y_{CP}^{K#pi}}", 0, -1e4, 1e4)));
 }
 
 void PDF_yCP_minus_yCP_KP::setObservables(const TString c) {

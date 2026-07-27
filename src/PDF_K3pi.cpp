@@ -7,7 +7,6 @@
 #include <PDF_K3pi.h>
 
 #include <CharmUtils.h>
-#include <ParametersCharmCombo.h>
 
 #include <Utils.h>
 
@@ -40,27 +39,19 @@ namespace {
 }  // namespace
 
 PDF_K3pi::PDF_K3pi(const TString measurement_id, const parametrisations::mix mix_param)
-    : PDF_Abs{3}, mix_param{mix_param} {
+    : PDF_Charm{3}, mix_param{mix_param} {
   name = "K3pi_" + measurement_id;
-  initParameters();
-  initRelations();
-  initObservables("LHCb R1");
-  setObservables(measurement_id);
-  setUncertainties(measurement_id);
-  setCorrelations(measurement_id);
-  build();
+  initialise(measurement_id, measurement_id, measurement_id);
 }
 
-void PDF_K3pi::initParameters() {
-  std::vector<std::string> param_names = {"r_K3pi", "k_K3pi", "Delta_K3pi"};
+std::set<std::string> PDF_K3pi::getParameterNames() const {
+  std::set<std::string> names = {"r_K3pi", "k_K3pi", "Delta_K3pi"};
   using parametrisations::mix;
   if (mix_param == mix::pheno)
-    param_names.insert(param_names.end(), {"x", "y", "qop", "phi"});
+    names.insert({"x", "y", "qop", "phi"});
   else
-    param_names.insert(param_names.end(), {"x12", "y12", "phiM", "phiG"});
-  ParametersCharmCombo p;
-  parameters = new RooArgList("parameters");
-  for (const auto& par : param_names) parameters->add(*(p.get(par)));
+    names.insert({"x12", "y12", "phiM", "phiG"});
+  return names;
 }
 
 void PDF_K3pi::initRelations() {
@@ -70,7 +61,8 @@ void PDF_K3pi::initRelations() {
   theory->add(*(Utils::makeTheoryVar("c2_th", "c2_th", theory_expressions["c2"][mix_param], parameters)));
 }
 
-void PDF_K3pi::initObservables(const TString label) {
+void PDF_K3pi::initObservables() {
+  const TString label = "LHCb R1";
   observables = new RooArgList("observables");  ///< the order of this list must match that of the COR matrix!
   observables->add(*(new RooRealVar("r_K3pi_obs", label + "   #it{r_{K3#pi}}", 0, -1e4, 1e4)));
   observables->add(*(new RooRealVar("c1_obs", label + "   #it{#kappa_{K3#pi}y'}", 0, -1e4, 1e4)));

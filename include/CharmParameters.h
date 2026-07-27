@@ -4,14 +4,14 @@
  * Date: October 2021
  **/
 
-#ifndef ParametersCharmCombo_h
-#define ParametersCharmCombo_h
+#ifndef CharmParameters_h
+#define CharmParameters_h
 
 #include <ParametersAbs.h>
 
-class ParametersCharmCombo : public ParametersAbs {
+class CharmParameters : public ParametersAbs {
  public:
-  ParametersCharmCombo();
+  CharmParameters();
 
  private:
   void defineParameters();

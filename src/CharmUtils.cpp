@@ -17,6 +17,8 @@ namespace {
       return id ? "pheno" : "(x, y, q/p, phi)";
     case mix::theo:
       return id ? "theo" : "(x12, y12, phiM, phiG)";
+    case mix::d0_to_kpi:
+      return id ? "d0_to_kpi" : "(y', x'^2, dy', dx'2)";
     default:
       throw std::runtime_error(
           std::format("ERROR parametrisations::mix {} not supported by \"str_repr\"", static_cast<int>(par)));

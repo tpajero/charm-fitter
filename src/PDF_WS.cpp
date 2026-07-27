@@ -7,7 +7,6 @@
 #include <PDF_WS.h>
 
 #include <CharmUtils.h>
-#include <ParametersCharmCombo.h>
 
 #include <Utils.h>
 
@@ -16,6 +15,7 @@
 #include <RooRealVar.h>
 
 #include <algorithm>
+#include <cmath>
 #include <format>
 #include <iostream>
 #include <map>
@@ -102,8 +102,7 @@ namespace {
 }  // namespace
 
 PDF_WS::PDF_WS(const TString measurement_id, const parametrisations::mix mix_param, parametrisations::kpi p)
-    : PDF_Abs{measurement_id.EqualTo("LHCb_Prompt_Run12_appB") ? 9 : 6}, mix_param{mix_param}, ws_param{p} {
-  TString label;
+    : PDF_Charm{measurement_id.EqualTo("LHCb_Prompt_Run12_appB") ? 9 : 6}, mix_param{mix_param}, ws_param{p} {
   if (measurement_id.EqualTo("BaBar"))
     label = "WS/RS BaBar CPV";
   else if (measurement_id.EqualTo("Belle"))
@@ -133,57 +132,40 @@ PDF_WS::PDF_WS(const TString measurement_id, const parametrisations::mix mix_par
   }
 
   name = "WS_" + measurement_id;
-  initParameters();
-  initRelations();
-  initObservables(label);
-  setObservables(measurement_id);
-  setUncertainties(measurement_id);
-  setCorrelations(measurement_id);
-  build();
+  initialise(measurement_id, measurement_id, measurement_id);
 }
 
 PDF_WS::PDF_WS(const TString val, TString err, const parametrisations::mix mix_param)
-    : PDF_Abs{6}, mix_param{mix_param} {
-  TString label;
+    : PDF_Charm{6}, mix_param{mix_param} {
   if (err.EqualTo("LHCb_Run12"))
     label = "WS/RS LHCb prompt (Run 1+2)";
   else
     throw std::runtime_error(std::format("PDF_WS::PDF_WS ERROR Measurement ID {} not supported", err.Data()));
 
   name = "WS_" + err;
-  initParameters();
-  initRelations();
-  initObservables(label);
-  setObservables(val);
-  setUncertainties(err);
-  setCorrelations(err);
-  build();
+  initialise(val, err, err);
 }
 
-void PDF_WS::initParameters() {
+std::set<std::string> PDF_WS::getParameterNames() const {
   using parametrisations::mix;
-  std::vector<std::string> param_names = {"R_Kpi"};
-  if (mix_param != mix::d0_to_kpi) param_names.emplace_back("Delta_Kpi");
-  param_names.emplace_back("Acp_KP");
-  if (nObs == 9) param_names.emplace_back("Acp_KK");
+  std::set<std::string> names = {"R_Kpi", "Acp_KP"};
+  if (mix_param != mix::d0_to_kpi) names.insert("Delta_Kpi");
+  if (nObs == 9) names.insert("Acp_KK");
   switch (mix_param) {
   case mix::pheno:
-    param_names.insert(param_names.end(), {"x", "y", "qop", "phi"});
+    names.insert({"x", "y", "qop", "phi"});
     break;
   case mix::theo:
-    param_names.emplace_back("phiG");
-    param_names.insert(param_names.end(), {"x12", "y12", "phiM"});
+    names.insert({"phiG", "x12", "y12", "phiM"});
     break;
   case mix::d0_to_kpi:
-    param_names.insert(param_names.end(), {"yp", "dyp", "xp2", "dxp2"});
+    names.insert({"yp", "dyp", "xp2", "dxp2"});
     break;
   default:
     throw std::runtime_error(
-        std::format("PDF_WS::initParameters ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
+        std::format("PDF_WS::getParameterNames ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
-  ParametersCharmCombo p;
-  parameters = new RooArgList("parameters");
-  for (const auto& par : param_names) parameters->add(*(p.get(par)));
+  return names;
 }
 
 void PDF_WS::initRelations() {
@@ -249,37 +231,37 @@ void PDF_WS::initRelationsRRXY() {
   theory->add(*(Utils::makeTheoryVar("x'2-_th", "x'2-_th", get_formula("x'2-", mix_param), parameters)));
 }
 
-void PDF_WS::initObservables(const TString setName) {
+void PDF_WS::initObservables() {
   observables = new RooArgList("observables");  // the order of this list must match that of the COR matrix!
   using parametrisations::kpi;
   switch (ws_param) {
   case kpi::raxy:
-    observables->add(*(new RooRealVar("RD_obs", setName + "   #it{R_{K#pi}}", 0., -1e4, 1e4)));
-    observables->add(*(new RooRealVar("y'+_obs", setName + "   #it{y'^{+}}", 0., -1e4, 1e4)));
-    observables->add(*(new RooRealVar("x'2+_obs", setName + "   #it{x'^{+2}}", 0., -1e4, 1e4)));
-    observables->add(*(new RooRealVar("AD_obs", setName + "   #it{A_{K#pi}}", 0., -1e4, 1e4)));
-    observables->add(*(new RooRealVar("y'-_obs", setName + "   #it{y'}^{#minus}", 0., -1e4, 1e4)));
-    observables->add(*(new RooRealVar("x'2-_obs", setName + "   #it{x'}^{#minus2}", 0., -1e4, 1e4)));
+    observables->add(*(new RooRealVar("RD_obs", label + "   #it{R_{K#pi}}", 0., -1e4, 1e4)));
+    observables->add(*(new RooRealVar("y'+_obs", label + "   #it{y'^{+}}", 0., -1e4, 1e4)));
+    observables->add(*(new RooRealVar("x'2+_obs", label + "   #it{x'^{+2}}", 0., -1e4, 1e4)));
+    observables->add(*(new RooRealVar("AD_obs", label + "   #it{A_{K#pi}}", 0., -1e4, 1e4)));
+    observables->add(*(new RooRealVar("y'-_obs", label + "   #it{y'}^{#minus}", 0., -1e4, 1e4)));
+    observables->add(*(new RooRealVar("x'2-_obs", label + "   #it{x'}^{#minus2}", 0., -1e4, 1e4)));
     break;
   case kpi::rrxy:
-    observables->add(*(new RooRealVar("RD_p_obs", setName + "   #it{R_{K#pi}^{+}}", 0., -1e4, 1e4)));
-    observables->add(*(new RooRealVar("y'+_obs", setName + "   #it{y'^{+}}", 0., -1e4, 1e4)));
-    observables->add(*(new RooRealVar("x'2+_obs", setName + "   #it{x'^{+2}}", 0., -1e4, 1e4)));
-    observables->add(*(new RooRealVar("RD_m_obs", setName + "   #it{R_{K#pi}^{#minus}}", 0., -1e4, 1e4)));
-    observables->add(*(new RooRealVar("y'-_obs", setName + "   #it{y'}^{#minus}", 0., -1e4, 1e4)));
-    observables->add(*(new RooRealVar("x'2-_obs", setName + "   #it{x'}^{#minus2}", 0., -1e4, 1e4)));
+    observables->add(*(new RooRealVar("RD_p_obs", label + "   #it{R_{K#pi}^{+}}", 0., -1e4, 1e4)));
+    observables->add(*(new RooRealVar("y'+_obs", label + "   #it{y'^{+}}", 0., -1e4, 1e4)));
+    observables->add(*(new RooRealVar("x'2+_obs", label + "   #it{x'^{+2}}", 0., -1e4, 1e4)));
+    observables->add(*(new RooRealVar("RD_m_obs", label + "   #it{R_{K#pi}^{#minus}}", 0., -1e4, 1e4)));
+    observables->add(*(new RooRealVar("y'-_obs", label + "   #it{y'}^{#minus}", 0., -1e4, 1e4)));
+    observables->add(*(new RooRealVar("x'2-_obs", label + "   #it{x'}^{#minus2}", 0., -1e4, 1e4)));
     break;
   case kpi::ccprime:
-    observables->add(*(new RooRealVar("RD_obs", setName + "   #it{R_{K#pi}}", 0., -1e4, 1e4)));
-    observables->add(*(new RooRealVar("c_obs", setName + "   #it{c_{K#pi}}", 0., -1e4, 1e4)));
-    observables->add(*(new RooRealVar("c'_obs", setName + "   #it{c'_{K#pi}}", 0., -1e4, 1e4)));
-    observables->add(*(new RooRealVar("AD_obs", setName + "   #it{A_{K#pi}}", 0., -1e4, 1e4)));
-    observables->add(*(new RooRealVar("dc_obs", setName + "   #it{#Deltac_{K#pi}}", 0., -1e4, 1e4)));
-    observables->add(*(new RooRealVar("dc'_obs", setName + "   #it{#Deltac'_{K#pi}}", 0., -1e4, 1e4)));
+    observables->add(*(new RooRealVar("RD_obs", label + "   #it{R_{K#pi}}", 0., -1e4, 1e4)));
+    observables->add(*(new RooRealVar("c_obs", label + "   #it{c_{K#pi}}", 0., -1e4, 1e4)));
+    observables->add(*(new RooRealVar("c'_obs", label + "   #it{c'_{K#pi}}", 0., -1e4, 1e4)));
+    observables->add(*(new RooRealVar("AD_obs", label + "   #it{A_{K#pi}}", 0., -1e4, 1e4)));
+    observables->add(*(new RooRealVar("dc_obs", label + "   #it{#Deltac_{K#pi}}", 0., -1e4, 1e4)));
+    observables->add(*(new RooRealVar("dc'_obs", label + "   #it{#Deltac'_{K#pi}}", 0., -1e4, 1e4)));
     if (nObs == 9) {
-      observables->add(*(new RooRealVar("ADt_obs", setName + "   #it{#tilde{A}_{K#pi}}", 0., -1e4, 1e4)));
-      observables->add(*(new RooRealVar("dc~_obs", setName + "   #it{#Delta#tilde{c}_{K#pi}}", 0., -1e4, 1e4)));
-      observables->add(*(new RooRealVar("dc'~_obs", setName + "   #it{#Delta#tilde{c}'_{K#pi}}", 0., -1e4, 1e4)));
+      observables->add(*(new RooRealVar("ADt_obs", label + "   #it{#tilde{A}_{K#pi}}", 0., -1e4, 1e4)));
+      observables->add(*(new RooRealVar("dc~_obs", label + "   #it{#Delta#tilde{c}_{K#pi}}", 0., -1e4, 1e4)));
+      observables->add(*(new RooRealVar("dc'~_obs", label + "   #it{#Delta#tilde{c}'_{K#pi}}", 0., -1e4, 1e4)));
     }
     break;
   default:
@@ -398,12 +380,12 @@ void PDF_WS::setUncertainties(const TString c) {
     std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_DT_Run1")) {
     obsErrSource = "https://inspirehep.net/literature/1499047";
-    StatErr[0] = pow(pow(0.0015, 2) + pow(0.0006, 2), 0.5);    // RD+
-    StatErr[1] = pow(pow(5.25e-3, 2) + pow(0.32e-3, 2), 0.5);  // y'+
-    StatErr[2] = pow(pow(4.46e-4, 2) + pow(0.31e-4, 2), 0.5);  // x'2+
-    StatErr[3] = pow(pow(0.0015, 2) + pow(0.0007, 2), 0.5);    // RD-
-    StatErr[4] = pow(pow(5.21e-3, 2) + pow(0.40e-3, 2), 0.5);  // y'-
-    StatErr[5] = pow(pow(4.31e-4, 2) + pow(0.38e-4, 2), 0.5);  // x'2-
+    StatErr[0] = std::hypot(0.0015, 0.0006);    // RD+
+    StatErr[1] = std::hypot(5.25e-3, 0.32e-3);  // y'+
+    StatErr[2] = std::hypot(4.46e-4, 0.31e-4);  // x'2+
+    StatErr[3] = std::hypot(0.0015, 0.0007);    // RD-
+    StatErr[4] = std::hypot(5.21e-3, 0.40e-3);  // y'-
+    StatErr[5] = std::hypot(4.31e-4, 0.38e-4);  // x'2-
     std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_Run1")) {
     obsErrSource = "https://inspirehep.net/literature/1499047";

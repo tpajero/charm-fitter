@@ -7,7 +7,6 @@
 #include <PDF_RM.h>
 
 #include <CharmUtils.h>
-#include <ParametersCharmCombo.h>
 
 #include <Utils.h>
 
@@ -22,36 +21,22 @@
 #include <iostream>
 #include <stdexcept>
 
-PDF_RM::PDF_RM(const TString measurement_id, const parametrisations::mix mix_param) : PDF_Abs{1}, mix_param{mix_param} {
+PDF_RM::PDF_RM(const TString measurement_id, const parametrisations::mix mix_param)
+    : PDF_Charm{1}, mix_param{mix_param}, measurement_id{measurement_id} {
   name = "RM_" + measurement_id;
-  initParameters();
-  initRelations();
-  initObservables(measurement_id);
-  setObservables(measurement_id);
-  setUncertainties(measurement_id);
-  setCorrelations(measurement_id);
-  build();
+  initialise(measurement_id, measurement_id, measurement_id);
 }
 
-void PDF_RM::initParameters() {
-  ParametersCharmCombo p;
-  parameters = new RooArgList("parameters");
-
+std::set<std::string> PDF_RM::getParameterNames() const {
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    parameters->add(*(p.get("x")));
-    parameters->add(*(p.get("y")));
-    break;
+    return {"x", "y"};
   case mix::theo:
-    parameters->add(*(p.get("x12")));
-    parameters->add(*(p.get("y12")));
-    parameters->add(*(p.get("phiM")));
-    parameters->add(*(p.get("phiG")));
-    break;
+    return {"x12", "y12", "phiM", "phiG"};
   default:
     throw std::runtime_error(
-        std::format("PDF_RM::initParameters ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
+        std::format("PDF_RM::getParameterNames ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
 }
 
@@ -75,9 +60,9 @@ void PDF_RM::initRelations() {
   }
 }
 
-void PDF_RM::initObservables(const TString setName) {
+void PDF_RM::initObservables() {
   observables = new RooArgList("observables");
-  observables->add(*(new RooRealVar("RM_obs", setName + "   #it{R_{M}}", 0, 0., 1e4)));
+  observables->add(*(new RooRealVar("RM_obs", measurement_id + "   #it{R_{M}}", 0, 0., 1e4)));
 }
 
 void PDF_RM::setObservables(const TString c) {

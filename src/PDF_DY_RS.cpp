@@ -7,7 +7,6 @@
 #include <PDF_DY_RS.h>
 
 #include <CharmUtils.h>
-#include <ParametersCharmCombo.h>
 
 #include <Utils.h>
 
@@ -19,42 +18,26 @@
 #include <stdexcept>
 
 PDF_DY_RS::PDF_DY_RS(const TString measurement_id, const parametrisations::mix mix_param)
-    : PDF_Abs{1}, mix_param{mix_param} {
+    : PDF_Charm{1}, mix_param{mix_param}, measurement_id{measurement_id} {
   name = "DY_RS_" + measurement_id;
-  initParameters();
-  initRelations();
-  initObservables(measurement_id);
-  setObservables(measurement_id);
-  setUncertainties(measurement_id);
-  setCorrelations(measurement_id);
-  build();
+  initialise(measurement_id, measurement_id, measurement_id);
 }
 
-void PDF_DY_RS::initParameters() {
-  ParametersCharmCombo p;
-  parameters = new RooArgList("parameters");
-  parameters->add(*(p.get("R_Kpi")));
-  parameters->add(*(p.get("Acp_KP")));
-  parameters->add(*(p.get("Delta_Kpi")));
-
+std::set<std::string> PDF_DY_RS::getParameterNames() const {
+  std::set<std::string> names = {"R_Kpi", "Acp_KP", "Delta_Kpi"};
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    parameters->add(*(p.get("x")));
-    parameters->add(*(p.get("y")));
-    parameters->add(*(p.get("qop")));
-    parameters->add(*(p.get("phi")));
+    names.insert({"x", "y", "qop", "phi"});
     break;
   case mix::theo:
-    parameters->add(*(p.get("phiG")));
-    parameters->add(*(p.get("x12")));
-    parameters->add(*(p.get("y12")));
-    parameters->add(*(p.get("phiM")));
+    names.insert({"phiG", "x12", "y12", "phiM"});
     break;
   default:
-    throw std::runtime_error(
-        std::format("PDF_DY_RS::initParameters ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
+    throw std::runtime_error(std::format("PDF_DY_RS::getParameterNames ERROR Parametrisation {} not supported",
+                                         utils::to_string(mix_param)));
   }
+  return names;
 }
 
 void PDF_DY_RS::initRelations() {
@@ -62,9 +45,9 @@ void PDF_DY_RS::initRelations() {
   theory->add(*(Utils::makeTheoryVar("DY_RS_th", "DY_RS_th", utils::dy_kp_expression(mix_param), parameters)));
 }
 
-void PDF_DY_RS::initObservables(const TString setName) {
+void PDF_DY_RS::initObservables() {
   observables = new RooArgList("observables");
-  observables->add(*(new RooRealVar("DY_RS_obs", setName + "   #it{A}_{#Gamma}^{#it{K#pi}}", 0, -1e4, 1e4)));
+  observables->add(*(new RooRealVar("DY_RS_obs", measurement_id + "   #it{#Delta Y}^{#it{K#pi}}", 0, -1e4, 1e4)));
 }
 
 void PDF_DY_RS::setObservables(const TString c) {

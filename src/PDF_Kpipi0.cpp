@@ -7,7 +7,6 @@
 #include <PDF_Kpipi0.h>
 
 #include <CharmUtils.h>
-#include <ParametersCharmCombo.h>
 
 #include <Utils.h>
 
@@ -15,50 +14,33 @@
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
+#include <cmath>
 #include <format>
 #include <iostream>
 #include <stdexcept>
 #include <vector>
 
 PDF_Kpipi0::PDF_Kpipi0(const TString measurement_id, const parametrisations::mix mix_param)
-    : PDF_Abs{2}, mix_param{mix_param} {
+    : PDF_Charm{2}, mix_param{mix_param}, measurement_id{measurement_id} {
   name = measurement_id + "_Kpipi0";
-  TString label;
-  if (measurement_id.EqualTo("BaBar"))
-    label = "BaBar #it{K}^{+}#pi^{#minus}#pi^{0}";
-  else
-    throw std::runtime_error(
-        std::format("PDF_Kpipi0::PDF_Kpipi0 ERROR Measurement ID {} not supported", measurement_id.Data()));
-  initParameters();
-  initRelations();
-  initObservables(label);
-  setObservables(measurement_id);
-  setUncertainties(measurement_id);
-  setCorrelations(measurement_id);
-  build();
+  initialise(measurement_id, measurement_id, measurement_id);
 }
 
-void PDF_Kpipi0::initParameters() {
-  ParametersCharmCombo p;
-  parameters = new RooArgList("parameters");
-  parameters->add(*(p.get("Delta_Kpipi0")));
-
+std::set<std::string> PDF_Kpipi0::getParameterNames() const {
+  std::set<std::string> names = {"Delta_Kpipi0"};
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    parameters->add(*(p.get("x")));
-    parameters->add(*(p.get("y")));
+    names.insert({"x", "y"});
     break;
   case mix::theo:
-    parameters->add(*(p.get("phiG")));
-    parameters->add(*(p.get("x12")));
-    parameters->add(*(p.get("y12")));
-    parameters->add(*(p.get("phiM")));
+    names.insert({"phiG", "x12", "y12", "phiM"});
     break;
   default:
-    throw std::runtime_error(
-        std::format("PDF_Kpipi0::initParameters ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
+    throw std::runtime_error(std::format("PDF_Kpipi0::getParameterNames ERROR Parametrisation {} not supported",
+                                         utils::to_string(mix_param)));
   }
+  return names;
 }
 
 void PDF_Kpipi0::initRelations() {
@@ -85,10 +67,17 @@ void PDF_Kpipi0::initRelations() {
   }
 }
 
-void PDF_Kpipi0::initObservables(const TString setName) {
+void PDF_Kpipi0::initObservables() {
+  TString label;
+  if (measurement_id.EqualTo("BaBar"))
+    label = "BaBar #it{K}^{+}#pi^{#minus}#pi^{0}";
+  else
+    throw std::runtime_error(
+        std::format("PDF_Kpipi0::initObservables ERROR Measurement ID {} not supported", measurement_id.Data()));
+
   observables = new RooArgList("observables");  ///< the order of this list must match that of the COR matrix!
-  observables->add(*(new RooRealVar("xpp_obs", setName + "   #it{x''}", 0., -1e4, 1e4)));
-  observables->add(*(new RooRealVar("ypp_obs", setName + "   #it{y''}", 0., -1e4, 1e4)));
+  observables->add(*(new RooRealVar("xpp_obs", label + "   #it{x''}", 0., -1e4, 1e4)));
+  observables->add(*(new RooRealVar("ypp_obs", label + "   #it{y''}", 0., -1e4, 1e4)));
 }
 
 void PDF_Kpipi0::setObservables(const TString c) {
@@ -108,8 +97,8 @@ void PDF_Kpipi0::setObservables(const TString c) {
 void PDF_Kpipi0::setUncertainties(const TString c) {
   if (c.EqualTo("BaBar")) {
     obsErrSource = "https://inspirehep.net/literature/791715";
-    StatErr[0] = pow(pow(0.625e-2, 2) + pow(0.39e-2, 2), 0.5);  // x''
-    StatErr[1] = pow(pow(0.595e-2, 2) + pow(0.34e-2, 2), 0.5);  // y''
+    StatErr[0] = std::hypot(0.625e-2, 0.39e-2);  // x''
+    StatErr[1] = std::hypot(0.595e-2, 0.34e-2);  // y''
   } else {
     throw std::runtime_error(std::format("PDF_Kpipi0::setUncertainties ERROR config {} not found", c.Data()));
   }

@@ -7,7 +7,6 @@
 #include <PDF_BES_Kpi_7d.h>
 
 #include <CharmUtils.h>
-#include <ParametersCharmCombo.h>
 
 #include <Utils.h>
 
@@ -17,42 +16,31 @@
 #include <RooRealVar.h>
 
 #include <boost/algorithm/string.hpp>
+#include <cmath>
 #include <format>
 #include <stdexcept>
 #include <vector>
 
-PDF_BES_Kpi_7d::PDF_BES_Kpi_7d(const parametrisations::mix mix_param) : PDF_Abs{7}, mix_param{mix_param} {
+PDF_BES_Kpi_7d::PDF_BES_Kpi_7d(const parametrisations::mix mix_param) : PDF_Charm{7}, mix_param{mix_param} {
   name = "charm-bes-kpi-2025";
-  initParameters();
-  initRelations();
-  initObservables();
-  setObservables("3+7fb");
-  setUncertainties("3+7fb");
-  setCorrelations("3+7fb");
-  build();
+  initialise("3+7fb", "3+7fb", "3+7fb");
 }
 
-void PDF_BES_Kpi_7d::initParameters() {
-  ParametersCharmCombo p;
-  parameters = new RooArgList("parameters");
-  parameters->add(*(p.get("R_Kpi")));
-  parameters->add(*(p.get("Delta_Kpi")));
-  parameters->add(*(p.get("F_pipipi0")));
+std::set<std::string> PDF_BES_Kpi_7d::getParameterNames() const {
+  std::set<std::string> names = {"R_Kpi", "Delta_Kpi", "F_pipipi0"};
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    parameters->add(*(p.get("y")));
+    names.insert("y");
     break;
   case mix::theo:
-    parameters->add(*(p.get("phiG")));
-    parameters->add(*(p.get("x12")));
-    parameters->add(*(p.get("y12")));
-    parameters->add(*(p.get("phiM")));
+    names.insert({"phiG", "x12", "y12", "phiM"});
     break;
   default:
-    throw std::runtime_error(std::format("PDF_BES_Kpi_7d::initParameters ERROR Parametrisation {} not supported",
+    throw std::runtime_error(std::format("PDF_BES_Kpi_7d::getParameterNames ERROR Parametrisation {} not supported",
                                          utils::to_string(mix_param)));
   }
+  return names;
 }
 
 void PDF_BES_Kpi_7d::initRelations() {
@@ -110,9 +98,9 @@ void PDF_BES_Kpi_7d::setUncertainties(const TString c) {
     StatErr[1] = 1.2e-2;
     SystErr[1] = 0.8e-2;
     StatErr[2] = 0.81e-2;
-    SystErr[2] = std::sqrt(std::pow(0.50e-2, 2) + std::pow(0.10e-2, 2));
+    SystErr[2] = std::hypot(0.50e-2, 0.10e-2);
     StatErr[3] = 1.2e-2;
-    SystErr[3] = std::sqrt(std::pow(0.7e-2, 2) + std::pow(0.3e-2, 2));
+    SystErr[3] = std::hypot(0.7e-2, 0.3e-2);
     StatErr[4] = 0.8e-2;
     SystErr[4] = 0.15e-2;
     StatErr[5] = 1.4e-2;

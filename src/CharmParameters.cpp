@@ -4,13 +4,13 @@
  * Date: October 2021
  **/
 
-#include <ParametersCharmCombo.h>
+#include <CharmParameters.h>
 
 #include <Utils.h>
 
 using Utils::DegToRad;
 
-ParametersCharmCombo::ParametersCharmCombo() { defineParameters(); }
+CharmParameters::CharmParameters() { defineParameters(); }
 
 /**
  * Define all (nuisance) parameters.
@@ -18,7 +18,7 @@ ParametersCharmCombo::ParametersCharmCombo() { defineParameters(); }
  * scan:  defines scan range (for Prob and Plugin methods)
  * phys:  physically allowed range (needs to be set!)
  */
-void ParametersCharmCombo::defineParameters() {
+void CharmParameters::defineParameters() {
   Parameter* p = nullptr;
 
   // CP asymmetry in the decay (``direct'' CP asymmetry) of D0 -> K+ K-

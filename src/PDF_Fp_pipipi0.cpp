@@ -7,7 +7,6 @@
 #include <PDF_Fp_pipipi0.h>
 
 #include <CharmUtils.h>
-#include <ParametersCharmCombo.h>
 
 #include <Utils.h>
 
@@ -19,29 +18,19 @@
 
 #include <algorithm>
 
-PDF_Fp_pipipi0::PDF_Fp_pipipi0(const TString measurement_id) : PDF_Abs{1} {
+PDF_Fp_pipipi0::PDF_Fp_pipipi0(const TString measurement_id) : PDF_Charm{1}, measurement_id{measurement_id} {
   name = "Fp-pipipi0" + measurement_id;
-  initParameters();
-  initRelations();
-  initObservables(measurement_id);
-  setObservables(measurement_id);
-  setUncertainties(measurement_id);
-  setCorrelations(measurement_id);
-  build();
+  initialise(measurement_id, measurement_id, measurement_id);
 }
 
-void PDF_Fp_pipipi0::initParameters() {
-  ParametersCharmCombo p;
-  parameters = new RooArgList("parameters");
-  parameters->add(*(p.get("F_pipipi0")));
-}
+std::set<std::string> PDF_Fp_pipipi0::getParameterNames() const { return {"F_pipipi0"}; }
 
 void PDF_Fp_pipipi0::initRelations() {
   theory = new RooArgList("theory");
   theory->add(*(Utils::makeTheoryVar("F_pipipi0_th", "F_pipipi0_th", "F_pipipi0", parameters)));
 }
 
-void PDF_Fp_pipipi0::initObservables(const TString measurement_id) {
+void PDF_Fp_pipipi0::initObservables() {
   observables = new RooArgList("observables");
   observables->add(*(new RooRealVar("F_pipipi0_obs", "F_{#pi#pi#pi^{0}} " + measurement_id, 0, -1e4, 1e4)));
 }
