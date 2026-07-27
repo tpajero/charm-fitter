@@ -100,7 +100,7 @@ void PDF_BES_CLEO_K3pi_Kpipi0::setUncertainties(const TString c) {
     StatErr[4] = 0.08e-2;       // r_K3pi
     StatErr[5] = 0.11e-2;       // r_Kpipi0
 
-    std::ranges::fill(SystErr, 0.);
+    std::ranges::fill(SystErr, 0.0);
   } else {
     std::cout << "PDF_BES_CLEO_K3pi_Kpipi0::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
     exit(1);

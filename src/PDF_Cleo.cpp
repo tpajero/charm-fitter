@@ -15,6 +15,7 @@
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
+#include <algorithm>
 #include <format>
 #include <iostream>
 #include <stdexcept>
@@ -115,11 +116,7 @@ void PDF_Cleo::setUncertainties(const TString c) {
     StatErr[2] = sqrt(pow(2e-2, 2) + pow(1e-2, 2));        // y
     StatErr[3] = sqrt(pow(0.20, 2) + pow(0.06, 2));        // cos
     StatErr[4] = sqrt(pow(0.41, 2) + pow(0.04, 2));        // sin
-    SystErr[0] = 0;
-    SystErr[1] = 0;
-    SystErr[2] = 0;
-    SystErr[3] = 0;
-    SystErr[4] = 0;
+    std::ranges::fill(SystErr, 0.0);
   } else {
     throw std::runtime_error(std::format("PDF_Cleo::setUncertainties ERROR config {} not found", c.Data()));
   }

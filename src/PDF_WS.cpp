@@ -386,7 +386,7 @@ void PDF_WS::setUncertainties(const TString c) {
     StatErr[3] = 0.000267;  // RD-
     StatErr[4] = 7.5e-3;    // y'-
     StatErr[5] = 5.0e-4;    // x'2-
-    std::ranges::fill(SystErr, 0.);
+    std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("Belle")) {
     obsErrSource = "http://belle.kek.jp/belle/theses/doctor/lmzhang06/phd-mix-400.ps.gz";
     StatErr[0] = 0.00024;  // RD+
@@ -395,7 +395,7 @@ void PDF_WS::setUncertainties(const TString c) {
     StatErr[3] = 0.00024;  // RD-
     StatErr[4] = 5.4e-3;   // y'-
     StatErr[5] = 2.9e-4;   // x'2-
-    std::ranges::fill(SystErr, 0.);
+    std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_DT_Run1")) {
     obsErrSource = "https://inspirehep.net/literature/1499047";
     StatErr[0] = pow(pow(0.0015, 2) + pow(0.0006, 2), 0.5);    // RD+
@@ -404,7 +404,7 @@ void PDF_WS::setUncertainties(const TString c) {
     StatErr[3] = pow(pow(0.0015, 2) + pow(0.0007, 2), 0.5);    // RD-
     StatErr[4] = pow(pow(5.21e-3, 2) + pow(0.40e-3, 2), 0.5);  // y'-
     StatErr[5] = pow(pow(4.31e-4, 2) + pow(0.38e-4, 2), 0.5);  // x'2-
-    std::ranges::fill(SystErr, 0.);
+    std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_Run1")) {
     obsErrSource = "https://inspirehep.net/literature/1499047";
     StatErr[0] = 0.00081;  // RD+
@@ -413,7 +413,7 @@ void PDF_WS::setUncertainties(const TString c) {
     StatErr[3] = 0.00081;  // RD-
     StatErr[4] = 1.21e-3;  // y'-
     StatErr[5] = 6.1e-5;   // x'2-
-    std::ranges::fill(SystErr, 0.);
+    std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_Prompt_2011_2016")) {
     obsErrSource = "https://inspirehep.net/literature/1642234";
     StatErr[0] = 0.000045;  // RD+
@@ -422,7 +422,7 @@ void PDF_WS::setUncertainties(const TString c) {
     StatErr[3] = 0.000045;  // RD-
     StatErr[4] = 7.4e-4;    // y'-
     StatErr[5] = 3.9e-5;    // x'2-
-    std::ranges::fill(SystErr, 0.);
+    std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_Prompt_Run12_sec9")) {
     obsErrSource = "https://indico.cern.ch/event/1355805/";
     StatErr[0] = 0.000019;  // RD
@@ -431,7 +431,7 @@ void PDF_WS::setUncertainties(const TString c) {
     StatErr[3] = 0.57e-2;   // AD
     StatErr[4] = 3.4e-4;    // dc
     StatErr[5] = 3.6e-6;    // dc'
-    std::ranges::fill(SystErr, 0.);
+    std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_Prompt_Run12_appB")) {
     obsErrSource = "https://indico.cern.ch/event/1355805/";
     StatErr[0] = 0.000019;  // RD
@@ -443,7 +443,7 @@ void PDF_WS::setUncertainties(const TString c) {
     StatErr[6] = 0.59e-2;   // ADt
     StatErr[7] = 3.6e-4;    // dc~
     StatErr[8] = 3.8e-6;    // dc'~
-    std::ranges::fill(SystErr, 0.);
+    std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_DT_Run2")) {
     obsErrSource = "https://indico.cern.ch/event/1423686/contributions/6139348/, LHCb-PAPER-2024-044";
     StatErr[0] = 0.00008;   // RD+
@@ -452,7 +452,7 @@ void PDF_WS::setUncertainties(const TString c) {
     StatErr[3] = 0.00008;   // RD-
     StatErr[4] = 2.36e-3;   // y'-
     StatErr[5] = 1.859e-4;  // x'2-
-    std::ranges::fill(SystErr, 0.);
+    std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_DT_Run12")) {
     obsErrSource = "https://indico.cern.ch/event/1423686/contributions/6139348/, LHCb-PAPER-2024-044";
     StatErr[0] = 0.00007;   // RD+
@@ -461,7 +461,7 @@ void PDF_WS::setUncertainties(const TString c) {
     StatErr[3] = 0.00007;   // RD-
     StatErr[4] = 2.11e-3;   // y'-
     StatErr[5] = 1.665e-4;  // x'2-
-    std::ranges::fill(SystErr, 0.);
+    std::ranges::fill(SystErr, 0.0);
   } else {
     throw std::runtime_error(std::format("PDF_WS::setUncertainties ERROR config {} not found", c.Data()));
   }

@@ -124,19 +124,19 @@ void PDF_WS_NoCPV::setUncertainties(const TString c) {
     StatErr[0] = 0.00035;  // RD
     StatErr[1] = 4.3e-3;   // y'
     StatErr[2] = 1.8e-4;   // x'2
-    std::ranges::fill(SystErr, 0.);
+    std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("BaBar")) {
     obsErrSource = "https://inspirehep.net/literature/746245";
     StatErr[0] = pow(pow(0.00016, 2) + pow(0.00010, 2), 0.5);  // RD
     StatErr[1] = pow(pow(4.4e-3, 2) + pow(3.1e-3, 2), 0.5);    // y'+
     StatErr[2] = pow(pow(3.0e-4, 2) + pow(2.1e-4, 2), 0.5);    // x'2+
-    std::ranges::fill(SystErr, 0.);
+    std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("Belle")) {
     obsErrSource = "https://inspirehep.net/literature/1277238";
     StatErr[0] = 0.00013;  // RD
     StatErr[1] = 3.4e-3;   // y'
     StatErr[2] = 2.2e-4;   // x'2
-    std::ranges::fill(SystErr, 0.);
+    std::ranges::fill(SystErr, 0.0);
   } else {
     throw std::runtime_error(std::format("PDF_WS_NoCPV::setUncertainties ERROR config {} not found", c.Data()));
   }

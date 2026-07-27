@@ -15,6 +15,7 @@
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
+#include <algorithm>
 #include <format>
 #include <iostream>
 #include <stdexcept>
@@ -73,7 +74,7 @@ void PDF_scan_DY_RS::setObservables() { setObservable("DY_RS_scan_obs", 0.); }
 
 void PDF_scan_DY_RS::setUncertainties() {
   StatErr[0] = 5e-7;
-  SystErr[0] = 0.;
+  std::ranges::fill(SystErr, 0.0);
 }
 
 void PDF_scan_DY_RS::setCorrelations() {

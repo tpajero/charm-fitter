@@ -120,17 +120,17 @@ void PDF_XY::setUncertainties(const TString c) {
     obsErrSource = "https://inspirehep.net/literature/853279";
     StatErr[0] = sqrt(pow(2.3e-3, 2) + pow(1.2e-3, 2) + pow(0.8e-3, 2));  // x
     StatErr[1] = sqrt(pow(2.0e-3, 2) + pow(1.3e-3, 2) + pow(0.7e-3, 2));  // y
-    std::ranges::fill(SystErr, 0.);
+    std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("BaBar_pipipi0")) {
     obsErrSource = "https://inspirehep.net/literature/1441203";
     StatErr[0] = sqrt(pow(12e-3, 2) + pow(6e-3, 2));  // x
     StatErr[1] = sqrt(pow(9e-3, 2) + pow(5e-3, 2));   // y
-    std::ranges::fill(SystErr, 0.);
+    std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_KSpipi")) {
     obsErrSource = "https://inspirehep.net/literature/1396327";
     StatErr[0] = sqrt(pow(5.3e-3, 2) + pow(1.7e-3, 2));  // x
     StatErr[1] = sqrt(pow(4.6e-3, 2) + pow(1.3e-3, 2));  // y
-    std::ranges::fill(SystErr, 0.);
+    std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("Belle_Belle2")) {
     obsErrSource = "https://arxiv.org/abs/2410.22961";
     StatErr[0] = 1.7e-3;  // x

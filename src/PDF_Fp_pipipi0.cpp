@@ -17,6 +17,8 @@
 
 #include <TString.h>
 
+#include <algorithm>
+
 PDF_Fp_pipipi0::PDF_Fp_pipipi0(const TString measurement_id) : PDF_Abs{1} {
   name = "Fp-pipipi0" + measurement_id;
   initParameters();
@@ -61,7 +63,7 @@ void PDF_Fp_pipipi0::setUncertainties(const TString c) {
   if (c.EqualTo("Cleo-c")) {
     obsErrSource = "https://inspirehep.net/literature/2139827";
     StatErr[0] = 0.017;
-    SystErr[0] = 0.;
+    std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("BESIII")) {
     obsErrSource = "https://inspirehep.net/literature/2827201";
     StatErr[0] = 0.0036;

@@ -98,7 +98,7 @@ void PDF_K3pi::setUncertainties(const TString c) {
     StatErr[0] = 0.12e-2;
     StatErr[1] = 1.8e-3;
     StatErr[2] = 1.8e-5;
-    std::ranges::fill(SystErr, 0);
+    std::ranges::fill(SystErr, 0.0);
   } else {
     throw std::runtime_error(std::format("PDF_K3pi::setUncertainties ERROR config {} not found", c.Data()));
   }

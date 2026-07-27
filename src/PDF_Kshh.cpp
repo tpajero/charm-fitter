@@ -17,6 +17,7 @@
 
 #include <TString.h>
 
+#include <algorithm>
 #include <format>
 #include <iostream>
 #include <stdexcept>
@@ -121,10 +122,7 @@ void PDF_Kshh::setUncertainties(const TString c) {
     StatErr[1] = sqrt(pow(0.15e-2, 2) + pow(0.068e-2, 2));         // y
     StatErr[2] = sqrt(pow(0.155, 2) + pow(0.071, 2));              // qop
     StatErr[3] = Utils::DegToRad(sqrt(pow(11, 2) + pow(4.6, 2)));  // phi
-    SystErr[0] = 0;                                                // x
-    SystErr[1] = 0;                                                // y
-    SystErr[2] = 0;                                                // qop
-    SystErr[3] = 0;                                                // phi
+    std::ranges::fill(SystErr, 0.0);
   } else {
     throw std::runtime_error(std::format("PDF_Kshh::setUncertainties ERROR config {} not found", c.Data()));
   }

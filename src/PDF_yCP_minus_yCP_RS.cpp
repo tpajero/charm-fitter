@@ -17,6 +17,7 @@
 
 #include <TString.h>
 
+#include <algorithm>
 #include <format>
 #include <iostream>
 #include <stdexcept>
@@ -113,7 +114,7 @@ void PDF_yCP_minus_yCP_RS::setUncertainties(const TString c) {
   if (c.EqualTo("WA2020")) {
     obsErrSource = "https://cds.cern.ch/record/2747731";
     StatErr[0] = 1.11e-3;
-    SystErr[0] = 0;
+    std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb2022")) {
     obsValSource = "https://inspirehep.net/literature/2035063";
     StatErr[0] = 0.26e-3;

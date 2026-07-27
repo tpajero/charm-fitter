@@ -150,7 +150,7 @@ void PDF_BinFlip::setUncertainties(const TString c) {
     StatErr[1] = pow(pow(1.198e-3, 2) + pow(0.85e-3, 2), 0.5);  // y
     StatErr[2] = pow(pow(0.182e-3, 2) + pow(0.01e-3, 2), 0.5);  // dx
     StatErr[3] = pow(pow(0.365e-3, 2) + pow(0.11e-3, 2), 0.5);  // dy
-    std::ranges::fill(SystErr, 0.);
+    std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_Run2_sl")) {
     obsErrSource = "https://inspirehep.net/literature/2135966";
     StatErr[0] = 1.48e-3;  // x
