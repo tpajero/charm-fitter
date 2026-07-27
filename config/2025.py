@@ -16,7 +16,7 @@ params = {
     "Delta_Kpi": Parameter("Delta_Kpi", r"$\Delta_{K\pi}$ [rad]", (-0.5, 0.2), "both"),
     "Delta_Kpipi0": Parameter("Delta_Kpipi0", r"$\Delta_{K\pi\pi^0}$ [rad]", (-2.0, 2.0), "both"),
     "Delta_K3pi": Parameter("Delta_K3pi", r"$\Delta_{K\pi\pi\pi}$ [rad]", (-0.5, 1.5), "both"),
-    "R_Kpi": Parameter("R_Kpi", r"$R_{K\pi}$ [\%]", (0.335, 0.355), "both"),
+    "r_Kpi": Parameter("r_Kpi", r"$r_{K\pi}$ [\%]", (5.79, 5.96), "both"),
     "r_K3pi": Parameter("r_K3pi", r"$r_{K\pi\pi\pi}$ [\%]", (4.0, 6.0), "both"),
     "r_K3pipi0": Parameter("r_Kpipi0", r"$r_{K\pi\pi^0}$ [\%]", (4.0, 6.0), "both"),
     "k_K3pi": Parameter("k_K3pi", r"$k_{K\pi\pi\pi}$", (0.0, 1.0), "both"),
@@ -31,7 +31,7 @@ plots_2d = [
     Plot2d(("phiM", "phiG"), "br", "bl"),
     Plot2d(("x", "y")),
     Plot2d(("qop", "phi")),
-    Plot2d(("Delta_Kpi", "R_Kpi")),
+    Plot2d(("Delta_Kpi", "r_Kpi")),
     Plot2d(("Acp_KK", "Acp_PP")),
     Plot2d(("Acp_KK", "phiM")),
 ]

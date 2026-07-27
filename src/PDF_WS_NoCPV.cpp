@@ -51,7 +51,7 @@ PDF_WS_NoCPV::PDF_WS_NoCPV(const TString measurement_id, const parametrisations:
 
 std::set<std::string> PDF_WS_NoCPV::getParameterNames() const {
   using parametrisations::mix;
-  std::set<std::string> names = {"R_Kpi"};
+  std::set<std::string> names = {"r_Kpi"};
   if (mix_param != mix::d0_to_kpi) names.insert("Delta_Kpi");
   switch (mix_param) {
   case mix::pheno:
@@ -72,7 +72,7 @@ std::set<std::string> PDF_WS_NoCPV::getParameterNames() const {
 
 void PDF_WS_NoCPV::initRelations() {
   theory = new RooArgList("theory");
-  theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "R_Kpi", parameters)));
+  theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "r_Kpi * r_Kpi", parameters)));
   theory->add(*(Utils::makeTheoryVar("yp_th", "yp_th", theory_expressions["y'"][mix_param], parameters)));
   theory->add(*(Utils::makeTheoryVar("xp2_th", "xp2_th", theory_expressions["x'2"][mix_param], parameters)));
 }

@@ -27,7 +27,7 @@ PDF_BES_Kpi_1d::PDF_BES_Kpi_1d(const parametrisations::mix mix_param) : PDF_Char
 }
 
 std::set<std::string> PDF_BES_Kpi_1d::getParameterNames() const {
-  std::set<std::string> names = {"Delta_Kpi", "R_Kpi"};
+  std::set<std::string> names = {"Delta_Kpi", "r_Kpi"};
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
@@ -46,7 +46,7 @@ std::set<std::string> PDF_BES_Kpi_1d::getParameterNames() const {
 void PDF_BES_Kpi_1d::initRelations() {
   theory = new RooArgList("theory");
   std::string a_kpi_formula =
-      std::format("(2 * sqrt(R_Kpi) * cos(Delta_Kpi) + {0}) / (1 + R_Kpi)", utils::y_expression(mix_param));
+      std::format("(2 * r_Kpi * cos(Delta_Kpi) + {0}) / (1 + r_Kpi * r_Kpi)", utils::y_expression(mix_param));
   theory->add(*(Utils::makeTheoryVar("A_kpi_th", "A_kpi_th", a_kpi_formula, parameters)));
 }
 

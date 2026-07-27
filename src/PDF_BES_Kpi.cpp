@@ -29,7 +29,7 @@ PDF_BES_Kpi::PDF_BES_Kpi(const parametrisations::mix mix_param) : PDF_Charm{4}, 
 }
 
 std::set<std::string> PDF_BES_Kpi::getParameterNames() const {
-  std::set<std::string> names = {"R_Kpi", "Delta_Kpi", "F_pipipi0"};
+  std::set<std::string> names = {"r_Kpi", "Delta_Kpi", "F_pipipi0"};
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
@@ -47,17 +47,17 @@ std::set<std::string> PDF_BES_Kpi::getParameterNames() const {
 
 void PDF_BES_Kpi::initRelations() {
   const std::string y = utils::y_expression(mix_param);
-  std::string a_kpi_formula = std::format("(2 * sqrt(R_Kpi) * cos(Delta_Kpi) + {0}) / (1 + R_Kpi)", y);
+  std::string a_kpi_formula = std::format("(2 * r_Kpi * cos(Delta_Kpi) + {0}) / (1 + r_Kpi * r_Kpi)", y);
   std::string a_kpi_pipipi0_formula =
-      std::format("F_pipipi0 * (2 * sqrt(R_Kpi) * cos(Delta_Kpi) + {0}) "
-                  " / (1 + R_Kpi + (1 - F_pipipi0) * (-2 * sqrt(R_Kpi) * cos(Delta_Kpi) + {0}))",
+      std::format("F_pipipi0 * (2 * r_Kpi * cos(Delta_Kpi) + {0}) "
+                  " / (1 + r_Kpi * r_Kpi + (1 - F_pipipi0) * (-2 * r_Kpi * cos(Delta_Kpi) + {0}))",
                   y);
   using Utils::makeTheoryVar;
   theory = new RooArgList("theory");
   theory->add(*(makeTheoryVar("A_kpi_th", "A_kpi_th", a_kpi_formula, parameters)));
   theory->add(*(makeTheoryVar("A_kpi_pipipi0_th", "A_kpi_pipipi0_th", a_kpi_pipipi0_formula, parameters)));
-  theory->add(*(makeTheoryVar("rcos_th", "rcos_th", "-sqrt(R_Kpi)*cos(Delta_Kpi)", parameters)));
-  theory->add(*(makeTheoryVar("rsin_th", "rsin_th", " sqrt(R_Kpi)*sin(Delta_Kpi)", parameters)));
+  theory->add(*(makeTheoryVar("rcos_th", "rcos_th", "-r_Kpi*cos(Delta_Kpi)", parameters)));
+  theory->add(*(makeTheoryVar("rsin_th", "rsin_th", " r_Kpi*sin(Delta_Kpi)", parameters)));
 }
 
 void PDF_BES_Kpi::initObservables() {

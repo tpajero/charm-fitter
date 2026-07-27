@@ -28,7 +28,7 @@ PDF_Cleo::PDF_Cleo(const TString measurement_id, const parametrisations::mix mix
 }
 
 std::set<std::string> PDF_Cleo::getParameterNames() const {
-  std::set<std::string> names = {"R_Kpi", "Delta_Kpi"};
+  std::set<std::string> names = {"r_Kpi", "Delta_Kpi"};
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
@@ -46,7 +46,7 @@ std::set<std::string> PDF_Cleo::getParameterNames() const {
 
 void PDF_Cleo::initRelations() {
   theory = new RooArgList("theory");
-  theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "R_Kpi", parameters)));
+  theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "r_Kpi * r_Kpi", parameters)));
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:

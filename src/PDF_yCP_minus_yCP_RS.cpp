@@ -28,7 +28,7 @@ PDF_yCP_minus_yCP_RS::PDF_yCP_minus_yCP_RS(const TString measurement_id, const p
 }
 
 std::set<std::string> PDF_yCP_minus_yCP_RS::getParameterNames() const {
-  std::set<std::string> names = {"R_Kpi", "Delta_Kpi"};
+  std::set<std::string> names = {"r_Kpi", "Delta_Kpi"};
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
@@ -53,7 +53,7 @@ void PDF_yCP_minus_yCP_RS::initRelations() {
                                        "0.5*( "
                                        "      y*(qop + 1/qop)*cos(phi)"
                                        "    - x*(qop - 1/qop)*sin(phi)"
-                                       " + sqrt(R_Kpi) * ("
+                                       " + r_Kpi * ("
                                        "      (y * cos(Delta_Kpi) - x * sin(Delta_Kpi)) * (qop + 1/qop) * cos(phi)"
                                        "    - (x * cos(Delta_Kpi) + y * sin(Delta_Kpi)) * (qop - 1/qop) * sin(phi)))",
                                        parameters)));
@@ -61,7 +61,7 @@ void PDF_yCP_minus_yCP_RS::initRelations() {
   case mix::theo:
     theory->add(*(Utils::makeTheoryVar("yCP_minus_yCP_RS_th", "yCP_minus_yCP_RS_th",
                                        " y12 * cos(phiG)"
-                                       " + sqrt(R_Kpi) * ("
+                                       " + r_Kpi * ("
                                        "       y12 * cos(Delta_Kpi) * cos(phiG)"
                                        "     - x12 * sin(Delta_Kpi) * cos(phiM))",
                                        parameters)));

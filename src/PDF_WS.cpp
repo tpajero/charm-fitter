@@ -70,7 +70,7 @@ namespace {
        {
            {mix::pheno, "0.125 * (x*x + y*y) * (qop*qop + 1 / (qop*qop))"},
            {mix::theo, "0.25 * (x12*x12 + y12*y12)"
-                       "+ 0.25 * R_Kpi * (y12*y12 - x12*x12)"},  // 2nd order corrections
+                       "+ 0.25 * r_Kpi * r_Kpi * (y12*y12 - x12*x12)"},  // 2nd order corrections
            {mix::d0_to_kpi, "(yp*yp + xp2) / 4"},
        }},
       {"dc",
@@ -148,7 +148,7 @@ PDF_WS::PDF_WS(const TString val, TString err, const parametrisations::mix mix_p
 
 std::set<std::string> PDF_WS::getParameterNames() const {
   using parametrisations::mix;
-  std::set<std::string> names = {"R_Kpi", "Acp_KP"};
+  std::set<std::string> names = {"r_Kpi", "Acp_KP"};
   if (mix_param != mix::d0_to_kpi) names.insert("Delta_Kpi");
   if (nObs == 9) names.insert("Acp_KK");
   switch (mix_param) {
@@ -189,7 +189,7 @@ void PDF_WS::initRelations() {
 void PDF_WS::initRelationsCCPrime() {
   using parametrisations::dy_fsc;
   theory = new RooArgList("theory");
-  theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "R_Kpi", parameters)));
+  theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "r_Kpi * r_Kpi", parameters)));
   theory->add(*(Utils::makeTheoryVar("c_th", "c_th", get_formula("c", mix_param), parameters)));
   theory->add(*(Utils::makeTheoryVar("c'_th", "c'_th", get_formula("c'", mix_param), parameters)));
   theory->add(*(Utils::makeTheoryVar("AD_th", "AD_th", "Acp_KP", parameters)));
@@ -199,11 +199,11 @@ void PDF_WS::initRelationsCCPrime() {
     theory->add(*(Utils::makeTheoryVar("ADt_th", "ADt_th", "Acp_KP - 2 * Acp_KK", parameters)));
     theory->add(*(Utils::makeTheoryVar(
         "dc~_th", "dc~_th",
-        std::format("{} - 2 * sqrt(R_Kpi) * ({}) - Acp_KK * ({})", get_formula("dc", mix_param),
+        std::format("{} - 2 * r_Kpi * ({}) - Acp_KK * ({})", get_formula("dc", mix_param),
                     utils::dy_hh_expression(mix_param, dy_fsc::none, "KK"), get_formula("c", mix_param)),
         parameters)));
     theory->add(*(Utils::makeTheoryVar("dc'~_th", "dc'~_th",
-                                       std::format("{} - 2 * sqrt(R_Kpi) * ({}) * ({}) - 2 * Acp_KK * ({})",
+                                       std::format("{} - 2 * r_Kpi * ({}) * ({}) - 2 * Acp_KK * ({})",
                                                    get_formula("dc'", mix_param), get_formula("c", mix_param),
                                                    utils::dy_hh_expression(mix_param, dy_fsc::none, "KK"),
                                                    get_formula("c'", mix_param)),
@@ -213,7 +213,7 @@ void PDF_WS::initRelationsCCPrime() {
 
 void PDF_WS::initRelationsRAXY() {
   theory = new RooArgList("theory");
-  theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "R_Kpi", parameters)));
+  theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "r_Kpi * r_Kpi", parameters)));
   theory->add(*(Utils::makeTheoryVar("y'+_th", "y'+_th", get_formula("y'+", mix_param), parameters)));
   theory->add(*(Utils::makeTheoryVar("x'2+_th", "x'2+_th", get_formula("x'2+", mix_param), parameters)));
   theory->add(*(Utils::makeTheoryVar("AD_th", "AD_th", "Acp_KP", parameters)));
@@ -223,10 +223,10 @@ void PDF_WS::initRelationsRAXY() {
 
 void PDF_WS::initRelationsRRXY() {
   theory = new RooArgList("theory");
-  theory->add(*(Utils::makeTheoryVar("RD_p_th", "RD_p_th", "R_Kpi * (1 + Acp_KP)", parameters)));
+  theory->add(*(Utils::makeTheoryVar("RD_p_th", "RD_p_th", "r_Kpi * r_Kpi * (1 + Acp_KP)", parameters)));
   theory->add(*(Utils::makeTheoryVar("y'+_th", "y'+_th", get_formula("y'+", mix_param), parameters)));
   theory->add(*(Utils::makeTheoryVar("x'2+_th", "x'2+_th", get_formula("x'2+", mix_param), parameters)));
-  theory->add(*(Utils::makeTheoryVar("RD_m_th", "RD_m_th", "R_Kpi * (1 - Acp_KP)", parameters)));
+  theory->add(*(Utils::makeTheoryVar("RD_m_th", "RD_m_th", "r_Kpi * r_Kpi * (1 - Acp_KP)", parameters)));
   theory->add(*(Utils::makeTheoryVar("y'-_th", "y'-_th", get_formula("y'-", mix_param), parameters)));
   theory->add(*(Utils::makeTheoryVar("x'2-_th", "x'2-_th", get_formula("x'2-", mix_param), parameters)));
 }

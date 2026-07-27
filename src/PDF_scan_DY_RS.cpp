@@ -25,7 +25,7 @@ PDF_scan_DY_RS::PDF_scan_DY_RS(const parametrisations::mix mix_param) : PDF_Char
 }
 
 std::set<std::string> PDF_scan_DY_RS::getParameterNames() const {
-  std::set<std::string> names = {"R_Kpi", "Acp_KP", "Delta_Kpi", "DY_RS"};
+  std::set<std::string> names = {"r_Kpi", "Acp_KP", "Delta_Kpi", "DY_RS"};
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
