@@ -54,10 +54,9 @@ void PDF_Cleo::initRelations() {
     break;
   case mix::theo:
     theory->add(*(Utils::makeTheoryVar("x2_th", "x2_th",
-                                       "0.5 * ("
-                                       "      pow(x12,2) - pow(y12,2) "
-                                       "    + pow(  pow(pow(x12,2) + pow(y12,2),2) "
-                                       "          - pow(2 * x12 * y12 * sin(phiM - phiG),2), 0.5))",
+                                       "0.5 * (x12*x12 - y12*y12 + sqrt("
+                                       "      TMath::Sq(x12*x12 + y12*y12) "
+                                       "    - TMath::Sq(2 * x12 * y12 * sin(phiM - phiG))))",
                                        parameters)));
     break;
   default:

@@ -45,13 +45,13 @@ void PDF_RM::initRelations() {
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    theory->add(*(Utils::makeTheoryVar("RM_th", "RM_th", "(pow(x,2) + pow(y,2))/2", parameters)));
+    theory->add(*(Utils::makeTheoryVar("RM_th", "RM_th", "(x*x + y*y)/2", parameters)));
     break;
   case mix::theo:
     theory->add(*(Utils::makeTheoryVar("RM_th", "RM_th",
-                                       "0.5 * pow( "
-                                       "    + pow(pow(x12,2) + pow(y12,2),2)"
-                                       "    - pow(2 * x12 * y12 * sin(phiM - phiG),2), 0.5)",
+                                       "0.5 * sqrt( "
+                                       "    + TMath::Sq(x12*x12 + y12*y12)"
+                                       "    - TMath::Sq(2 * x12 * y12 * sin(phiM - phiG)))",
                                        parameters)));
     break;
   default:

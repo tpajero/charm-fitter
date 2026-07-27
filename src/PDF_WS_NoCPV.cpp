@@ -35,9 +35,9 @@ namespace {
        }},
       {"x'2",
        {
-           {mix::pheno, "pow(x*cos(Delta_Kpi) - y*sin(Delta_Kpi),2)"},
-           {mix::theo, "pow(- y12*sin(Delta_Kpi) * TMath::Sign(1.,cos(phiG))"
-                       "    + x12*cos(Delta_Kpi) * TMath::Sign(1.,cos(phiM)), 2)"},
+           {mix::pheno, "TMath::Sq(x*cos(Delta_Kpi) - y*sin(Delta_Kpi))"},
+           {mix::theo, "TMath::Sq(- y12*sin(Delta_Kpi) * TMath::Sign(1.,cos(phiG))"
+                       "    + x12*cos(Delta_Kpi) * TMath::Sign(1.,cos(phiM)))"},
            {mix::d0_to_kpi, "xp2"},
        }},
   };

@@ -45,18 +45,18 @@ namespace {
        }},
       {"x'2+",
        {
-           {mix::pheno, "pow(qop*(  x * cos(Delta_Kpi - phi)"
-                        "             - y * sin(Delta_Kpi - phi)),2)"},
-           {mix::theo, "pow(- y12 * sin(Delta_Kpi + phiG)"
-                       "    + x12 * cos(Delta_Kpi + phiM), 2)"},
+           {mix::pheno, "TMath::Sq(qop*(  x * cos(Delta_Kpi - phi)"
+                        "               - y * sin(Delta_Kpi - phi)))"},
+           {mix::theo, "TMath::Sq(- y12 * sin(Delta_Kpi + phiG)"
+                       "          + x12 * cos(Delta_Kpi + phiM))"},
            {mix::d0_to_kpi, "xp2 + dxp2"},
        }},
       {"x'2-",
        {
-           {mix::pheno, "pow(1/qop*(  x * cos(Delta_Kpi + phi)"
-                        "               - y * sin(Delta_Kpi + phi)),2)"},
-           {mix::theo, "pow(- y12 * sin(Delta_Kpi-phiG)"
-                       "    + x12 * cos(Delta_Kpi-phiM),2)"},
+           {mix::pheno, "TMath::Sq(1/qop*(  x * cos(Delta_Kpi + phi)"
+                        "                 - y * sin(Delta_Kpi + phi)))"},
+           {mix::theo, "TMath::Sq(- y12 * sin(Delta_Kpi-phiG)"
+                       "          + x12 * cos(Delta_Kpi-phiM))"},
            {mix::d0_to_kpi, "xp2 - dxp2"},
        }},
       {"c",
@@ -68,10 +68,10 @@ namespace {
        }},
       {"c'",
        {
-           {mix::pheno, "0.125 * (pow(x, 2) + pow(y, 2)) * (pow(qop, 2) + pow(qop, -2))"},
-           {mix::theo, "0.25 * (pow(x12, 2) + pow(y12, 2))"
-                       "+ 0.25 * R_Kpi * (pow(y12, 2) - pow(x12, 2))"},  // 2nd order corrections
-           {mix::d0_to_kpi, "(pow(yp, 2) + xp2) / 4"},
+           {mix::pheno, "0.125 * (x*x + y*y) * (qop*qop + 1 / (qop*qop))"},
+           {mix::theo, "0.25 * (x12*x12 + y12*y12)"
+                       "+ 0.25 * R_Kpi * (y12*y12 - x12*x12)"},  // 2nd order corrections
+           {mix::d0_to_kpi, "(yp*yp + xp2) / 4"},
        }},
       {"dc",
        {
@@ -83,9 +83,9 @@ namespace {
        }},
       {"dc'",
        {
-           {mix::pheno, "1 / 8 * (pow(x, 2) + pow(y, 2)) * (pow(qop, 2) - pow(qop, -2))"},
+           {mix::pheno, "1 / 8 * (x*x + y*y) * (qop*qop - 1 / (qop*qop))"},
            {mix::theo, "0.5 * x12 * y12 * sin(phiM - phiG)"},
-           {mix::d0_to_kpi, "(2 * yp * dyp + pow(dyp, 2) + dxp2) / 4"},
+           {mix::d0_to_kpi, "(2 * yp * dyp + dyp*dyp + dxp2) / 4"},
        }},
   };
 

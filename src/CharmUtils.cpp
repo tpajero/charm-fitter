@@ -47,10 +47,10 @@ std::string utils::x_expression(const parametrisations::mix mix_param) {
   case mix::pheno:
     return "x";
   case mix::theo:
-    return "pow(2,-0.5) * sqrt("
-           "    pow(x12,2) - pow(y12,2) + sqrt("
-           "       + pow(pow(x12,2) + pow(y12,2),2)"
-           "       - pow(2 * x12 * y12 * sin(phiM - phiG),2)"
+    return "1/sqrt(2) * sqrt("
+           "    x12*x12 - y12*y12 + sqrt("
+           "       + TMath::Sq(x12*x12 + y12*y12)"
+           "       - TMath::Sq(2 * x12 * y12 * sin(phiM - phiG))"
            "    )"
            ") * TMath::Sign(1., cos(phiM - phiG))";
   default:
@@ -65,10 +65,10 @@ std::string utils::y_expression(const parametrisations::mix mix_param) {
   case mix::pheno:
     return "y";
   case mix::theo:
-    return "pow(2,-0.5) * sqrt("
-           "    pow(y12,2) - pow(x12,2) + sqrt("
-           "       + pow(pow(x12,2) + pow(y12,2),2)"
-           "       - pow(2 * x12 * y12 * sin(phiM - phiG),2)"
+    return "1/sqrt(2) * sqrt("
+           "    y12*y12 - x12*x12 + sqrt("
+           "       + TMath::Sq(x12*x12 + y12*y12)"
+           "       - TMath::Sq(2 * x12 * y12 * sin(phiM - phiG))"
            "    )"
            ")";
   default:

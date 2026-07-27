@@ -54,14 +54,14 @@ void PDF_Kshh::initRelations() {
     break;
   case mix::theo:
     theory->add(*(Utils::makeTheoryVar("qop_th", "qop_th",
-                                       "pow(  (pow(x12,2) + pow(y12,2) + 2 * x12 * y12 * sin(phiM - phiG))"
-                                       "    /  pow(  pow(pow(x12,2) + pow(y12,2),2)                       "
-                                       "           - pow(2 * x12 * y12 * sin(phiM - phiG),2), 0.5), 0.5)  ",
+                                       "sqrt(  (x12*x12 + y12*y12 + 2 * x12 * y12 * sin(phiM - phiG))"
+                                       "     / sqrt(  TMath::Sq(x12*x12 + y12*y12)                       "
+                                       "            - TMath::Sq(2 * x12 * y12 * sin(phiM - phiG))))  ",
                                        parameters)));
     theory->add(*(Utils::makeTheoryVar("phi_th", "phi_th",
                                        "-0.5 * TMath::ATan("
-                                       "      (pow(x12,2) * sin(2*phiM) + pow(y12,2) * sin(2*phiG))"
-                                       "    / (pow(x12,2) * cos(2*phiM) + pow(y12,2) * cos(2*phiG)))",
+                                       "      (x12*x12 * sin(2*phiM) + y12*y12 * sin(2*phiG))"
+                                       "    / (x12*x12 * cos(2*phiM) + y12*y12 * cos(2*phiG)))",
                                        parameters)));
     break;
   default:
