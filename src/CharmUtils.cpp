@@ -17,6 +17,8 @@ namespace {
       return id ? "pheno" : "(x, y, q/p, phi)";
     case mix::theo:
       return id ? "theo" : "(x12, y12, phiM, phiG)";
+    case mix::d0_to_kpi:
+      return id ? "d0_to_kpi" : "(y', x'^2, dy', dx'2)";
     default:
       throw std::runtime_error(
           std::format("ERROR parametrisations::mix {} not supported by \"str_repr\"", static_cast<int>(par)));
@@ -45,10 +47,10 @@ std::string utils::x_expression(const parametrisations::mix mix_param) {
   case mix::pheno:
     return "x";
   case mix::theo:
-    return "pow(2,-0.5) * sqrt("
-           "    pow(x12,2) - pow(y12,2) + sqrt("
-           "       + pow(pow(x12,2) + pow(y12,2),2)"
-           "       - pow(2 * x12 * y12 * sin(phiM - phiG),2)"
+    return "1/sqrt(2) * sqrt("
+           "    x12*x12 - y12*y12 + sqrt("
+           "       + TMath::Sq(x12*x12 + y12*y12)"
+           "       - TMath::Sq(2 * x12 * y12 * sin(phiM - phiG))"
            "    )"
            ") * TMath::Sign(1., cos(phiM - phiG))";
   default:
@@ -63,10 +65,10 @@ std::string utils::y_expression(const parametrisations::mix mix_param) {
   case mix::pheno:
     return "y";
   case mix::theo:
-    return "pow(2,-0.5) * sqrt("
-           "    pow(y12,2) - pow(x12,2) + sqrt("
-           "       + pow(pow(x12,2) + pow(y12,2),2)"
-           "       - pow(2 * x12 * y12 * sin(phiM - phiG),2)"
+    return "1/sqrt(2) * sqrt("
+           "    y12*y12 - x12*x12 + sqrt("
+           "       + TMath::Sq(x12*x12 + y12*y12)"
+           "       - TMath::Sq(2 * x12 * y12 * sin(phiM - phiG))"
            "    )"
            ")";
   default:
@@ -133,12 +135,12 @@ std::string utils::dy_kp_expression(const parametrisations::mix mix_param) {
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    return "0.5 * sqrt(R_Kpi) * (  (y*cos(Delta_Kpi) - x*sin(Delta_Kpi))*(qop - 1/qop - Acp_KP)*cos(phi) "
-           "                     - (x*cos(Delta_Kpi) + y*sin(Delta_Kpi))*(qop + 1/qop         )*sin(phi))";
+    return "0.5 * r_Kpi * (  (y*cos(Delta_Kpi) - x*sin(Delta_Kpi))*(qop - 1/qop - Acp_KP)*cos(phi) "
+           "               - (x*cos(Delta_Kpi) + y*sin(Delta_Kpi))*(qop + 1/qop         )*sin(phi))";
     break;
   case mix::theo:
-    return "sqrt(R_Kpi) * (  (-y12*cos(Delta_Kpi)*cos(phiG) + x12*sin(Delta_Kpi)*cos(phiM))*Acp_KP*0.5 "
-           "               + ( y12*sin(Delta_Kpi)*sin(phiG) + x12*cos(Delta_Kpi)*sin(phiM))           )";
+    return "r_Kpi * (  (-y12*cos(Delta_Kpi)*cos(phiG) + x12*sin(Delta_Kpi)*cos(phiM))*Acp_KP*0.5 "
+           "         + ( y12*sin(Delta_Kpi)*sin(phiG) + x12*cos(Delta_Kpi)*sin(phiM))           )";
     break;
   default:
     throw std::runtime_error(

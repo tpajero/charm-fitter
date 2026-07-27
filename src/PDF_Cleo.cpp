@@ -7,7 +7,6 @@
 #include <PDF_Cleo.h>
 
 #include <CharmUtils.h>
-#include <ParametersCharmCombo.h>
 
 #include <Utils.h>
 
@@ -15,50 +14,39 @@
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
+#include <algorithm>
+#include <cmath>
 #include <format>
 #include <iostream>
 #include <stdexcept>
 #include <vector>
 
 PDF_Cleo::PDF_Cleo(const TString measurement_id, const parametrisations::mix mix_param)
-    : PDF_Abs{5}, mix_param{mix_param} {
+    : PDF_Charm{5}, mix_param{mix_param} {
   name = "CLEO";
-  initParameters();
-  initRelations();
-  initObservables(name);
-  setObservables(measurement_id);
-  setUncertainties(measurement_id);
-  setCorrelations(measurement_id);
-  build();
+  initialise(measurement_id, measurement_id, measurement_id);
 }
 
-void PDF_Cleo::initParameters() {
-  ParametersCharmCombo p;
-  parameters = new RooArgList("parameters");
-  parameters->add(*(p.get("R_Kpi")));
-  parameters->add(*(p.get("Delta_Kpi")));
-
+std::set<std::string> PDF_Cleo::getParameterNames() const {
+  std::set<std::string> names = {"r_Kpi", "Delta_Kpi"};
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    parameters->add(*(p.get("x")));
-    parameters->add(*(p.get("y")));
+    names.insert({"x", "y"});
     break;
   case mix::theo:
-    parameters->add(*(p.get("phiG")));
-    parameters->add(*(p.get("phiM")));
-    parameters->add(*(p.get("x12")));
-    parameters->add(*(p.get("y12")));
+    names.insert({"phiG", "phiM", "x12", "y12"});
     break;
   default:
     throw std::runtime_error(
-        std::format("PDF_Cleo::initParameters ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
+        std::format("PDF_Cleo::getParameterNames ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
+  return names;
 }
 
 void PDF_Cleo::initRelations() {
   theory = new RooArgList("theory");
-  theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "R_Kpi", parameters)));
+  theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "r_Kpi * r_Kpi", parameters)));
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
@@ -66,10 +54,9 @@ void PDF_Cleo::initRelations() {
     break;
   case mix::theo:
     theory->add(*(Utils::makeTheoryVar("x2_th", "x2_th",
-                                       "0.5 * ("
-                                       "      pow(x12,2) - pow(y12,2) "
-                                       "    + pow(  pow(pow(x12,2) + pow(y12,2),2) "
-                                       "          - pow(2 * x12 * y12 * sin(phiM - phiG),2), 0.5))",
+                                       "0.5 * (x12*x12 - y12*y12 + sqrt("
+                                       "      TMath::Sq(x12*x12 + y12*y12) "
+                                       "    - TMath::Sq(2 * x12 * y12 * sin(phiM - phiG))))",
                                        parameters)));
     break;
   default:
@@ -81,13 +68,13 @@ void PDF_Cleo::initRelations() {
   theory->add(*(Utils::makeTheoryVar("sin_th", "sin_th", "-sin(Delta_Kpi)", parameters)));
 }
 
-void PDF_Cleo::initObservables(const TString setName) {
+void PDF_Cleo::initObservables() {
   observables = new RooArgList("observables");  ///< the order of this list must match that of the COR matrix!
-  observables->add(*(new RooRealVar("RD_obs", setName + "   #it{R_{K#pi}}", 0., 0., 1e4)));
-  observables->add(*(new RooRealVar("x2_obs", setName + "   #it{x}^{2}", 0., -1e4, 1e4)));
-  observables->add(*(new RooRealVar("y_obs", setName + "   #it{y}", 0., -1e4, 1e4)));
-  observables->add(*(new RooRealVar("cos_obs", setName + "   cos#Delta_{#it{K#pi}}", 0., -1., 1.)));
-  observables->add(*(new RooRealVar("sin_obs", setName + "   #minussin#Delta_{#it{K#pi}}", 0., -1., 1.)));
+  observables->add(*(new RooRealVar("RD_obs", name + "   #it{R_{K#pi}}", 0., 0., 1e4)));
+  observables->add(*(new RooRealVar("x2_obs", name + "   #it{x}^{2}", 0., -1e4, 1e4)));
+  observables->add(*(new RooRealVar("y_obs", name + "   #it{y}", 0., -1e4, 1e4)));
+  observables->add(*(new RooRealVar("cos_obs", name + "   cos#Delta_{#it{K#pi}}", 0., -1., 1.)));
+  observables->add(*(new RooRealVar("sin_obs", name + "   #minussin#Delta_{#it{K#pi}}", 0., -1., 1.)));
 }
 
 void PDF_Cleo::setObservables(const TString c) {
@@ -110,16 +97,12 @@ void PDF_Cleo::setObservables(const TString c) {
 void PDF_Cleo::setUncertainties(const TString c) {
   if (c.EqualTo("Cleo-c")) {
     obsErrSource = "https://inspirehep.net/literature/1189182";
-    StatErr[0] = sqrt(pow(1.07e-3, 2) + pow(0.45e-3, 2));  // RD
-    StatErr[1] = sqrt(pow(2.3e-3, 2) + pow(1.1e-3, 2));    // x2
-    StatErr[2] = sqrt(pow(2e-2, 2) + pow(1e-2, 2));        // y
-    StatErr[3] = sqrt(pow(0.20, 2) + pow(0.06, 2));        // cos
-    StatErr[4] = sqrt(pow(0.41, 2) + pow(0.04, 2));        // sin
-    SystErr[0] = 0;
-    SystErr[1] = 0;
-    SystErr[2] = 0;
-    SystErr[3] = 0;
-    SystErr[4] = 0;
+    StatErr[0] = std::hypot(1.07e-3, 0.45e-3);  // RD
+    StatErr[1] = std::hypot(2.3e-3, 1.1e-3);    // x2
+    StatErr[2] = std::hypot(2e-2, 1e-2);        // y
+    StatErr[3] = std::hypot(0.20, 0.06);        // cos
+    StatErr[4] = std::hypot(0.41, 0.04);        // sin
+    std::ranges::fill(SystErr, 0.0);
   } else {
     throw std::runtime_error(std::format("PDF_Cleo::setUncertainties ERROR config {} not found", c.Data()));
   }

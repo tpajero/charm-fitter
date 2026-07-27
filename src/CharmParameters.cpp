@@ -4,13 +4,13 @@
  * Date: October 2021
  **/
 
-#include <ParametersCharmCombo.h>
+#include <CharmParameters.h>
 
 #include <Utils.h>
 
 using Utils::DegToRad;
 
-ParametersCharmCombo::ParametersCharmCombo() { defineParameters(); }
+CharmParameters::CharmParameters() { defineParameters(); }
 
 /**
  * Define all (nuisance) parameters.
@@ -18,7 +18,7 @@ ParametersCharmCombo::ParametersCharmCombo() { defineParameters(); }
  * scan:  defines scan range (for Prob and Plugin methods)
  * phys:  physically allowed range (needs to be set!)
  */
-void ParametersCharmCombo::defineParameters() {
+void CharmParameters::defineParameters() {
   Parameter* p = nullptr;
 
   // CP asymmetry in the decay (``direct'' CP asymmetry) of D0 -> K+ K-
@@ -45,13 +45,13 @@ void ParametersCharmCombo::defineParameters() {
   p->scan = range(-2.5e-2, 2e-2);
   p->phys = range(-1., 1.);
 
-  // Ratio of the squared magnitudes of the decay amplitudes of D0 -> K+ pi- to D0 -> K- pi+
-  p = newParameter("R_Kpi");
-  p->title = "#it{R_{K#pi}}";
-  p->startvalue = 3.43e-3;
+  // Ratio of the magnitudes of the decay amplitudes of D0 -> K+ pi- to D0 -> K- pi+
+  p = newParameter("r_Kpi");
+  p->title = "#it{r_{K#pi}}";
+  p->startvalue = 5.857e-2;
   p->unit = "";
-  p->scan = range(3.3e-3, 3.6e-3);
-  p->phys = range(0., 1e2);
+  p->scan = range(5.74e-2, 6e-2);
+  p->phys = range(0., 10.);
 
   // Ratio of the magnitudes of the decay amplitudes of D0 -> K+ pi- pi- pi+ to D0 -> K- pi- pi+ pi+
   p = newParameter("r_K3pi");

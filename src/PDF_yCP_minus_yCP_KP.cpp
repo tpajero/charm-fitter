@@ -7,7 +7,6 @@
 #include <PDF_yCP_minus_yCP_KP.h>
 
 #include <CharmUtils.h>
-#include <ParametersCharmCombo.h>
 
 #include <Utils.h>
 
@@ -17,45 +16,32 @@
 
 #include <TString.h>
 
+#include <algorithm>
 #include <format>
 #include <iostream>
 #include <stdexcept>
 
 PDF_yCP_minus_yCP_KP::PDF_yCP_minus_yCP_KP(const TString measurement_id, const parametrisations::mix mix_param)
-    : PDF_Abs{1}, mix_param{mix_param} {
+    : PDF_Charm{1}, mix_param{mix_param}, measurement_id{measurement_id} {
   name = "yCP_minus_yCP_KP_" + measurement_id;
-  initParameters();
-  initRelations();
-  initObservables(measurement_id);
-  setObservables(measurement_id);
-  setUncertainties(measurement_id);
-  setCorrelations(measurement_id);
-  build();
+  initialise(measurement_id, measurement_id, measurement_id);
 }
 
-void PDF_yCP_minus_yCP_KP::initParameters() {
-  ParametersCharmCombo p;
-  parameters = new RooArgList("parameters");
-
-  parameters->add(*(p.get("R_Kpi")));
-  parameters->add(*(p.get("Delta_Kpi")));
+std::set<std::string> PDF_yCP_minus_yCP_KP::getParameterNames() const {
+  std::set<std::string> names = {"r_Kpi", "Delta_Kpi"};
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    parameters->add(*(p.get("x")));
-    parameters->add(*(p.get("y")));
-    parameters->add(*(p.get("qop")));
-    parameters->add(*(p.get("phi")));
+    names.insert({"x", "y", "qop", "phi"});
     break;
   case mix::theo:
-    parameters->add(*(p.get("phiG")));
-    parameters->add(*(p.get("x12")));
-    parameters->add(*(p.get("y12")));
+    names.insert({"phiG", "x12", "y12"});
     break;
   default:
-    throw std::runtime_error(std::format("PDF_yCP_minus_yCP_KP::initParameters ERROR Parametrisation {} not supported",
-                                         utils::to_string(mix_param)));
+    throw std::runtime_error(std::format(
+        "PDF_yCP_minus_yCP_KP::getParameterNames ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
+  return names;
 }
 
 void PDF_yCP_minus_yCP_KP::initRelations() {
@@ -67,7 +53,7 @@ void PDF_yCP_minus_yCP_KP::initRelations() {
                                        " 0.5*( "
                                        "       y*(qop + 1/qop)*cos(phi)"
                                        "     - x*(qop - 1/qop)*sin(phi))"
-                                       " + sqrt(R_Kpi) * cos(Delta_Kpi) * ("
+                                       " + r_Kpi * cos(Delta_Kpi) * ("
                                        "      y * (qop + 1/qop) * cos(phi)"
                                        "    - x * (qop - 1/qop) * sin(phi))",
                                        parameters)));
@@ -75,7 +61,7 @@ void PDF_yCP_minus_yCP_KP::initRelations() {
   case mix::theo:
     theory->add(*(Utils::makeTheoryVar("yCP_minus_yCP_KP_th", "yCP_minus_yCP_KP_th",
                                        "y12*cos(phiG)"
-                                       "+ 2 * sqrt(R_Kpi) * y12 * cos(Delta_Kpi) * cos(phiG)",
+                                       "+ 2 * r_Kpi * y12 * cos(Delta_Kpi) * cos(phiG)",
                                        parameters)));
     break;
   default:
@@ -84,10 +70,10 @@ void PDF_yCP_minus_yCP_KP::initRelations() {
   }
 }
 
-void PDF_yCP_minus_yCP_KP::initObservables(const TString setName) {
+void PDF_yCP_minus_yCP_KP::initObservables() {
   observables = new RooArgList("observables");
-  observables->add(
-      *(new RooRealVar("yCP_minus_yCP_KP_obs", setName + "   #it{y_{CP}}#minus#it{y_{CP}^{K#pi}}", 0, -1e4, 1e4)));
+  observables->add(*(
+      new RooRealVar("yCP_minus_yCP_KP_obs", measurement_id + "   #it{y_{CP}}#minus#it{y_{CP}^{K#pi}}", 0, -1e4, 1e4)));
 }
 
 void PDF_yCP_minus_yCP_KP::setObservables(const TString c) {
@@ -107,7 +93,7 @@ void PDF_yCP_minus_yCP_KP::setUncertainties(const TString c) {
   if (c.EqualTo("WA2020")) {
     obsErrSource = "https://cds.cern.ch/record/2747731";
     StatErr[0] = 3.068e-2;
-    SystErr[0] = 0.;
+    std::ranges::fill(SystErr, 0.0);
   } else {
     throw std::runtime_error(std::format("PDF_yCP_minus_yCP_KP::setUncertainties ERROR config {} not found", c.Data()));
   }

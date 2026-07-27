@@ -7,7 +7,6 @@
 #include <PDF_BES_Kpi.h>
 
 #include <CharmUtils.h>
-#include <ParametersCharmCombo.h>
 
 #include <Utils.h>
 
@@ -24,53 +23,41 @@
 #include <string>
 #include <vector>
 
-PDF_BES_Kpi::PDF_BES_Kpi(const parametrisations::mix mix_param) : PDF_Abs{4}, mix_param{mix_param} {
+PDF_BES_Kpi::PDF_BES_Kpi(const parametrisations::mix mix_param) : PDF_Charm{4}, mix_param{mix_param} {
   name = "charm-bes-kpi";
-  initParameters();
-  initRelations();
-  initObservables();
-  setObservables("3fb");
-  setUncertainties("3fb");
-  setCorrelations("3fb");
-  build();
+  initialise("3fb", "3fb", "3fb");
 }
 
-void PDF_BES_Kpi::initParameters() {
-  ParametersCharmCombo p;
-  parameters = new RooArgList("parameters");
-  parameters->add(*(p.get("R_Kpi")));
-  parameters->add(*(p.get("Delta_Kpi")));
-  parameters->add(*(p.get("F_pipipi0")));
+std::set<std::string> PDF_BES_Kpi::getParameterNames() const {
+  std::set<std::string> names = {"r_Kpi", "Delta_Kpi", "F_pipipi0"};
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    parameters->add(*(p.get("y")));
+    names.insert("y");
     break;
   case mix::theo:
-    parameters->add(*(p.get("phiG")));
-    parameters->add(*(p.get("x12")));
-    parameters->add(*(p.get("y12")));
-    parameters->add(*(p.get("phiM")));
+    names.insert({"phiG", "x12", "y12", "phiM"});
     break;
   default:
-    throw std::runtime_error(
-        std::format("PDF_BES_Kpi::initParameters ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
+    throw std::runtime_error(std::format("PDF_BES_Kpi::getParameterNames ERROR Parametrisation {} not supported",
+                                         utils::to_string(mix_param)));
   }
+  return names;
 }
 
 void PDF_BES_Kpi::initRelations() {
   const std::string y = utils::y_expression(mix_param);
-  std::string a_kpi_formula = std::format("(2 * sqrt(R_Kpi) * cos(Delta_Kpi) + {0}) / (1 + R_Kpi)", y);
+  std::string a_kpi_formula = std::format("(2 * r_Kpi * cos(Delta_Kpi) + {0}) / (1 + r_Kpi * r_Kpi)", y);
   std::string a_kpi_pipipi0_formula =
-      std::format("F_pipipi0 * (2 * sqrt(R_Kpi) * cos(Delta_Kpi) + {0}) "
-                  " / (1 + R_Kpi + (1 - F_pipipi0) * (-2 * sqrt(R_Kpi) * cos(Delta_Kpi) + {0}))",
+      std::format("F_pipipi0 * (2 * r_Kpi * cos(Delta_Kpi) + {0}) "
+                  " / (1 + r_Kpi * r_Kpi + (1 - F_pipipi0) * (-2 * r_Kpi * cos(Delta_Kpi) + {0}))",
                   y);
   using Utils::makeTheoryVar;
   theory = new RooArgList("theory");
   theory->add(*(makeTheoryVar("A_kpi_th", "A_kpi_th", a_kpi_formula, parameters)));
   theory->add(*(makeTheoryVar("A_kpi_pipipi0_th", "A_kpi_pipipi0_th", a_kpi_pipipi0_formula, parameters)));
-  theory->add(*(makeTheoryVar("rcos_th", "rcos_th", "-sqrt(R_Kpi)*cos(Delta_Kpi)", parameters)));
-  theory->add(*(makeTheoryVar("rsin_th", "rsin_th", " sqrt(R_Kpi)*sin(Delta_Kpi)", parameters)));
+  theory->add(*(makeTheoryVar("rcos_th", "rcos_th", "-r_Kpi*cos(Delta_Kpi)", parameters)));
+  theory->add(*(makeTheoryVar("rsin_th", "rsin_th", " r_Kpi*sin(Delta_Kpi)", parameters)));
 }
 
 void PDF_BES_Kpi::initObservables() {
@@ -101,9 +88,9 @@ void PDF_BES_Kpi::setUncertainties(const TString c) {
     StatErr[1] = 1.2e-2;
     SystErr[1] = 0.8e-2;
     // The stat. errs. for rcos and rsin include both the statistical and systematic components
-    StatErr[2] = std::sqrt(std::pow(0.81e-2, 2) + std::pow(0.50e-2, 2) + std::pow(0.10e-2, 2));
+    StatErr[2] = std::hypot(0.81e-2, 0.50e-2, 0.10e-2);
     SystErr[2] = 0.;
-    StatErr[3] = std::sqrt(std::pow(1.2e-2, 2) + std::pow(0.7e-2, 2) + std::pow(0.3e-2, 2));
+    StatErr[3] = std::hypot(1.2e-2, 0.7e-2, 0.3e-2);
     SystErr[3] = 0.;
   } else {
     throw std::runtime_error(std::format("PDF_BES_Kpi::setUncertainties ERROR err config {} not found", c.Data()));

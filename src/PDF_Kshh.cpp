@@ -7,7 +7,6 @@
 #include <PDF_Kshh.h>
 
 #include <CharmUtils.h>
-#include <ParametersCharmCombo.h>
 
 #include <Utils.h>
 
@@ -17,48 +16,29 @@
 
 #include <TString.h>
 
+#include <algorithm>
+#include <cmath>
 #include <format>
 #include <iostream>
 #include <stdexcept>
 #include <vector>
 
 PDF_Kshh::PDF_Kshh(const TString measurement_id, const parametrisations::mix mix_param)
-    : PDF_Abs{4}, mix_param{mix_param} {
+    : PDF_Charm{4}, mix_param{mix_param}, measurement_id{measurement_id} {
   name = "Kshh_" + measurement_id;
-  initParameters();
-  initRelations();
-
-  TString label = measurement_id;
-  if (measurement_id == "Belle") label = "Belle #it{K}_{S}^{0}#it{#pi^{+}#pi^{#minus}}";
-
-  initObservables(label);
-  setObservables(measurement_id);
-  setUncertainties(measurement_id);
-  setCorrelations(measurement_id);
-  build();
+  initialise(measurement_id, measurement_id, measurement_id);
 }
 
-void PDF_Kshh::initParameters() {
-  ParametersCharmCombo p;
-  parameters = new RooArgList("parameters");
-
+std::set<std::string> PDF_Kshh::getParameterNames() const {
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    parameters->add(*(p.get("x")));
-    parameters->add(*(p.get("y")));
-    parameters->add(*(p.get("qop")));
-    parameters->add(*(p.get("phi")));
-    break;
+    return {"x", "y", "qop", "phi"};
   case mix::theo:
-    parameters->add(*(p.get("phiG")));
-    parameters->add(*(p.get("x12")));
-    parameters->add(*(p.get("y12")));
-    parameters->add(*(p.get("phiM")));
-    break;
+    return {"phiG", "x12", "y12", "phiM"};
   default:
     throw std::runtime_error(
-        std::format("PDF_Kshh::initParameters ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
+        std::format("PDF_Kshh::getParameterNames ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
 }
 
@@ -74,14 +54,14 @@ void PDF_Kshh::initRelations() {
     break;
   case mix::theo:
     theory->add(*(Utils::makeTheoryVar("qop_th", "qop_th",
-                                       "pow(  (pow(x12,2) + pow(y12,2) + 2 * x12 * y12 * sin(phiM - phiG))"
-                                       "    /  pow(  pow(pow(x12,2) + pow(y12,2),2)                       "
-                                       "           - pow(2 * x12 * y12 * sin(phiM - phiG),2), 0.5), 0.5)  ",
+                                       "sqrt(  (x12*x12 + y12*y12 + 2 * x12 * y12 * sin(phiM - phiG))"
+                                       "     / sqrt(  TMath::Sq(x12*x12 + y12*y12)                       "
+                                       "            - TMath::Sq(2 * x12 * y12 * sin(phiM - phiG))))  ",
                                        parameters)));
     theory->add(*(Utils::makeTheoryVar("phi_th", "phi_th",
                                        "-0.5 * TMath::ATan("
-                                       "      (pow(x12,2) * sin(2*phiM) + pow(y12,2) * sin(2*phiG))"
-                                       "    / (pow(x12,2) * cos(2*phiM) + pow(y12,2) * cos(2*phiG)))",
+                                       "      (x12*x12 * sin(2*phiM) + y12*y12 * sin(2*phiG))"
+                                       "    / (x12*x12 * cos(2*phiM) + y12*y12 * cos(2*phiG)))",
                                        parameters)));
     break;
   default:
@@ -90,12 +70,15 @@ void PDF_Kshh::initRelations() {
   }
 }
 
-void PDF_Kshh::initObservables(const TString setName) {
+void PDF_Kshh::initObservables() {
+  TString label = measurement_id;
+  if (measurement_id == "Belle") label = "Belle #it{K}_{S}^{0}#it{#pi^{+}#pi^{#minus}}";
+
   observables = new RooArgList("observables");  ///< the order of this list must match that of the COR matrix!
-  observables->add(*(new RooRealVar("x_obs", setName + "   #it{x}", 0., -1e4, 1e4)));
-  observables->add(*(new RooRealVar("y_obs", setName + "   #it{y}", 0., -1e4, 1e4)));
-  observables->add(*(new RooRealVar("qop_obs", setName + "   |#it{q}/#it{p}|", 0., -1e4, 1e4)));
-  observables->add(*(new RooRealVar("phi_obs", setName + "   #it{#phi}_{2}", 0., -1e4, 1e4)));
+  observables->add(*(new RooRealVar("x_obs", label + "   #it{x}", 0., -1e4, 1e4)));
+  observables->add(*(new RooRealVar("y_obs", label + "   #it{y}", 0., -1e4, 1e4)));
+  observables->add(*(new RooRealVar("qop_obs", label + "   |#it{q}/#it{p}|", 0., -1e4, 1e4)));
+  observables->add(*(new RooRealVar("phi_obs", label + "   #it{#phi}_{2}", 0., -1e4, 1e4)));
 }
 
 void PDF_Kshh::setObservables(const TString c) {
@@ -117,14 +100,11 @@ void PDF_Kshh::setObservables(const TString c) {
 void PDF_Kshh::setUncertainties(const TString c) {
   if (c.EqualTo("Belle")) {
     obsErrSource = "https://inspirehep.net/literature/1289224";
-    StatErr[0] = sqrt(pow(0.19e-2, 2) + pow(0.093e-2, 2));         // x
-    StatErr[1] = sqrt(pow(0.15e-2, 2) + pow(0.068e-2, 2));         // y
-    StatErr[2] = sqrt(pow(0.155, 2) + pow(0.071, 2));              // qop
-    StatErr[3] = Utils::DegToRad(sqrt(pow(11, 2) + pow(4.6, 2)));  // phi
-    SystErr[0] = 0;                                                // x
-    SystErr[1] = 0;                                                // y
-    SystErr[2] = 0;                                                // qop
-    SystErr[3] = 0;                                                // phi
+    StatErr[0] = std::hypot(0.19e-2, 0.093e-2);         // x
+    StatErr[1] = std::hypot(0.15e-2, 0.068e-2);         // y
+    StatErr[2] = std::hypot(0.155, 0.071);              // qop
+    StatErr[3] = Utils::DegToRad(std::hypot(11, 4.6));  // phi
+    std::ranges::fill(SystErr, 0.0);
   } else {
     throw std::runtime_error(std::format("PDF_Kshh::setUncertainties ERROR config {} not found", c.Data()));
   }

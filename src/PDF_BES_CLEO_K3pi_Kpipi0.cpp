@@ -12,7 +12,6 @@
 #include <PDF_BES_CLEO_K3pi_Kpipi0.h>
 
 #include <CharmUtils.h>
-#include <ParametersCharmCombo.h>
 
 #include <Utils.h>
 
@@ -28,23 +27,13 @@
 
 using Utils::DegToRad;
 
-PDF_BES_CLEO_K3pi_Kpipi0::PDF_BES_CLEO_K3pi_Kpipi0(const TString measurement_id) : PDF_Abs{6} {
+PDF_BES_CLEO_K3pi_Kpipi0::PDF_BES_CLEO_K3pi_Kpipi0(const TString measurement_id) : PDF_Charm{6} {
   name = "K3pi_" + measurement_id;
-  TString label = "BES3 + CLEO";
-  initParameters();
-  initRelations();
-  initObservables(label);
-  setObservables(measurement_id);
-  setUncertainties(measurement_id);
-  setCorrelations(measurement_id);
-  build();
+  initialise(measurement_id, measurement_id, measurement_id);
 }
 
-void PDF_BES_CLEO_K3pi_Kpipi0::initParameters() {
-  std::vector<std::string> param_names = {"r_K3pi", "k_K3pi", "Delta_K3pi", "r_Kpipi0", "k_Kpipi0", "Delta_Kpipi0"};
-  ParametersCharmCombo p;
-  parameters = new RooArgList("parameters");
-  for (const auto& par : param_names) parameters->add(*(p.get(par)));
+std::set<std::string> PDF_BES_CLEO_K3pi_Kpipi0::getParameterNames() const {
+  return {"r_K3pi", "k_K3pi", "Delta_K3pi", "r_Kpipi0", "k_Kpipi0", "Delta_Kpipi0"};
 }
 
 void PDF_BES_CLEO_K3pi_Kpipi0::initRelations() {
@@ -58,7 +47,8 @@ void PDF_BES_CLEO_K3pi_Kpipi0::initRelations() {
   theory->add(*(makeTheoryVar("r_Kpipi0_th", "r_Kpipi0_th", "r_Kpipi0", parameters)));
 }
 
-void PDF_BES_CLEO_K3pi_Kpipi0::initObservables(const TString label) {
+void PDF_BES_CLEO_K3pi_Kpipi0::initObservables() {
+  const TString label = "BES3 + CLEO";
   observables = new RooArgList("observables");  ///< the order of this list must match that of the COR matrix!
   observables->add(*(new RooRealVar("k_K3pi_obs", label + "   #it{#kappa_{K3#pi}}", 1, -2, 2)));
   observables->add(
@@ -100,7 +90,7 @@ void PDF_BES_CLEO_K3pi_Kpipi0::setUncertainties(const TString c) {
     StatErr[4] = 0.08e-2;       // r_K3pi
     StatErr[5] = 0.11e-2;       // r_Kpipi0
 
-    std::ranges::fill(SystErr, 0.);
+    std::ranges::fill(SystErr, 0.0);
   } else {
     std::cout << "PDF_BES_CLEO_K3pi_Kpipi0::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
     exit(1);

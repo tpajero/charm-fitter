@@ -9,9 +9,12 @@
 
 #include "CharmUtils.h"
 
-#include <PDF_Abs.h>
+#include <PDF_Charm.h>
 
 #include <TString.h>
+
+#include <set>
+#include <string>
 
 class RooArgList;
 
@@ -19,14 +22,13 @@ namespace parametrisations {
   enum class kpi { raxy, rrxy, ccprime };
 }  // namespace parametrisations
 
-class PDF_WS : public PDF_Abs {
+class PDF_WS : public PDF_Charm {
  public:
   PDF_WS(TString measurement_id, parametrisations::mix mix_param,
          parametrisations::kpi p = parametrisations::kpi::rrxy);
   PDF_WS(TString val, TString err, parametrisations::mix mix_param);
   void buildPdf() override;
-  void initObservables(TString setName);
-  void initParameters() override;
+  void initObservables() override;
   void initRelations() override;
   void setCorrelations(TString measurement_id) override;
   void setObservables(TString measurement_id) override;
@@ -37,9 +39,11 @@ class PDF_WS : public PDF_Abs {
   void initRelationsRAXY();
   void initRelationsRRXY();
   void initRelationsXYM(RooArgList* theory);
+  std::set<std::string> getParameterNames() const override;
 
   const parametrisations::mix mix_param;
   const parametrisations::kpi ws_param = parametrisations::kpi::rrxy;
+  TString label;
 };
 
 #endif

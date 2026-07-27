@@ -9,22 +9,25 @@
 
 #include "CharmUtils.h"
 
-#include <PDF_Abs.h>
+#include <PDF_Charm.h>
 
 #include <TString.h>
 
-class PDF_scan_DY_RS : public PDF_Abs {
+#include <set>
+#include <string>
+
+class PDF_scan_DY_RS : public PDF_Charm {
  public:
   PDF_scan_DY_RS(parametrisations::mix mix_param);
   void buildPdf() override;
   void initObservables() override;
-  void initParameters() override;
   void initRelations() override;
-  void setCorrelations();
-  void setObservables();
-  void setUncertainties();
+  void setCorrelations(TString c) override;
+  void setObservables(TString c) override;
+  void setUncertainties(TString c) override;
 
  private:
+  std::set<std::string> getParameterNames() const override;
   const parametrisations::mix mix_param;
 };
 

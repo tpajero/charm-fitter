@@ -7,7 +7,6 @@
 #include <PDF_yCP_plus_yCP_RS.h>
 
 #include <CharmUtils.h>
-#include <ParametersCharmCombo.h>
 
 #include <Utils.h>
 
@@ -15,46 +14,32 @@
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
+#include <algorithm>
 #include <format>
 #include <iostream>
 #include <stdexcept>
 
 PDF_yCP_plus_yCP_RS::PDF_yCP_plus_yCP_RS(const TString measurement_id, const parametrisations::mix mix_param)
-    : PDF_Abs{1}, mix_param{mix_param} {
+    : PDF_Charm{1}, mix_param{mix_param}, measurement_id{measurement_id} {
   name = "yCP_plus_yCP_RS_" + measurement_id;
-  initParameters();
-  initRelations();
-  initObservables(measurement_id);
-  setObservables(measurement_id);
-  setUncertainties(measurement_id);
-  setCorrelations(measurement_id);
-  build();
+  initialise(measurement_id, measurement_id, measurement_id);
 }
 
-void PDF_yCP_plus_yCP_RS::initParameters() {
-  ParametersCharmCombo p;
-  parameters = new RooArgList("parameters");
-
-  parameters->add(*(p.get("R_Kpi")));
-  parameters->add(*(p.get("Delta_Kpi")));
+std::set<std::string> PDF_yCP_plus_yCP_RS::getParameterNames() const {
+  std::set<std::string> names = {"r_Kpi", "Delta_Kpi"};
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    parameters->add(*(p.get("x")));
-    parameters->add(*(p.get("y")));
-    parameters->add(*(p.get("qop")));
-    parameters->add(*(p.get("phi")));
+    names.insert({"x", "y", "qop", "phi"});
     break;
   case mix::theo:
-    parameters->add(*(p.get("phiG")));
-    parameters->add(*(p.get("phiM")));
-    parameters->add(*(p.get("x12")));
-    parameters->add(*(p.get("y12")));
+    names.insert({"phiG", "phiM", "x12", "y12"});
     break;
   default:
-    throw std::runtime_error(std::format("PDF_yCP_plus_yCP_RS::initParameters ERROR Parametrisation {} not supported",
-                                         utils::to_string(mix_param)));
+    throw std::runtime_error(std::format(
+        "PDF_yCP_plus_yCP_RS::getParameterNames ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
+  return names;
 }
 
 void PDF_yCP_plus_yCP_RS::initRelations() {
@@ -66,7 +51,7 @@ void PDF_yCP_plus_yCP_RS::initRelations() {
                                        "0.5*( "
                                        "      y*(qop + 1/qop)*cos(phi)"
                                        "    - x*(qop - 1/qop)*sin(phi)"
-                                       " + sqrt(R_Kpi) * ("
+                                       " + r_Kpi * ("
                                        "    - (y * cos(Delta_Kpi) - x * sin(Delta_Kpi)) * (qop + 1/qop) * cos(phi)"
                                        "    + (x * cos(Delta_Kpi) + y * sin(Delta_Kpi)) * (qop - 1/qop) * sin(phi)))",
                                        parameters)));
@@ -74,7 +59,7 @@ void PDF_yCP_plus_yCP_RS::initRelations() {
   case mix::theo:
     theory->add(*(Utils::makeTheoryVar("yCP_plus_yCP_RS_th", "yCP_plus_yCP_RS_th",
                                        " y12 * cos(phiG)"
-                                       " + sqrt(R_Kpi) * ("
+                                       " + r_Kpi * ("
                                        "     - y12 * cos(Delta_Kpi) * cos(phiG)"
                                        "     + x12 * sin(Delta_Kpi) * cos(phiM))",
                                        parameters)));
@@ -85,10 +70,10 @@ void PDF_yCP_plus_yCP_RS::initRelations() {
   }
 }
 
-void PDF_yCP_plus_yCP_RS::initObservables(const TString setName) {
+void PDF_yCP_plus_yCP_RS::initObservables() {
   observables = new RooArgList("observables");
-  observables->add(*(
-      new RooRealVar("yCP_plus_yCP_RS_obs", setName + "   #it{y_{CP}}+#it{y_{CP}^{K^{#minus}#pi^{+}}}", 0, -1e4, 1e4)));
+  observables->add(*(new RooRealVar("yCP_plus_yCP_RS_obs",
+                                    measurement_id + "   #it{y_{CP}}+#it{y_{CP}^{K^{#minus}#pi^{+}}}", 0, -1e4, 1e4)));
 }
 
 void PDF_yCP_plus_yCP_RS::setObservables(const TString c) {
@@ -108,7 +93,7 @@ void PDF_yCP_plus_yCP_RS::setUncertainties(const TString c) {
   if (c.EqualTo("WA2020")) {
     obsErrSource = "https://cds.cern.ch/record/2747731";
     StatErr[0] = 1.114e-2;
-    SystErr[0] = 0;
+    std::ranges::fill(SystErr, 0.0);
   } else {
     throw std::runtime_error(std::format("PDF_yCP_plus_yCP_RS::setUncertainties ERROR config {} not found", c.Data()));
   }

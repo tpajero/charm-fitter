@@ -7,7 +7,6 @@
 #include <PDF_XY.h>
 
 #include <CharmUtils.h>
-#include <ParametersCharmCombo.h>
 
 #include <Utils.h>
 
@@ -18,49 +17,27 @@
 #include <TString.h>
 
 #include <algorithm>
+#include <cmath>
 #include <format>
 #include <iostream>
 #include <stdexcept>
 
-PDF_XY::PDF_XY(const TString measurement_id, const parametrisations::mix mix_param) : PDF_Abs{2}, mix_param{mix_param} {
+PDF_XY::PDF_XY(const TString measurement_id, const parametrisations::mix mix_param)
+    : PDF_Charm{2}, mix_param{mix_param}, measurement_id{measurement_id} {
   name = "XY_" + measurement_id;
-
-  TString label = measurement_id;
-  if (measurement_id.EqualTo("BaBar_Kshh"))
-    label = "BaBar #it{K}_{S}^{0}#it{h}^{+}#it{h}^{#minus}";
-  else if (measurement_id.EqualTo("BaBar_pipipi0"))
-    label = "BaBar #it{#pi}^{+}#it{#pi}^{#minus}#it{#pi}^{0}";
-  else if (measurement_id.EqualTo("LHCb_KSpipi"))
-    label = "LHCb #it{K}^{0}_{s}#it{#pi}^{+}#pi^{#minus}";
-  else if (measurement_id.EqualTo("Belle_Belle2"))
-    label = "Belle 1+2 #it{K}^{0}_{s}#it{#pi}^{+}#pi^{#minus}";
-  initParameters();
-  initRelations();
-  initObservables(label);
-  setObservables(measurement_id);
-  setUncertainties(measurement_id);
-  setCorrelations(measurement_id);
-  build();
+  initialise(measurement_id, measurement_id, measurement_id);
 }
 
-void PDF_XY::initParameters() {
-  ParametersCharmCombo p;
-  parameters = new RooArgList("parameters");
+std::set<std::string> PDF_XY::getParameterNames() const {
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    parameters->add(*(p.get("x")));
-    parameters->add(*(p.get("y")));
-    break;
+    return {"x", "y"};
   case mix::theo:
-    parameters->add(*(p.get("x12")));
-    parameters->add(*(p.get("y12")));
-    parameters->add(*(p.get("phiM")));
-    parameters->add(*(p.get("phiG")));
-    break;
+    return {"x12", "y12", "phiM", "phiG"};
   default:
     throw std::runtime_error(
-        std::format("PDF_XY::initRelations ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
+        std::format("PDF_XY::getParameterNames ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
 }
 
@@ -83,10 +60,20 @@ void PDF_XY::initRelations() {
   }
 }
 
-void PDF_XY::initObservables(const TString setName) {
+void PDF_XY::initObservables() {
+  TString label = measurement_id;
+  if (measurement_id.EqualTo("BaBar_Kshh"))
+    label = "BaBar #it{K}_{S}^{0}#it{h}^{+}#it{h}^{#minus}";
+  else if (measurement_id.EqualTo("BaBar_pipipi0"))
+    label = "BaBar #it{#pi}^{+}#it{#pi}^{#minus}#it{#pi}^{0}";
+  else if (measurement_id.EqualTo("LHCb_KSpipi"))
+    label = "LHCb #it{K}^{0}_{s}#it{#pi}^{+}#pi^{#minus}";
+  else if (measurement_id.EqualTo("Belle_Belle2"))
+    label = "Belle 1+2 #it{K}^{0}_{s}#it{#pi}^{+}#pi^{#minus}";
+
   observables = new RooArgList("observables");  ///< the order of this list must match that of the COR matrix!
-  observables->add(*(new RooRealVar("x_obs", setName + "   #it{x}", 0, -1e4, 1e4)));
-  observables->add(*(new RooRealVar("y_obs", setName + "   #it{y}", 0, -1e4, 1e4)));
+  observables->add(*(new RooRealVar("x_obs", label + "   #it{x}", 0, -1e4, 1e4)));
+  observables->add(*(new RooRealVar("y_obs", label + "   #it{y}", 0, -1e4, 1e4)));
 }
 
 void PDF_XY::setObservables(const TString c) {
@@ -118,19 +105,19 @@ void PDF_XY::setObservables(const TString c) {
 void PDF_XY::setUncertainties(const TString c) {
   if (c.EqualTo("BaBar_Kshh")) {
     obsErrSource = "https://inspirehep.net/literature/853279";
-    StatErr[0] = sqrt(pow(2.3e-3, 2) + pow(1.2e-3, 2) + pow(0.8e-3, 2));  // x
-    StatErr[1] = sqrt(pow(2.0e-3, 2) + pow(1.3e-3, 2) + pow(0.7e-3, 2));  // y
-    std::ranges::fill(SystErr, 0.);
+    StatErr[0] = std::hypot(2.3e-3, 1.2e-3, 0.8e-3);  // x
+    StatErr[1] = std::hypot(2.0e-3, 1.3e-3, 0.7e-3);  // y
+    std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("BaBar_pipipi0")) {
     obsErrSource = "https://inspirehep.net/literature/1441203";
-    StatErr[0] = sqrt(pow(12e-3, 2) + pow(6e-3, 2));  // x
-    StatErr[1] = sqrt(pow(9e-3, 2) + pow(5e-3, 2));   // y
-    std::ranges::fill(SystErr, 0.);
+    StatErr[0] = std::hypot(12e-3, 6e-3);  // x
+    StatErr[1] = std::hypot(9e-3, 5e-3);   // y
+    std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_KSpipi")) {
     obsErrSource = "https://inspirehep.net/literature/1396327";
-    StatErr[0] = sqrt(pow(5.3e-3, 2) + pow(1.7e-3, 2));  // x
-    StatErr[1] = sqrt(pow(4.6e-3, 2) + pow(1.3e-3, 2));  // y
-    std::ranges::fill(SystErr, 0.);
+    StatErr[0] = std::hypot(5.3e-3, 1.7e-3);  // x
+    StatErr[1] = std::hypot(4.6e-3, 1.3e-3);  // y
+    std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("Belle_Belle2")) {
     obsErrSource = "https://arxiv.org/abs/2410.22961";
     StatErr[0] = 1.7e-3;  // x

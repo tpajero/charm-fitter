@@ -7,7 +7,6 @@
 #include <PDF_RM.h>
 
 #include <CharmUtils.h>
-#include <ParametersCharmCombo.h>
 
 #include <Utils.h>
 
@@ -17,40 +16,27 @@
 
 #include <TString.h>
 
+#include <algorithm>
 #include <format>
 #include <iostream>
 #include <stdexcept>
 
-PDF_RM::PDF_RM(const TString measurement_id, const parametrisations::mix mix_param) : PDF_Abs{1}, mix_param{mix_param} {
+PDF_RM::PDF_RM(const TString measurement_id, const parametrisations::mix mix_param)
+    : PDF_Charm{1}, mix_param{mix_param}, measurement_id{measurement_id} {
   name = "RM_" + measurement_id;
-  initParameters();
-  initRelations();
-  initObservables(measurement_id);
-  setObservables(measurement_id);
-  setUncertainties(measurement_id);
-  setCorrelations(measurement_id);
-  build();
+  initialise(measurement_id, measurement_id, measurement_id);
 }
 
-void PDF_RM::initParameters() {
-  ParametersCharmCombo p;
-  parameters = new RooArgList("parameters");
-
+std::set<std::string> PDF_RM::getParameterNames() const {
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    parameters->add(*(p.get("x")));
-    parameters->add(*(p.get("y")));
-    break;
+    return {"x", "y"};
   case mix::theo:
-    parameters->add(*(p.get("x12")));
-    parameters->add(*(p.get("y12")));
-    parameters->add(*(p.get("phiM")));
-    parameters->add(*(p.get("phiG")));
-    break;
+    return {"x12", "y12", "phiM", "phiG"};
   default:
     throw std::runtime_error(
-        std::format("PDF_RM::initParameters ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
+        std::format("PDF_RM::getParameterNames ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
 }
 
@@ -59,13 +45,13 @@ void PDF_RM::initRelations() {
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    theory->add(*(Utils::makeTheoryVar("RM_th", "RM_th", "(pow(x,2) + pow(y,2))/2", parameters)));
+    theory->add(*(Utils::makeTheoryVar("RM_th", "RM_th", "(x*x + y*y)/2", parameters)));
     break;
   case mix::theo:
     theory->add(*(Utils::makeTheoryVar("RM_th", "RM_th",
-                                       "0.5 * pow( "
-                                       "    + pow(pow(x12,2) + pow(y12,2),2)"
-                                       "    - pow(2 * x12 * y12 * sin(phiM - phiG),2), 0.5)",
+                                       "0.5 * sqrt( "
+                                       "    + TMath::Sq(x12*x12 + y12*y12)"
+                                       "    - TMath::Sq(2 * x12 * y12 * sin(phiM - phiG)))",
                                        parameters)));
     break;
   default:
@@ -74,9 +60,9 @@ void PDF_RM::initRelations() {
   }
 }
 
-void PDF_RM::initObservables(const TString setName) {
+void PDF_RM::initObservables() {
   observables = new RooArgList("observables");
-  observables->add(*(new RooRealVar("RM_obs", setName + "   #it{R_{M}}", 0, 0., 1e4)));
+  observables->add(*(new RooRealVar("RM_obs", measurement_id + "   #it{R_{M}}", 0, 0., 1e4)));
 }
 
 void PDF_RM::setObservables(const TString c) {
@@ -99,11 +85,11 @@ void PDF_RM::setUncertainties(const TString c) {
   if (c.EqualTo("HFLAV2016")) {
     obsErrSource = "https://hflav-eos.web.cern.ch/hflav-eos/charm/CHARM21/results_mixing.html";
     StatErr[0] = 2.69e-4;
-    SystErr[0] = 0;
+    std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_K3pi_Run1")) {
     obsErrSource = "https://inspirehep.net/literature/1423070";
     StatErr[0] = 2 * 0.18e-4;
-    SystErr[0] = 0;
+    std::ranges::fill(SystErr, 0.0);
   } else {
     throw std::runtime_error(std::format("PDF_RM::setUncertainties ERROR config {} not found", c.Data()));
   }

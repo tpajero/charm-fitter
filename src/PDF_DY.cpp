@@ -7,7 +7,6 @@
 #include <PDF_DY.h>
 
 #include <CharmUtils.h>
-#include <ParametersCharmCombo.h>
 
 #include <Utils.h>
 
@@ -15,59 +14,45 @@
 #include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
+#include <algorithm>
 #include <format>
 #include <iostream>
 #include <stdexcept>
 
 PDF_DY::PDF_DY(const TString measurement_id, const parametrisations::mix mix_param,
                const parametrisations::dy_fsc dy_fsc_param)
-    : PDF_Abs{dy_fsc_param == parametrisations::dy_fsc::none ? 1 : 2}, mix_param{mix_param},
-      dy_fsc_param{dy_fsc_param} {
+    : PDF_Charm{dy_fsc_param == parametrisations::dy_fsc::none ? 1 : 2}, mix_param{mix_param},
+      dy_fsc_param{dy_fsc_param}, measurement_id{measurement_id} {
   name = "DY_" + measurement_id;
-  initParameters();
-  initRelations();
-  initObservables(measurement_id);
-  setObservables(measurement_id);
-  setUncertainties(measurement_id);
-  setCorrelations(measurement_id);
-  build();
+  initialise(measurement_id, measurement_id, measurement_id);
 }
 
-void PDF_DY::initParameters() {
-  ParametersCharmCombo p;
-  parameters = new RooArgList("parameters");
+std::set<std::string> PDF_DY::getParameterNames() const {
+  std::set<std::string> names;
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    parameters->add(*(p.get("x")));
-    parameters->add(*(p.get("y")));
-    parameters->add(*(p.get("qop")));
-    parameters->add(*(p.get("phi")));
+    names.insert({"x", "y", "qop", "phi"});
     break;
   case mix::theo:
-    parameters->add(*(p.get("x12")));
-    parameters->add(*(p.get("y12")));
-    parameters->add(*(p.get("phiM")));
+    names.insert({"x12", "y12", "phiM"});
     break;
   default:
     throw std::runtime_error(
-        std::format("PDF_DY::initParameters ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
+        std::format("PDF_DY::getParameterNames ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
   using parametrisations::dy_fsc;
   switch (dy_fsc_param) {
   case dy_fsc::none:
     break;
   case dy_fsc::partial:
-    parameters->add(*(p.get("Acp_KK")));
-    parameters->add(*(p.get("Acp_PP")));
+    names.insert({"Acp_KK", "Acp_PP"});
     break;
   case dy_fsc::full:
-    parameters->add(*(p.get("Acp_KK")));
-    parameters->add(*(p.get("Acp_PP")));
-    parameters->add(*(p.get("cot_delta_KK")));
-    parameters->add(*(p.get("cot_delta_PP")));
+    names.insert({"Acp_KK", "Acp_PP", "cot_delta_KK", "cot_delta_PP"});
     break;
   }
+  return names;
 }
 
 void PDF_DY::initRelations() {
@@ -82,15 +67,15 @@ void PDF_DY::initRelations() {
   }
 }
 
-void PDF_DY::initObservables(const TString setName) {
+void PDF_DY::initObservables() {
   observables = new RooArgList("observables");
   if (nObs == 1) {
-    observables->add(*(new RooRealVar("DY_obs", setName + "   #Delta#it{Y}", 0, -1e4, 1e4)));
+    observables->add(*(new RooRealVar("DY_obs", measurement_id + "   #Delta#it{Y}", 0, -1e4, 1e4)));
   } else if (nObs == 2) {
     observables->add(
-        *(new RooRealVar("DY_KK_obs", setName + "   #Delta#it{Y}_{#it{K}^{+}#it{K}^{#minus}}", 0, -1e4, 1e4)));
-    observables->add(
-        *(new RooRealVar("DY_PP_obs", setName + "   #Delta#it{Y}_{#it{#pi}^{+}#it{#pi}^{#minus}}", 0, -1e4, 1e4)));
+        *(new RooRealVar("DY_KK_obs", measurement_id + "   #Delta#it{Y}_{#it{K}^{+}#it{K}^{#minus}}", 0, -1e4, 1e4)));
+    observables->add(*(
+        new RooRealVar("DY_PP_obs", measurement_id + "   #Delta#it{Y}_{#it{#pi}^{+}#it{#pi}^{#minus}}", 0, -1e4, 1e4)));
   }
 }
 
@@ -124,10 +109,10 @@ void PDF_DY::setUncertainties(const TString c) {
   obsErrSource = "https://github.com/tpajero/charm-fitter/tree/master/charmcombo/blue/DY.cpp";
   if (nObs == 1 && c.EqualTo("WA2019")) {
     StatErr[0] = 2.6e-4;
-    SystErr[0] = 0.;
+    std::ranges::fill(SystErr, 0.0);
   } else if (nObs == 1 && c.EqualTo("WA2020")) {
     StatErr[0] = 2.0e-4;
-    SystErr[0] = 0.;
+    std::ranges::fill(SystErr, 0.0);
   } else if (nObs == 1 && c.EqualTo("WA2021")) {
     StatErr[0] = 1.11e-4;
     SystErr[0] = 0.33e-4;
