@@ -1,6 +1,5 @@
 import argparse
 import importlib
-import logging
 import os
 import re
 import subprocess
@@ -8,7 +7,6 @@ from collections.abc import Callable
 from contextlib import contextmanager
 from dataclasses import KW_ONLY, dataclass, field
 from enum import Enum
-from math import floor, log, sqrt
 from multiprocessing import Pool
 from pathlib import Path
 from types import ModuleType
@@ -30,106 +28,6 @@ from matplotlib.ticker import MaxNLocator
 from scipy.stats import chi2
 
 repo_path = Path(__file__).resolve().parents[2]
-
-
-# BLUE combinations ----------------------------------------------------------------------------------------------------
-
-
-@dataclass(frozen=True)
-class Measurement:
-    """Class to define the objects storing the information relative to a single measurement for BLUE combinations."""
-
-    label: str
-    arxiv: str
-    val: float
-    stat: float
-    sys: float | None = None
-    sys2: float | None = None
-
-    def __post_init__(self):
-        if "BaBar" in self.label:
-            color = "g"
-        elif "Belle" in self.label:
-            color = "r"
-        elif "BES" in self.label:
-            color = "g"
-        elif "CDF" in self.label:
-            color = "m"
-        elif "CLEO" in self.label:
-            color = "m"
-        elif "CMS" in self.label:
-            color = "g"
-        elif "LHCb" in self.label:
-            color = "b"
-        elif any(s in self.label for s in ["average", "PDG"]):
-            color = "k"
-        else:
-            raise RuntimeError(f"The label {self.label} is not supported")
-
-        object.__setattr__(self, "color", color)
-
-    def result_str(self, units: float = 1.0) -> str:
-        def _ndigits_to_print(stat, sys=None, sys2=None):
-            """Given three uncertainties, return the number of digits after the comma to be printed according to PDG
-            conventions. Assumes that the input measurements have the right number of digits according to PDG
-            conventions (where the number of digits is set by the least precise measurement).
-            """
-
-            # Special case for publications not adhering to PDG conventions
-            if (
-                (
-                    self.label == "CLEO"
-                    and (self.arxiv == "hep-ex/9705006" or (self.arxiv == "0906.3198" and stat > 0.2))
-                )
-                or (self.label == "Belle" and self.arxiv == "2103.09969" and stat > 0.1)
-                or self.arxiv in ["1911.01114", "2105.01565", "2405.11606", "2411.00306", "La Thuile"]
-            ):
-                return 1
-
-            min_unc = stat
-            if sys:
-                min_unc = min(min_unc, sys)
-            if sys2:
-                min_unc = min(min_unc, sys2)
-            main_exp = floor(log(min_unc) / log(10))
-            if main_exp > 0:
-                logging.warning(f"There may be too many figures printed for the uncertainties ({stat}, {sys}, {sys2})")
-                return 0
-            min_unc = floor(min_unc * 10 ** (2 - main_exp))
-            if min_unc < 354:
-                ndig = 2
-            else:
-                ndig = 1
-            logging.debug(
-                f"The number of digits to be printed for ({stat}, {sys}, {sys2}) is {ndig} ({ndig - main_exp - 1} after the comma; main_exp = {main_exp})"
-            )
-            return ndig - main_exp - 1
-
-        val = self.val / units
-        stat = self.stat / units
-        sys = self.sys / units if self.sys else None
-        sys2 = self.sys2 / units if self.sys2 else None
-
-        ndig = _ndigits_to_print(stat, sys, sys2)
-        if ndig > 2:  # TODO (fix for measurements non conformant to PDG
-            ndig = 2
-
-        s = f"{{:+.{ndig}f}} $\\pm$ {{:.{ndig}f}}".format(val, stat)
-        if sys:
-            s += f" $\\pm$ {{:.{ndig}f}}".format(sys)
-        if sys2:
-            s += f" $\\pm$ {{:.{ndig}f}}".format(sys2)
-        s = s.replace("-", "\u2013")
-        return s
-
-    def err(self) -> float:
-        if self.sys is None:
-            return self.stat
-        else:
-            err2 = (self.stat) ** 2 + (self.sys) ** 2
-            if self.sys2:
-                err2 += (self.sys2) ** 2
-            return sqrt(err2)
 
 
 # CharmFitter scans and plotting ---------------------------------------------------------------------------------------
@@ -598,7 +496,8 @@ class Plotter:
                 )
 
                 # Improved U-spin (cf. https://indico.cern.ch/event/1440982/contributions/6530703/)
-                akk_over_app = 1.8091  # Amplitude ratio
+                # Amplitude ratio A(KK)/A(pipi), computed by scripts/u-spin.py from the BF(D0 -> KK/pipi) PDG values
+                akk_over_app = 1.8091
                 xmin, xmax = ax.get_xlim()
                 ymin, ymax = ax.get_ylim()
                 xline_max = min(xmax, -ymin / akk_over_app)
@@ -789,6 +688,24 @@ def _dcs_cpv_label(dcs_cpv: bool | None, args: argparse.Namespace, cfg: ModuleTy
     return ", {} {} 0$".format(cfg.parameters["Acp_KP"].latex_name.strip()[:-1], r"\neq" if dcs_cpv else "=")
 
 
+def _dcs_cpv_vals(args: argparse.Namespace, compare_dcs_hypos: bool) -> list[bool | None]:
+    """Get the list of dcs_cpv values to be plotted/compared, for combos (e.g. ws-combo) that don't have this option."""
+    if not hasattr(args, "dcs_cpv"):
+        return [None]
+    if compare_dcs_hypos:
+        return [not args.dcs_cpv_default, args.dcs_cpv_default]
+    return [args.dcs_cpv]
+
+
+def _dcs_cpv_subdir(args: argparse.Namespace, compare_dcs_hypos: bool) -> str:
+    """Get the output subdirectory encoding the dcs_cpv hypothesis of a plot."""
+    if compare_dcs_hypos:
+        return "comparison"
+    if not hasattr(args, "dcs_cpv"):
+        return ""
+    return "with-dcs-cpv" if args.dcs_cpv else "no-dcs-cpv"
+
+
 def scans_1d(args: argparse.Namespace, cfg: ModuleType, combiners_ids: list[str] | None = None) -> None:
     """Run the 1D scans for all parameters."""
 
@@ -963,17 +880,7 @@ def plots_1d(
 
         plot = Plotter(
             dim=1,
-            save=args.savedir
-            / combiners_label
-            / "1d"
-            / (
-                "comparison"
-                if compare_dcs_hypos
-                else ("with-dcs-cpv" if args.dcs_cpv else "no-dcs-cpv")
-                if "dcs_cpv" in vars(args)
-                else ""
-            )
-            / f"{parname}.pdf",
+            save=args.savedir / combiners_label / "1d" / _dcs_cpv_subdir(args, compare_dcs_hypos) / f"{parname}.pdf",
             xtitle=par.title,
             xrange=par.plot_range,
             xtransf=par.transf,
@@ -983,13 +890,7 @@ def plots_1d(
             legfill=par.plot_opts_1d.legfill,
         )
 
-        dcs_cpv_vals = (
-            [None]
-            if not hasattr(args, "dcs_cpv")
-            else [not args.dcs_cpv_default, args.dcs_cpv_default]
-            if compare_dcs_hypos
-            else [args.dcs_cpv if "dcs_cpv" in vars(args) else None]
-        )
+        dcs_cpv_vals = _dcs_cpv_vals(args, compare_dcs_hypos)
         prefixes = [_get_prefix(args.prefix, par, dcs_cpv=dcs_cpv) for dcs_cpv in dcs_cpv_vals] * len(combiners_ids)
         labels = [
             cfg.combiners[combiner_id].title + _dcs_cpv_label(dcs_cpv, args, cfg)
@@ -1059,13 +960,7 @@ def plots_2d(
             save=args.savedir
             / (cfg.baseline_combiner if breakdown else combiners_label)
             / ("breakdown" if breakdown else "2d")
-            / (
-                "comparison"
-                if compare_dcs_hypos
-                else ("with-dcs-cpv" if args.dcs_cpv else "no-dcs-cpv")
-                if "dcs_cpv" in vars(args)
-                else ""
-            )
+            / _dcs_cpv_subdir(args, compare_dcs_hypos)
             / f"{yname}-vs-{xname}.pdf",
             xtitle=xpar.title,
             ytitle=ypar.title,
@@ -1080,13 +975,7 @@ def plots_2d(
             legfontsize=plot_params.legfontsize,
         )
 
-        dcs_cpv_vals = (
-            [None]
-            if not hasattr(args, "dcs_cpv")
-            else [not args.dcs_cpv_default, args.dcs_cpv_default]
-            if compare_dcs_hypos
-            else [args.dcs_cpv if "dcs_cpv" in vars(args) else None]
-        )
+        dcs_cpv_vals = _dcs_cpv_vals(args, compare_dcs_hypos)
         prefixes = []
         for combiner_id in combiners_ids:
             combiner = cfg.combiners[combiner_id]

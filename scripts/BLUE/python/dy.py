@@ -14,7 +14,8 @@ from pathlib import Path
 import matplotlib
 import matplotlib.pyplot as plt
 
-from charm_fitter.utils import Measurement, repo_path, setup_matplotlib
+from charm_fitter.blue import Measurement, blue_parser
+from charm_fitter.utils import setup_matplotlib
 
 measures = {
     "babar-2012": {"all": Measurement("BaBar 2012", "1209.3896", -8.8, 25.5, 5.8)},
@@ -135,7 +136,7 @@ def get_xy_ranges(comb: str, final_state: str, dy_notation: bool) -> tuple[tuple
             "pipi": -20.0 if dy_notation else -27,
         }
         x_max_wa = {
-            "all": (120 if dy_notation else 120) if "2024" in comb else (90 if dy_notation else 70),
+            "all": 100 if "2024" in comb else (90 if dy_notation else 70),
             "kk": 80 if dy_notation else 55,
             "pipi": 73 if dy_notation else 65,
         }
@@ -174,6 +175,7 @@ def make_plot(comb: str, final_state: str, dy_notation: bool, out_dir: Path) -> 
 
     measures = get_measures(comb, final_state)
     n_meas = len(measures)
+    x_text = get_x_text(comb, final_state, dy_notation)
     for i in range(n_meas):
         meas = measures[i]
         plt.errorbar(
@@ -192,24 +194,32 @@ def make_plot(comb: str, final_state: str, dy_notation: bool, out_dir: Path) -> 
             capsize=7,
             color=meas.color if comb != "lhcb" else "k",
         )
-        x_text = get_x_text(comb, final_state, dy_notation)
+
+        ylim = ax.get_ylim()
+        height_px = ax.bbox.height
+        fontsize_yscale = fig.dpi / 72 * (ylim[1] - ylim[0]) / height_px
+
+        fontsize = matplotlib.rcParams["font.size"]
         y_text = n_meas - i - 1.25
+
+        if args.arxiv and meas.arxiv is not None:
+            arxiv_fontsize = fontsize * 0.8
+            y_text += 0.5 * fontsize_yscale * arxiv_fontsize
+            plt.text(
+                x_text,
+                y_text - fontsize_yscale * arxiv_fontsize * 0.8,
+                rf"\href{{https://arxiv.org/abs/{meas.arxiv}}}{{arXiv:{meas.arxiv}}}"
+                if args.latex
+                else f"arXiv:{meas.arxiv}",
+                fontsize=arxiv_fontsize,
+                color="deepskyblue",
+            )
         plt.text(
             x_text,
             y_text,
             f"{meas.label}\n{meas.result_str()}",
             color=meas.color if comb != "lhcb" else "k",
         )
-        if i < n_meas - 1 and False:  # TODO
-            arxiv_fontsize = 15
-            default_fontsize = matplotlib.rcParams["font.size"]
-            plt.text(
-                x_text,
-                y_text - 0.006 * (default_fontsize + arxiv_fontsize),
-                f"arXiv:{meas.arxiv}",
-                fontsize=arxiv_fontsize,
-                color="deepskyblue",
-            )
 
     # Vertical line for world average
     avg = measures[-1].val if dy_notation else -measures[-1].val
@@ -235,7 +245,7 @@ def make_plot(comb: str, final_state: str, dy_notation: bool, out_dir: Path) -> 
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
+    parser = blue_parser("dy")
     parser.add_argument(
         "-c",
         "--comb",
@@ -256,20 +266,6 @@ def parse_args() -> argparse.Namespace:
         action="store_false",
         dest="dy_notation",
         help="Use the A_Gamma notation rather than DeltaY",
-    )
-    parser.add_argument(
-        "-o",
-        "--outdir",
-        type=Path,
-        default=repo_path / "plots" / "BLUE" / "dy",
-        help="Output directory for saving the plots",
-    )
-    parser.add_argument(
-        "--no-latex",
-        dest="latex",
-        default=True,
-        action="store_false",
-        help="Disable LaTeX in Matplotlib text processing (needed for, e.g., Gitlab CI)",
     )
     return parser.parse_args()
 

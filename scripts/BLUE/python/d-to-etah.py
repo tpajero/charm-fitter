@@ -11,12 +11,12 @@ To check what options are available, run:
 import argparse
 import itertools
 import logging
-from math import log
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 
-from charm_fitter.utils import Measurement, repo_path, setup_matplotlib
+from charm_fitter.blue import Measurement, blue_parser, get_units_label
+from charm_fitter.utils import setup_matplotlib
 
 
 def get_measures(meas_type: str, decay: str, date: str) -> list[Measurement]:
@@ -273,14 +273,6 @@ def get_xrange_and_units(meas_type: str, decay: str, date: str) -> tuple[tuple[f
     return xranges[meas_type][decay], units[meas_type][decay]
 
 
-def get_units_label(units: float) -> str:
-    raw_exp = log(units) / log(10)
-    exp = round(raw_exp)
-    if abs(exp - raw_exp) > 1e-2:
-        raise RuntimeError(f"Units {units} not supported")
-    return r"\%" if exp == -2 else f"10^{{{exp}}}"
-
-
 def plot_average(meas_type: str, decay: str, date: str, out_dir: Path) -> None:
     measures = get_measures(meas_type, decay, date)
     n_meas = len(measures)
@@ -303,7 +295,7 @@ def plot_average(meas_type: str, decay: str, date: str, out_dir: Path) -> None:
     )
 
     # Plot the measures and their numerical values
-    x_text = max([meas.val + meas.err() for meas in measures]) + 0.05 * (x_max - x_min)
+    x_text = (max([meas.val + meas.err() for meas in measures]) + 0.05 * (x_max - x_min)) / units
     for i in range(n_meas):
         meas = measures[i]
         plt.errorbar(
@@ -322,12 +314,31 @@ def plot_average(meas_type: str, decay: str, date: str, out_dir: Path) -> None:
             capsize=5,
             color=meas.color,
         )
+
+        ylim = ax.get_ylim()
+        height_px = ax.bbox.height
+        fontsize_yscale = fig.dpi / 72 * (ylim[1] - ylim[0]) / height_px
+
+        fontsize = 18
         y_text = n_meas - i - 1 - 0.25 * (n_meas / 6)
+
+        if args.arxiv and meas.arxiv is not None:
+            arxiv_fontsize = fontsize * 0.8
+            y_text += 0.5 * fontsize_yscale * arxiv_fontsize
+            plt.text(
+                x_text,
+                y_text - fontsize_yscale * arxiv_fontsize * 0.8,
+                rf"\href{{https://arxiv.org/abs/{meas.arxiv}}}{{arXiv:{meas.arxiv}}}"
+                if args.latex
+                else f"arXiv:{meas.arxiv}",
+                fontsize=arxiv_fontsize,
+                color="deepskyblue",
+            )
         plt.text(
-            x_text / units,
+            x_text,
             y_text,
             f"{meas.label}\n{meas.result_str(units)}",
-            fontsize=18,
+            fontsize=fontsize,
             color=meas.color,
         )
 
@@ -357,7 +368,7 @@ def plot_average(meas_type: str, decay: str, date: str, out_dir: Path) -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
+    parser = blue_parser("d-to-etah")
     parser.add_argument(
         "-c",
         "--date",
@@ -365,20 +376,6 @@ def parse_args() -> argparse.Namespace:
         default="2025",
         help="Date of the combination",
         choices=["2025"],
-    )
-    parser.add_argument(
-        "-o",
-        "--outdir",
-        type=Path,
-        default=repo_path / "plots" / "BLUE" / "d-to-etah",
-        help="Output directory for saving the plots",
-    )
-    parser.add_argument(
-        "--no-latex",
-        dest="latex",
-        default=True,
-        action="store_false",
-        help="Disable LaTeX in Matplotlib text processing (needed for, e.g., Gitlab CI)",
     )
     return parser.parse_args()
 

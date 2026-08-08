@@ -9,12 +9,13 @@ To check what options are available, run:
 
 import argparse
 import logging
-from math import log
 from pathlib import Path
 
+import matplotlib
 import matplotlib.pyplot as plt
 
-from charm_fitter.utils import Measurement, repo_path, setup_matplotlib
+from charm_fitter.blue import Measurement, blue_parser, get_units_label
+from charm_fitter.utils import setup_matplotlib
 
 
 def get_measures(comb: str) -> list[Measurement]:
@@ -42,20 +43,12 @@ def get_measures(comb: str) -> list[Measurement]:
             [
                 Measurement("Belle + Belle II 2025", "2504.15881", -0.6e-2, 1.1e-2, 0.1e-2),
                 # Measurement("World average March 2025", None, -1.19e-2, 0.77e-2, 0.17e-2),  # p-value 3.76%
-                Measurement("LHCb 2025", "preliminary", 1.86e-2, 1.04e-2, 0.41e-2),
-                Measurement("LHCb average 2025", "preliminary", -0.37e-2, 0.78e-2, 0.29e-2),
+                Measurement("LHCb 2025", "2510.14732", 1.86e-2, 1.04e-2, 0.41e-2),
+                Measurement("LHCb average 2025", None, -0.37e-2, 0.78e-2, 0.29e-2),
                 Measurement("World average 2025", None, -0.17e-2, 0.62e-2, 0.18e-2),  # p-value 0.99%
             ]
         )
     return measures
-
-
-def get_units_label(units: float) -> str:
-    raw_exp = log(units) / log(10)
-    exp = round(raw_exp)
-    if abs(exp - raw_exp) > 1e-2:
-        raise RuntimeError(f"Units {units} not supported")
-    return r"\%" if exp == -2 else f"10^{{{exp}}}"
 
 
 def plot_average(date: str, out_dir: Path) -> None:
@@ -66,16 +59,17 @@ def plot_average(date: str, out_dir: Path) -> None:
         return
 
     # Axes and labels
-    fig, ax = plt.subplots(figsize=(6, 6))
+    fig_ysize = 6
+    fig, ax = plt.subplots(figsize=(6, fig_ysize))
     (x_min, x_max), units = (-0.45, 0.6), 1e-2
     y_min, y_max = -0.5, n_meas - 0.5
     plt.xlim(x_min / units, x_max / units)
     plt.ylim(y_min, y_max)
     plt.tick_params(axis="y", which="both", right=False, left=False, labelleft=False)
-    plt.xlabel(r"$A_{CP}(D^0 \to K^0_S K^0_S)$ $[\%]$", fontsize=24, ha="center")
+    plt.xlabel(rf"$A_{{CP}}(D^0 \to K^0_S K^0_S)$ $[{get_units_label(units)}]$", fontsize=24, ha="center")
 
     # Plot the measures and their numerical values
-    x_text = max([meas.val + meas.err() for meas in measures]) + 0.05 * (x_max - x_min)
+    x_text = max([meas.val + meas.err() for meas in measures]) + 0.05 * (x_max - x_min) / units
     for i in range(n_meas):
         meas = measures[i]
         plt.errorbar(
@@ -94,12 +88,31 @@ def plot_average(date: str, out_dir: Path) -> None:
             capsize=5,
             color=meas.color,
         )
+
+        ylim = ax.get_ylim()
+        height_px = ax.bbox.height
+        fontsize_yscale = fig.dpi / 72 * (ylim[1] - ylim[0]) / height_px
+
+        fontsize = matplotlib.rcParams["font.size"] * 8.0 / len(measures)
         y_text = n_meas - i - 1 - 0.25 * (n_meas / 6)
+
+        if args.arxiv and meas.arxiv is not None:
+            arxiv_fontsize = fontsize * 0.8
+            y_text += 0.5 * fontsize_yscale * arxiv_fontsize
+            plt.text(
+                x_text,
+                y_text - fontsize_yscale * arxiv_fontsize * 0.8,
+                rf"\href{{https://arxiv.org/abs/{meas.arxiv}}}{{arXiv:{meas.arxiv}}}"
+                if args.latex
+                else f"arXiv:{meas.arxiv}",
+                fontsize=arxiv_fontsize,
+                color="deepskyblue",
+            )
         plt.text(
-            x_text / units,
+            x_text,
             y_text,
             f"{meas.label}\n{meas.result_str(units)}",
-            fontsize=18,
+            fontsize=fontsize,
             color=meas.color,
         )
 
@@ -136,7 +149,7 @@ def plot_average(date: str, out_dir: Path) -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
+    parser = blue_parser("d0-to-ksks")
     parser.add_argument(
         "-c",
         "--date",
@@ -144,20 +157,6 @@ def parse_args() -> argparse.Namespace:
         default="2025",
         help="Date of the combination",
         choices=["2024", "2025"],
-    )
-    parser.add_argument(
-        "-o",
-        "--outdir",
-        type=Path,
-        default=repo_path / "plots" / "BLUE" / "d0-to-ksks",
-        help="Output directory for saving the plots",
-    )
-    parser.add_argument(
-        "--no-latex",
-        dest="latex",
-        default=True,
-        action="store_false",
-        help="Disable LaTeX in Matplotlib text processing (needed for, e.g., Gitlab CI)",
     )
     return parser.parse_args()
 
