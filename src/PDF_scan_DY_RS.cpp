@@ -62,8 +62,8 @@ void PDF_scan_DY_RS::setObservables(const TString c) {
 }
 
 void PDF_scan_DY_RS::setUncertainties(const TString) {
-  StatErr[0] = 5e-7;
-  std::ranges::fill(SystErr, 0.0);
+  StatErr = {5e-7};
+  SystErr = {0.0};
 }
 
 void PDF_scan_DY_RS::setCorrelations(const TString) {

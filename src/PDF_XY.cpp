@@ -105,25 +105,24 @@ void PDF_XY::setObservables(const TString c) {
 void PDF_XY::setUncertainties(const TString c) {
   if (c.EqualTo("BaBar_Kshh")) {
     obsErrSource = "https://inspirehep.net/literature/853279";
-    StatErr[0] = std::hypot(2.3e-3, 1.2e-3, 0.8e-3);  // x
-    StatErr[1] = std::hypot(2.0e-3, 1.3e-3, 0.7e-3);  // y
+    StatErr = {std::hypot(2.3e-3, 1.2e-3, 0.8e-3),   // x
+               std::hypot(2.0e-3, 1.3e-3, 0.7e-3)};  // y
     std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("BaBar_pipipi0")) {
     obsErrSource = "https://inspirehep.net/literature/1441203";
-    StatErr[0] = std::hypot(12e-3, 6e-3);  // x
-    StatErr[1] = std::hypot(9e-3, 5e-3);   // y
+    StatErr = {std::hypot(12e-3, 6e-3),  // x
+               std::hypot(9e-3, 5e-3)};  // y
     std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_KSpipi")) {
     obsErrSource = "https://inspirehep.net/literature/1396327";
-    StatErr[0] = std::hypot(5.3e-3, 1.7e-3);  // x
-    StatErr[1] = std::hypot(4.6e-3, 1.3e-3);  // y
+    StatErr = {std::hypot(5.3e-3, 1.7e-3),   // x
+               std::hypot(4.6e-3, 1.3e-3)};  // y
     std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("Belle_Belle2")) {
     obsErrSource = "https://arxiv.org/abs/2410.22961";
-    StatErr[0] = 1.7e-3;  // x
-    StatErr[1] = 1.4e-3;  // y
-    SystErr[0] = 0.4e-3;  // x
-    SystErr[1] = 0.3e-3;  // y
+    //         x       y
+    StatErr = {1.7e-3, 1.4e-3};
+    SystErr = {0.4e-3, 0.3e-3};
   } else {
     throw std::runtime_error(std::format("PDF_XY::setUncertainties ERROR config {} not found", c.Data()));
   }

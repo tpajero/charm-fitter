@@ -55,12 +55,12 @@ void PDF_Fp_pipipi0::setObservables(const TString c) {
 void PDF_Fp_pipipi0::setUncertainties(const TString c) {
   if (c.EqualTo("Cleo-c")) {
     obsErrSource = "https://inspirehep.net/literature/2139827";
-    StatErr[0] = 0.017;
-    std::ranges::fill(SystErr, 0.0);
+    StatErr = {0.017};
+    SystErr = {0.0};
   } else if (c.EqualTo("BESIII")) {
     obsErrSource = "https://inspirehep.net/literature/2827201";
-    StatErr[0] = 0.0036;
-    SystErr[0] = 0.0021;
+    StatErr = {0.0036};
+    SystErr = {0.0021};
   } else {
     std::cout << "PDF_Fp_pipipi0::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);

@@ -87,15 +87,9 @@ void PDF_BES_Kpi::setObservables(const TString c) {
 void PDF_BES_Kpi::setUncertainties(const TString c) {
   if (c.EqualTo("3fb")) {
     obsErrSource = "https://arxiv.org/pdf/2208.09402v2.pdf";
-    StatErr[0] = 1.1e-2;
-    SystErr[0] = 0.7e-2;
-    StatErr[1] = 1.2e-2;
-    SystErr[1] = 0.8e-2;
     // The stat. errs. for rcos and rsin include both the statistical and systematic components
-    StatErr[2] = std::hypot(0.81e-2, 0.50e-2, 0.10e-2);
-    SystErr[2] = 0.;
-    StatErr[3] = std::hypot(1.2e-2, 0.7e-2, 0.3e-2);
-    SystErr[3] = 0.;
+    StatErr = {1.1e-2, 1.2e-2, std::hypot(0.81e-2, 0.50e-2, 0.10e-2), std::hypot(1.2e-2, 0.7e-2, 0.3e-2)};
+    SystErr = {0.7e-2, 0.8e-2, 0., 0.};
   } else {
     throw std::runtime_error(std::format("PDF_BES_Kpi::setUncertainties ERROR err config {} not found", c.Data()));
   }

@@ -16,7 +16,6 @@
 
 #include <TString.h>
 
-#include <algorithm>
 #include <format>
 #include <iostream>
 #include <stdexcept>
@@ -92,8 +91,8 @@ void PDF_yCP_minus_yCP_KP::setObservables(const TString c) {
 void PDF_yCP_minus_yCP_KP::setUncertainties(const TString c) {
   if (c.EqualTo("WA2020")) {
     obsErrSource = "https://cds.cern.ch/record/2747731";
-    StatErr[0] = 3.068e-2;
-    std::ranges::fill(SystErr, 0.0);
+    StatErr = {3.068e-2};
+    SystErr = {0.0};
   } else {
     throw std::runtime_error(std::format("PDF_yCP_minus_yCP_KP::setUncertainties ERROR config {} not found", c.Data()));
   }

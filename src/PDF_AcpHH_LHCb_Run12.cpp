@@ -102,24 +102,8 @@ void PDF_AcpHH_LHCb_Run12::setObservables(const TString c) {
 
 void PDF_AcpHH_LHCb_Run12::setUncertainties(const TString c) {
   obsErrSource = "https://cds.cern.ch/record/2799916/";
-
-  StatErr[0] = 15.0e-4;
-  StatErr[1] = 15.0e-4;
-  StatErr[2] = 8.8e-4;
-  StatErr[3] = 6.7e-4;
-  StatErr[4] = 16.0e-4;
-  StatErr[5] = 8.0e-4;
-  StatErr[6] = 8.0e-4;
-  StatErr[7] = 3.2e-4;
-
-  SystErr[0] = 10.0e-4;
-  SystErr[1] = 10.0e-4;
-  SystErr[2] = 1.6e-4;
-  SystErr[3] = 2.0e-4;
-  SystErr[4] = 8.0e-4;
-  SystErr[5] = 3.0e-4;
-  SystErr[6] = 5.0e-4;
-  SystErr[7] = 0.9e-4;
+  StatErr = {15.0e-4, 15.0e-4, 8.8e-4, 6.7e-4, 16.0e-4, 8.0e-4, 8.0e-4, 3.2e-4};
+  SystErr = {10.0e-4, 10.0e-4, 1.6e-4, 2.0e-4, 8.0e-4, 3.0e-4, 5.0e-4, 0.9e-4};
 }
 
 void PDF_AcpHH_LHCb_Run12::setCorrelations(const TString c) {

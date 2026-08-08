@@ -16,7 +16,6 @@
 
 #include <TString.h>
 
-#include <algorithm>
 #include <format>
 #include <iostream>
 #include <stdexcept>
@@ -84,12 +83,12 @@ void PDF_RM::setObservables(const TString c) {
 void PDF_RM::setUncertainties(const TString c) {
   if (c.EqualTo("HFLAV2016")) {
     obsErrSource = "https://hflav-eos.web.cern.ch/hflav-eos/charm/CHARM21/results_mixing.html";
-    StatErr[0] = 2.69e-4;
-    std::ranges::fill(SystErr, 0.0);
+    StatErr = {2.69e-4};
+    SystErr = {0.0};
   } else if (c.EqualTo("LHCb_K3pi_Run1")) {
     obsErrSource = "https://inspirehep.net/literature/1423070";
-    StatErr[0] = 2 * 0.18e-4;
-    std::ranges::fill(SystErr, 0.0);
+    StatErr = {2 * 0.18e-4};
+    SystErr = {0.0};
   } else {
     throw std::runtime_error(std::format("PDF_RM::setUncertainties ERROR config {} not found", c.Data()));
   }

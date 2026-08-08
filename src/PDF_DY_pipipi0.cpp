@@ -73,8 +73,8 @@ void PDF_DY_pipipi0::setObservables(const TString c) {
 void PDF_DY_pipipi0::setUncertainties(const TString c) {
   obsErrSource = "https://arxiv.org/abs/2405.06556";
   if (c.EqualTo("LHCb-R2")) {
-    StatErr[0] = 5.97e-4;
-    SystErr[0] = 2.01e-4;  // Removed the sys. unc. for the time binning
+    StatErr = {5.97e-4};
+    SystErr = {2.01e-4};  // Removed the sys. unc. for the time binning
   } else {
     throw std::runtime_error(std::format(
         "PDF_DY_pipipi0::setUncertainties ERROR config {} not found for {} DY_pipipi0 observables", c.Data(), nObs));

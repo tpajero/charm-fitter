@@ -71,8 +71,8 @@ void PDF_BES_Kpi_1d::setObservables(const TString c) {
 void PDF_BES_Kpi_1d::setUncertainties(const TString c) {
   if (c.EqualTo("BES")) {
     obsErrSource = "http://inspirehep.net/record/1291279";
-    StatErr[0] = 1.3e-2;
-    SystErr[0] = 0.7e-2;
+    StatErr = {1.3e-2};
+    SystErr = {0.7e-2};
   } else {
     throw std::runtime_error(std::format("PDF_BES_Kpi_1d::setUncertainties ERROR config {} not found", c.Data()));
   }

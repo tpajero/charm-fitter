@@ -97,20 +97,8 @@ void PDF_BES_Kpi_7d::setObservables(const TString c) {
 void PDF_BES_Kpi_7d::setUncertainties(const TString c) {
   if (c.EqualTo("3+7fb")) {
     obsErrSource = "https://arxiv.org/pdf/2208.09402v2.pdf, https://arxiv.org/pdf/2506.07907";
-    StatErr[0] = 1.1e-2;
-    SystErr[0] = 0.7e-2;
-    StatErr[1] = 1.2e-2;
-    SystErr[1] = 0.8e-2;
-    StatErr[2] = 0.81e-2;
-    SystErr[2] = std::hypot(0.50e-2, 0.10e-2);
-    StatErr[3] = 1.2e-2;
-    SystErr[3] = std::hypot(0.7e-2, 0.3e-2);
-    StatErr[4] = 0.8e-2;
-    SystErr[4] = 0.15e-2;
-    StatErr[5] = 1.4e-2;
-    SystErr[5] = 0.18e-2;
-    StatErr[6] = 1.7e-2;
-    SystErr[6] = 0.31e-2;
+    StatErr = {1.1e-2, 1.2e-2, 0.81e-2, 1.2e-2, 0.8e-2, 1.4e-2, 1.7e-2};
+    SystErr = {0.7e-2, 0.8e-2, std::hypot(0.50e-2, 0.10e-2), std::hypot(0.7e-2, 0.3e-2), 0.15e-2, 0.18e-2, 0.31e-2};
   } else {
     throw std::runtime_error(std::format("PDF_BES_Kpi_7d::setUncertainties ERROR err config {} not found", c.Data()));
   }

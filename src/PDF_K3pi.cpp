@@ -87,9 +87,7 @@ void PDF_K3pi::setObservables(const TString c) {
 void PDF_K3pi::setUncertainties(const TString c) {
   if (c.EqualTo("LHCb-run1")) {
     obsErrSource = "https://arxiv.org/abs/1602.07224v2";
-    StatErr[0] = 0.12e-2;
-    StatErr[1] = 1.8e-3;
-    StatErr[2] = 1.8e-5;
+    StatErr = {0.12e-2, 1.8e-3, 1.8e-5};
     std::ranges::fill(SystErr, 0.0);
   } else {
     throw std::runtime_error(std::format("PDF_K3pi::setUncertainties ERROR config {} not found", c.Data()));
