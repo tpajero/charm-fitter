@@ -83,15 +83,21 @@ void PDF_AcpHH_LHCb_Run12::initObservables() {
 }
 
 void PDF_AcpHH_LHCb_Run12::setObservables(const TString c) {
-  obsValSource = "https://cds.cern.ch/record/2799916/";
-  setObservable("acp_d0_to_kk_run1_mu_obs", -6.0e-4);
-  setObservable("acp_d0_to_kk_run1_prompt_obs", 14.0e-4);
-  setObservable("acp_d0_to_kk_run2_cdp_obs", 13.6e-4);
-  setObservable("acp_d0_to_kk_run2_cds_obs", 2.8e-4);
-  setObservable("dacp_run1_mu_obs", 14.0e-4);
-  setObservable("dacp_run1_prompt_obs", -10.0e-4);
-  setObservable("dacp_run2_mu_obs", -9.0e-4);
-  setObservable("dacp_run2_prompt_obs", -18.2e-4);
+  if (c.EqualTo("truth"))
+    setObservablesTruth();
+  else if (c.EqualTo("toy"))
+    setObservablesToy();
+  else {
+    obsValSource = "https://cds.cern.ch/record/2799916/";
+    setObservable("acp_d0_to_kk_run1_mu_obs", -6.0e-4);
+    setObservable("acp_d0_to_kk_run1_prompt_obs", 14.0e-4);
+    setObservable("acp_d0_to_kk_run2_cdp_obs", 13.6e-4);
+    setObservable("acp_d0_to_kk_run2_cds_obs", 2.8e-4);
+    setObservable("dacp_run1_mu_obs", 14.0e-4);
+    setObservable("dacp_run1_prompt_obs", -10.0e-4);
+    setObservable("dacp_run2_mu_obs", -9.0e-4);
+    setObservable("dacp_run2_prompt_obs", -18.2e-4);
+  }
 }
 
 void PDF_AcpHH_LHCb_Run12::setUncertainties(const TString c) {

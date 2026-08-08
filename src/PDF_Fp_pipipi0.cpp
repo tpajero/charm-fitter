@@ -36,7 +36,11 @@ void PDF_Fp_pipipi0::initObservables() {
 }
 
 void PDF_Fp_pipipi0::setObservables(const TString c) {
-  if (c.EqualTo("Cleo-c")) {
+  if (c.EqualTo("truth"))
+    setObservablesTruth();
+  else if (c.EqualTo("toy"))
+    setObservablesToy();
+  else if (c.EqualTo("Cleo-c")) {
     obsValSource = "https://inspirehep.net/literature/2139827";
     setObservable("F_pipipi0_obs", 0.973);
   } else if (c.EqualTo("BESIII")) {

@@ -76,7 +76,11 @@ void PDF_BES_Kpi_7d::initObservables() {
 }
 
 void PDF_BES_Kpi_7d::setObservables(const TString c) {
-  if (c.EqualTo("3+7fb")) {
+  if (c.EqualTo("truth"))
+    setObservablesTruth();
+  else if (c.EqualTo("toy"))
+    setObservablesToy();
+  else if (c.EqualTo("3+7fb")) {
     obsValSource = "https://arxiv.org/pdf/2208.09402v2.pdf, https://arxiv.org/pdf/2506.07907";
     setObservable("A_kpi_obs", 13.2e-2);
     setObservable("A_kpi_pipipi0_obs", 13.0e-2);

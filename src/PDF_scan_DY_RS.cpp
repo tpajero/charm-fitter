@@ -52,7 +52,14 @@ void PDF_scan_DY_RS::initObservables() {
   observables->add(*(new RooRealVar("DY_RS_scan_obs", "scan   #Delta#it{Y}_{#it{K^{#minus}#pi^{+}}}", 0, -1e4, 1e4)));
 }
 
-void PDF_scan_DY_RS::setObservables(const TString) { setObservable("DY_RS_scan_obs", 0.); }
+void PDF_scan_DY_RS::setObservables(const TString c) {
+  if (c.EqualTo("truth"))
+    setObservablesTruth();
+  else if (c.EqualTo("toy"))
+    setObservablesToy();
+  else
+    setObservable("DY_RS_scan_obs", 0.);
+}
 
 void PDF_scan_DY_RS::setUncertainties(const TString) {
   StatErr[0] = 5e-7;

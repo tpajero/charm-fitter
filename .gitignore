@@ -22,3 +22,5 @@ BLUE/scripts/*.sh
 .eclipse/
 CMakeLists.txt.user
 .vscode/
+
+CLAUDE.md
