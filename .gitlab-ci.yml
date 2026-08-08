@@ -9,8 +9,6 @@ variables:
 
 check-formatting:
   stage: pre-commit
-  tags:
-    - cvmfs
   image: gitlab-registry.cern.ch/lhcb-docker/os-base/alma9-devel:latest
   variables:
     PRE_COMMIT_HOME: ${CI_PROJECT_DIR}/.cache/pre-commit
@@ -34,3 +32,5 @@ trigger-pipeline:
     strategy: depend
   variables:
     CHARM_BRANCH: $CI_COMMIT_REF_NAME
+    CONFIG_FILE_WS: config/plotting/ws-2025.py
+    CONFIG_FILE: config/plotting/charm-2025.py

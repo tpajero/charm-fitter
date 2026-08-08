@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """Calculate the U-spin limit for ACP(KK) and ACP(pipi), taking into account the fact that their branching fractions
 differ.
 

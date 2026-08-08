@@ -4,7 +4,7 @@ set(COMBINER_NAME charm-fitter)
 
 # Define all executables of this combiner. They have to be located in the main/
 # subdirectory, and end with .cpp.
-set(COMBINER_EXECUTABLES charmcombo ws-combo)
+set(COMBINER_EXECUTABLES charm-combo ws-combo)
 
 # -----------------------------------------------------------------------------
 # Set directory names and includes

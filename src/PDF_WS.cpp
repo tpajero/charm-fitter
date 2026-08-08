@@ -30,7 +30,7 @@ namespace {
       {"y'+",
        {
            {mix::pheno, "qop*(  y * cos(Delta_Kpi - phi)"
-                        "         + x * sin(Delta_Kpi - phi))"},
+                        "     + x * sin(Delta_Kpi - phi))"},
            {mix::theo, "  y12 * cos(Delta_Kpi + phiG)"
                        "+ x12 * sin(Delta_Kpi + phiM)"},
            {mix::d0_to_kpi, "yp + dyp"},
@@ -38,9 +38,9 @@ namespace {
       {"y'-",
        {
            {mix::pheno, "1/qop*(  y * cos(Delta_Kpi + phi)"
-                        "           + x * sin(Delta_Kpi + phi))"},
-           {mix::theo, "  y12 * cos(Delta_Kpi-phiG)"
-                       "+ x12 * sin(Delta_Kpi-phiM)"},
+                        "       + x * sin(Delta_Kpi + phi))"},
+           {mix::theo, "  y12 * cos(Delta_Kpi - phiG)"
+                       "+ x12 * sin(Delta_Kpi - phiM)"},
            {mix::d0_to_kpi, "yp - dyp"},
        }},
       {"x'2+",
@@ -55,14 +55,14 @@ namespace {
        {
            {mix::pheno, "TMath::Sq(1/qop*(  x * cos(Delta_Kpi + phi)"
                         "                 - y * sin(Delta_Kpi + phi)))"},
-           {mix::theo, "TMath::Sq(- y12 * sin(Delta_Kpi-phiG)"
-                       "          + x12 * cos(Delta_Kpi-phiM))"},
+           {mix::theo, "TMath::Sq(- y12 * sin(Delta_Kpi - phiG)"
+                       "          + x12 * cos(Delta_Kpi - phiM))"},
            {mix::d0_to_kpi, "xp2 - dxp2"},
        }},
       {"c",
        {
-           {mix::pheno, "0.5 * (      qop*(  y*cos(Delta_Kpi - phi) + x*sin(Delta_Kpi - phi)) "
-                        "       + 1 / qop*(  y*cos(Delta_Kpi + phi) + x*sin(Delta_Kpi + phi)))"},
+           {mix::pheno, "0.5 * (  qop     * (y*cos(Delta_Kpi - phi) + x*sin(Delta_Kpi - phi)) "
+                        "       + 1 / qop * (y*cos(Delta_Kpi + phi) + x*sin(Delta_Kpi + phi)))"},
            {mix::theo, "y12 * cos(Delta_Kpi) * cos(phiG) + x12 * sin(Delta_Kpi) * cos(phiM)"},
            {mix::d0_to_kpi, "yp"},
        }},
@@ -318,7 +318,7 @@ void PDF_WS::setObservables(const TString c) {
     setObservable("y'-_obs", 5.54e-3);
     setObservable("x'2-_obs", 1.6e-5);
   } else if (c.EqualTo("LHCb_Prompt_Run12_sec9")) {
-    obsValSource = "https://indico.cern.ch/event/1355805/";
+    obsValSource = "https://inspirehep.net/literature/2871248 Tab III";
     setObservable("RD_obs", 0.003427);
     setObservable("c_obs", 5.28e-3);
     setObservable("c'_obs", 1.20e-5);
@@ -326,7 +326,7 @@ void PDF_WS::setObservables(const TString c) {
     setObservable("dc_obs", 2.0e-4);
     setObservable("dc'_obs", -0.7e-6);
   } else if (c.EqualTo("LHCb_Prompt_Run12_appB")) {
-    obsValSource = "https://indico.cern.ch/event/1355805/";
+    obsValSource = "https://inspirehep.net/literature/2871248 Tab IV";
     setObservable("RD_obs", 0.003427);
     setObservable("c_obs", 5.28e-3);
     setObservable("c'_obs", 1.20e-5);
@@ -337,7 +337,7 @@ void PDF_WS::setObservables(const TString c) {
     setObservable("dc~_obs", 3.2e-4);
     setObservable("dc'~_obs", -2.0e-6);
   } else if (c.EqualTo("LHCb_DT_Run2")) {
-    obsValSource = "https://indico.cern.ch/event/1423686/contributions/6139348/, LHCb-PAPER-2024-044";
+    obsValSource = "https://inspirehep.net/literature/2871248";
     setObservable("RD_p_obs", 0.00355);
     setObservable("y'+_obs", 3.56e-3);
     setObservable("x'2+_obs", 1.086e-4);
@@ -345,7 +345,7 @@ void PDF_WS::setObservables(const TString c) {
     setObservable("y'-_obs", 8.11e-3);
     setObservable("x'2-_obs", -1.129e-4);
   } else if (c.EqualTo("LHCb_DT_Run12")) {
-    obsValSource = "https://indico.cern.ch/event/1423686/contributions/6139348/, LHCb-PAPER-2024-044";
+    obsValSource = "https://inspirehep.net/literature/2871248";
     setObservable("RD_p_obs", 0.00350);
     setObservable("y'+_obs", 4.14e-3);
     setObservable("x'2+_obs", 7.84e-5);
@@ -406,7 +406,7 @@ void PDF_WS::setUncertainties(const TString c) {
     StatErr[5] = 3.9e-5;    // x'2-
     std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_Prompt_Run12_sec9")) {
-    obsErrSource = "https://indico.cern.ch/event/1355805/";
+    obsErrSource = "https://inspirehep.net/literature/2871248 Tab III";
     StatErr[0] = 0.000019;  // RD
     StatErr[1] = 3.3e-4;    // c
     StatErr[2] = 3.5e-6;    // c'
@@ -415,7 +415,7 @@ void PDF_WS::setUncertainties(const TString c) {
     StatErr[5] = 3.6e-6;    // dc'
     std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_Prompt_Run12_appB")) {
-    obsErrSource = "https://indico.cern.ch/event/1355805/";
+    obsErrSource = "https://inspirehep.net/literature/2871248 Tab IV";
     StatErr[0] = 0.000019;  // RD
     StatErr[1] = 3.3e-4;    // c
     StatErr[2] = 3.5e-6;    // c'
@@ -427,7 +427,7 @@ void PDF_WS::setUncertainties(const TString c) {
     StatErr[8] = 3.8e-6;    // dc'~
     std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_DT_Run2")) {
-    obsErrSource = "https://indico.cern.ch/event/1423686/contributions/6139348/, LHCb-PAPER-2024-044";
+    obsErrSource = "https://inspirehep.net/literature/2871248";
     StatErr[0] = 0.00008;   // RD+
     StatErr[1] = 2.25e-3;   // y'+
     StatErr[2] = 1.623e-4;  // x'2+
@@ -436,7 +436,7 @@ void PDF_WS::setUncertainties(const TString c) {
     StatErr[5] = 1.859e-4;  // x'2-
     std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_DT_Run12")) {
-    obsErrSource = "https://indico.cern.ch/event/1423686/contributions/6139348/, LHCb-PAPER-2024-044";
+    obsErrSource = "https://inspirehep.net/literature/2871248";
     StatErr[0] = 0.00007;   // RD+
     StatErr[1] = 2.04e-3;   // y'+
     StatErr[2] = 1.522e-4;  // x'2+
@@ -522,7 +522,7 @@ void PDF_WS::setCorrelations(const TString c) {
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, data);
   } else if (c.EqualTo("LHCb_Prompt_Run12_sec9")) {
-    corSource = "https://indico.cern.ch/event/1355805/";
+    corSource = "https://inspirehep.net/literature/2871248 Tab III";
     std::vector<double> data = {
         // clang-format off
         // RD  c      c'      AD      c       c'
@@ -536,7 +536,7 @@ void PDF_WS::setCorrelations(const TString c) {
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, data);
   } else if (c.EqualTo("LHCb_Prompt_Run12_appB")) {
-    corSource = "https://indico.cern.ch/event/1355805/";
+    corSource = "https://inspirehep.net/literature/2871248 Tab IV";
     std::vector<double> data = {
         // clang-format off
         // RD  c      c'      AD      c       c'      ADt     ct      c't
@@ -553,7 +553,7 @@ void PDF_WS::setCorrelations(const TString c) {
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, data);
   } else if (c.EqualTo("LHCb_DT_Run2")) {
-    corSource = "https://indico.cern.ch/event/1423686/contributions/6139348/, LHCb-PAPER-2024-044";
+    corSource = "https://inspirehep.net/literature/2871248";
     std::vector<double> data = {
         // clang-format off
         // RD+  y'+    x'2+    RD-     y'-    x'2-
@@ -567,7 +567,7 @@ void PDF_WS::setCorrelations(const TString c) {
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, data);
   } else if (c.EqualTo("LHCb_DT_Run12")) {
-    corSource = "https://indico.cern.ch/event/1423686/contributions/6139348/, LHCb-PAPER-2024-044";
+    corSource = "https://inspirehep.net/literature/2871248";
     std::vector<double> data = {
         // clang-format off
         //  RD+  y'+    x'2+    RD-    y'-    x'2-

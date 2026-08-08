@@ -28,16 +28,16 @@ namespace {
   std::map<std::string, std::map<mix, std::string>> theory_expressions = {
       {"y'",
        {
-           {mix::pheno, "y*cos(Delta_Kpi) + x*sin(Delta_Kpi)"},
+           {mix::pheno, "y * cos(Delta_Kpi) + x * sin(Delta_Kpi)"},
            {mix::theo, "  y12 * cos(Delta_Kpi) * TMath::Sign(1.,cos(phiG)) "
                        "+ x12 * sin(Delta_Kpi) * TMath::Sign(1.,cos(phiM))"},
            {mix::d0_to_kpi, "yp"},
        }},
       {"x'2",
        {
-           {mix::pheno, "TMath::Sq(x*cos(Delta_Kpi) - y*sin(Delta_Kpi))"},
-           {mix::theo, "TMath::Sq(- y12*sin(Delta_Kpi) * TMath::Sign(1.,cos(phiG))"
-                       "    + x12*cos(Delta_Kpi) * TMath::Sign(1.,cos(phiM)))"},
+           {mix::pheno, "TMath::Sq(x * cos(Delta_Kpi) - y * sin(Delta_Kpi))"},
+           {mix::theo, "TMath::Sq(- y12 * sin(Delta_Kpi) * TMath::Sign(1.,cos(phiG))"
+                       "          + x12 * cos(Delta_Kpi) * TMath::Sign(1.,cos(phiM)))"},
            {mix::d0_to_kpi, "xp2"},
        }},
   };
@@ -55,10 +55,10 @@ std::set<std::string> PDF_WS_NoCPV::getParameterNames() const {
   if (mix_param != mix::d0_to_kpi) names.insert("Delta_Kpi");
   switch (mix_param) {
   case mix::pheno:
-    names.insert({"x", "y", "qop", "phi"});
+    names.insert({"x", "y"});
     break;
   case mix::theo:
-    names.insert({"phiG", "x12", "y12", "phiM"});
+    names.insert({"x12", "y12", "phiM", "phiG"});
     break;
   case mix::d0_to_kpi:
     names.insert({"yp", "xp2"});

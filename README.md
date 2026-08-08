@@ -1,6 +1,6 @@
 # CharmFitter
 
-A global analysis of charm measurements of mixing and CP violation, interpreting the experimental observables in terms
+Global combination of charm measurements of mixing and CP violation, interpreting the experimental observables in terms
 the the relevant theory parameters.
 Both the theoretical or phenomenological parametrisations can be used, adopting the formulas in the following
 references,
@@ -15,7 +15,7 @@ which are mostly based on the article
   * A. L. Kagan and L. Silvestrini, *Dispersive and absorptive CP violation in D0/anti-D0 mixing*,
     [Phys. Rev. D **103** 053008, 2021](https://inspirehep.net/literature/1776611).
 
-The impact of using different assumptions on the universality of DeltaY(D0 -> h- h+) can be tested, too.
+The impact of using different assumptions for the final-state corrections for DeltaY(D0 -> h- h+) can be tested, too.
 
 The statistical treatment is frequentist and relies on the GammaCombo package (see
 [gammacombo](https://gammacombo.github.io) for details).
@@ -48,20 +48,23 @@ before running any executables.
 ### Main combiner
 
 One- and two-dimensional confidence intervals for the theory parameters of interest can be plotted with
-[Matplotlib](https://matplotlib.org/) using the script [scripts/mpl-plots.py](scripts/mpl-plots.py), while the list of
-parameters to plot, their ranges and the axes titles are set in the configuration files in [config](config).
+[Matplotlib](https://matplotlib.org/) using the script [scripts/charm-combo.py](scripts/charm-combo.py),
+while the list of parameters to plot, their ranges and the axes titles are set in the configuration files
+in [config/plotting](config/plotting).
 For example, you can plot the results of the world average of 2025 with
 
-    python scripts/mpl-plots.py --config config/2025.py -a all --rescan --extra-opts " --pr --ps 1 "
+    python scripts/charm-combo.py --config config/plotting/charm-2025.py -a all --rescan
 
-To see more options, please run `python scripts/mpl-plots.py -h`.
+To see all available options, run `python scripts/charm-combo.py -h`.
+Analogous plots for the subset of WS/RS D0 -> Kpi measurements can be obtained through a sibling script,
+see `python scripts/ws-combo.py -h`.
 
-Please see the [GammaCombo manual](https://gammacombo.github.io/manual.pdf) for instructions on how to add new
+Please refer to the [GammaCombo manual](https://gammacombo.github.io/manual.pdf) for instructions on how to add new
 measurements to the combination.
 
 ### BLUE combinations
 
-Please refer to the anotations at the beginning of C++ and Python files in the [scripts/BLUE](scripts/BLUE) folder.
+Please refer to the annotations at the beginning of C++ and Python files in the [scripts/BLUE](scripts/BLUE) folder.
 
 ## Maintainers
 

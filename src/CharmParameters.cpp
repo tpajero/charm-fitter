@@ -239,31 +239,31 @@ void CharmParameters::defineParameters() {
 
   // Parameters for (D0 -> Kpi)-only combination -----------------------------------------------------------------------
 
+  p = newParameter("yp");
+  p->title = "#it{y'}";
+  p->startvalue = 5.3e-3;
+  p->unit = "";
+  p->scan = range(0.1, 1);
+  p->phys = range(-1e4, 1e4);
+
+  p = newParameter("dyp");
+  p->title = "#it{#Delta y'}";
+  p->startvalue = 1e-5;
+  p->unit = "";
+  p->scan = range(0.1, 1);
+  p->phys = range(-1e4, 1e4);
+
   p = newParameter("xp2");
-  p->title = "#it{x'}^{2} [10^{#minus4}]";
-  p->startvalue = 0.24;
+  p->title = "#it{x'}^{2}";
+  p->startvalue = 1.8e-5;
   p->unit = "";
   p->scan = range(-4, 4);
   p->phys = range(-1e4, 1e4);
 
-  p = newParameter("yp");
-  p->title = "#it{y'} [%]";
-  p->startvalue = 0.52;
-  p->unit = "";
-  p->scan = range(0.1, 1);
-  p->phys = range(-1e4, 1e4);
-
   p = newParameter("dxp2");
-  p->title = "#it{#Delta x'}^{2} [10^{#minus4}]";
-  p->startvalue = 0.02;
+  p->title = "#it{#Delta x'}^{2}";
+  p->startvalue = 1e-6;
   p->unit = "";
   p->scan = range(-0.4, 1.);
-  p->phys = range(-1e4, 1e4);
-
-  p = newParameter("dyp");
-  p->title = "#it{#Delta y'} [%]";
-  p->startvalue = 0.01;
-  p->unit = "";
-  p->scan = range(0.1, 1);
   p->phys = range(-1e4, 1e4);
 }
