@@ -6,8 +6,6 @@ import matplotlib.pyplot as plt
 from gc_core.utils import load_gc_core_lib
 
 from charm_fitter.utils import (
-    compare_dy_fsc_hypotheses_plots_2d,
-    compare_dy_fsc_hypotheses_scans_2d,
     cwd,
     get_configuration,
     parse_args,
@@ -32,17 +30,19 @@ if __name__ == "__main__":
 
     with cwd(repo_path):  # Need to call the executable from the repository root due to GammaCombo core limitations
         if any(x in ["all", "1d"] for x in args.actions):
-            scans_1d(args, cfg)
-            plots_1d(args, cfg, compare_dcs_hypos=args.dcs_cpv != args.dcs_cpv_default)
+            scans_1d(list(cfg.baseline_combiners.values()), args)
+            plots_1d(cfg.plots_1d, args, cfg, compare_dcs_hypos=args.dcs_cpv != args.dcs_cpv_default)
         if any(x in ["all", "2d"] for x in args.actions):
-            scans_2d(args, cfg)
-            plots_2d(args, cfg, compare_dcs_hypos=args.dcs_cpv != args.dcs_cpv_default)
-            if args.dcs_cpv == args.dcs_cpv_default:
-                compare_dy_fsc_hypotheses_scans_2d(args, cfg)
-                compare_dy_fsc_hypotheses_plots_2d(args, cfg)
+            scans_2d(list(cfg.baseline_combiners.values()), args)
+            plots_2d(cfg.plots_2d, args, cfg, compare_dcs_hypos=args.dcs_cpv != args.dcs_cpv_default)
+        if any(x in ["all", "dy-fsc"] for x in args.actions):
+            scans_1d(list(cfg.baseline_combiners.values()), args, dy_fsc_comparison=True)
+            scans_2d(list(cfg.baseline_combiners.values()), args, dy_fsc_comparison=True)
+            plots_1d(cfg.plots_dy_fsc_1d, args, cfg)
+            plots_2d(cfg.plots_dy_fsc_2d, args, cfg, plots_cat="compare-dy-fsc")
         if any(x in ["all", "breakdown"] for x in args.actions):
-            scans_2d(args, cfg, cfg.breakdowns)
-            plots_2d(args, cfg, breakdown=True)
+            scans_2d(list(cfg.combiners_breakdown.values()), args)
+            plots_2d(cfg.plots_breakdown, args, cfg, plots_cat="breakdown")
 
     if args.interactive:
         plt.show()

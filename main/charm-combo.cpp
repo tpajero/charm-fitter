@@ -76,10 +76,11 @@ namespace {
 
   // PDFs with results from charm factories
   const std::vector<int> cf_pdfs = {
-      50,  // Delta_Kpi  Cleo-c
-      53,  // F+_pipipi0 Cleo-c
-      55,  // F+_pipipi0 BESIII
-      56,  // Delta_Kpi  BESIII 3+7 fb
+      50,  // Delta_Kpi   Cleo-c
+      53,  // F+_pipipi0  Cleo-c
+      54,  // K3pi Kpipi0 Cleo-c
+      55,  // F+_pipipi0  BESIII
+      56,  // Delta_Kpi   BESIII 3+7 fb
   };
 
   struct ParsedArgs {
@@ -275,8 +276,8 @@ int main(int argc, char* argv[]) {
   gc.addPdf(61, new PDF_yCP_minus_yCP_RS("WA2020", mix_param),                       "yCP-yCP(RS)  WA       2020                  ");
   gc.addPdf(62, new PDF_yCP_minus_yCP_KP("WA2020", mix_param),                       "yCP-yCP(KP)  WA       2020                  ");
   gc.addPdf(63, new PDF_yCP_plus_yCP_RS("WA2020", mix_param),                        "yCP+yCP(RS)  WA       2020                  ");
-  gc.addPdf(64, new PDF_yCP_minus_yCP_RS("LHCb-R1", mix_param),                      "yCP-yCP(RS)  LHCb     Run 1    [B -> D* mu] ");
-  gc.addPdf(65, new PDF_yCP_minus_yCP_RS("LHCb-R2", mix_param),                      "yCP-yCP(RS)  LHCb     Run 2    [D* -> D0 pi]");
+  gc.addPdf(64, new PDF_yCP_minus_yCP_RS("LHCb-R1", mix_param),                      "yCP-yCP(RS)  LHCb     Run 1    [B -> D* mu] ");  // Included in WA 2020
+  gc.addPdf(65, new PDF_yCP_minus_yCP_RS("LHCb-R2", mix_param),                      "yCP-yCP(RS)  LHCb     Run 2    [D* -> D0 pi]");  // Not included in WA 2020
 
   if (dy_fsc_hypo == dy_fsc::none) {
     gc.addPdf(70, new PDF_DY("WA2019", dy_fsc_hypo, acp_param, mix_param),           "DY           WA       2019                  ");
