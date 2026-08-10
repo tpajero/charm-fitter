@@ -30,11 +30,11 @@ if __name__ == "__main__":
 
     with cwd(repo_path):  # Need to call the executable from the repository root due to GammaCombo core limitations
         if any(x in ["all", "1d"] for x in args.actions):
-            scans_1d(args, cfg)
-            plots_1d(args, cfg)
+            scans_1d(list(cfg.baseline_combiners.values()), args)
+            plots_1d(cfg.plots_1d, args, cfg)
         if any(x in ["all", "2d"] for x in args.actions):
-            scans_2d(args, cfg)
-            plots_2d(args, cfg)
+            scans_2d(list(cfg.baseline_combiners.values()), args)
+            plots_2d(cfg.plots_2d, args, cfg)
 
     if args.interactive:
         plt.show()
