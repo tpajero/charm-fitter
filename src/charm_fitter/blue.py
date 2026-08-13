@@ -71,6 +71,8 @@ class Measurement:
         "CDF": "m",
         "CLEO": "m",
         "CMS": "g",
+        "E791": "y",
+        "FOCUS": "c",
         "LHCb": "b",
         "average": "k",
         "PDG": "k",
@@ -278,12 +280,13 @@ def plot_measurements(
 def blue_parser(default_outdir: str) -> argparse.ArgumentParser:
     """Create a argument parser for the BLUE scripts with the arguments shared by all scripts."""
     parser = argparse.ArgumentParser()
+    outdir = repo_path / "plots" / "BLUE" / default_outdir
     parser.add_argument(
         "-o",
         "--outdir",
         type=Path,
-        default=repo_path / "plots" / "BLUE" / default_outdir,
-        help="Output directory for saving the plots",
+        default=outdir,
+        help=f"Output directory for saving the plots (defaults to {str(outdir)!r})",
     )
     ref_group = parser.add_mutually_exclusive_group()
     ref_group.add_argument(

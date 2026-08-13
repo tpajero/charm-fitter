@@ -21,7 +21,8 @@ The statistical treatment is frequentist and relies on the GammaCombo package (s
 [gammacombo](https://gammacombo.github.io) for details).
 
 Additionally, the folder `BLUE/main` contains executables to perform single-observable averages of charm quantities
-(e.g. for DeltaY, CP violation in D0 -> KS KS decays, and D(s)+ -> eta(')h+ branching fractions).
+(e.g. for DeltaY, CP violation in D0 -> KS KS decays, D(s)+ -> eta(')h+ branching fractions and CP asymmetries, yCP
+and yCP - yCP(RS)).
 The executables are based on the [BLUE](https://blue.hepforge.org/) package, and are direcly linked against a local
 copy of its library.
 
@@ -83,7 +84,7 @@ We would like to thank Nico Kleijne for a careful review of the code.
 
 ## Citation
 
-Please consider citing the following article if you use this software:
+Please cite the following article if you use this software:
 
 T. Pajero and M. J. Morello, *Mixing and CP violation in D0 -> K- pi+ decays*,
 [JHEP **03** (2022) 162](https://inspirehep.net/literature/1866950).
