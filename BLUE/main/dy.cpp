@@ -3,23 +3,18 @@
  * Author: tommaso.pajero@cern.ch
  * Date: October 2022
  *
- * Code to perform the average of DeltaY (a.k.a. -A_Gamma) measurements.
- * Values are expressed in units of 10^-4.
+ * Perform the average of DeltaY (a.k.a. -A_Gamma) measurements. Values are expressed in units of 10^-4.
  *
- * The code is based on the BLUE package (https://blue.hepforge.org/).
- * Run it from a root interactive session through:
+ * Print usage and available options with
  *
- *    gSystem->Load("libBlue.so")
- *    .L DY.cpp
- *    DY(<n-combination>)
+ *    ./bin/BLUE/dy -h
  *
- * The scale factor to account for dilution in the mu-tagged measurement by LHCb (Run2_mu) is taken from
- * LHCb-ANA-2019-021, and gets contributions from:
- *  - Fig. 11, where the average from the deviation from unity of the slope is -0.0554
- *  - Fig. 12, where the average from the deviation from unity of the slope is -0.0521
- * The scale factor is thus equal to 1 / (1 - 0.0554) / (1 - 0.0521) = 1.117.
- **/
+ */
 
+#include <BLUE/Blue.h>
+#include <BLUE/Utils.h>
+
+#include <cstdlib>
 #include <iomanip>
 #include <iostream>
 #include <map>
@@ -27,47 +22,46 @@
 #include <string>
 #include <vector>
 
-#include <Blue.h>
+const BLUE::Combinations combinations = {
+    {0, {"LHCb average 2021", {4, 5, 6, 7, 8, 9, 10, 11}}},
+    {1, {"LHCb average 2021 (K+ K-)", {4, 6, 8, 10}}},
+    {2, {"LHCb average 2021 (pi+ pi-)", {5, 7, 9, 11}}},
+    {3, {"LHCb average 2024", {4, 5, 6, 7, 8, 9, 10, 11, 12}}},
+    {100, {"World average 2021", {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}}},
+    {101, {"World average 2021 (K+ K-)", {1, 4, 6, 8, 10}}},
+    {102, {"World average 2021 (pi+ pi-)", {2, 5, 7, 9, 11}}},
+    {103, {"World average 2024", {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}}},
+};
 
-void print_header(const std::string avg_title) {
-  const int line_length = 80;
-  std::cout << std::setw(line_length) << std::setfill('-') << "\n"
-            << avg_title << "\n"
-            << std::setw(line_length) << std::setfill('-') << "\n";
-}
+const std::vector<TString> names = {
+    "BaBar            ",  //  0  https://inspirehep.net/literature/1186384
+    "CDF KK           ",  //  1  https://inspirehep.net/literature/1323066
+    "CDF PP           ",  //  2  https://inspirehep.net/literature/1323066
+    "Belle            ",  //  3  https://inspirehep.net/literature/1395100
+    "LHCb R1 mu KK    ",  //  4  https://inspirehep.net/literature/1341286
+    "LHCb R1 mu PP    ",  //  5  https://inspirehep.net/literature/1341286
+    "LHCb R1 prompt KK",  //  6  https://inspirehep.net/literature/1514549
+    "LHCb R1 prompt PP",  //  7  https://inspirehep.net/literature/1514549
+    "LHCb R2 mu KK    ",  //  8  https://inspirehep.net/literature/1762838
+    "LHCb R2 mu PP    ",  //  9  https://inspirehep.net/literature/1762838
+    "LHCb R2 prompt KK",  // 10  https://inspirehep.net/literature/1864385
+    "LHCb R2 prompt PP",  // 11  https://inspirehep.net/literature/1864385
+    "LHCb R2 pipipi0  ",  // 12  https://inspirehep.net/literature/2785424
+};
 
 /**
- * Perform the combination of a given set of measurements.
+ * Perform the combination of a set of DeltaY (a.k.a. -A_Gamma) measurements. Values are expressed in units of 10^-4.
  *
- * @param flag Steers which set of measurements should be employed (according to the values of "combinations" below).
+ * The scale factor to account for dilution in the mu-tagged measurement by LHCb (Run2_mu) is taken from
+ * LHCb-ANA-2019-021, and gets contributions from:
+ *  - Fig. 11, where the average from the deviation from unity of the slope is -0.0554
+ *  - Fig. 12, where the average from the deviation from unity of the slope is -0.0521
+ * The scale factor is thus equal to 1 / (1 - 0.0554) / (1 - 0.0521) = 1.117.
+ *
+ * @param flag Steers which set of measurements should be employed (according to the values of "combinations" above).
  */
-void DY(int flag = 0) {
+void run(const int flag) {
 
-  const std::map<int, std::pair<std::string, std::vector<int>>> combinations = {
-      {0, {"LHCb average 2024", {4, 5, 6, 7, 8, 9, 10, 11, 12}}},
-      {1, {"LHCb average 2024 (K+ K-)", {4, 6, 8, 10}}},
-      {2, {"LHCb average 2024 (pi+ pi-)", {5, 7, 9, 11}}},
-      {100, {"World average 2024", {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}}},
-      {101, {"World average 2024 (K+ K-)", {1, 4, 6, 8, 10}}},
-      {102, {"World average 2024 (pi+ pi-)", {2, 5, 7, 9, 11}}},
-  };
-
-  // number of estimates, uncertainties, observables
-  const std::vector<TString> names = {
-      "BaBar         ",  //  0
-      "CDF_KK        ",  //  1
-      "CDF_PP        ",  //  2
-      "Belle         ",  //  3
-      "Run1_mu_KK    ",  //  4
-      "Run1_mu_PP    ",  //  5
-      "Run1_prompt_KK",  //  6
-      "Run1_prompt_PP",  //  7
-      "Run2_mu_KK    ",  //  8
-      "Run2_mu_PP    ",  //  9
-      "Run2_prompt_KK",  // 10
-      "Run2_prompt_PP",  // 11
-      "Run2_pipipi0",    // 12
-  };
   const std::vector<TString> names_obs = {"     DY"};
   const auto num_est = names.size();
 
@@ -122,8 +116,8 @@ void DY(int flag = 0) {
   auto inp_sta = std::make_unique<const TMatrixD>(num_est, num_unc, &s_unc[0]);
 
   // Format for the output
-  const TString for_val = "%2.2f";
-  const TString for_unc = "%2.2f";
+  const TString for_val = "%+6.2f";
+  const TString for_unc = "%5.2f";
   const TString for_wei = "%2.2f";
   const TString for_rho = "%2.2f";
   const TString for_pul = "%2.2f";
@@ -142,13 +136,17 @@ void DY(int flag = 0) {
 
   // Perform the combination
   const auto [title, inputs] = combinations.at(flag);
-  print_header(title);
+  BLUE::print_banner("DeltaY(h- h+ (pi0))", title);
   for (auto i = 0; i < num_est; ++i) my_blue->SetInActiveEst(i);
   for (auto i : inputs) my_blue->SetActiveEst(i);
   my_blue->FixInp();
   my_blue->PrintEst();
   my_blue->Solve();
   my_blue->PrintResult();
+}
 
-  return;
+int main(int argc, char** argv) {
+  const int flag = BLUE::parse_args(argc, argv, combinations, names);
+  run(flag);
+  return EXIT_SUCCESS;
 }

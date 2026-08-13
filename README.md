@@ -20,9 +20,10 @@ The impact of using different assumptions for the final-state corrections for De
 The statistical treatment is frequentist and relies on the GammaCombo package (see
 [gammacombo](https://gammacombo.github.io) for details).
 
-Additionally, the folder `scripts/BLUE` contains C++ scripts to perform single-observable averages (e.g. for DeltaY, CP
-violation in D0 -> KS KS decays, and D(s)+ -> eta(')h+ branching fractions), based on the
-[BLUE](https://blue.hepforge.org/) combiner, and Python scripts to plot the results.
+Additionally, the folder `BLUE/main` contains executables to perform single-observable averages of charm quantities
+(e.g. for DeltaY, CP violation in D0 -> KS KS decays, and D(s)+ -> eta(')h+ branching fractions).
+The executables are based on the [BLUE](https://blue.hepforge.org/) package, and are direcly linked against a local
+copy of its library.
 
 ## Install
 
@@ -64,7 +65,13 @@ measurements to the combination.
 
 ### BLUE combinations
 
-Please refer to the annotations at the beginning of C++ and Python files in the [scripts/BLUE](scripts/BLUE) folder.
+The BLUE combinations can be performed using the executables built from [BLUE/main](BLUE/main), e.g.
+
+    bin/BLUE/<exec> <combination-id>
+
+The executables support the `-h` option, to list which combinations are supported.
+The results of the combinations can be plotted using the Python scripts in [BLUE/scripts](BLUE/scripts)
+(run them with `-h` to explore available options).
 
 ## Maintainers
 
