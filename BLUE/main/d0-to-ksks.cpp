@@ -3,17 +3,18 @@
  * Author: tommaso.pajero@cern.ch
  * Date: September 2024
  *
- * Code to perform the average of ACP(D0 -> KS KS) measurements.
+ * Perform the average of ACP(D0 -> KS KS) measurements.
  *
- * The code is based on the BLUE package (https://blue.hepforge.org/).
- * Run it from a root interactive session through:
+ * Print usage and available options with
  *
- *    gSystem->Load("libBlue.so")
- *    .L ksks.cpp
- *    ksks(<n-combination>)
+ *    ./bin/BLUE/ksks -h
  *
  **/
 
+#include <BLUE/Blue.h>
+#include <BLUE/Utils.h>
+
+#include <cstdlib>
 #include <iomanip>
 #include <iostream>
 #include <map>
@@ -21,40 +22,29 @@
 #include <string>
 #include <vector>
 
-#include <Blue.h>
+const BLUE::Combinations combinations = {
+    {0, {"LHCb average 2025", {1, 3, 7}}},
+    {1, {"World average 2025", {0, 1, 3, 4, 6, 7}}},
+};
 
-void print_header(const std::string avg_title) {
-  const int line_length = 80;
-  std::cout << std::setw(line_length) << std::setfill('-') << "\n"
-            << avg_title << "\n"
-            << std::setw(line_length) << std::setfill('-') << "\n";
-}
+const std::vector<TString> names = {
+    "CLEO      ",  //  0  https://inspirehep.net/literature/539090
+    "LHCb 2015 ",  //  1  https://inspirehep.net/literature/1389705
+    "Belle 2017",  //  2  https://inspirehep.net/literature/1599959
+    "LHCb 2021 ",  //  3  https://inspirehep.net/literature/1861934
+    "CMS       ",  //  4  https://inspirehep.net/literature/2788405
+    "Belle 2024",  //  5  https://inspirehep.net/literature/2914970
+    "Belle 2025",  //  6  https://inspirehep.net/literature/2844984
+    "LHCb 2025 ",  //  7  https://inspirehep.net/literature/3070434
+};
 
 /**
  * Perform the combination of a given set of measurements.
  *
- * @param flag Steers which set of measurements should be employed (according to the values of "combinations" below).
+ * @param flag Steers which set of measurements should be employed (according to the values of "combinations" above).
  */
-void ksks(const int flag = 0) {
+void run(const int flag) {
 
-  const std::map<int, std::pair<std::string, std::vector<int>>> combinations = {
-      {0, {"World average 2024", {0, 1, 3, 4, 5}}},
-      {1, {"World average March 2025", {0, 1, 3, 4, 6}}},
-      {2, {"LHCb average 2025", {1, 3, 7}}},
-      {3, {"World average 2025", {0, 1, 3, 4, 6, 7}}},
-  };
-
-  // number of estimates, uncertainties, observables
-  const std::vector<TString> names = {
-      "CLEO      ",  //  0
-      "LHCb_2015 ",  //  1
-      "Belle_2017",  //  2
-      "LHCb_2021 ",  //  3
-      "CMS       ",  //  4
-      "Belle_2024",  //  5
-      "Belle_2025",  //  6
-      "LHCb_2025",   //  7
-  };
   const std::vector<TString> names_obs = {" ACP(D0 -> KS KS)"};
   const auto num_est = names.size();
 
@@ -117,13 +107,17 @@ void ksks(const int flag = 0) {
 
   // Perform the combination
   const auto [title, inputs] = combinations.at(flag);
-  print_header(title);
+  BLUE::print_banner("ACP(D0 -> KS KS)", title);
   for (auto i = 0; i < num_est; ++i) my_blue->SetInActiveEst(i);
   for (auto i : inputs) my_blue->SetActiveEst(i);
   my_blue->FixInp();
   my_blue->PrintEst();
   my_blue->Solve();
   my_blue->PrintResult();
+}
 
-  return;
+int main(int argc, char** argv) {
+  const int flag = BLUE::parse_args(argc, argv, combinations, names);
+  run(flag);
+  return EXIT_SUCCESS;
 }

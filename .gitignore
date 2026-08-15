@@ -3,7 +3,8 @@ doc/latex/
 build*/
 bin/
 plots/
-blue/figs
+
+BLUE/scripts/*.sh
 
 .DS_Store
 *~

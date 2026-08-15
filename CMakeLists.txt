@@ -77,3 +77,59 @@ endforeach()
 foreach(folder ${OUTPUT_FOLDERS})
   install(DIRECTORY DESTINATION ${COMBINER_NAME}/${folder})
 endforeach()
+
+# -----------------------------------------------------------------------------
+# Build the BLUE library and executables (optional)
+# -----------------------------------------------------------------------------
+
+option(
+  BUILD_BLUE
+  "Build the BLUE library and the executables for single-observable averages"
+  ON)
+
+if(BUILD_BLUE)
+  set(BLUE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/BLUE/include)
+  set(BLUE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/BLUE/src)
+  set(BLUE_MAIN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/BLUE/main)
+
+  set(BLUE_LIB Blue)
+  add_library(${BLUE_LIB} SHARED ${BLUE_SOURCE_DIR}/Blue.cxx
+                                 ${BLUE_SOURCE_DIR}/Utils.cpp)
+  target_link_libraries(
+    ${BLUE_LIB}
+    PUBLIC ROOT::Core
+           ROOT::Gpad
+           ROOT::Graf
+           ROOT::Hist
+           ROOT::MathCore
+           ROOT::Matrix
+           ROOT::RIO)
+  target_include_directories(${BLUE_LIB} PUBLIC ${BLUE_INCLUDE_DIR})
+
+  # Silence compiler warnings for the BLUE library.
+  if(MSVC)
+    set_property(
+      SOURCE ${BLUE_SOURCE_DIR}/Blue.cxx
+      APPEND
+      PROPERTY COMPILE_OPTIONS /w)
+  else()
+    set_property(
+      SOURCE ${BLUE_SOURCE_DIR}/Blue.cxx
+      APPEND
+      PROPERTY COMPILE_OPTIONS -w)
+  endif()
+
+  root_generate_dictionary(G__${BLUE_LIB} BLUE/Blue.h MODULE ${BLUE_LIB}
+                           LINKDEF ${BLUE_INCLUDE_DIR}/BLUE/LinkDef.h)
+
+  set(BLUE_EXECUTABLES dy d0-to-ksks ycp ycp-minus-ycp-rs)
+  foreach(exec ${BLUE_EXECUTABLES})
+    add_executable(${exec} ${BLUE_MAIN_DIR}/${exec}.cpp)
+    target_link_libraries(${exec} PUBLIC ${BLUE_LIB})
+  endforeach()
+
+  foreach(exec ${BLUE_EXECUTABLES})
+    install(PROGRAMS $<TARGET_FILE:${exec}>
+            DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/bin/BLUE)
+  endforeach()
+endif()
