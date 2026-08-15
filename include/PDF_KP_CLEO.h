@@ -15,9 +15,12 @@
 #include <set>
 #include <string>
 
-class PDF_Cleo : public PDF_Charm {
+/**
+ * Implements the CLEO-c measurement of D0 -> K+ pi-, https://inspirehep.net/literature/1189182.
+ */
+class PDF_KP_CLEO : public PDF_Charm {
  public:
-  PDF_Cleo(TString measurement_id, parametrisations::mix mix_param);
+  PDF_KP_CLEO(TString measurement_id, parametrisations::mix mix_param);
   void initObservables() override;
   void initRelations() override;
   void setCorrelations(TString measurement_id) override;

@@ -7,21 +7,20 @@
 #include <PDF_AcpHH_LHCb_Run12.h>
 #include <PDF_BES_CLEO_K3pi_Kpipi0.h>
 #include <PDF_BES_Kpi.h>
-#include <PDF_BES_Kpi_1d.h>
-#include <PDF_BES_Kpi_7d.h>
+#include <PDF_BES_Kpi_pipipi0.h>
 #include <PDF_BinFlip.h>
-#include <PDF_Cleo.h>
 #include <PDF_DY.h>
 #include <PDF_DY_RS.h>
 #include <PDF_DY_pipipi0.h>
 #include <PDF_Fp_pipipi0.h>
 #include <PDF_K3pi.h>
+#include <PDF_KP_CLEO.h>
 #include <PDF_Kpipi0.h>
-#include <PDF_Kshh.h>
 #include <PDF_RM.h>
 #include <PDF_WS.h>
 #include <PDF_WS_NoCPV.h>
 #include <PDF_XY.h>
+#include <PDF_XY_QoP_PHI.h>
 #include <PDF_scan_DY_RS.h>
 #include <PDF_yCP.h>
 #include <PDF_yCP_minus_yCP_KP.h>
@@ -29,33 +28,45 @@
 #include <PDF_yCP_plus_yCP_RS.h>
 
 #include <format>
+#include <iostream>
 #include <set>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
 namespace {
-  std::vector<int> get_lhcb_pdfs(const std::string run, const hypotheses::dy_fsc dy_fsc_hypo) {
+  std::vector<int> lhcb_pdfs(const std::string period, const hypotheses::dy_fsc dy_fsc_hypo) {
     std::vector<int> pdfs;
-    if (run == "run12") {
+    if (period == "R1") {  // LHCb Run 1
       pdfs = {
-          3,   // XY               KSpipi Prompt Run 1
-          11,  // RM               K3pi Run 1
-          21,  // BinFlip          Run 1
-          24,  // BinFlip          Run 2
-          35,  // WS               DT Run 1
-          39,  // WS               Prompt Run 1+2
-          61,  // yCP_minus_yCP_RS WA2020          TODO
-          64,  // yCP_minus_yCP_RS 2022 prompt
-          72,  // DY average
-          90,  // AcpHH
+          140,  // yCP - yCP(RS)
+          190,  // DeltaY(h- h+)
+          220,  // DeltaACP, ACP(K- K+)
+          281,  // D0 -> K+ pi-
+          322,  // D0 -> KS pi- pi+      Prompt 2011 (AmAna)
+          323,  // D0 -> KS pi- pi+      Binflip
+          370,  // D0 -> K+ pi- pi+ pi+
+      };
+    } else if (period == "R12") {  // LHCb Run 1 + Run 2
+      pdfs = {
+          140,  // yCP - yCP(RS)         Run 1
+          141,  // yCP - yCP(RS)         Run 2
+          191,  // DeltaY(h- h+)         Run 1+2
+          222,  // DeltaACP, ACP(K- K+)  Run 1+2
+          284,  // D0 -> K+ pi-          Run 1+2 prompt (App. B)
+          286,  // D0 -> K+ pi-          Run 1+2 DT
+          322,  // D0 -> KS pi- pi+      Prompt 2011 (AmAna)
+          323,  // D0 -> KS pi- pi+      Binflip Run 1
+          326,  // D0 -> KS pi- pi+      Binflip Run 2
+          370,  // D0 -> K+ pi- pi- pi+
+                // TODO add D0 -> K+ pi- pi- pi+ Run 2
       };
       if (dy_fsc_hypo == hypotheses::dy_fsc::none) {
-        pdfs.push_back(85);  // DY_pipipi0 Run 2
+        pdfs.push_back(351);  // DY_pipipi0 Run 2
       }
     } else {
       throw std::runtime_error(
-          std::format("get_lhcb_pdfs ERROR The list of the LHCb results from the period `{}` is not supported", run));
+          std::format("lhcb_pdfs ERROR The list of the LHCb results from the period '{}' is not supported", period));
     }
     return pdfs;
   }
@@ -63,6 +74,15 @@ namespace {
   using hypotheses::dy_fsc;
   using parametrisations::acp;
   using parametrisations::mix;
+
+  /// Auxiliary inputs from Charm Factories.
+  const std::vector<int> cf_pdfs = {
+      1,   // Delta_Kpi            Cleo-c
+      21,  // Delta_Kpi F+_pipipi0 BESIII 3+7 fb
+      40,  // F+_pipipi0           Cleo-c
+      41,  // F+_pipipi0           BESIII
+      60,  // K3pi Kpipi0          Cleo-c + BESIII
+  };
 
   struct ParsedArgs {
     dy_fsc dy_fsc_hypo;
@@ -195,10 +215,11 @@ int main(int argc, char* argv[]) {
     print_charm_help();
   } else {
     std::cout << "INFO The combination will be run with the following configuration:\n"
-              << "     DeltaY(h- h+) final-state correction: " << dy_fsc_hypo << "\n"
-              << "     aCP(h- h+) asymmetry parametrisation: " << acp_param << "\n"
-              << "     Mixing parametrisation: " << mix_param << "\n"
-              << "     Allow for CP violation in DCS D0 -> K+ pi- decays: " << dcs_cpv << std::endl;
+              << "     - DeltaY(h- h+) final-state correction:          " << dy_fsc_hypo << "\n"
+              << "     - aCP(h- h+) asymmetry parametrisation:          " << acp_param << "\n"
+              << "     - Mixing parametrisation:                        " << mix_param << "\n"
+              << "     - Allow for CP violation in D0 -> K+ pi- decays: " << std::boolalpha << dcs_cpv
+              << std::noboolalpha << std::endl;
   }
 
   std::string combiner_name = std::format("charm-combo_{}-dyfsc_{}_{}", utils::get_id(dy_fsc_hypo),
@@ -216,69 +237,110 @@ int main(int argc, char* argv[]) {
   using parametrisations::kpi;
 
   // clang-format off
-  gc.addPdf(1, new PDF_XY("BaBar_Kshh", mix_param),                                  "XY KShh      BaBar                          ");
-  gc.addPdf(2, new PDF_XY("BaBar_pipipi0", mix_param),                               "XY pipipi0   BaBar                          ");
-  gc.addPdf(3, new PDF_XY("LHCb_KSpipi", mix_param),                                 "XY KSpipi    LHCb     2011     [D* -> D0 pi]");
-  gc.addPdf(4, new PDF_Kpipi0("BaBar", mix_param),                                   "Kpipi0       BaBar                          ");
-  gc.addPdf(5, new PDF_K3pi("LHCb-run1", mix_param),                                 "K3pi         LHCb     Run 1                 ");
-  gc.addPdf(6, new PDF_XY("Belle_Belle2", mix_param),                                "XY KSpipi    Belle+Belle2 (951+408 fb-1)    ");
 
-  gc.addPdf(10, new PDF_RM("HFLAV2016", mix_param),                                  "R_M          HFLAV    2016                  ");
-  gc.addPdf(11, new PDF_RM("LHCb_K3pi_Run1", mix_param),                             "R_M K3pi     LHCb                           ");
+  // --- Inputs from Charm Factories, grouped by final state ---
 
-  gc.addPdf(20, new PDF_Kshh("Belle", mix_param),                                    "KShh         Belle                          ");
-  gc.addPdf(21, new PDF_BinFlip("LHCb_Run1", mix_param),                             "Bin-flip     LHCb     Run 1                 ");
-  gc.addPdf(22, new PDF_BinFlip("LHCb_Run2_prompt", mix_param),                      "Bin-flip     LHCb     Run 2    [D* -> D0 pi]");
-  gc.addPdf(23, new PDF_BinFlip("LHCb_Run2_sl", mix_param),                          "Bin-flip     LHCb     Run 2    [B -> D0 mu] ");
-  gc.addPdf(24, new PDF_BinFlip("LHCb_Run2", mix_param),                             "Bin-flip     LHCb     Run 2                 ");
+  gc.addPdf(1, new PDF_KP_CLEO("CLEO-c", mix_param),                             "Delta_Kpi    CLEO-c                         ");
+  gc.addPdf(2, new PDF_BES_Kpi(mix_param),                                       "Delta_Kpi    BESIII   3fb      [A_kpi only] ");  // Superseded by 20, 21
 
-  gc.addPdf(30, new PDF_WS_NoCPV("CDF", mix_param),                                  "WS/RS        CDF                            ");
-  gc.addPdf(31, new PDF_WS_NoCPV("BaBar", mix_param),                                "WS/RS        BaBar    no CPV                ");
-  gc.addPdf(32, new PDF_WS_NoCPV("Belle", mix_param),                                "WS/RS        Belle    no CPV                ");
-  gc.addPdf(33, new PDF_WS("BaBar", mix_param),                                      "WS/RS        BaBar                          ");
-  gc.addPdf(34, new PDF_WS("Belle", mix_param),                                      "WS/RS        Belle                          ");
-  gc.addPdf(35, new PDF_WS("LHCb_DT_Run1", mix_param),                               "WS/RS        LHCb     Run 1    [B -> D* mu] ");
-  gc.addPdf(36, new PDF_WS("LHCb_Run1", mix_param),                                  "WS/RS        LHCb     Run 1                 ");
-  gc.addPdf(37, new PDF_WS("LHCb_Prompt_2011_2016", mix_param),                      "WS/RS        LHCb     2011-6   [D* -> D0 pi]");
-  gc.addPdf(38, new PDF_WS("LHCb_Prompt_Run12_sec9", mix_param, kpi::ccprime),       "WS/RS        LHCb     Run 1+2  [D* -> D0 pi]");
-  gc.addPdf(39, new PDF_WS("LHCb_Prompt_Run12_appB", mix_param, kpi::ccprime, dy_fsc_hypo, acp_param), "WS/RS        LHCb     Run 1+2  [D* -> D0 pi]");
-  gc.addPdf(40, new PDF_WS("LHCb_DT_Run2", mix_param),                               "WS/RS        LHCb     Run 2    [B -> D* mu] ");
-  gc.addPdf(41, new PDF_WS("LHCb_DT_Run12", mix_param),                              "WS/RS        LHCb     Run 1-2  [B -> D* mu] ");
+  gc.addSubsetPdf(20, new PDF_BES_Kpi_pipipi0("3fb", mix_param), 0, 1, 2, 3,     "Kpi+pipipi0  BESIII   3fb                   ");  // Supersedes 2
+  gc.addPdf(21, new PDF_BES_Kpi_pipipi0("3+7fb", mix_param),                     "Kpi+pipipi0  BESIII   3+7fb                 ");  // Supersedes 2, 20
 
-  gc.addPdf(50, new PDF_Cleo("Cleo-c", mix_param),                                   "Delta_Kpi    Cleo-c                         ");
-  gc.addPdf(51, new PDF_BES_Kpi_1d(mix_param),                                       "Delta_Kpi    BES      3fb      [A_kpi only] ");
-  gc.addPdf(52, new PDF_BES_Kpi(mix_param),                                          "Delta_Kpi    BES      3fb                   ");
-  gc.addPdf(53, new PDF_Fp_pipipi0("Cleo-c"),                                        "Fpipipi0     Cleo-c                         ");
-  gc.addPdf(54, new PDF_BES_CLEO_K3pi_Kpipi0("BES3-CLEO"),                           "K3pi-Kpipi0  BES3 + Cleo                    ");
-  gc.addPdf(55, new PDF_Fp_pipipi0("BESIII"),                                        "Fpipipi0     BES3                           ");
-  gc.addPdf(56, new PDF_BES_Kpi_7d(mix_param),                                       "Delta_Kpi    BES3     3+7fb                 ");
+  gc.addPdf(40, new PDF_Fp_pipipi0("CLEO-c"),                                    "Fpipipi0     CLEO-c                         ");
+  gc.addPdf(41, new PDF_Fp_pipipi0("BESIII-8fb"),                                "Fpipipi0     BESIII   8fb                   ");  // Assumed uncorrelated from 20, 21 due to much larger sample (8 vs. 3 fb)
 
-  gc.addPdf(60, new PDF_yCP("WA2020", mix_param),                                    "yCP          WA       2020                  ");
-  gc.addPdf(61, new PDF_yCP_minus_yCP_RS("WA2020", mix_param),                       "yCP-yCP(RS)  WA       2020                  ");
-  gc.addPdf(62, new PDF_yCP_minus_yCP_KP("WA2020", mix_param),                       "yCP-yCP(KP)  WA       2020                  ");
-  gc.addPdf(63, new PDF_yCP_plus_yCP_RS("WA2020", mix_param),                        "yCP+yCP(RS)  WA       2020                  ");
-  gc.addPdf(64, new PDF_yCP_minus_yCP_RS("LHCb2022", mix_param),                     "yCP-yCP(RS)  LHCb     2022                  ");
+  gc.addPdf(60, new PDF_BES_CLEO_K3pi_Kpipi0("BESIII-CLEO-c"),                   "K3pi-Kpipi0  BESIII + CLEO-c                ");
 
+  // --- Charm measurements ---
+
+  // SL Mixing
+  gc.addPdf(100, new PDF_RM("HFLAV-2008", mix_param),                            "R_M          HFLAV    2008                  ");
+
+  // yCP
+  gc.addPdf(110, new PDF_yCP("WA-2015", mix_param),                              "yCP          WA       2015                  ");
+
+  gc.addPdf(120, new PDF_yCP_plus_yCP_RS("Belle", mix_param),                    "yCP+yCP(RS)  Belle                          ");
+
+  gc.addPdf(130, new PDF_yCP_minus_yCP_KP("E791", mix_param),                    "yCP-yCP(KP)  E791                           ");
+
+  gc.addPdf(140, new PDF_yCP_minus_yCP_RS("LHCb-R1", mix_param),                 "yCP-yCP(RS)  LHCb     Run 1    [B -> D* mu] ");  // Included in WA >= 2018
+  gc.addPdf(141, new PDF_yCP_minus_yCP_RS("LHCb-R2", mix_param),                 "yCP-yCP(RS)  LHCb     Run 2    [D* -> D0 pi]");  // Included in WA >= 2022
+
+  gc.addPdf(160, new PDF_yCP_minus_yCP_RS("WA-2016", mix_param),                 "yCP-yCP(RS)  WA       2016                  ");
+  gc.addPdf(161, new PDF_yCP_minus_yCP_RS("WA-2018", mix_param),                 "yCP-yCP(RS)  WA       2018                  ");
+  gc.addPdf(162, new PDF_yCP_minus_yCP_RS("WA-2022", mix_param),                 "yCP-yCP(RS)  WA       2022                  ");
+
+  // D0 -> h+ h-
   if (dy_fsc_hypo == dy_fsc::none) {
-    gc.addPdf(70, new PDF_DY("WA2019", dy_fsc_hypo, acp_param, mix_param),           "DY           WA       2019                  ");
-    gc.addPdf(73, new PDF_DY("Belle&BaBar", dy_fsc_hypo, acp_param, mix_param),      "DY           B-factories                    ");
-  }
-  gc.addPdf(71, new PDF_DY("WA2020", dy_fsc_hypo, acp_param, mix_param),             "DY           WA       2020                  ");
-  gc.addPdf(72, new PDF_DY("WA2021", dy_fsc_hypo, acp_param, mix_param),             "DY           WA       2021                  ");
-
-  gc.addPdf(80, new PDF_DY_RS("LHCb2021", mix_param),                                "DY(RS)       LHCb     2021                  ");
-
-  if (dy_fsc_hypo == dy_fsc::none) {
-    gc.addPdf(85, new PDF_DY_pipipi0("LHCb-R2", mix_param),                          "DY(pipipi0)  LHCb     Run2                  ");
+    gc.addPdf(170, new PDF_DY("Belle+BaBar", dy_fsc_hypo, acp_param, mix_param), "DY           B-Factories                    ");  // Included in WA >= 2019
   }
 
-  gc.addPdf(90, new PDF_AcpHH_LHCb_Run12(dy_fsc_hypo, acp_param, mix_param),                   "ACP(KK/PP)   LHCb     Run1+2                ");
-  gc.addSubsetPdf(93, new PDF_AcpHH_LHCb_Run12(dy_fsc_hypo, acp_param, mix_param), 0, 1, 4, 5, "ACP(KK/PP)   LHCb     Run1                  ");
+  gc.addPdf(190, new PDF_DY("LHCb-R1",  dy_fsc_hypo, acp_param, mix_param),      "DY           LHCb     Run 1                 ");  // Included in WA >= 2019
+  gc.addPdf(191, new PDF_DY("LHCb-R12", dy_fsc_hypo, acp_param, mix_param),      "DY           LHCb     Run 1+2               ");  // Included in WA >= 2021
 
-  gc.addPdf(100, new PDF_scan_DY_RS(mix_param),                                      "ScanDYRS     This is just a nuisance parameter");
+  gc.addPdf(200, new PDF_DY("WA-2019", dy_fsc_hypo, acp_param, mix_param),       "DY           WA       2019                  ");
+  gc.addPdf(201, new PDF_DY("WA-2020", dy_fsc_hypo, acp_param, mix_param),       "DY           WA       2020                  ");
+  gc.addPdf(202, new PDF_DY("WA-2021", dy_fsc_hypo, acp_param, mix_param),       "DY           WA       2021                  ");
 
-  gc.addPdf(110, new PDF_yCP("WA2020_biased", mix_param),                            "yCP          WA       2020     [biased]     ");
-  gc.addPdf(111, new PDF_yCP("LHCb2022_biased", mix_param),                          "yCP-yCP(RS)  LHCb     2022     [biased]     ");
+  gc.addSubsetPdf(220, new PDF_AcpHH_LHCb_Run12(dy_fsc_hypo, acp_param, mix_param), 0, 1, 4, 5,
+                                                                                 "ACP(KK/PP)   LHCb     Run1                  ");  // Superseded by 221, 222
+  gc.addSubsetPdf(221, new PDF_AcpHH_LHCb_Run12(dy_fsc_hypo, acp_param, mix_param), 0, 1, 4, 5, 6, 7,
+                                                                                 "ACP(KK/PP)   LHCb     DeltaACP R12, ACPKK R1");  // Supersedes 220, superseded by 222
+  gc.addPdf(222, new PDF_AcpHH_LHCb_Run12(dy_fsc_hypo, acp_param, mix_param),    "ACP(KK/PP)   LHCb     Run1+2                ");  // Supersedes 220, 221
+
+  // D0 -> K+ pi-
+
+  gc.addPdf(250, new PDF_WS_NoCPV("CDF", mix_param),                             "WS/RS        CDF      No CPV                ");
+  gc.addPdf(251, new PDF_WS_NoCPV("BaBar", mix_param),                           "WS/RS        BaBar    No CPV                ");  // Alternative to 260
+  gc.addPdf(252, new PDF_WS_NoCPV("Belle", mix_param),                           "WS/RS        Belle    No CPV                ");  // Incompatible with 261 and based on a larger sample
+
+  gc.addPdf(260, new PDF_WS("BaBar", mix_param),                                 "WS/RS        BaBar                          ");  // Alternative to 251
+  gc.addPdf(261, new PDF_WS("Belle", mix_param),                                 "WS/RS        Belle                          ");  // Incompatible with 252 and based on a smaller sample
+
+  gc.addPdf(280, new PDF_WS("LHCb-R1-DT", mix_param),                            "WS/RS        LHCb     Run 1    [B -> D* mu] ");
+  gc.addPdf(281, new PDF_WS("LHCb-R1-biased", mix_param),                        "WS/RS        LHCb     Run 1    [biased]     ");  // Prompt measurements neglects ghost pions
+  gc.addPdf(282, new PDF_WS("LHCb-2011-2016-prompt", mix_param),                 "WS/RS        LHCb     2011-6   [D* -> D0 pi]");
+  gc.addPdf(283, new PDF_WS("LHCb-R12-prompt-sec9", mix_param, kpi::ccprime),    "WS/RS        LHCb     Run 1+2  [D* -> D0 pi, sec 9]");
+  gc.addPdf(284, new PDF_WS("LHCb-R12-prompt-appB", mix_param, kpi::ccprime,
+                            dy_fsc_hypo, acp_param),                             "WS/RS        LHCb     Run 1+2  [D* -> D0 pi, app B]");
+  gc.addPdf(285, new PDF_WS("LHCb-R2-DT", mix_param),                            "WS/RS        LHCb     Run 2    [B -> D* mu] ");
+  gc.addPdf(286, new PDF_WS("LHCb-R12-DT", mix_param),                           "WS/RS        LHCb     Run 1+2  [B -> D* mu] ");
+
+  // D0 -> K- pi+
+
+  gc.addPdf(310, new PDF_DY_RS("LHCb-R2-prompt", mix_param),                     "DY(RS)       LHCb     Run 2    [D* -> D0 pi] ");
+
+  // D0 -> KS pi+ pi-
+
+  gc.addPdf(320, new PDF_XY("BaBar-KShh", mix_param),                            "KS h+ h-     BaBar    2010                  ");
+  gc.addPdf(321, new PDF_XY_QoP_PHI("Belle", mix_param),                         "KS h+ h-     Belle    2014                  ");  // Superseded by 327
+  gc.addPdf(322, new PDF_XY("LHCb-KSpipi-2011-prompt", mix_param),               "KS pi+ pi-   LHCb     2011     [D* -> D0 pi]");
+  gc.addPdf(323, new PDF_BinFlip("LHCb-R1", mix_param),                          "Bin-flip     LHCb     Run 1                 ");
+  gc.addPdf(324, new PDF_BinFlip("LHCb-R2-prompt", mix_param),                   "Bin-flip     LHCb     Run 2    [D* -> D0 pi]");
+  gc.addPdf(325, new PDF_BinFlip("LHCb-R2-SL", mix_param),                       "Bin-flip     LHCb     Run 2    [B -> D0 mu] ");
+  gc.addPdf(326, new PDF_BinFlip("LHCb-R2", mix_param),                          "Bin-flip     LHCb     Run 2                 ");
+  gc.addPdf(327, new PDF_XY("Belle-Belle2", mix_param),                          "KS pi+ pi-   Belle+Belle2 (951+408 fb-1)    ");  // Supersedes 321
+
+  // D0 -> pi+ pi- pi0
+
+  gc.addPdf(350, new PDF_XY("BaBar-pipipi0", mix_param),                         "pi+ pi- pi0  BaBar                          ");
+  if (dy_fsc_hypo == dy_fsc::none) {
+    gc.addPdf(351, new PDF_DY_pipipi0("LHCb-R2", mix_param),                     "DY(pipipi0)  LHCb     Run 2                 ");
+  }
+
+  // D0 -> K+ pi- pi0
+
+  gc.addPdf(360, new PDF_Kpipi0("BaBar", mix_param),                             "Kpipi0       BaBar                          ");
+
+  // D0 -> K+ pi- pi- pi+
+
+  gc.addPdf(370, new PDF_RM("LHCb-K3pi-R1", mix_param),                          "R_M  K3pi    LHCb     R1                    ");  // Subset of 371
+  gc.addPdf(371, new PDF_K3pi("LHCb-R1", mix_param),                             "K3pi         LHCb     R1                    ");  // Superset of 370
+
+  // --- Nuisance parameters ---
+
+  gc.addPdf(390, new PDF_scan_DY_RS(mix_param),                                      "ScanDYRS     This is just a nuisance parameter");
+
   // clang-format on
 
   ///////////////////////////////////////////////////
@@ -289,99 +351,104 @@ int main(int argc, char* argv[]) {
 
   gc.newCombiner(0, "empty", "empty");
 
-  // WA 2020
-  gc.newCombiner(1, "WA-2020", "World average (Dec 2020)", 1, 2, 3, 4, 10, 11, 20, 21, 30, 31, 32, 35, 37, 50, 51);
-  gc.getCombiner(1)->addPdf(gc[60]);
-  gc.getCombiner(1)->addPdf(gc[61]);
-  gc.getCombiner(1)->addPdf(gc[62]);
-  gc.getCombiner(1)->addPdf(gc[63]);
-  gc.getCombiner(1)->addPdf(gc[71]);
+  // World averages ----------------------------------------------------------------------------------------------------
 
-  // WA June 2021
-  gc.cloneCombiner(20, 1, "WA-2021", "World average (June 2021)");
-  gc.getCombiner(20)->addPdf(gc[22]);  // bin-flip run 2
-  gc.getCombiner(20)->delPdf(gc[71]);  // DY WA 2020
-  gc.getCombiner(20)->addPdf(gc[72]);  // DY WA 2021
-  gc.getCombiner(20)->delPdf(gc[11]);  // LHCb K3pi (x2 + y2)/4
-  gc.getCombiner(20)->addPdf(gc[5]);   // LHCb K3pi full
-  gc.getCombiner(20)->addPdf(gc[54]);  // BES3 + CLEO K3pi, Kpipi0
+  /*
+  // New LHCb measurement of the WS/RS ratio in D0 -> K+ pi- decays with LHCb 2011-2016 prompt data
+  gc.cloneCombiner(, , "WA-2018-02", "World average (Feb 2018)");
+  gc.getCombiner()->delPdf(gc[281]);  // LHCb Run 1 prompt + DT
+  gc.getCombiner()->addPdf(gc[280]);  // LHCb Run 1 DT
+  gc.getCombiner()->addPdf(gc[282]);  // LHCb 2011-2016 prompt
 
-  // WA after LHCb 2022 yCP measurement
-  gc.cloneCombiner(30, 20, "WA-2022-02", "World average (Feb 2022)");
-  gc.getCombiner(30)->addPdf(gc[64]);  // yCP LHCb 2022
+  // New LHCb measurement of yCP(h- h+) - yCP(RS) with Run 1 SL data (CKM)
+  gc.cloneCombiner(, , "WA-2018-09", "World average (Sep 2018)");
+  gc.getCombiner()->delPdf(gc[160]);
+  gc.getCombiner()->addPdf(gc[161]);
 
-  // WA after LHCb 2022 yCP measurement - biased
-  gc.cloneCombiner(31, 30, "WA-2022-02-biased",
-                   "World average (Feb 2022) #minus no #it{y}_{#it{CP}}^{#it{K^{#minus}#pi^{+}}} correction");
-  gc.getCombiner(31)->delPdf(gc[60]);
-  gc.getCombiner(31)->delPdf(gc[61]);
-  gc.getCombiner(31)->delPdf(gc[62]);
-  gc.getCombiner(31)->delPdf(gc[63]);
-  gc.getCombiner(31)->delPdf(gc[64]);
-  gc.getCombiner(31)->addPdf(gc[110]);
-  gc.getCombiner(31)->addPdf(gc[111]);
+  // New LHCb bin-flip measurement of D0 -> KS pi- pi+ with Run 1 data (La Thuile)
+  gc.cloneCombiner(, , "WA-2019-03", "World average (Mar 2019)");
+  gc.getCombiner()->addPdf(gc[323]);
+  */
 
-  // WA September 2022
-  gc.cloneCombiner(40, 30, "WA-2022-09", "World average (Sept 2022)");
-  gc.getCombiner(40)->delPdf(gc[51]);  // old BESIII measurement of delta_Kpi
-  gc.getCombiner(40)->addPdf(gc[52]);  // new BESIII measurement of delta_Kpi
-  gc.getCombiner(40)->addPdf(gc[53]);  // F+_pipipi0
-  gc.getCombiner(40)->delPdf(gc[22]);  // bin-flip LHCb Run 2 prompt
-  gc.getCombiner(40)->addPdf(gc[24]);  // bin-flip LHCb Run 2
-  gc.getCombiner(40)->addPdf(gc[90]);  // ACP(KK) + DeltaACP LHCb Run 1+2
+  gc.newCombiner(1, "base", "base",
+                 {1, 2, 100, 110, 120, 130, 161, 200, 250, 252, 260, 280, 282, 320, 321, 323, 350, 360, 371});
 
-  // WA March 2024 March before WS/RS
-  gc.cloneCombiner(49, 40, "WA-2024-02", "World average (Feb 2024)");
-  if (dy_fsc_hypo == dy_fsc::none) gc.getCombiner(49)->addPdf(gc[85]);  // DY(pi+ pi- pi0) from LHCb Run 2
+  // New LHCb measurement of DeltaY(h- h+) with Run 2 SL data (Brookhaven Forum)
+  gc.cloneCombiner(2, 1, "WA-2019-09", "World average (Sep 2019)");
+  gc.getCombiner(2)->delPdf(gc[200]);
+  gc.getCombiner(2)->addPdf(gc[201]);
 
-  // WA March 2024 - no FSC
-  gc.cloneCombiner(50, 40, "WA-2024-03", "World average (March 2024)");
-  gc.getCombiner(50)->delPdf(gc[37]);                                   // WS/RS in D0 -> Kpi from LHCb 2011-2016
-  gc.getCombiner(50)->addPdf(gc[39]);                                   // WS/RS in D0 -> Kpi from LHCb Run 1+2
-  if (dy_fsc_hypo == dy_fsc::none) gc.getCombiner(50)->addPdf(gc[85]);  // DY(pi+ pi- pi0) from LHCb Run 2
+  // New LHCb measurement of DeltaY(h- h+) with Run 2 prompt data (LHC seminar)
+  gc.cloneCombiner(3, 2, "WA-2021-02", "World average (Feb 2021)");
+  gc.getCombiner(3)->delPdf(gc[201]);
+  gc.getCombiner(3)->addPdf(gc[202]);
 
-  // WA March 2024 with parametrisation of prompt LHCb WS/RS decays from Sec. 9 - no FSC
-  gc.cloneCombiner(51, 50, "WA-2024-03-WSsec9", "World average (March 2024, prompt WS/RS from Sec. 9)");
-  gc.getCombiner(51)->delPdf(gc[39]);  // WS/RS in D0 -> Kpi from LHCb Run 1+2
-  gc.getCombiner(51)->addPdf(gc[38]);  // WS/RS in D0 -> Kpi from LHCb Run 1+2
+  // New LHCb bin-flip measurement of D0 -> KS pi- pi+ with Run 2 prompt data (Moriond QCD)
+  // New BESIII deterrmination of strong parameters for D0 -> K+ pi- pi- pi+ and D0 -> K+ pi- pi0
+  gc.cloneCombiner(4, 3, "WA-2021-03", "World average (Mar 2021)");
+  gc.getCombiner(4)->addPdf(gc[324]);
+  gc.getCombiner(4)->addPdf(gc[60]);  // BESIII + CLEO K3pi, Kpipi0
 
-  // WA Sept 2024 (new BESIII F+(pi+pi-pi0))
-  gc.cloneCombiner(53, 50, "WA-2024-09", "World average (Sep 2024)");
-  gc.getCombiner(53)->addPdf(gc[55]);  // BESIII measurement of Fp_pipipi0
+  // New LHCb bin-flip measurement of D0 -> KS pi- pi+ with Run 2 SL data (PANIC 2021)
+  gc.cloneCombiner(5, 4, "WA-2021-09", "World average (Sep 2021)");
+  gc.getCombiner(5)->delPdf(gc[324]);  // Bin-flip LHCb Run 2 prompt
+  gc.getCombiner(5)->addPdf(gc[326]);  // Bin-flip LHCb Run 2
 
-  // WA October 2024 (new WS/RS with DT Run 2 data)
-  gc.cloneCombiner(54, 53, "WA-2024-10", "World average (October 2024)");
-  gc.getCombiner(54)->delPdf(gc[35]);  // WS/RS in D0 -> Kpi from LHCb Run 1 DT
-  gc.getCombiner(54)->addPdf(gc[41]);  // WS/RS in D0 -> Kpi from LHCb Run 1+2 DT
+  // New LHCb measurement of yCP - yCP(RS) with Run 2 data (La Thuile 2022)
+  gc.cloneCombiner(6, 5, "WA-2022-03", "World average (Mar 2022)");
+  gc.getCombiner(6)->delPdf(gc[161]);
+  gc.getCombiner(6)->addPdf(gc[162]);
 
-  // WA October 2025 (new BinFlip from Belle + Belle 2, new BESIII Delta_Kpi, no new LHCb D0 -> K3pi Run 2) ------------
-  gc.cloneCombiner(55, 54, "WA-2025-10", "World average (October 2025)");
-  gc.getCombiner(55)->delPdf(gc[20]);  // D0 -> KS hh from Belle
-  gc.getCombiner(55)->addPdf(gc[6]);   // D0 -> KS pi pi BinFlip Belle + Belle 2
-  gc.getCombiner(55)->delPdf(gc[52]);  // D0 -> Kpi BESIII 3   fb
-  gc.getCombiner(55)->addPdf(gc[56]);  // D0 -> Kpi BESIII 3+7 fb
+  // New LHCb measurement of ACP(K- K+) (ICHEP 2022)
+  gc.cloneCombiner(7, 6, "WA-2022-07", "World average (Jul 2022)");
+  gc.getCombiner(7)->delPdf(gc[221]);  // LHCb DeltaACP Run 1+2, ACP(K- K+) Run 1
+  gc.getCombiner(7)->addPdf(gc[222]);  // LHCb DeltaACP Run 1+2, ACP(K- K+) Run 1+2
+
+  // New BESIII measurement of Delta_Kpi and F+(pi+ pi- pi0) with 3 fb
+  gc.cloneCombiner(8, 7, "WA-2022-08", "World average (Aug 2022)");
+  gc.getCombiner(8)->delPdf(gc[2]);   // BESIII delta_Kpi
+  gc.getCombiner(8)->addPdf(gc[20]);  // BESIII delta_Kpi + pipipi0 3fb
+
+  // New LHCb measurements for Moriond EW:
+  //   - WS/RS ratio in D0 -> K+ pi- decays with LHCb Run 2 prompt data
+  //   - DeltaY(pi- pi+ pi0) with 2012 + Run 2 data
+  gc.cloneCombiner(9, 8, "WA-2024-03", "World average (Mar 2024)");
+  gc.getCombiner(9)->delPdf(gc[282]);  // LHCb WS/RS in D0 -> K+ pi+ 2011-2016 prompt
+  gc.getCombiner(9)->addPdf(gc[284]);  // LHCb WS/RS in D0 -> K+ pi+ Run 1+2   prompt
+  if (dy_fsc_hypo == dy_fsc::none) { gc.getCombiner(9)->addPdf(gc[351]); }
+
+  // New measurement of F+(pi+pi-pi0) by BESIII
+  gc.cloneCombiner(10, 9, "WA-2024-09", "World average (Sep 2024)");
+  gc.getCombiner(10)->addPdf(gc[41]);  // F+_pipipi0 BESIII 8fb
+
+  // - New measurement of the WS/RS ratio in D0 -> K+ pi- decays with LHCb Run 2 DT data (LHCb Implications Workshop)
+  // - New Belle + Belle2 bin-flip measurement of D0 -> KS pi- pi+
+  gc.cloneCombiner(11, 10, "WA-2024-10", "World average (Oct 2024)");
+  gc.getCombiner(11)->delPdf(gc[280]);  // WS/RS in D0 -> Kpi, LHCb Run 1   DT
+  gc.getCombiner(11)->addPdf(gc[286]);  // WS/RS in D0 -> Kpi, LHCb Run 1+2 DT
+  gc.getCombiner(11)->delPdf(gc[321]);  // D0 -> KS h- h+   from Belle
+  gc.getCombiner(11)->addPdf(gc[327]);  // D0 -> KS pi- pi+ from Belle + Belle 2
+
+  // New BESIII measurement of Delta_Kpi with 8 fb
+  gc.cloneCombiner(12, 11, "WA-2025-06", "World average (Jun 2025)");
+  gc.getCombiner(12)->delPdf(gc[20]);  // BESIII delta_Kpi
+  gc.getCombiner(12)->addPdf(gc[21]);  // BESIII delta_Kpi + pipipi0 3fb
+
+  // New LHCb measurements of WS/RS in D0 -> K+ pi- pi- pi+ with Run 2 prompt data (CKM 2025) TODO
+  // gc.cloneCombiner(13, 12, "WA-2025-09", "World average (Sep 2025)");
+  // gc.getCombiner(13)->addPdf(gc[]);
 
   // LHCb-only averages ------------------------------------------------------------------------------------------------
 
-  gc.newCombiner(300, "LHCb-2024-05", "LHCb average (May 2024)");
-  for (const auto imeas : get_lhcb_pdfs("run12", dy_fsc_hypo)) gc.getCombiner(300)->addPdf(gc[imeas]);
+  gc.newCombiner(300, "LHCb-R1", "LHCb Run 1");
+  for (const auto pdf : lhcb_pdfs("R1", dy_fsc_hypo)) gc.getCombiner(300)->addPdf(gc[pdf]);
+  for (const auto pdf : cf_pdfs) gc.getCombiner(300)->addPdf(gc[pdf]);
 
-  // LHCb-only + charm factories averages ------------------------------------------------------------------------------
-
-  gc.cloneCombiner(400, 300, "LHCb-CF-2024-05", "LHCb + Charm factories average (May 2024)");
-  for (auto imeas : {50, 52, 53}) gc.getCombiner(400)->addPdf(gc[imeas]);
+  gc.newCombiner(301, "LHCb-R12", "LHCb Run 1+2");
+  for (const auto pdf : lhcb_pdfs("R12", dy_fsc_hypo)) gc.getCombiner(301)->addPdf(gc[pdf]);
+  for (const auto pdf : cf_pdfs) gc.getCombiner(301)->addPdf(gc[pdf]);
 
   // Impact of LHCb upgrades -------------------------------------------------------------------------------------------
-
-  // WA before LHCb Run 2
-  if (dy_fsc_hypo == dy_fsc::none) {
-    gc.newCombiner(500, "LHCb-Run1", "World average before LHCb Run 2");
-    for (auto imeas : {1, 2, 3, 4, 10, 11, 20, 21, 30, 31, 32, 35, 36, 50, 52, 60, 61, 62, 63, 70, 93})
-      gc.getCombiner(500)->addPdf(gc[imeas]);
-  }
-
-  // WA after LHCb Run 2
-  gc.cloneCombiner(501, 50, "LHCb-Run2", "World average after LHCb Run 2");
 
   ///////////////////////////////////////////////////
   //

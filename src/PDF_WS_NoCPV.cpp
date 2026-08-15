@@ -131,9 +131,13 @@ void PDF_WS_NoCPV::setCorrelations(const TString c) {
   resetCorrelations();
   if (c.EqualTo("CDF")) {
     corSource = "https://inspirehep.net/literature/1254229";
-    std::cout << "INFO [PDF_WS_NoCPV]: The correlation matrix of https://inspirehep.net/literature/1254229\n"
-                 "                     (CDF) is not positive definite. It has been modified to avoid non convergence.\n"
-              << std::endl;
+    /* N.B.: The correlation matrix is not positive definite. Positive definiteness was enforced by diagonalising it,
+             setting negative eigenvalues to zero, and transforming the matrix back to the orignal basis.
+
+             The original matrix was:    1.  -0.97  0.90
+                                              1.   -0.98
+                                                    1.
+    */
     std::vector<double> dataStat = {
         // clang-format off
         1., -0.967, 0.900,  // RD
@@ -143,7 +147,7 @@ void PDF_WS_NoCPV::setCorrelations(const TString c) {
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
   } else if (c.EqualTo("BaBar")) {
-    corSource = "https://inspirehep.net/literature/746245";
+    corSource = "https://hflav-eos.web.cern.ch/hflav-eos/charm/CKM25/results_mix_cpv.html";
     std::vector<double> dataStat = {
         // clang-format off
         1., -0.87, 0.77,  // RD

@@ -18,6 +18,8 @@
 #include <format>
 #include <iostream>
 #include <map>
+#include <numbers>
+#include <set>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -102,19 +104,19 @@ namespace {
   const std::map<std::string, std::string> labels = {
       {"BaBar", "WS/RS BaBar CPV"},
       {"Belle", "WS/RS Belle CPV"},
-      {"LHCb_DT_Run1", "WS/RS LHCb Run 1 DT"},
-      {"LHCb_Run1", "WS/RS LHCb Run 1"},
-      {"LHCb_Prompt_2011_2016", "WS/RS LHCb (11/16) prompt"},
-      {"LHCb_Prompt_Run12_sec9", "WS/RS LHCb Run 1+2 prompt Sec. 9"},
-      {"LHCb_Prompt_Run12_appB", "WS/RS LHCb Run 1+2 prompt App. B"},
-      {"LHCb_DT_Run2", "WS/RS LHCb Run 2 DT"},
-      {"LHCb_DT_Run12", "WS/RS LHCb Run 1+2 DT"},
+      {"LHCb-R1-DT", "WS/RS LHCb Run 1 DT"},
+      {"LHCb-R1-biased", "WS/RS LHCb Run 1 (biased)"},
+      {"LHCb-2011-2016-prompt", "WS/RS LHCb (11/16) prompt"},
+      {"LHCb-R12-prompt-sec9", "WS/RS LHCb Run 1+2 prompt Sec. 9"},
+      {"LHCb-R12-prompt-appB", "WS/RS LHCb Run 1+2 prompt App. B"},
+      {"LHCb-R2-DT", "WS/RS LHCb Run 2 DT"},
+      {"LHCb-R12-DT", "WS/RS LHCb Run 1+2 DT"},
   };
 }  // namespace
 
 PDF_WS::PDF_WS(const TString val, const TString err, const parametrisations::mix mix_param,
                parametrisations::kpi kpi_param, hypotheses::dy_fsc dy_fsc_hypo, parametrisations::acp acp_param)
-    : PDF_Charm{val.EqualTo("LHCb_Prompt_Run12_appB") ? 9 : 6}, mix_param{mix_param}, kpi_param{kpi_param},
+    : PDF_Charm{val.EqualTo("LHCb-R12-prompt-appB") ? 9 : 6}, mix_param{mix_param}, kpi_param{kpi_param},
       dy_fsc_hypo{dy_fsc_hypo}, acp_param{acp_param} {
   try {
     label = labels.at(val.Data());
@@ -122,9 +124,9 @@ PDF_WS::PDF_WS(const TString val, const TString err, const parametrisations::mix
     throw std::runtime_error(std::format("PDF_WS::PDF_WS ERROR Measurement ID {} not supported", val.Data()));
   }
 
-  if (kpi_param == parametrisations::kpi::ccprime && !val.BeginsWith("LHCb_Prompt_Run12")) {
-    throw std::runtime_error(
-        "PDF_WS::PDF_WS ERROR The c/c' parametrisation was introduced only with the LHCb Run 2 measurement");
+  if ((kpi_param == parametrisations::kpi::ccprime) != val.BeginsWith("LHCb-R12-prompt")) {
+    throw std::runtime_error("PDF_WS::PDF_WS ERROR The c/c' parametrisation must be used if and only if val is a LHCb "
+                             "Run 1+2 prompt measurement");
   }
 
   name = "WS_" + val;
@@ -270,23 +272,23 @@ void PDF_WS::setObservables(const TString c) {
     setObservablesToy();
   else if (c.EqualTo("BaBar")) {
     obsValSource = "https://inspirehep.net/literature/746245";
-    // setObservable("RD_obs", 0.00303); TODO
+    // (RD+, RD-) calculated from (RD, AD). See the comment on correlation matrices for details.
     setObservable("RD_p_obs", 2.97e-3);
     setObservable("y'+_obs", 9.8e-3);
     setObservable("x'2+_obs", -2.4e-4);
-    // setObservable("AD_obs", -2.1e-2); TODO
     setObservable("RD_m_obs", 3.09e-3);
     setObservable("y'-_obs", 9.6e-3);
     setObservable("x'2-_obs", -2.0e-4);
   } else if (c.EqualTo("Belle")) {
-    obsValSource = "http://belle.kek.jp/belle/theses/doctor/lmzhang06/phd-mix-400.ps.gz";
+    obsValSource = "http://belle.kek.jp/belle/theses/doctor/lmzhang06/phd-mix-400.ps.gz p. 100 "
+                   "(https://inspirehep.net/literature/708708)";
     setObservable("RD_p_obs", 3.73e-3);
     setObservable("y'+_obs", -1.2e-3);
     setObservable("x'2+_obs", 3.2e-4);
     setObservable("RD_m_obs", 3.56e-3);
-    setObservable("y'-_obs", 2e-3);
+    setObservable("y'-_obs", 2.0e-3);
     setObservable("x'2-_obs", 0.6e-4);
-  } else if (c.EqualTo("LHCb_DT_Run1")) {
+  } else if (c.EqualTo("LHCb-R1-DT")) {
     obsValSource = "https://inspirehep.net/literature/1499047";
     setObservable("RD_p_obs", 3.38e-3);
     setObservable("y'+_obs", 5.81e-3);
@@ -294,7 +296,8 @@ void PDF_WS::setObservables(const TString c) {
     setObservable("RD_m_obs", 3.60e-3);
     setObservable("y'-_obs", 3.32e-3);
     setObservable("x'2-_obs", 7.9e-5);
-  } else if (c.EqualTo("LHCb_Run1")) {
+  } else if (c.EqualTo("LHCb-R1-biased")) {
+    // The prompt measurement neglected the background from ghost pions
     obsValSource = "https://inspirehep.net/literature/1499047";
     setObservable("RD_p_obs", 3.474e-3);
     setObservable("y'+_obs", 5.97e-3);
@@ -302,7 +305,7 @@ void PDF_WS::setObservables(const TString c) {
     setObservable("RD_m_obs", 3.591e-3);
     setObservable("y'-_obs", 4.50e-3);
     setObservable("x'2-_obs", 6.1e-5);
-  } else if (c.EqualTo("LHCb_Prompt_2011_2016")) {
+  } else if (c.EqualTo("LHCb-2011-2016-prompt")) {
     obsValSource = "https://inspirehep.net/literature/1642234";
     setObservable("RD_p_obs", 3.454e-3);
     setObservable("y'+_obs", 5.01e-3);
@@ -310,16 +313,16 @@ void PDF_WS::setObservables(const TString c) {
     setObservable("RD_m_obs", 3.454e-3);
     setObservable("y'-_obs", 5.54e-3);
     setObservable("x'2-_obs", 1.6e-5);
-  } else if (c.EqualTo("LHCb_Prompt_Run12_sec9")) {
-    obsValSource = "https://inspirehep.net/literature/2871248 Tab III";
+  } else if (c.EqualTo("LHCb-R12-prompt-sec9")) {
+    obsValSource = "https://inspirehep.net/literature/2811016 Tab III";
     setObservable("RD_obs", 3.427e-3);
     setObservable("c_obs", 5.28e-3);
     setObservable("c'_obs", 1.20e-5);
     setObservable("AD_obs", -0.66e-2);
     setObservable("dc_obs", 2.0e-4);
     setObservable("dc'_obs", -0.7e-6);
-  } else if (c.EqualTo("LHCb_Prompt_Run12_appB")) {
-    obsValSource = "https://inspirehep.net/literature/2871248 Tab IV";
+  } else if (c.EqualTo("LHCb-R12-prompt-appB")) {
+    obsValSource = "https://inspirehep.net/literature/2811016 Tab IV";
     setObservable("RD_obs", 3.427e-3);
     setObservable("c_obs", 5.28e-3);
     setObservable("c'_obs", 1.20e-5);
@@ -329,20 +332,20 @@ void PDF_WS::setObservables(const TString c) {
     setObservable("ADt_obs", -0.82e-2);
     setObservable("dc~_obs", 3.2e-4);
     setObservable("dc'~_obs", -2.0e-6);
-  } else if (c.EqualTo("LHCb_DT_Run2")) {
-    obsValSource = "https://inspirehep.net/literature/2871248";
-    setObservable("RD_p_obs", 3.55e-3);
+  } else if (c.EqualTo("LHCb-R2-DT")) {
+    obsValSource = "https://inspirehep.net/literature/2871248, Table 15 of https://cds.cern.ch/record/2888491";
+    setObservable("RD_p_obs", 3.552e-3);
     setObservable("y'+_obs", 3.56e-3);
-    setObservable("x'2+_obs", 1.086e-4);
-    setObservable("RD_m_obs", 3.39e-3);
+    setObservable("x'2+_obs", 10.86e-5);
+    setObservable("RD_m_obs", 3.391e-3);
     setObservable("y'-_obs", 8.11e-3);
-    setObservable("x'2-_obs", -1.129e-4);
-  } else if (c.EqualTo("LHCb_DT_Run12")) {
+    setObservable("x'2-_obs", -11.29e-5);
+  } else if (c.EqualTo("LHCb-R12-DT")) {
     obsValSource = "https://inspirehep.net/literature/2871248";
-    setObservable("RD_p_obs", 3.50e-3);
+    setObservable("RD_p_obs", 3.500e-3);
     setObservable("y'+_obs", 4.14e-3);
     setObservable("x'2+_obs", 7.84e-5);
-    setObservable("RD_m_obs", 0.00344);
+    setObservable("RD_m_obs", 3.440e-3);
     setObservable("y'-_obs", 6.81e-3);
     setObservable("x'2-_obs", -4.86e-5);
   } else {
@@ -353,54 +356,81 @@ void PDF_WS::setObservables(const TString c) {
 void PDF_WS::setUncertainties(const TString c) {
   if (c.EqualTo("BaBar")) {
     obsErrSource = "https://inspirehep.net/literature/746245";
-    // StatErr[0] = 0.000189; // RD TODO
-    // StatErr[3] = 5.4e-2;    // AD TODO
+    // Errors for (RD+, RD-) calculated as sigma(RD) * sqrt(2). See the comment on correlation matrices for details.
     //         RD+       y'+     x'2+    RD-       y'-     x'2-
-    StatErr = {0.267e-3, 7.8e-3, 5.2e-4, 0.267e-3, 7.5e-3, 5.0e-4};
+    const double unc_RD = std::hypot(0.16e-3, 0.10e-3) * std::numbers::sqrt2;
+    StatErr = {
+        unc_RD,                      // RD+
+        std::hypot(6.4e-3, 4.5e-3),  // y'+
+        std::hypot(4.3e-4, 3.0e-4),  // x'2+
+        unc_RD,                      // RD-
+        std::hypot(6.1e-3, 4.3e-3),  // y'-
+        std::hypot(4.1e-4, 2.9e-4),  // x'2-
+    };
     std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("Belle")) {
-    obsErrSource = "http://belle.kek.jp/belle/theses/doctor/lmzhang06/phd-mix-400.ps.gz";
+    obsErrSource = "http://belle.kek.jp/belle/theses/doctor/lmzhang06/phd-mix-400.ps.gz p. 100 "
+                   "(https://inspirehep.net/literature/708708)";
     //         RD+      y'+     x'2+    RD-      y'-     x'2-
-    StatErr = {0.24e-3, 5.7e-3, 3.1e-4, 0.24e-3, 5.4e-3, 2.9e-4};
+    StatErr = {0.24e-3, 5.7e-3, 3.15e-4, 0.235e-3, 5.35e-3, 2.9e-4};
     std::ranges::fill(SystErr, 0.0);
-  } else if (c.EqualTo("LHCb_DT_Run1")) {
+  } else if (c.EqualTo("LHCb-R1-DT")) {
     obsErrSource = "https://inspirehep.net/literature/1499047";
-    StatErr = {std::hypot(1.5e-3, 0.6e-3),     // RD+
-               std::hypot(5.25e-3, 0.32e-3),   // y'+
-               std::hypot(4.46e-4, 0.31e-4),   // x'2+
-               std::hypot(1.5e-3, 0.7e-3),     // RD-
-               std::hypot(5.21e-3, 0.40e-3),   // y'-
-               std::hypot(4.31e-4, 0.38e-4)};  // x'2-
+    StatErr = {std::hypot(1.5e-3, 0.6e-3),    // RD+
+               std::hypot(5.25e-3, 0.32e-3),  // y'+
+               std::hypot(44.6e-5, 3.1e-5),   // x'2+
+               std::hypot(1.5e-3, 0.7e-3),    // RD-
+               std::hypot(5.21e-3, 0.40e-3),  // y'-
+               std::hypot(43.1e-5, 3.8e-5)};  // x'2-
     std::ranges::fill(SystErr, 0.0);
-  } else if (c.EqualTo("LHCb_Run1")) {
+  } else if (c.EqualTo("LHCb-R1-biased")) {
     obsErrSource = "https://inspirehep.net/literature/1499047";
     //         RD+      y'+      x'2+    RD-      y'-      x'2-
     StatErr = {0.081e-3, 1.25e-3, 6.5e-5, 0.081e-3, 1.21e-3, 6.1e-5};
     std::ranges::fill(SystErr, 0.0);
-  } else if (c.EqualTo("LHCb_Prompt_2011_2016")) {
+  } else if (c.EqualTo("LHCb-2011-2016-prompt")) {
     obsErrSource = "https://inspirehep.net/literature/1642234";
-    //         RD+       y'+     x'2+    RD-       y'-     x'2-
-    StatErr = {0.045e-3, 7.4e-4, 3.7e-5, 0.045e-3, 7.4e-4, 3.9e-5};
+    StatErr = {
+        std::hypot(0.040e-3, 0.020e-3),  // RD+
+        std::hypot(0.64e-3, 0.38e-3),    // y'+
+        std::hypot(3.2e-5, 1.9e-5),      // x'2+
+        std::hypot(0.040e-3, 0.020e-3),  // RD-
+        std::hypot(0.64e-3, 0.38e-3),    // y'-
+        std::hypot(3.3e-5, 2.0e-5),      // x'2-
+    };
     std::ranges::fill(SystErr, 0.0);
-  } else if (c.EqualTo("LHCb_Prompt_Run12_sec9")) {
-    obsErrSource = "https://inspirehep.net/literature/2871248 Tab III";
+  } else if (c.EqualTo("LHCb-R12-prompt-sec9")) {
+    obsErrSource = "https://inspirehep.net/literature/2811016 Tab III";
     //         RD        c       c'      AD       dc      dc'
     StatErr = {0.019e-3, 3.3e-4, 3.5e-6, 0.57e-2, 3.4e-4, 3.6e-6};
     std::ranges::fill(SystErr, 0.0);
-  } else if (c.EqualTo("LHCb_Prompt_Run12_appB")) {
-    obsErrSource = "https://inspirehep.net/literature/2871248 Tab IV";
+  } else if (c.EqualTo("LHCb-R12-prompt-appB")) {
+    obsErrSource = "https://inspirehep.net/literature/2811016 Tab IV";
     //         RD        c       c'      AD      dc      dc'     ADt      dc~     dc'~
     StatErr = {0.019e-3, 3.3e-4, 3.5e-6, 2.0e-2, 1.0e-3, 9.8e-6, 0.59e-2, 3.6e-4, 3.8e-6};
     std::ranges::fill(SystErr, 0.0);
-  } else if (c.EqualTo("LHCb_DT_Run2")) {
-    obsErrSource = "https://inspirehep.net/literature/2871248";
-    //         RD+       y'+     x'2+      RD-      y'-      x'2-
-    StatErr = {0.08e-3, 2.25e-3, 1.623e-4, 0.08e-3, 2.36e-3, 1.859e-4};
+  } else if (c.EqualTo("LHCb-R2-DT")) {
+    obsErrSource = "https://inspirehep.net/literature/2871248, Table 15 of https://cds.cern.ch/record/2888491";
+    StatErr = {
+        std::hypot(0.079e-3, 0.023e-3),  // RD+
+        std::hypot(2.23e-3, 0.26e-3),    // y'+
+        std::hypot(16.17e-5, 1.35e-5),   // x'2+
+        std::hypot(0.079e-3, 0.023e-3),  // RD-
+        std::hypot(2.34e-3, 0.28e-3),    // y'-
+        std::hypot(1.855e-4, 1.28e-5),   // x'2-
+    };
     std::ranges::fill(SystErr, 0.0);
-  } else if (c.EqualTo("LHCb_DT_Run12")) {
+  } else if (c.EqualTo("LHCb-R12-DT")) {
     obsErrSource = "https://inspirehep.net/literature/2871248";
     //        RD+       y'+     x'2+      RD-      y'-      x'2-
-    StatErr = {0.07e-3, 2.04e-3, 1.522e-4, 0.07e-3, 2.11e-3, 1.665e-4};
+    StatErr = {
+        std::hypot(0.069e-3, 0.023e-3),  // RD+
+        std::hypot(2.0e-3, 0.3e-3),      // y'+
+        std::hypot(15e-5, 1e-5),         // x'2+
+        std::hypot(0.070e-3, 0.023e-3),  // RD-
+        std::hypot(2.1e-3, 0.3e-3),      // y'-
+        std::hypot(16.61e-5, 1e-5),      // x'2-
+    };
     std::ranges::fill(SystErr, 0.0);
   } else {
     throw std::runtime_error(std::format("PDF_WS::setUncertainties ERROR config {} not found", c.Data()));
@@ -409,8 +439,14 @@ void PDF_WS::setUncertainties(const TString c) {
 
 void PDF_WS::setCorrelations(const TString c) {
   resetCorrelations();
-  if (c.EqualTo("BaBar")) {  // TODO
-    corSource = "https://hflav-eos.web.cern.ch/hflav-eos/charm/CKM23/results_mix_cpv.html";
+  if (c.EqualTo("BaBar")) {
+    corSource = "https://hflav-eos.web.cern.ch/hflav-eos/charm/CKM25/results_mix_cpv.html";
+    /* N.B.: The values on the webpage are slightly different from those in the final paper.
+             Moreover, it is unreasonable that the correlation coefficients between (RD, y'+, x'2+) are exactly the
+             same as those between (AD, y'-, x'2-). Therefore, the parametrisation is changed to
+             (RD+, y'+, x'2+, RD-, y'-, x'2-), where D0 and anti-D0 are likely uncorrelated. The correlation
+             coefficients are then assumed to be equal to the ones on the HFLAV, separately for D0 and anti-D0.
+    */
     std::vector<double> data = {
         // clang-format off
         // RD+   y'+    x'2+   RD-  y'-   x'2-
@@ -424,7 +460,8 @@ void PDF_WS::setCorrelations(const TString c) {
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, data);
   } else if (c.EqualTo("Belle")) {
-    corSource = "http://belle.kek.jp/belle/theses/doctor/lmzhang06/phd-mix-400.ps.gz";
+    corSource = "http://belle.kek.jp/belle/theses/doctor/lmzhang06/phd-mix-400.ps.gz p. 93 "
+                "(https://inspirehep.net/literature/708708)";
     std::vector<double> data = {
         // clang-format off
         // RD+  y'+    x'2+   RD-  y'-    x'2-
@@ -437,7 +474,7 @@ void PDF_WS::setCorrelations(const TString c) {
         // clang-format on
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, data);
-  } else if (c.EqualTo("LHCb_DT_Run1")) {
+  } else if (c.EqualTo("LHCb-R1-DT")) {
     corSource = "https://inspirehep.net/literature/1499047";
     std::vector<double> data = {
         // clang-format off
@@ -451,11 +488,11 @@ void PDF_WS::setCorrelations(const TString c) {
         // clang-format on
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, data);
-  } else if (c.EqualTo("LHCb_Run1")) {
+  } else if (c.EqualTo("LHCb-R1-biased")) {
     corSource = "https://inspirehep.net/literature/1499047";
     std::vector<double> data = {
         // clang-format off
-        //  RD+     y'+    x'2+     RD-     y'-    x'2-
+        // RD+ y'+  x'2+    RD-     y'-     x'2-
         1., -0.920, 0.823, -0.007, -0.010,  0.008,  // RD+
              1.,   -0.962, -0.011,  0.000, -0.002,  // y'+
                     1.,     0.009, -0.002,  0.004,  // x'2+
@@ -465,12 +502,12 @@ void PDF_WS::setCorrelations(const TString c) {
         // clang-format on
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, data);
-  } else if (c.EqualTo("LHCb_Prompt_2011_2016")) {
+  } else if (c.EqualTo("LHCb-2011-2016-prompt")) {
     corSource = "https://inspirehep.net/literature/1642234";
     std::vector<double> data = {
         // clang-format off
-        //  RD+     y'+    x'2+     RD-     y'-    x'2-
-        1., -0.935, 0.843, -0.012, -0.003, -0.002,  // RD+
+        // RD+ y'+  x'2+    RD-     y'-     x'2-
+        1., -0.935, 0.843, -0.012, -0.003,  0.002,  // RD+
              1.,   -0.963, -0.003,  0.004, -0.003,  // y'+
                     1.,     0.002, -0.003,  0.003,  // x'2+
                             1.,    -0.935,  0.846,  // RD-
@@ -479,8 +516,8 @@ void PDF_WS::setCorrelations(const TString c) {
         // clang-format on
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, data);
-  } else if (c.EqualTo("LHCb_Prompt_Run12_sec9")) {
-    corSource = "https://inspirehep.net/literature/2871248 Tab III";
+  } else if (c.EqualTo("LHCb-R12-prompt-sec9")) {
+    corSource = "https://inspirehep.net/literature/2811016 Tab III";
     std::vector<double> data = {
         // clang-format off
         // RD  c      c'      AD      c       c'
@@ -493,14 +530,14 @@ void PDF_WS::setCorrelations(const TString c) {
         // clang-format on
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, data);
-  } else if (c.EqualTo("LHCb_Prompt_Run12_appB")) {
-    corSource = "https://inspirehep.net/literature/2871248 Tab IV";
+  } else if (c.EqualTo("LHCb-R12-prompt-appB")) {
+    corSource = "https://inspirehep.net/literature/2811016 Tab IV";
     std::vector<double> data = {
         // clang-format off
         // RD  c      c'      AD      c       c'      ADt     ct      c't
         1.,   -0.927, 0.803,  0.003, -0.002,  0.002,  0.008, -0.007,  0.000,  // RD
                1.,   -0.943, -0.005,  0.004, -0.004, -0.014,  0.013, -0.006,  // c
-                      1.,     0.003, -0.003,  0.003,  0.007, -0.006,  0.000,  // c'
+                      1.,     0.003, -0.003,  0.003,  0.007, -0.006,  0.   ,  // c'
                               1.,    -0.938,  0.811,  0.,     0.,     0.,     // AD
                                       1.,    -0.943,  0.,     0.,     0.,     // dc
                                               1.,     0.,     0.,     0.,     // dc'
@@ -510,30 +547,30 @@ void PDF_WS::setCorrelations(const TString c) {
         // clang-format on
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, data);
-  } else if (c.EqualTo("LHCb_DT_Run2")) {
+  } else if (c.EqualTo("LHCb-R2-DT")) {
     corSource = "https://inspirehep.net/literature/2871248";
     std::vector<double> data = {
         // clang-format off
         // RD+  y'+    x'2+    RD-     y'-    x'2-
-        1.,    -0.768, 0.639, -0.015, -0.001, 0.,     // RD+
-                1.,   -0.940,  0.,     0.,    0.,     // y'+
+        1.,    -0.762, 0.634, -0.015, -0.001, 0.,     // RD+
+                1.,   -0.942,  0.,     0.,    0.,     // y'+
                        1.,     0.,     0.,    0.,     // x'2+
-                               1.,    -0.769, 0.653,  // RD-
-                                       1.,   -0.950,  // y'-
+                               1.,    -0.762, 0.646,  // RD-
+                                       1.,   -0.949,  // y'-
                                               1.      // x'2-
         // clang-format on
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, data);
-  } else if (c.EqualTo("LHCb_DT_Run12")) {
+  } else if (c.EqualTo("LHCb-R12-DT")) {
     corSource = "https://inspirehep.net/literature/2871248";
     std::vector<double> data = {
         // clang-format off
         //  RD+  y'+    x'2+    RD-    y'-    x'2-
-        1.,     -0.759, 0.631, -0.013, 0.,    0.,     // RD+
-                 1.,   -0.945,  0.,    0.,    0.,     // y'+
+        1.,     -0.749, 0.624, -0.013, 0.,    0.,     // RD+
+                 1.,   -0.943,  0.,    0.,    0.,     // y'+
                         1.,     0.,    0.,    0.,     // x'2+
-                                1.,   -0.756, 0.637,  // RD-
-                                       1.,   -0.949,  // y'-
+                                1.,   -0.745, 0.629,  // RD-
+                                       1.,   -0.946,  // y'-
                                               1.      // x'2-
         // clang-format on
     };

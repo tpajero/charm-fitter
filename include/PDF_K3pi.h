@@ -15,6 +15,9 @@
 #include <set>
 #include <string>
 
+/**
+ * Models the LHCb measurement of D0 -> K+ pi- pi- pi+ decays with Run 1 data.
+ */
 class PDF_K3pi : public PDF_Charm {
  public:
   PDF_K3pi(TString measurement_id, parametrisations::mix mix_param);

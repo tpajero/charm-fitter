@@ -21,6 +21,9 @@ namespace parametrisations {
   enum class kpi { raxy, rrxy, ccprime };
 }  // namespace parametrisations
 
+/**
+ * Models measurements of the WS/RS ratio of D0 -> K+ pi- decays.
+ */
 class PDF_WS : public PDF_Charm {
  public:
   PDF_WS(TString measurement_id, parametrisations::mix, parametrisations::kpi p = parametrisations::kpi::rrxy,

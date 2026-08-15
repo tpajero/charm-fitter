@@ -79,18 +79,18 @@ void PDF_yCP_minus_yCP_KP::setObservables(const TString c) {
     setObservablesTruth();
   else if (c.EqualTo("toy"))
     setObservablesToy();
-  else if (c.EqualTo("WA2020")) {
-    obsValSource = "https://cds.cern.ch/record/2747731";
-    setObservable("yCP_minus_yCP_KP_obs", 0.732e-2);
+  else if (c.EqualTo("E791")) {
+    obsValSource = "https://inspirehep.net/literature/496510";
+    setObservable("yCP_minus_yCP_KP_obs", 7.32e-3);
   } else {
     throw std::runtime_error(std::format("PDF_yCP_minus_yCP_KP::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
 void PDF_yCP_minus_yCP_KP::setUncertainties(const TString c) {
-  if (c.EqualTo("WA2020")) {
-    obsErrSource = "https://cds.cern.ch/record/2747731";
-    StatErr = {3.068e-2};
+  if (c.EqualTo("E791")) {
+    obsErrSource = "https://inspirehep.net/literature/496510";
+    StatErr = {30.68e-3};
     SystErr = {0.0};
   } else {
     throw std::runtime_error(std::format("PDF_yCP_minus_yCP_KP::setUncertainties ERROR config {} not found", c.Data()));

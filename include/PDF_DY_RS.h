@@ -15,6 +15,9 @@
 #include <set>
 #include <string>
 
+/**
+ * Models measurements of DeltaY(D0 -> K- pi+).
+ */
 class PDF_DY_RS : public PDF_Charm {
  public:
   PDF_DY_RS(TString measurement_id, parametrisations::mix mix_param);

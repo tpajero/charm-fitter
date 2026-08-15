@@ -64,7 +64,7 @@ void PDF_BES_CLEO_K3pi_Kpipi0::setObservables(const TString c) {
     setObservablesTruth();
   else if (c.EqualTo("toy"))
     setObservablesToy();
-  else if (c.EqualTo("BES3-CLEO")) {
+  else if (c.EqualTo("BESIII-CLEO-c")) {
     obsValSource = "BES+CLEO, arXiv:2103.05988";
     setObservable("k_K3pi_obs", 0.49);
     setObservable("Delta_K3pi_obs", DegToRad(26));
@@ -79,16 +79,15 @@ void PDF_BES_CLEO_K3pi_Kpipi0::setObservables(const TString c) {
 }
 
 void PDF_BES_CLEO_K3pi_Kpipi0::setUncertainties(const TString c) {
-  if (c.EqualTo("BES3-CLEO")) {
+  if (c.EqualTo("BESIII-CLEO-c")) {
     obsErrSource = "BES+CLEO, arXiv:2103.05988";
     // Values are the average of the upper and lower asymmetric uncertainties
-    StatErr[0] = 0.105;         // k_K3pi
-    StatErr[1] = DegToRad(18);  // Delta_K3pi
-    StatErr[2] = 0.04;          // k_Kpipi0
-    StatErr[3] = DegToRad(11);  // Delta_Kpipi0
-    StatErr[4] = 0.08e-2;       // r_K3pi
-    StatErr[5] = 0.11e-2;       // r_Kpipi0
-
+    StatErr = {0.105,         // k_K3pi
+               DegToRad(18),  // Delta_K3pi
+               0.04,          // k_Kpipi0
+               DegToRad(11),  // Delta_Kpipi0
+               0.08e-2,       // r_K3pi
+               0.11e-2};      // r_Kpipi0
     std::ranges::fill(SystErr, 0.0);
   } else {
     std::cout << "PDF_BES_CLEO_K3pi_Kpipi0::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
@@ -98,7 +97,7 @@ void PDF_BES_CLEO_K3pi_Kpipi0::setUncertainties(const TString c) {
 
 void PDF_BES_CLEO_K3pi_Kpipi0::setCorrelations(const TString c) {
   resetCorrelations();
-  if (c.EqualTo("BES3-CLEO")) {
+  if (c.EqualTo("BESIII-CLEO-c")) {
     corSource = "BES+CLEO, arXiv:2103.05988";
     std::vector<double> dataStat = {
         // clang-format off

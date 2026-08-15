@@ -4,7 +4,7 @@
  * Date: October 2021
  **/
 
-#include <PDF_Kshh.h>
+#include <PDF_XY_QoP_PHI.h>
 
 #include <CharmUtils.h>
 
@@ -22,13 +22,13 @@
 #include <stdexcept>
 #include <vector>
 
-PDF_Kshh::PDF_Kshh(const TString measurement_id, const parametrisations::mix mix_param)
+PDF_XY_QoP_PHI::PDF_XY_QoP_PHI(const TString measurement_id, const parametrisations::mix mix_param)
     : PDF_Charm{4}, mix_param{mix_param}, measurement_id{measurement_id} {
   name = "Kshh_" + measurement_id;
   initialise(measurement_id, measurement_id, measurement_id);
 }
 
-std::set<std::string> PDF_Kshh::getParameterNames() const {
+std::set<std::string> PDF_XY_QoP_PHI::getParameterNames() const {
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
@@ -36,12 +36,12 @@ std::set<std::string> PDF_Kshh::getParameterNames() const {
   case mix::theo:
     return {"phiG", "x12", "y12", "phiM"};
   default:
-    throw std::runtime_error(
-        std::format("PDF_Kshh::getParameterNames ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
+    throw std::runtime_error(std::format("PDF_XY_QoP_PHI::getParameterNames ERROR Parametrisation {} not supported",
+                                         utils::to_string(mix_param)));
   }
 }
 
-void PDF_Kshh::initRelations() {
+void PDF_XY_QoP_PHI::initRelations() {
   theory = new RooArgList("theory");
   theory->add(*(Utils::makeTheoryVar("x_th", utils::x_expression(mix_param), parameters)));
   theory->add(*(Utils::makeTheoryVar("y_th", utils::y_expression(mix_param), parameters)));
@@ -64,12 +64,12 @@ void PDF_Kshh::initRelations() {
                                        parameters)));
     break;
   default:
-    throw std::runtime_error(
-        std::format("PDF_Kshh::initRelations ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
+    throw std::runtime_error(std::format("PDF_XY_QoP_PHI::initRelations ERROR Parametrisation {} not supported",
+                                         utils::to_string(mix_param)));
   }
 }
 
-void PDF_Kshh::initObservables() {
+void PDF_XY_QoP_PHI::initObservables() {
   TString label = measurement_id;
   if (measurement_id == "Belle") label = "Belle #it{K}_{S}^{0}#it{#pi^{+}#pi^{#minus}}";
 
@@ -80,7 +80,7 @@ void PDF_Kshh::initObservables() {
   observables->add(*(new RooRealVar("phi_obs", label + "   #it{#phi}_{2}", 0., -1e4, 1e4)));
 }
 
-void PDF_Kshh::setObservables(const TString c) {
+void PDF_XY_QoP_PHI::setObservables(const TString c) {
   if (c.EqualTo("truth"))
     setObservablesTruth();
   else if (c.EqualTo("toy"))
@@ -92,24 +92,24 @@ void PDF_Kshh::setObservables(const TString c) {
     setObservable("qop_obs", 0.90);
     setObservable("phi_obs", Utils::DegToRad(-6.));
   } else {
-    throw std::runtime_error(std::format("PDF_Kshh::setObservables ERROR config {} not found", c.Data()));
+    throw std::runtime_error(std::format("PDF_XY_QoP_PHI::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
-void PDF_Kshh::setUncertainties(const TString c) {
+void PDF_XY_QoP_PHI::setUncertainties(const TString c) {
   if (c.EqualTo("Belle")) {
     obsErrSource = "https://inspirehep.net/literature/1289224";
-    StatErr[0] = std::hypot(0.19e-2, 0.093e-2);         // x
-    StatErr[1] = std::hypot(0.15e-2, 0.068e-2);         // y
-    StatErr[2] = std::hypot(0.155, 0.071);              // qop
-    StatErr[3] = Utils::DegToRad(std::hypot(11, 4.6));  // phi
+    StatErr[0] = std::hypot(0.19e-2, (std::hypot(0.04e-2, 0.06e-2) + std::hypot(0.08e-2, 0.08e-2)) / 2.0);  // x
+    StatErr[1] = std::hypot(0.15e-2, (std::hypot(0.04e-2, 0.03e-2) + std::hypot(0.05e-2, 0.07e-2)) / 2.0);  // y
+    StatErr[2] = (std::hypot(0.16, 0.05, 0.06) + std::hypot(0.15, 0.04, 0.05)) / 2.0;                       // qop
+    StatErr[3] = Utils::DegToRad(std::hypot(11.0, 3.0, 3.5));                                               // phi
     std::ranges::fill(SystErr, 0.0);
   } else {
-    throw std::runtime_error(std::format("PDF_Kshh::setUncertainties ERROR config {} not found", c.Data()));
+    throw std::runtime_error(std::format("PDF_XY_QoP_PHI::setUncertainties ERROR config {} not found", c.Data()));
   }
 }
 
-void PDF_Kshh::setCorrelations(const TString c) {
+void PDF_XY_QoP_PHI::setCorrelations(const TString c) {
   resetCorrelations();
   if (c.EqualTo("Belle")) {
     corSource = "hflav";
@@ -123,6 +123,6 @@ void PDF_Kshh::setCorrelations(const TString c) {
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
   } else {
-    throw std::runtime_error(std::format("PDF_Kshh::setCorrelations ERROR config {} not found", c.Data()));
+    throw std::runtime_error(std::format("PDF_XY_QoP_PHI::setCorrelations ERROR config {} not found", c.Data()));
   }
 }

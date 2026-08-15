@@ -4,7 +4,7 @@
  * Date: October 2021
  **/
 
-#include <PDF_Cleo.h>
+#include <PDF_KP_CLEO.h>
 
 #include <CharmUtils.h>
 
@@ -20,13 +20,13 @@
 #include <stdexcept>
 #include <vector>
 
-PDF_Cleo::PDF_Cleo(const TString measurement_id, const parametrisations::mix mix_param)
+PDF_KP_CLEO::PDF_KP_CLEO(const TString measurement_id, const parametrisations::mix mix_param)
     : PDF_Charm{5}, mix_param{mix_param} {
   name = "CLEO";
   initialise(measurement_id, measurement_id, measurement_id);
 }
 
-std::set<std::string> PDF_Cleo::getParameterNames() const {
+std::set<std::string> PDF_KP_CLEO::getParameterNames() const {
   std::set<std::string> names = {"r_Kpi", "Delta_Kpi"};
   using parametrisations::mix;
   switch (mix_param) {
@@ -37,13 +37,13 @@ std::set<std::string> PDF_Cleo::getParameterNames() const {
     names.insert({"phiG", "phiM", "x12", "y12"});
     break;
   default:
-    throw std::runtime_error(
-        std::format("PDF_Cleo::getParameterNames ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
+    throw std::runtime_error(std::format("PDF_KP_CLEO::getParameterNames ERROR Parametrisation {} not supported",
+                                         utils::to_string(mix_param)));
   }
   return names;
 }
 
-void PDF_Cleo::initRelations() {
+void PDF_KP_CLEO::initRelations() {
   theory = new RooArgList("theory");
   theory->add(*(Utils::makeTheoryVar("RD_th", "r_Kpi * r_Kpi", parameters)));
   using parametrisations::mix;
@@ -60,14 +60,14 @@ void PDF_Cleo::initRelations() {
     break;
   default:
     throw std::runtime_error(
-        std::format("PDF_Cleo::initRelations ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
+        std::format("PDF_KP_CLEO::initRelations ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
   theory->add(*(Utils::makeTheoryVar("y_th", utils::y_expression(mix_param), parameters)));
   theory->add(*(Utils::makeTheoryVar("cos_th", "cos(Delta_Kpi)", parameters)));
   theory->add(*(Utils::makeTheoryVar("sin_th", "-sin(Delta_Kpi)", parameters)));
 }
 
-void PDF_Cleo::initObservables() {
+void PDF_KP_CLEO::initObservables() {
   observables = new RooArgList("observables");  ///< the order of this list must match that of the COR matrix!
   observables->add(*(new RooRealVar("RD_obs", name + "   #it{R_{K#pi}}", 0., 0., 1e4)));
   observables->add(*(new RooRealVar("x2_obs", name + "   #it{x}^{2}", 0., -1e4, 1e4)));
@@ -76,12 +76,12 @@ void PDF_Cleo::initObservables() {
   observables->add(*(new RooRealVar("sin_obs", name + "   #minussin#Delta_{#it{K#pi}}", 0., -1., 1.)));
 }
 
-void PDF_Cleo::setObservables(const TString c) {
+void PDF_KP_CLEO::setObservables(const TString c) {
   if (c.EqualTo("truth"))
     setObservablesTruth();
   else if (c.EqualTo("toy"))
     setObservablesToy();
-  else if (c.EqualTo("Cleo-c")) {
+  else if (c.EqualTo("CLEO-c")) {
     obsValSource = "https://inspirehep.net/literature/1189182";
     setObservable("RD_obs", 5.33e-3);
     setObservable("x2_obs", 0.6e-3);
@@ -89,12 +89,12 @@ void PDF_Cleo::setObservables(const TString c) {
     setObservable("cos_obs", 0.81);
     setObservable("sin_obs", -0.01);
   } else {
-    throw std::runtime_error(std::format("PDF_Cleo::setObservables ERROR config {} not found", c.Data()));
+    throw std::runtime_error(std::format("PDF_KP_CLEO::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
-void PDF_Cleo::setUncertainties(const TString c) {
-  if (c.EqualTo("Cleo-c")) {
+void PDF_KP_CLEO::setUncertainties(const TString c) {
+  if (c.EqualTo("CLEO-c")) {
     obsErrSource = "https://inspirehep.net/literature/1189182";
     StatErr[0] = std::hypot(1.07e-3, 0.45e-3);  // RD
     StatErr[1] = std::hypot(2.3e-3, 1.1e-3);    // x2
@@ -103,13 +103,13 @@ void PDF_Cleo::setUncertainties(const TString c) {
     StatErr[4] = std::hypot(0.41, 0.04);        // sin
     std::ranges::fill(SystErr, 0.0);
   } else {
-    throw std::runtime_error(std::format("PDF_Cleo::setUncertainties ERROR config {} not found", c.Data()));
+    throw std::runtime_error(std::format("PDF_KP_CLEO::setUncertainties ERROR config {} not found", c.Data()));
   }
 }
 
-void PDF_Cleo::setCorrelations(const TString c) {
+void PDF_KP_CLEO::setCorrelations(const TString c) {
   resetCorrelations();
-  if (c.EqualTo("Cleo-c")) {
+  if (c.EqualTo("CLEO-c")) {
     corSource = "https://inspirehep.net/literature/1189182";
     std::vector<double> dataStat = {
         // clang-format off
@@ -122,6 +122,6 @@ void PDF_Cleo::setCorrelations(const TString c) {
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
   } else {
-    throw std::runtime_error(std::format("PDF_Cleo::setCorrelations ERROR config {} not found", c.Data()));
+    throw std::runtime_error(std::format("PDF_KP_CLEO::setCorrelations ERROR config {} not found", c.Data()));
   }
 }
