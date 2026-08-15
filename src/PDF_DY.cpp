@@ -73,6 +73,20 @@ void PDF_DY::setObservables(const TString c) {
   } else if (nObs == 2 && c.EqualTo("WA2021")) {
     setObservable("DY_KK_obs", -0.20e-4);
     setObservable("DY_PP_obs", -3.53e-4);
+  } else if (c.EqualTo("LHCb-R1")) {
+    if (nObs == 1)
+      setObservable("DY_obs", 2.86e-4);
+    else {
+      setObservable("DY_KK_obs", 4.51e-4);
+      setObservable("DY_PP_obs", -2.67e-4);
+    }
+  } else if (c.EqualTo("LHCb-R12")) {
+    if (nObs == 1)
+      setObservable("DY_obs", -1.08e-4);
+    else {
+      setObservable("DY_KK_obs", -0.35e-4);
+      setObservable("DY_PP_obs", -3.61e-4);
+    }
   } else {
     throw std::runtime_error(
         std::format("PDF_DY::setObservables ERROR config {} not found for {} DY observables", c.Data(), nObs));
@@ -81,24 +95,24 @@ void PDF_DY::setObservables(const TString c) {
 
 void PDF_DY::setUncertainties(const TString c) {
   obsErrSource = "https://github.com/tpajero/charm-fitter/tree/master/charmcombo/blue/DY.cpp";
-  if (nObs == 1 && c.EqualTo("WA2019")) {
-    StatErr = {2.6e-4};
-    SystErr = {0.0};
-  } else if (nObs == 1 && c.EqualTo("WA2020")) {
-    StatErr = {2.0e-4};
-    SystErr = {0.0};
-  } else if (nObs == 1 && c.EqualTo("WA2021")) {
-    StatErr = {1.11e-4};
-    SystErr = {0.33e-4};
-  } else if (nObs == 1 && c.EqualTo("Belle&BaBar")) {
+  if (nObs == 1 && c.EqualTo("Belle&BaBar")) {
     StatErr = {15.75e-4};
     SystErr = {4.81e-4};
-  } else if (nObs == 2 && c.EqualTo("WA2020")) {
-    StatErr = {2.35e-4, 4.30e-4};
-    SystErr = {0.57e-4, 0.70e-4};
-  } else if (nObs == 2 && c.EqualTo("WA2021")) {
-    StatErr = {1.28e-4, 2.36e-4};
-    SystErr = {0.32e-4, 0.39e-4};
+  } else if (nObs == 1 && c.EqualTo("WA2019")) {
+    StatErr = {2.6e-4};
+    SystErr = {0.0e-4};
+  } else if (c.EqualTo("WA2020")) {
+    StatErr = (nObs == 1) ? std::initializer_list<double>{2.0e-4} : std::initializer_list<double>{2.35e-4, 4.30e-4};
+    SystErr = (nObs == 1) ? std::initializer_list<double>{0.0e-4} : std::initializer_list<double>{0.57e-4, 0.70e-4};
+  } else if (c.EqualTo("WA2021")) {
+    StatErr = (nObs == 1) ? std::initializer_list<double>{1.11e-4} : std::initializer_list<double>{1.28e-4, 2.36e-4};
+    SystErr = (nObs == 1) ? std::initializer_list<double>{0.33e-4} : std::initializer_list<double>{0.32e-4, 0.39e-4};
+  } else if (c.EqualTo("LHCb-R1")) {
+    StatErr = (nObs == 1) ? std::initializer_list<double>{2.59e-4} : std::initializer_list<double>{2.96e-4, 5.39e-4};
+    SystErr = (nObs == 1) ? std::initializer_list<double>{0.93e-4} : std::initializer_list<double>{0.91e-4, 1.11e-4};
+  } else if (c.EqualTo("LHCb-R12")) {
+    StatErr = (nObs == 1) ? std::initializer_list<double>{1.13e-4} : std::initializer_list<double>{1.28e-4, 2.38e-4};
+    SystErr = (nObs == 1) ? std::initializer_list<double>{0.33e-4} : std::initializer_list<double>{0.32e-4, 0.40e-4};
   } else {
     throw std::runtime_error(
         std::format("PDF_DY::setUncertainties ERROR config {} not found for {} DY observables", c.Data(), nObs));
@@ -107,15 +121,21 @@ void PDF_DY::setUncertainties(const TString c) {
 
 void PDF_DY::setCorrelations(const TString c) {
   resetCorrelations();
-  corSource = "https://github.com/tpajero/charm-fitter/tree/master/charmcombo/blue/DY.cpp";
   if (nObs == 1)
     corSource = "No correlations for one observable";
-  else if (nObs == 2 && c.EqualTo("WA2020"))
-    corSystMatrix[0][1] = 0.63;  // np.sum(np.square([0.05, 0.42, 0.10, 0.04, 0.23, 0.09])) / 0.57 / 0.70
-  else if (nObs == 2 && c.EqualTo("WA2021"))
-    corSystMatrix[0][1] = 0.68;  // np.sum(np.square([0.18, 0.21, 0.06, 0.01, 0.07])) / 0.32 / 0.39
   else {
-    throw std::runtime_error(
-        std::format("PDF_DY::setCorrelations ERROR config {} not found for {} DY observables", c.Data(), nObs));
+    if (nObs != 2) throw std::runtime_error("PDF_DY::setCorrelations ERROR Only up to two observables are supported");
+    corSource = "https://github.com/tpajero/charm-fitter/tree/main/scripts/BLUE/cpp/DY.cpp";
+    if (c.EqualTo("WA2020"))
+      corSystMatrix[0][1] = 0.63;  // np.sum(np.square([0.05, 0.42, 0.10, 0.04, 0.23, 0.09])) / 0.57 / 0.70
+    else if (c.EqualTo("WA2021"))
+      corSystMatrix[0][1] = 0.68;  // np.sum(np.square([0.18, 0.21, 0.06, 0.01, 0.07])) / 0.32 / 0.39
+    else if (c.EqualTo("LHCb-R1"))
+      corSystMatrix[0][1] = 0.62;  // np.sum(np.square([0.09, 0.68, 0.17, 0.06, 0.35])) / 0.91 / 1.11
+    else if (c.EqualTo("LHCb-R12"))
+      corSystMatrix[0][1] = 0.70;  // np.sum(np.square([0.19, 0.21, 0.07, 0.01, 0.07])) / 0.32 / 0.40
+    else
+      throw std::runtime_error(
+          std::format("PDF_DY::setCorrelations ERROR config {} not found for {} DY observables", c.Data(), nObs));
   }
 }

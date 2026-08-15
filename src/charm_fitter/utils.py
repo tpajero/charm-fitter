@@ -262,7 +262,7 @@ class Combiner:
     scanrange_1d: tuple[float, float] | None = None  # 1D scan range in scan units (radians for angles); used by comp_1d
     scanparams_1d: list[ScanParams1D] = field(default_factory=list)
     scanparams_2d: list[ScanParams2D] = field(default_factory=list)
-    external_file: str = ""
+    parfile: str | None = None
     col: str | None = None
     ls: str | None = None
 
@@ -779,17 +779,21 @@ def scans_1d(args: argparse.Namespace, cfg: ModuleType, combiners_ids: list[str]
     for par in cfg.parameters.values():
         if not par.scan_1d or (par.name == "Acp_KP" and not args.dcs_cpv):
             continue
-        extra_opts = args.extra_opts
+        extra_opts_base = args.extra_opts
         if MixParam.PHENO in par.mix_params and MixParam.THEO not in par.mix_params:
-            extra_opts += " --mix pheno"
+            extra_opts_base += " --mix pheno"
         if args.plugin:
             if args.submit:
-                extra_opts += f" -a pluginbatch --ntoys 50 --nbatchjobs 200 {args.batchopts}"
+                extra_opts_base += f" -a pluginbatch --ntoys 50 --nbatchjobs 200 {args.batchopts}"
             else:
-                extra_opts += " -a plugin -j 1-200"
+                extra_opts_base += " -a plugin -j 1-200"
         for combiner_id in combiners_ids:
-            scanparams = next((x for x in cfg.combiners[combiner_id].scanparams_1d if x.par == par.name), None)
+            combiner = cfg.combiners[combiner_id]
+            scanparams = next((x for x in combiner.scanparams_1d if x.par == par.name), None)
             scan_range = scanparams.range if scanparams is not None else par.scan_range
+            extra_opts = extra_opts_base
+            if combiner.parfile is not None:
+                extra_opts += f" --parfile {combiner.parfile}"
             cmd = (
                 f"bin/{args.execfile} -c {_combiner_string(cfg.combiners[combiner_id].id):<31s}"
                 f" --var {par.name:<12s}"

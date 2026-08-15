@@ -84,7 +84,10 @@ void PDF_yCP_minus_yCP_RS::setObservables(const TString c) {
   else if (c.EqualTo("WA2020")) {
     obsValSource = "https://cds.cern.ch/record/2747731";
     setObservable("yCP_minus_yCP_RS_obs", 7.38e-3);
-  } else if (c.EqualTo("LHCb2022")) {
+  } else if (c.EqualTo("LHCb-R1")) {
+    obsValSource = "https://arxiv.org/pdf/1810.06874v2";
+    setObservable("yCP_minus_yCP_RS_obs", 5.7e-3);
+  } else if (c.EqualTo("LHCb-R2")) {
     obsValSource = "https://inspirehep.net/literature/2035063";
     setObservable("yCP_minus_yCP_RS_obs", 6.96e-3);
   } else {
@@ -97,7 +100,11 @@ void PDF_yCP_minus_yCP_RS::setUncertainties(const TString c) {
     obsErrSource = "https://cds.cern.ch/record/2747731";
     StatErr = {1.11e-3};
     SystErr = {0.0};
-  } else if (c.EqualTo("LHCb2022")) {
+  } else if (c.EqualTo("LHCb-R1")) {
+    obsErrSource = "https://arxiv.org/pdf/1810.06874v2";
+    StatErr = {1.3e-3};
+    SystErr = {0.9e-3};
+  } else if (c.EqualTo("LHCb-R2")) {
     obsErrSource = "https://inspirehep.net/literature/2035063";
     StatErr = {0.26e-3};
     SystErr = {0.13e-3};

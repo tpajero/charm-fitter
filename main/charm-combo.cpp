@@ -35,27 +35,37 @@
 #include <vector>
 
 namespace {
-  std::vector<int> get_lhcb_pdfs(const std::string run, const hypotheses::dy_fsc dy_fsc_hypo) {
+  std::vector<int> lhcb_pdfs(const std::string period, const hypotheses::dy_fsc dy_fsc_hypo) {
     std::vector<int> pdfs;
-    if (run == "run12") {
+    if (period == "R1") {  // LHCb Run 1
       pdfs = {
-          3,   // XY               KSpipi Prompt Run 1
-          11,  // RM               K3pi Run 1
-          21,  // BinFlip          Run 1
-          24,  // BinFlip          Run 2
-          35,  // WS               DT Run 1
-          39,  // WS               Prompt Run 1+2
-          61,  // yCP_minus_yCP_RS WA2020          TODO
-          64,  // yCP_minus_yCP_RS 2022 prompt
-          72,  // DY average
-          90,  // AcpHH
+          3,   // D0 -> KS pi- pi+      Prompt 2011 (XY)
+          21,  // D0 -> KS pi- pi+      Binflip
+          5,   // D0 -> K+ pi- pi+ pi+
+          36,  // D0 -> K+ pi-
+          64,  // yCP - yCP(RS)
+          74,  // DeltaY(h- h+)
+          93,  // DeltaACP and ACP(D0 -> K- K+)
+      };
+    } else if (period == "R12") {  // LHCb Run 1 + Run 2
+      pdfs = {
+          3,   // D0 -> KS pi- pi+      Prompt 2011 (XY)
+          21,  // D0 -> KS pi- pi+      Run 1 Binflip
+          24,  // D0 -> KS pi- pi+      Run 2 Binflip
+          5,   // D0 -> K+ pi- pi+ pi+  Run 1              TODO: add Run 2
+          39,  // D0 -> K+ pi-          Prompt
+          41,  // D0 -> K+ pi-          Double tag
+          64,  // yCP - yCP(RS)         Run 1
+          65,  // yCP - yCP(RS)         Run 2
+          75,  // DeltaY(h- h+)
+          90,  // DeltaACP and ACP(D0 -> K- K+)
       };
       if (dy_fsc_hypo == hypotheses::dy_fsc::none) {
         pdfs.push_back(85);  // DY_pipipi0 Run 2
       }
     } else {
       throw std::runtime_error(
-          std::format("get_lhcb_pdfs ERROR The list of the LHCb results from the period `{}` is not supported", run));
+          std::format("lhcb_pdfs ERROR The list of the LHCb results from the period `{}` is not supported", period));
     }
     return pdfs;
   }
@@ -63,6 +73,14 @@ namespace {
   using hypotheses::dy_fsc;
   using parametrisations::acp;
   using parametrisations::mix;
+
+  // PDFs with results from charm factories
+  const std::vector<int> cf_pdfs = {
+      50,  // Delta_Kpi  Cleo-c
+      53,  // F+_pipipi0 Cleo-c
+      55,  // F+_pipipi0 BESIII
+      56,  // Delta_Kpi  BESIII 3+7 fb
+  };
 
   struct ParsedArgs {
     dy_fsc dy_fsc_hypo;
@@ -257,7 +275,8 @@ int main(int argc, char* argv[]) {
   gc.addPdf(61, new PDF_yCP_minus_yCP_RS("WA2020", mix_param),                       "yCP-yCP(RS)  WA       2020                  ");
   gc.addPdf(62, new PDF_yCP_minus_yCP_KP("WA2020", mix_param),                       "yCP-yCP(KP)  WA       2020                  ");
   gc.addPdf(63, new PDF_yCP_plus_yCP_RS("WA2020", mix_param),                        "yCP+yCP(RS)  WA       2020                  ");
-  gc.addPdf(64, new PDF_yCP_minus_yCP_RS("LHCb2022", mix_param),                     "yCP-yCP(RS)  LHCb     2022                  ");
+  gc.addPdf(64, new PDF_yCP_minus_yCP_RS("LHCb-R1", mix_param),                      "yCP-yCP(RS)  LHCb     Run 1    [B -> D* mu] ");
+  gc.addPdf(65, new PDF_yCP_minus_yCP_RS("LHCb-R2", mix_param),                      "yCP-yCP(RS)  LHCb     Run 2    [D* -> D0 pi]");
 
   if (dy_fsc_hypo == dy_fsc::none) {
     gc.addPdf(70, new PDF_DY("WA2019", dy_fsc_hypo, acp_param, mix_param),           "DY           WA       2019                  ");
@@ -265,6 +284,8 @@ int main(int argc, char* argv[]) {
   }
   gc.addPdf(71, new PDF_DY("WA2020", dy_fsc_hypo, acp_param, mix_param),             "DY           WA       2020                  ");
   gc.addPdf(72, new PDF_DY("WA2021", dy_fsc_hypo, acp_param, mix_param),             "DY           WA       2021                  ");
+  gc.addPdf(74, new PDF_DY("LHCb-R1", dy_fsc_hypo, acp_param, mix_param),            "DY           LHCb     Run 1                 ");
+  gc.addPdf(75, new PDF_DY("LHCb-R12", dy_fsc_hypo, acp_param, mix_param),           "DY           LHCb     Run 1+2               ");
 
   gc.addPdf(80, new PDF_DY_RS("LHCb2021", mix_param),                                "DY(RS)       LHCb     2021                  ");
 
@@ -308,7 +329,7 @@ int main(int argc, char* argv[]) {
 
   // WA after LHCb 2022 yCP measurement
   gc.cloneCombiner(30, 20, "WA-2022-02", "World average (Feb 2022)");
-  gc.getCombiner(30)->addPdf(gc[64]);  // yCP LHCb 2022
+  gc.getCombiner(30)->addPdf(gc[65]);  // yCP LHCb 2022
 
   // WA after LHCb 2022 yCP measurement - biased
   gc.cloneCombiner(31, 30, "WA-2022-02-biased",
@@ -317,7 +338,7 @@ int main(int argc, char* argv[]) {
   gc.getCombiner(31)->delPdf(gc[61]);
   gc.getCombiner(31)->delPdf(gc[62]);
   gc.getCombiner(31)->delPdf(gc[63]);
-  gc.getCombiner(31)->delPdf(gc[64]);
+  gc.getCombiner(31)->delPdf(gc[65]);
   gc.getCombiner(31)->addPdf(gc[110]);
   gc.getCombiner(31)->addPdf(gc[111]);
 
@@ -363,13 +384,13 @@ int main(int argc, char* argv[]) {
 
   // LHCb-only averages ------------------------------------------------------------------------------------------------
 
-  gc.newCombiner(300, "LHCb-2024-05", "LHCb average (May 2024)");
-  for (const auto imeas : get_lhcb_pdfs("run12", dy_fsc_hypo)) gc.getCombiner(300)->addPdf(gc[imeas]);
+  gc.newCombiner(300, "LHCb-R1", "LHCb Run 1");
+  for (const auto pdf : lhcb_pdfs("R1", dy_fsc_hypo)) gc.getCombiner(300)->addPdf(gc[pdf]);
+  for (const auto pdf : cf_pdfs) gc.getCombiner(300)->addPdf(gc[pdf]);
 
-  // LHCb-only + charm factories averages ------------------------------------------------------------------------------
-
-  gc.cloneCombiner(400, 300, "LHCb-CF-2024-05", "LHCb + Charm factories average (May 2024)");
-  for (auto imeas : {50, 52, 53}) gc.getCombiner(400)->addPdf(gc[imeas]);
+  gc.newCombiner(301, "LHCb-R12", "LHCb Run 1+2");
+  for (const auto pdf : lhcb_pdfs("R12", dy_fsc_hypo)) gc.getCombiner(301)->addPdf(gc[pdf]);
+  for (const auto pdf : cf_pdfs) gc.getCombiner(301)->addPdf(gc[pdf]);
 
   // Impact of LHCb upgrades -------------------------------------------------------------------------------------------
 
