@@ -377,7 +377,7 @@ void PDF_WS::setUncertainties(const TString c) {
   } else if (c.EqualTo("LHCb_Run1")) {
     obsErrSource = "https://inspirehep.net/literature/1499047";
     //         RD+      y'+      x'2+    RD-      y'-      x'2-
-    StatErr = {0.81e-3, 1.25e-3, 6.5e-5, 0.81e-3, 1.21e-3, 6.1e-5};
+    StatErr = {0.081e-3, 1.25e-3, 6.5e-5, 0.081e-3, 1.21e-3, 6.1e-5};
     std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_Prompt_2011_2016")) {
     obsErrSource = "https://inspirehep.net/literature/1642234";
