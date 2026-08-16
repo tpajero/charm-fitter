@@ -11,7 +11,6 @@
 #include <Utils.h>
 
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
 #include <algorithm>
@@ -56,9 +55,9 @@ std::set<std::string> PDF_K3pi::getParameterNames() const {
 
 void PDF_K3pi::initRelations() {
   theory = new RooArgList("theory");  ///< the order of this list must match that of the COR matrix!
-  theory->add(*(Utils::makeTheoryVar("r_K3pi_th", "r_K3pi_th", "r_K3pi", parameters)));
-  theory->add(*(Utils::makeTheoryVar("c1_th", "c1_th", theory_expressions["c1"][mix_param], parameters)));
-  theory->add(*(Utils::makeTheoryVar("c2_th", "c2_th", theory_expressions["c2"][mix_param], parameters)));
+  theory->add(*(Utils::makeTheoryVar("r_K3pi_th", "r_K3pi", parameters)));
+  theory->add(*(Utils::makeTheoryVar("c1_th", theory_expressions["c1"][mix_param], parameters)));
+  theory->add(*(Utils::makeTheoryVar("c2_th", theory_expressions["c2"][mix_param], parameters)));
 }
 
 void PDF_K3pi::initObservables() {
@@ -87,9 +86,7 @@ void PDF_K3pi::setObservables(const TString c) {
 void PDF_K3pi::setUncertainties(const TString c) {
   if (c.EqualTo("LHCb-run1")) {
     obsErrSource = "https://arxiv.org/abs/1602.07224v2";
-    StatErr[0] = 0.12e-2;
-    StatErr[1] = 1.8e-3;
-    StatErr[2] = 1.8e-5;
+    StatErr = {0.12e-2, 1.8e-3, 1.8e-5};
     std::ranges::fill(SystErr, 0.0);
   } else {
     throw std::runtime_error(std::format("PDF_K3pi::setUncertainties ERROR config {} not found", c.Data()));
@@ -111,8 +108,4 @@ void PDF_K3pi::setCorrelations(const TString c) {
   } else {
     throw std::runtime_error(std::format("PDF_K3pi::setCorrelations ERROR config {} not found", c.Data()));
   }
-}
-
-void PDF_K3pi::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }

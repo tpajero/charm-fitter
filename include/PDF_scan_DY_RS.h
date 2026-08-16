@@ -19,7 +19,6 @@
 class PDF_scan_DY_RS : public PDF_Charm {
  public:
   PDF_scan_DY_RS(parametrisations::mix mix_param);
-  void buildPdf() override;
   void initObservables() override;
   void initRelations() override;
   void setCorrelations(TString c) override;

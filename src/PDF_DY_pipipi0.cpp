@@ -11,7 +11,6 @@
 #include <Utils.h>
 
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
 #include <format>
@@ -45,9 +44,8 @@ std::set<std::string> PDF_DY_pipipi0::getParameterNames() const {
 
 void PDF_DY_pipipi0::initRelations() {
   theory = new RooArgList("theory");
-  theory->add(
-      *(Utils::makeTheoryVar("DY_pipipi0_th", "DY_pipipi0_th",
-                             std::format("-(2 * F_pipipi0 - 1) * ({})", utils::dy_expression(mix_param)), parameters)));
+  theory->add(*(Utils::makeTheoryVar(
+      "DY_pipipi0_th", std::format("-(2 * F_pipipi0 - 1) * ({})", utils::dy_expression(mix_param)), parameters)));
 }
 
 void PDF_DY_pipipi0::initObservables() {
@@ -73,8 +71,8 @@ void PDF_DY_pipipi0::setObservables(const TString c) {
 void PDF_DY_pipipi0::setUncertainties(const TString c) {
   obsErrSource = "https://arxiv.org/abs/2405.06556";
   if (c.EqualTo("LHCb-R2")) {
-    StatErr[0] = 5.97e-4;
-    SystErr[0] = 2.01e-4;  // Removed the sys. unc. for the time binning
+    StatErr = {5.97e-4};
+    SystErr = {2.01e-4};  // Removed the sys. unc. for the time binning
   } else {
     throw std::runtime_error(std::format(
         "PDF_DY_pipipi0::setUncertainties ERROR config {} not found for {} DY_pipipi0 observables", c.Data(), nObs));
@@ -84,8 +82,4 @@ void PDF_DY_pipipi0::setUncertainties(const TString c) {
 void PDF_DY_pipipi0::setCorrelations(const TString c) {
   resetCorrelations();
   corSource = "No correlations for one observable";
-}
-
-void PDF_DY_pipipi0::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }

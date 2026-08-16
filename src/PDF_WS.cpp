@@ -11,7 +11,6 @@
 #include <Utils.h>
 
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
 #include <algorithm>
@@ -99,29 +98,25 @@ namespace {
       throw;
     }
   }
+
+  const std::map<std::string, std::string> labels = {
+      {"BaBar", "WS/RS BaBar CPV"},
+      {"Belle", "WS/RS Belle CPV"},
+      {"LHCb_DT_Run1", "WS/RS LHCb Run 1 DT"},
+      {"LHCb_Run1", "WS/RS LHCb Run 1"},
+      {"LHCb_Prompt_2011_2016", "WS/RS LHCb (11/16) prompt"},
+      {"LHCb_Prompt_Run12_sec9", "WS/RS LHCb Run 1+2 prompt Sec. 9"},
+      {"LHCb_Prompt_Run12_appB", "WS/RS LHCb Run 1+2 prompt App. B"},
+      {"LHCb_DT_Run2", "WS/RS LHCb Run 2 DT"},
+      {"LHCb_DT_Run12", "WS/RS LHCb Run 1+2 DT"},
+  };
 }  // namespace
 
 PDF_WS::PDF_WS(const TString measurement_id, const parametrisations::mix mix_param, parametrisations::kpi p)
     : PDF_Charm{measurement_id.EqualTo("LHCb_Prompt_Run12_appB") ? 9 : 6}, mix_param{mix_param}, ws_param{p} {
-  if (measurement_id.EqualTo("BaBar"))
-    label = "WS/RS BaBar CPV";
-  else if (measurement_id.EqualTo("Belle"))
-    label = "WS/RS Belle CPV";
-  else if (measurement_id.EqualTo("LHCb_DT_Run1"))
-    label = "WS/RS LHCb dt (Run 1)";
-  else if (measurement_id.EqualTo("LHCb_Run1"))
-    label = "WS/RS LHCb Run 1";
-  else if (measurement_id.EqualTo("LHCb_Prompt_2011_2016"))
-    label = "WS/RS LHCb prompt (15/16)";
-  else if (measurement_id.EqualTo("LHCb_Prompt_Run12_sec9"))
-    label = "WS/RS LHCb prompt (Run 1+2)";
-  else if (measurement_id.EqualTo("LHCb_Prompt_Run12_appB"))
-    label = "WS/RS LHCb prompt (Run 1+2)";
-  else if (measurement_id.EqualTo("LHCb_DT_Run2"))
-    label = "WS/RS LHCb dt (Run 2)";
-  else if (measurement_id.EqualTo("LHCb_DT_Run12"))
-    label = "WS/RS LHCb dt (Run 1+2)";
-  else {
+  try {
+    label = labels.at(measurement_id.Data());
+  } catch (const std::out_of_range&) {
     throw std::runtime_error(
         std::format("PDF_WS::PDF_WS ERROR Measurement ID {} not supported", measurement_id.Data()));
   }
@@ -189,20 +184,20 @@ void PDF_WS::initRelations() {
 void PDF_WS::initRelationsCCPrime() {
   using parametrisations::dy_fsc;
   theory = new RooArgList("theory");
-  theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "r_Kpi * r_Kpi", parameters)));
-  theory->add(*(Utils::makeTheoryVar("c_th", "c_th", get_formula("c", mix_param), parameters)));
-  theory->add(*(Utils::makeTheoryVar("c'_th", "c'_th", get_formula("c'", mix_param), parameters)));
-  theory->add(*(Utils::makeTheoryVar("AD_th", "AD_th", "Acp_KP", parameters)));
-  theory->add(*(Utils::makeTheoryVar("dc_th", "dc_th", get_formula("dc", mix_param), parameters)));
-  theory->add(*(Utils::makeTheoryVar("dc'_th", "dc'_th", get_formula("dc'", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("RD_th", "r_Kpi * r_Kpi", parameters)));
+  theory->add(*(Utils::makeTheoryVar("c_th", get_formula("c", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("c'_th", get_formula("c'", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("AD_th", "Acp_KP", parameters)));
+  theory->add(*(Utils::makeTheoryVar("dc_th", get_formula("dc", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("dc'_th", get_formula("dc'", mix_param), parameters)));
   if (nObs == 9) {
-    theory->add(*(Utils::makeTheoryVar("ADt_th", "ADt_th", "Acp_KP - 2 * Acp_KK", parameters)));
+    theory->add(*(Utils::makeTheoryVar("ADt_th", "Acp_KP - 2 * Acp_KK", parameters)));
     theory->add(*(Utils::makeTheoryVar(
-        "dc~_th", "dc~_th",
+        "dc~_th",
         std::format("{} - 2 * r_Kpi * ({}) - Acp_KK * ({})", get_formula("dc", mix_param),
                     utils::dy_hh_expression(mix_param, dy_fsc::none, "KK"), get_formula("c", mix_param)),
         parameters)));
-    theory->add(*(Utils::makeTheoryVar("dc'~_th", "dc'~_th",
+    theory->add(*(Utils::makeTheoryVar("dc'~_th",
                                        std::format("{} - 2 * r_Kpi * ({}) * ({}) - 2 * Acp_KK * ({})",
                                                    get_formula("dc'", mix_param), get_formula("c", mix_param),
                                                    utils::dy_hh_expression(mix_param, dy_fsc::none, "KK"),
@@ -213,22 +208,22 @@ void PDF_WS::initRelationsCCPrime() {
 
 void PDF_WS::initRelationsRAXY() {
   theory = new RooArgList("theory");
-  theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "r_Kpi * r_Kpi", parameters)));
-  theory->add(*(Utils::makeTheoryVar("y'+_th", "y'+_th", get_formula("y'+", mix_param), parameters)));
-  theory->add(*(Utils::makeTheoryVar("x'2+_th", "x'2+_th", get_formula("x'2+", mix_param), parameters)));
-  theory->add(*(Utils::makeTheoryVar("AD_th", "AD_th", "Acp_KP", parameters)));
-  theory->add(*(Utils::makeTheoryVar("y'-_th", "y'-_th", get_formula("y'-", mix_param), parameters)));
-  theory->add(*(Utils::makeTheoryVar("x'2-_th", "x'2-_th", get_formula("x'2-", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("RD_th", "r_Kpi * r_Kpi", parameters)));
+  theory->add(*(Utils::makeTheoryVar("y'+_th", get_formula("y'+", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("x'2+_th", get_formula("x'2+", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("AD_th", "Acp_KP", parameters)));
+  theory->add(*(Utils::makeTheoryVar("y'-_th", get_formula("y'-", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("x'2-_th", get_formula("x'2-", mix_param), parameters)));
 }
 
 void PDF_WS::initRelationsRRXY() {
   theory = new RooArgList("theory");
-  theory->add(*(Utils::makeTheoryVar("RD_p_th", "RD_p_th", "r_Kpi * r_Kpi * (1 + Acp_KP)", parameters)));
-  theory->add(*(Utils::makeTheoryVar("y'+_th", "y'+_th", get_formula("y'+", mix_param), parameters)));
-  theory->add(*(Utils::makeTheoryVar("x'2+_th", "x'2+_th", get_formula("x'2+", mix_param), parameters)));
-  theory->add(*(Utils::makeTheoryVar("RD_m_th", "RD_m_th", "r_Kpi * r_Kpi * (1 - Acp_KP)", parameters)));
-  theory->add(*(Utils::makeTheoryVar("y'-_th", "y'-_th", get_formula("y'-", mix_param), parameters)));
-  theory->add(*(Utils::makeTheoryVar("x'2-_th", "x'2-_th", get_formula("x'2-", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("RD_p_th", "r_Kpi * r_Kpi * (1 + Acp_KP)", parameters)));
+  theory->add(*(Utils::makeTheoryVar("y'+_th", get_formula("y'+", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("x'2+_th", get_formula("x'2+", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("RD_m_th", "r_Kpi * r_Kpi * (1 - Acp_KP)", parameters)));
+  theory->add(*(Utils::makeTheoryVar("y'-_th", get_formula("y'-", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("x'2-_th", get_formula("x'2-", mix_param), parameters)));
 }
 
 void PDF_WS::initObservables() {
@@ -278,48 +273,48 @@ void PDF_WS::setObservables(const TString c) {
   else if (c.EqualTo("BaBar")) {
     obsValSource = "https://inspirehep.net/literature/746245";
     // setObservable("RD_obs", 0.00303); TODO
-    setObservable("RD_p_obs", 0.00297);
+    setObservable("RD_p_obs", 2.97e-3);
     setObservable("y'+_obs", 9.8e-3);
     setObservable("x'2+_obs", -2.4e-4);
     // setObservable("AD_obs", -2.1e-2); TODO
-    setObservable("RD_m_obs", 0.00309);
+    setObservable("RD_m_obs", 3.09e-3);
     setObservable("y'-_obs", 9.6e-3);
     setObservable("x'2-_obs", -2.0e-4);
   } else if (c.EqualTo("Belle")) {
     obsValSource = "http://belle.kek.jp/belle/theses/doctor/lmzhang06/phd-mix-400.ps.gz";
-    setObservable("RD_p_obs", 0.00373);
+    setObservable("RD_p_obs", 3.73e-3);
     setObservable("y'+_obs", -1.2e-3);
     setObservable("x'2+_obs", 3.2e-4);
-    setObservable("RD_m_obs", 0.00356);
+    setObservable("RD_m_obs", 3.56e-3);
     setObservable("y'-_obs", 2e-3);
     setObservable("x'2-_obs", 0.6e-4);
   } else if (c.EqualTo("LHCb_DT_Run1")) {
     obsValSource = "https://inspirehep.net/literature/1499047";
-    setObservable("RD_p_obs", 0.00338);
+    setObservable("RD_p_obs", 3.38e-3);
     setObservable("y'+_obs", 5.81e-3);
     setObservable("x'2+_obs", -1.9e-5);
-    setObservable("RD_m_obs", 0.00360);
+    setObservable("RD_m_obs", 3.60e-3);
     setObservable("y'-_obs", 3.32e-3);
     setObservable("x'2-_obs", 7.9e-5);
   } else if (c.EqualTo("LHCb_Run1")) {
     obsValSource = "https://inspirehep.net/literature/1499047";
-    setObservable("RD_p_obs", 0.003474);
+    setObservable("RD_p_obs", 3.474e-3);
     setObservable("y'+_obs", 5.97e-3);
     setObservable("x'2+_obs", 1.1e-5);
-    setObservable("RD_m_obs", 0.003591);
+    setObservable("RD_m_obs", 3.591e-3);
     setObservable("y'-_obs", 4.50e-3);
     setObservable("x'2-_obs", 6.1e-5);
   } else if (c.EqualTo("LHCb_Prompt_2011_2016")) {
     obsValSource = "https://inspirehep.net/literature/1642234";
-    setObservable("RD_p_obs", 0.003454);
+    setObservable("RD_p_obs", 3.454e-3);
     setObservable("y'+_obs", 5.01e-3);
     setObservable("x'2+_obs", 6.1e-5);
-    setObservable("RD_m_obs", 0.003454);
+    setObservable("RD_m_obs", 3.454e-3);
     setObservable("y'-_obs", 5.54e-3);
     setObservable("x'2-_obs", 1.6e-5);
   } else if (c.EqualTo("LHCb_Prompt_Run12_sec9")) {
     obsValSource = "https://inspirehep.net/literature/2871248 Tab III";
-    setObservable("RD_obs", 0.003427);
+    setObservable("RD_obs", 3.427e-3);
     setObservable("c_obs", 5.28e-3);
     setObservable("c'_obs", 1.20e-5);
     setObservable("AD_obs", -0.66e-2);
@@ -327,7 +322,7 @@ void PDF_WS::setObservables(const TString c) {
     setObservable("dc'_obs", -0.7e-6);
   } else if (c.EqualTo("LHCb_Prompt_Run12_appB")) {
     obsValSource = "https://inspirehep.net/literature/2871248 Tab IV";
-    setObservable("RD_obs", 0.003427);
+    setObservable("RD_obs", 3.427e-3);
     setObservable("c_obs", 5.28e-3);
     setObservable("c'_obs", 1.20e-5);
     setObservable("AD_obs", -0.9e-2);
@@ -338,15 +333,15 @@ void PDF_WS::setObservables(const TString c) {
     setObservable("dc'~_obs", -2.0e-6);
   } else if (c.EqualTo("LHCb_DT_Run2")) {
     obsValSource = "https://inspirehep.net/literature/2871248";
-    setObservable("RD_p_obs", 0.00355);
+    setObservable("RD_p_obs", 3.55e-3);
     setObservable("y'+_obs", 3.56e-3);
     setObservable("x'2+_obs", 1.086e-4);
-    setObservable("RD_m_obs", 0.00339);
+    setObservable("RD_m_obs", 3.39e-3);
     setObservable("y'-_obs", 8.11e-3);
     setObservable("x'2-_obs", -1.129e-4);
   } else if (c.EqualTo("LHCb_DT_Run12")) {
     obsValSource = "https://inspirehep.net/literature/2871248";
-    setObservable("RD_p_obs", 0.00350);
+    setObservable("RD_p_obs", 3.50e-3);
     setObservable("y'+_obs", 4.14e-3);
     setObservable("x'2+_obs", 7.84e-5);
     setObservable("RD_m_obs", 0.00344);
@@ -361,88 +356,53 @@ void PDF_WS::setUncertainties(const TString c) {
   if (c.EqualTo("BaBar")) {
     obsErrSource = "https://inspirehep.net/literature/746245";
     // StatErr[0] = 0.000189; // RD TODO
-    StatErr[0] = 0.000267;  // RD+
-    StatErr[1] = 7.8e-3;    // y'+
-    StatErr[2] = 5.2e-4;    // x'2+
     // StatErr[3] = 5.4e-2;    // AD TODO
-    StatErr[3] = 0.000267;  // RD-
-    StatErr[4] = 7.5e-3;    // y'-
-    StatErr[5] = 5.0e-4;    // x'2-
+    //         RD+       y'+     x'2+    RD-       y'-     x'2-
+    StatErr = {0.267e-3, 7.8e-3, 5.2e-4, 0.267e-3, 7.5e-3, 5.0e-4};
     std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("Belle")) {
     obsErrSource = "http://belle.kek.jp/belle/theses/doctor/lmzhang06/phd-mix-400.ps.gz";
-    StatErr[0] = 0.00024;  // RD+
-    StatErr[1] = 5.7e-3;   // y'+
-    StatErr[2] = 3.1e-4;   // x'2+
-    StatErr[3] = 0.00024;  // RD-
-    StatErr[4] = 5.4e-3;   // y'-
-    StatErr[5] = 2.9e-4;   // x'2-
+    //         RD+      y'+     x'2+    RD-      y'-     x'2-
+    StatErr = {0.24e-3, 5.7e-3, 3.1e-4, 0.24e-3, 5.4e-3, 2.9e-4};
     std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_DT_Run1")) {
     obsErrSource = "https://inspirehep.net/literature/1499047";
-    StatErr[0] = std::hypot(0.0015, 0.0006);    // RD+
-    StatErr[1] = std::hypot(5.25e-3, 0.32e-3);  // y'+
-    StatErr[2] = std::hypot(4.46e-4, 0.31e-4);  // x'2+
-    StatErr[3] = std::hypot(0.0015, 0.0007);    // RD-
-    StatErr[4] = std::hypot(5.21e-3, 0.40e-3);  // y'-
-    StatErr[5] = std::hypot(4.31e-4, 0.38e-4);  // x'2-
+    StatErr = {std::hypot(1.5e-3, 0.6e-3),     // RD+
+               std::hypot(5.25e-3, 0.32e-3),   // y'+
+               std::hypot(4.46e-4, 0.31e-4),   // x'2+
+               std::hypot(1.5e-3, 0.7e-3),     // RD-
+               std::hypot(5.21e-3, 0.40e-3),   // y'-
+               std::hypot(4.31e-4, 0.38e-4)};  // x'2-
     std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_Run1")) {
     obsErrSource = "https://inspirehep.net/literature/1499047";
-    StatErr[0] = 0.00081;  // RD+
-    StatErr[1] = 1.25e-3;  // y'+
-    StatErr[2] = 6.5e-5;   // x'2+
-    StatErr[3] = 0.00081;  // RD-
-    StatErr[4] = 1.21e-3;  // y'-
-    StatErr[5] = 6.1e-5;   // x'2-
+    //         RD+      y'+      x'2+    RD-      y'-      x'2-
+    StatErr = {0.81e-3, 1.25e-3, 6.5e-5, 0.81e-3, 1.21e-3, 6.1e-5};
     std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_Prompt_2011_2016")) {
     obsErrSource = "https://inspirehep.net/literature/1642234";
-    StatErr[0] = 0.000045;  // RD+
-    StatErr[1] = 7.4e-4;    // y'+
-    StatErr[2] = 3.7e-5;    // x'2+
-    StatErr[3] = 0.000045;  // RD-
-    StatErr[4] = 7.4e-4;    // y'-
-    StatErr[5] = 3.9e-5;    // x'2-
+    //         RD+       y'+     x'2+    RD-       y'-     x'2-
+    StatErr = {0.045e-3, 7.4e-4, 3.7e-5, 0.045e-3, 7.4e-4, 3.9e-5};
     std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_Prompt_Run12_sec9")) {
     obsErrSource = "https://inspirehep.net/literature/2871248 Tab III";
-    StatErr[0] = 0.000019;  // RD
-    StatErr[1] = 3.3e-4;    // c
-    StatErr[2] = 3.5e-6;    // c'
-    StatErr[3] = 0.57e-2;   // AD
-    StatErr[4] = 3.4e-4;    // dc
-    StatErr[5] = 3.6e-6;    // dc'
+    //         RD        c       c'      AD       dc      dc'
+    StatErr = {0.019e-3, 3.3e-4, 3.5e-6, 0.57e-2, 3.4e-4, 3.6e-6};
     std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_Prompt_Run12_appB")) {
     obsErrSource = "https://inspirehep.net/literature/2871248 Tab IV";
-    StatErr[0] = 0.000019;  // RD
-    StatErr[1] = 3.3e-4;    // c
-    StatErr[2] = 3.5e-6;    // c'
-    StatErr[3] = 2.0e-2;    // AD
-    StatErr[4] = 1.0e-3;    // dc
-    StatErr[5] = 9.8e-6;    // dc'
-    StatErr[6] = 0.59e-2;   // ADt
-    StatErr[7] = 3.6e-4;    // dc~
-    StatErr[8] = 3.8e-6;    // dc'~
+    //         RD        c       c'      AD      dc      dc'     ADt      dc~     dc'~
+    StatErr = {0.019e-3, 3.3e-4, 3.5e-6, 2.0e-2, 1.0e-3, 9.8e-6, 0.59e-2, 3.6e-4, 3.8e-6};
     std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_DT_Run2")) {
     obsErrSource = "https://inspirehep.net/literature/2871248";
-    StatErr[0] = 0.00008;   // RD+
-    StatErr[1] = 2.25e-3;   // y'+
-    StatErr[2] = 1.623e-4;  // x'2+
-    StatErr[3] = 0.00008;   // RD-
-    StatErr[4] = 2.36e-3;   // y'-
-    StatErr[5] = 1.859e-4;  // x'2-
+    //         RD+       y'+     x'2+      RD-      y'-      x'2-
+    StatErr = {0.08e-3, 2.25e-3, 1.623e-4, 0.08e-3, 2.36e-3, 1.859e-4};
     std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_DT_Run12")) {
     obsErrSource = "https://inspirehep.net/literature/2871248";
-    StatErr[0] = 0.00007;   // RD+
-    StatErr[1] = 2.04e-3;   // y'+
-    StatErr[2] = 1.522e-4;  // x'2+
-    StatErr[3] = 0.00007;   // RD-
-    StatErr[4] = 2.11e-3;   // y'-
-    StatErr[5] = 1.665e-4;  // x'2-
+    //        RD+       y'+     x'2+      RD-      y'-      x'2-
+    StatErr = {0.07e-3, 2.04e-3, 1.522e-4, 0.07e-3, 2.11e-3, 1.665e-4};
     std::ranges::fill(SystErr, 0.0);
   } else {
     throw std::runtime_error(std::format("PDF_WS::setUncertainties ERROR config {} not found", c.Data()));
@@ -583,8 +543,4 @@ void PDF_WS::setCorrelations(const TString c) {
   } else {
     throw std::runtime_error(std::format("PDF_WS::setCorrelations ERROR config {} not found", c.Data()));
   }
-}
-
-void PDF_WS::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }

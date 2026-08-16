@@ -12,7 +12,6 @@
 
 #include <RooArgList.h>
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
 #include <format>
@@ -83,37 +82,27 @@ void PDF_AcpHH_LHCb_Run12::initObservables() {
 }
 
 void PDF_AcpHH_LHCb_Run12::setObservables(const TString c) {
-  obsValSource = "https://cds.cern.ch/record/2799916/";
-  setObservable("acp_d0_to_kk_run1_mu_obs", -6.0e-4);
-  setObservable("acp_d0_to_kk_run1_prompt_obs", 14.0e-4);
-  setObservable("acp_d0_to_kk_run2_cdp_obs", 13.6e-4);
-  setObservable("acp_d0_to_kk_run2_cds_obs", 2.8e-4);
-  setObservable("dacp_run1_mu_obs", 14.0e-4);
-  setObservable("dacp_run1_prompt_obs", -10.0e-4);
-  setObservable("dacp_run2_mu_obs", -9.0e-4);
-  setObservable("dacp_run2_prompt_obs", -18.2e-4);
+  if (c.EqualTo("truth"))
+    setObservablesTruth();
+  else if (c.EqualTo("toy"))
+    setObservablesToy();
+  else {
+    obsValSource = "https://cds.cern.ch/record/2799916/";
+    setObservable("acp_d0_to_kk_run1_mu_obs", -6.0e-4);
+    setObservable("acp_d0_to_kk_run1_prompt_obs", 14.0e-4);
+    setObservable("acp_d0_to_kk_run2_cdp_obs", 13.6e-4);
+    setObservable("acp_d0_to_kk_run2_cds_obs", 2.8e-4);
+    setObservable("dacp_run1_mu_obs", 14.0e-4);
+    setObservable("dacp_run1_prompt_obs", -10.0e-4);
+    setObservable("dacp_run2_mu_obs", -9.0e-4);
+    setObservable("dacp_run2_prompt_obs", -18.2e-4);
+  }
 }
 
 void PDF_AcpHH_LHCb_Run12::setUncertainties(const TString c) {
   obsErrSource = "https://cds.cern.ch/record/2799916/";
-
-  StatErr[0] = 15.0e-4;
-  StatErr[1] = 15.0e-4;
-  StatErr[2] = 8.8e-4;
-  StatErr[3] = 6.7e-4;
-  StatErr[4] = 16.0e-4;
-  StatErr[5] = 8.0e-4;
-  StatErr[6] = 8.0e-4;
-  StatErr[7] = 3.2e-4;
-
-  SystErr[0] = 10.0e-4;
-  SystErr[1] = 10.0e-4;
-  SystErr[2] = 1.6e-4;
-  SystErr[3] = 2.0e-4;
-  SystErr[4] = 8.0e-4;
-  SystErr[5] = 3.0e-4;
-  SystErr[6] = 5.0e-4;
-  SystErr[7] = 0.9e-4;
+  StatErr = {15.0e-4, 15.0e-4, 8.8e-4, 6.7e-4, 16.0e-4, 8.0e-4, 8.0e-4, 3.2e-4};
+  SystErr = {10.0e-4, 10.0e-4, 1.6e-4, 2.0e-4, 8.0e-4, 3.0e-4, 5.0e-4, 0.9e-4};
 }
 
 void PDF_AcpHH_LHCb_Run12::setCorrelations(const TString c) {
@@ -148,12 +137,8 @@ void PDF_AcpHH_LHCb_Run12::setCorrelations(const TString c) {
   corSystMatrix = Utils::buildCorMatrix(nObs, dataSyst);
 }
 
-void PDF_AcpHH_LHCb_Run12::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
-}
-
 void PDF_AcpHH_LHCb_Run12::add_acpkk(RooArgList* theory, TString name, double avg_time) {
-  theory->add(*(Utils::makeTheoryVar(name, name,
+  theory->add(*(Utils::makeTheoryVar(name,
                                      std::format("Acp_KK + {:.5e} * ({})", avg_time / constants::d0_lifetime,
                                                  utils::dy_hh_expression(mix_param, dy_fsc_param, "KK")),
                                      parameters)));
@@ -161,7 +146,7 @@ void PDF_AcpHH_LHCb_Run12::add_acpkk(RooArgList* theory, TString name, double av
 
 void PDF_AcpHH_LHCb_Run12::add_dacp(RooArgList* theory, TString name, double avg_time_kk, double avg_time_pp) {
   theory->add(*(Utils::makeTheoryVar(
-      name, name,
+      name,
       std::format("Acp_KK + {:.5e} * ({}) - Acp_PP - {:.5e} * ({})", avg_time_kk / constants::d0_lifetime,
                   utils::dy_hh_expression(mix_param, dy_fsc_param, "KK"), avg_time_pp / constants::d0_lifetime,
                   utils::dy_hh_expression(mix_param, dy_fsc_param, "PP")),

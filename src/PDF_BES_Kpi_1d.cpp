@@ -11,7 +11,6 @@
 #include <Utils.h>
 
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
 #include <boost/algorithm/string.hpp>
@@ -47,7 +46,7 @@ void PDF_BES_Kpi_1d::initRelations() {
   theory = new RooArgList("theory");
   std::string a_kpi_formula =
       std::format("(2 * r_Kpi * cos(Delta_Kpi) + {0}) / (1 + r_Kpi * r_Kpi)", utils::y_expression(mix_param));
-  theory->add(*(Utils::makeTheoryVar("A_kpi_th", "A_kpi_th", a_kpi_formula, parameters)));
+  theory->add(*(Utils::makeTheoryVar("A_kpi_th", a_kpi_formula, parameters)));
 }
 
 void PDF_BES_Kpi_1d::initObservables() {
@@ -71,8 +70,8 @@ void PDF_BES_Kpi_1d::setObservables(const TString c) {
 void PDF_BES_Kpi_1d::setUncertainties(const TString c) {
   if (c.EqualTo("BES")) {
     obsErrSource = "http://inspirehep.net/record/1291279";
-    StatErr[0] = 1.3e-2;
-    SystErr[0] = 0.7e-2;
+    StatErr = {1.3e-2};
+    SystErr = {0.7e-2};
   } else {
     throw std::runtime_error(std::format("PDF_BES_Kpi_1d::setUncertainties ERROR config {} not found", c.Data()));
   }
@@ -81,8 +80,4 @@ void PDF_BES_Kpi_1d::setUncertainties(const TString c) {
 void PDF_BES_Kpi_1d::setCorrelations(const TString c) {
   resetCorrelations();
   corSource = "No correlations for one observable";
-}
-
-void PDF_BES_Kpi_1d::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }

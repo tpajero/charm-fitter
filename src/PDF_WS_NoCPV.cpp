@@ -11,7 +11,6 @@
 #include <Utils.h>
 
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
 #include <algorithm>
@@ -72,9 +71,9 @@ std::set<std::string> PDF_WS_NoCPV::getParameterNames() const {
 
 void PDF_WS_NoCPV::initRelations() {
   theory = new RooArgList("theory");
-  theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "r_Kpi * r_Kpi", parameters)));
-  theory->add(*(Utils::makeTheoryVar("yp_th", "yp_th", theory_expressions["y'"][mix_param], parameters)));
-  theory->add(*(Utils::makeTheoryVar("xp2_th", "xp2_th", theory_expressions["x'2"][mix_param], parameters)));
+  theory->add(*(Utils::makeTheoryVar("RD_th", "r_Kpi * r_Kpi", parameters)));
+  theory->add(*(Utils::makeTheoryVar("yp_th", theory_expressions["y'"][mix_param], parameters)));
+  theory->add(*(Utils::makeTheoryVar("xp2_th", theory_expressions["x'2"][mix_param], parameters)));
 }
 
 void PDF_WS_NoCPV::initObservables() {
@@ -91,17 +90,17 @@ void PDF_WS_NoCPV::setObservables(const TString c) {
     setObservablesToy();
   else if (c.EqualTo("CDF")) {
     obsValSource = "https://inspirehep.net/literature/1254229";
-    setObservable("RD_obs", 0.00351);
+    setObservable("RD_obs", 3.51e-3);
     setObservable("yp_obs", 4.3e-3);
     setObservable("xp2_obs", 0.8e-4);
   } else if (c.EqualTo("BaBar")) {
     obsValSource = "https://inspirehep.net/literature/746245";
-    setObservable("RD_obs", 0.00303);
+    setObservable("RD_obs", 3.03e-3);
     setObservable("yp_obs", 9.7e-3);
     setObservable("xp2_obs", -2.2e-4);
   } else if (c.EqualTo("Belle")) {
     obsValSource = "https://inspirehep.net/literature/1277238";
-    setObservable("RD_obs", 0.00353);
+    setObservable("RD_obs", 3.53e-3);
     setObservable("yp_obs", 4.6e-3);
     setObservable("xp2_obs", 0.9e-4);
   } else {
@@ -110,23 +109,18 @@ void PDF_WS_NoCPV::setObservables(const TString c) {
 }
 
 void PDF_WS_NoCPV::setUncertainties(const TString c) {
+  // RD, y', x'2
   if (c.EqualTo("CDF")) {
     obsErrSource = "https://inspirehep.net/literature/1254229";
-    StatErr[0] = 0.00035;  // RD
-    StatErr[1] = 4.3e-3;   // y'
-    StatErr[2] = 1.8e-4;   // x'2
+    StatErr = {0.35e-3, 4.3e-3, 1.8e-4};
     std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("BaBar")) {
     obsErrSource = "https://inspirehep.net/literature/746245";
-    StatErr[0] = std::hypot(0.00016, 0.00010);  // RD
-    StatErr[1] = std::hypot(4.4e-3, 3.1e-3);    // y'+
-    StatErr[2] = std::hypot(3.0e-4, 2.1e-4);    // x'2+
+    StatErr = {std::hypot(0.16e-3, 0.10e-3), std::hypot(4.4e-3, 3.1e-3), std::hypot(3.0e-4, 2.1e-4)};
     std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("Belle")) {
     obsErrSource = "https://inspirehep.net/literature/1277238";
-    StatErr[0] = 0.00013;  // RD
-    StatErr[1] = 3.4e-3;   // y'
-    StatErr[2] = 2.2e-4;   // x'2
+    StatErr = {0.13e-3, 3.4e-3, 2.2e-4};
     std::ranges::fill(SystErr, 0.0);
   } else {
     throw std::runtime_error(std::format("PDF_WS_NoCPV::setUncertainties ERROR config {} not found", c.Data()));
@@ -171,8 +165,4 @@ void PDF_WS_NoCPV::setCorrelations(const TString c) {
   } else {
     throw std::runtime_error(std::format("PDF_WS_NoCPV::setCorrelations ERROR config {} not found", c.Data()));
   }
-}
-
-void PDF_WS_NoCPV::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }

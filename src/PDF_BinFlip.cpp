@@ -11,7 +11,6 @@
 #include <Utils.h>
 
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
 #include <algorithm>
@@ -45,25 +44,25 @@ void PDF_BinFlip::initRelations() {
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    theory->add(*(Utils::makeTheoryVar("x_th", "x_th",
+    theory->add(*(Utils::makeTheoryVar("x_th",
                                        "0.5*(  x*cos(phi)*(qop + 1/qop)"
                                        "     + y*sin(phi)*(qop - 1/qop))",
                                        parameters)));
-    theory->add(*(Utils::makeTheoryVar("y_th", "y_th",
+    theory->add(*(Utils::makeTheoryVar("y_th",
                                        "0.5*(  y*cos(phi)*(qop + 1./qop)"
                                        "     - x*sin(phi)*(qop - 1./qop))",
                                        parameters)));
     break;
   case mix::theo:
-    theory->add(*(Utils::makeTheoryVar("x_th", "x_th", " x12*cos(phiM)", parameters)));
-    theory->add(*(Utils::makeTheoryVar("y_th", "y_th", " y12*cos(phiG)", parameters)));
+    theory->add(*(Utils::makeTheoryVar("x_th", " x12*cos(phiM)", parameters)));
+    theory->add(*(Utils::makeTheoryVar("y_th", " y12*cos(phiG)", parameters)));
     break;
   default:
     throw std::runtime_error(
         std::format("PDF_BinFlip::initRelations ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
-  theory->add(*(Utils::makeTheoryVar("dx_th", "dx_th", utils::dx_expression(mix_param), parameters)));
-  theory->add(*(Utils::makeTheoryVar("dy_th", "dy_th", utils::dy_expression(mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("dx_th", utils::dx_expression(mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("dy_th", utils::dy_expression(mix_param), parameters)));
 }
 
 void PDF_BinFlip::initObservables() {
@@ -119,43 +118,24 @@ void PDF_BinFlip::setObservables(const TString c) {
 }
 
 void PDF_BinFlip::setUncertainties(const TString c) {
+  // x, y, dx, dy
   if (c.EqualTo("LHCb_Run1")) {
     obsErrSource = "https://inspirehep.net/literature/1724179";
-    StatErr[0] = 1.6e-3;   // x
-    StatErr[1] = 3.6e-3;   // y
-    StatErr[2] = 0.7e-3;   // dx
-    StatErr[3] = 1.6e-3;   // dy
-    SystErr[0] = 0.4e-3;   // x
-    SystErr[1] = 1.1e-3;   // y
-    SystErr[2] = 0.22e-3;  // dx
-    SystErr[3] = 0.3e-3;   // dy
+    StatErr = {1.6e-3, 3.6e-3, 0.7e-3, 1.6e-3};
+    SystErr = {0.4e-3, 1.1e-3, 0.22e-3, 0.3e-3};
   } else if (c.EqualTo("LHCb_Run2_prompt")) {
     obsErrSource = "https://inspirehep.net/literature/1867376";
-    StatErr[0] = std::hypot(0.459e-3, 0.29e-3);  // x
-    StatErr[1] = std::hypot(1.198e-3, 0.85e-3);  // y
-    StatErr[2] = std::hypot(0.182e-3, 0.01e-3);  // dx
-    StatErr[3] = std::hypot(0.365e-3, 0.11e-3);  // dy
+    StatErr = {std::hypot(0.459e-3, 0.29e-3), std::hypot(1.198e-3, 0.85e-3), std::hypot(0.182e-3, 0.01e-3),
+               std::hypot(0.365e-3, 0.11e-3)};
     std::ranges::fill(SystErr, 0.0);
   } else if (c.EqualTo("LHCb_Run2_sl")) {
     obsErrSource = "https://inspirehep.net/literature/2135966";
-    StatErr[0] = 1.48e-3;  // x
-    StatErr[1] = 3.12e-3;  // y
-    StatErr[2] = 0.93e-3;  // dx
-    StatErr[3] = 1.92e-3;  // dy
-    SystErr[0] = 0.26e-3;  // x
-    SystErr[1] = 0.83e-3;  // y
-    SystErr[2] = 0.28e-3;  // dx
-    SystErr[3] = 0.26e-3;  // dy
+    StatErr = {1.48e-3, 3.12e-3, 0.93e-3, 1.92e-3};
+    SystErr = {0.26e-3, 0.83e-3, 0.28e-3, 0.26e-3};
   } else if (c.EqualTo("LHCb_Run2")) {
     obsErrSource = "https://inspirehep.net/literature/2135966";
-    StatErr[0] = 0.45e-3;   // x
-    StatErr[1] = 1.16e-3;   // y
-    StatErr[2] = 0.18e-3;   // dx
-    StatErr[3] = 0.35e-3;   // dy
-    SystErr[0] = 0.195e-3;  // x
-    SystErr[1] = 0.594e-3;  // y
-    SystErr[2] = 0.013e-3;  // dx
-    SystErr[3] = 0.128e-3;  // dy
+    StatErr = {0.45e-3, 1.16e-3, 0.18e-3, 0.35e-3};
+    SystErr = {0.195e-3, 0.594e-3, 0.013e-3, 0.128e-3};
   } else {
     throw std::runtime_error(std::format("PDF_BinFlip::setUncertainties ERROR config {} not found", c.Data()));
   }
@@ -237,8 +217,4 @@ void PDF_BinFlip::setCorrelations(const TString c) {
   } else {
     throw std::runtime_error(std::format("PDF_BinFlip::setCorrelations ERROR config {} not found", c.Data()));
   }
-}
-
-void PDF_BinFlip::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }

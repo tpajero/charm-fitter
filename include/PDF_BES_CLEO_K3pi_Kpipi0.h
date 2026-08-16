@@ -17,7 +17,6 @@
 class PDF_BES_CLEO_K3pi_Kpipi0 : public PDF_Charm {
  public:
   PDF_BES_CLEO_K3pi_Kpipi0(TString measurement_id);
-  void buildPdf() override;
   void initObservables() override;
   void initRelations() override;
   void setCorrelations(TString measurement_id) override;

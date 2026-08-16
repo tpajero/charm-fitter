@@ -12,7 +12,6 @@
 
 #include <RooArgList.h>
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
 #include <boost/algorithm/string.hpp>
@@ -52,13 +51,13 @@ void PDF_BES_Kpi_7d::initRelations() {
                   y);
   using Utils::makeTheoryVar;
   theory = new RooArgList("theory");
-  theory->add(*(makeTheoryVar("A_kpi_th", "A_kpi_th", a_kpi_formula, parameters)));
-  theory->add(*(makeTheoryVar("A_kpi_pipipi0_th", "A_kpi_pipipi0_th", a_kpi_pipipi0_formula, parameters)));
-  theory->add(*(makeTheoryVar("rcos_3fb_th", "rcos_3fb_th", "-r_Kpi*cos(Delta_Kpi)", parameters)));
-  theory->add(*(makeTheoryVar("rsin_3fb_th", "rsin_3fb_th", " r_Kpi*sin(Delta_Kpi)", parameters)));
-  theory->add(*(makeTheoryVar("rcos_7fbCP_th", "rcos_7fbCP_th", "-r_Kpi*cos(Delta_Kpi)", parameters)));
-  theory->add(*(makeTheoryVar("rcos_7fb_th", "rcos_7fb_th", "-r_Kpi*cos(Delta_Kpi)", parameters)));
-  theory->add(*(makeTheoryVar("rsin_7fb_th", "rsin_7fb_th", " r_Kpi*sin(Delta_Kpi)", parameters)));
+  theory->add(*(makeTheoryVar("A_kpi_th", a_kpi_formula, parameters)));
+  theory->add(*(makeTheoryVar("A_kpi_pipipi0_th", a_kpi_pipipi0_formula, parameters)));
+  theory->add(*(makeTheoryVar("rcos_3fb_th", "-r_Kpi*cos(Delta_Kpi)", parameters)));
+  theory->add(*(makeTheoryVar("rsin_3fb_th", " r_Kpi*sin(Delta_Kpi)", parameters)));
+  theory->add(*(makeTheoryVar("rcos_7fbCP_th", "-r_Kpi*cos(Delta_Kpi)", parameters)));
+  theory->add(*(makeTheoryVar("rcos_7fb_th", "-r_Kpi*cos(Delta_Kpi)", parameters)));
+  theory->add(*(makeTheoryVar("rsin_7fb_th", " r_Kpi*sin(Delta_Kpi)", parameters)));
 }
 
 void PDF_BES_Kpi_7d::initObservables() {
@@ -76,7 +75,11 @@ void PDF_BES_Kpi_7d::initObservables() {
 }
 
 void PDF_BES_Kpi_7d::setObservables(const TString c) {
-  if (c.EqualTo("3+7fb")) {
+  if (c.EqualTo("truth"))
+    setObservablesTruth();
+  else if (c.EqualTo("toy"))
+    setObservablesToy();
+  else if (c.EqualTo("3+7fb")) {
     obsValSource = "https://arxiv.org/pdf/2208.09402v2.pdf, https://arxiv.org/pdf/2506.07907";
     setObservable("A_kpi_obs", 13.2e-2);
     setObservable("A_kpi_pipipi0_obs", 13.0e-2);
@@ -93,20 +96,8 @@ void PDF_BES_Kpi_7d::setObservables(const TString c) {
 void PDF_BES_Kpi_7d::setUncertainties(const TString c) {
   if (c.EqualTo("3+7fb")) {
     obsErrSource = "https://arxiv.org/pdf/2208.09402v2.pdf, https://arxiv.org/pdf/2506.07907";
-    StatErr[0] = 1.1e-2;
-    SystErr[0] = 0.7e-2;
-    StatErr[1] = 1.2e-2;
-    SystErr[1] = 0.8e-2;
-    StatErr[2] = 0.81e-2;
-    SystErr[2] = std::hypot(0.50e-2, 0.10e-2);
-    StatErr[3] = 1.2e-2;
-    SystErr[3] = std::hypot(0.7e-2, 0.3e-2);
-    StatErr[4] = 0.8e-2;
-    SystErr[4] = 0.15e-2;
-    StatErr[5] = 1.4e-2;
-    SystErr[5] = 0.18e-2;
-    StatErr[6] = 1.7e-2;
-    SystErr[6] = 0.31e-2;
+    StatErr = {1.1e-2, 1.2e-2, 0.81e-2, 1.2e-2, 0.8e-2, 1.4e-2, 1.7e-2};
+    SystErr = {0.7e-2, 0.8e-2, std::hypot(0.50e-2, 0.10e-2), std::hypot(0.7e-2, 0.3e-2), 0.15e-2, 0.18e-2, 0.31e-2};
   } else {
     throw std::runtime_error(std::format("PDF_BES_Kpi_7d::setUncertainties ERROR err config {} not found", c.Data()));
   }
@@ -143,8 +134,4 @@ void PDF_BES_Kpi_7d::setCorrelations(const TString c) {
   } else {
     throw std::runtime_error(std::format("PDF_BES_Kpi_7d::setCorrelations ERROR cor config {} not found", c.Data()));
   }
-}
-
-void PDF_BES_Kpi_7d::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }

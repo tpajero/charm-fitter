@@ -11,10 +11,8 @@
 #include <Utils.h>
 
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
-#include <algorithm>
 #include <format>
 #include <iostream>
 #include <stdexcept>
@@ -58,12 +56,11 @@ std::set<std::string> PDF_DY::getParameterNames() const {
 void PDF_DY::initRelations() {
   theory = new RooArgList("theory");
   if (nObs == 1) {
-    theory->add(*(Utils::makeTheoryVar("DY_th", "DY_th", utils::dy_hh_expression(mix_param), parameters)));
+    theory->add(*(Utils::makeTheoryVar("DY_th", utils::dy_hh_expression(mix_param), parameters)));
   } else if (nObs == 2) {
-    theory->add(*(Utils::makeTheoryVar("DY_KK_th", "DY_KK_th", utils::dy_hh_expression(mix_param, dy_fsc_param, "KK"),
-                                       parameters)));
-    theory->add(*(Utils::makeTheoryVar("DY_PP_th", "DY_PP_th", utils::dy_hh_expression(mix_param, dy_fsc_param, "PP"),
-                                       parameters)));
+    for (const auto& hh : {"KK", "PP"})
+      theory->add(*(Utils::makeTheoryVar(std::format("DY_{}_th", hh),
+                                         utils::dy_hh_expression(mix_param, dy_fsc_param, hh), parameters)));
   }
 }
 
@@ -108,27 +105,23 @@ void PDF_DY::setObservables(const TString c) {
 void PDF_DY::setUncertainties(const TString c) {
   obsErrSource = "https://github.com/tpajero/charm-fitter/tree/master/charmcombo/blue/DY.cpp";
   if (nObs == 1 && c.EqualTo("WA2019")) {
-    StatErr[0] = 2.6e-4;
-    std::ranges::fill(SystErr, 0.0);
+    StatErr = {2.6e-4};
+    SystErr = {0.0};
   } else if (nObs == 1 && c.EqualTo("WA2020")) {
-    StatErr[0] = 2.0e-4;
-    std::ranges::fill(SystErr, 0.0);
+    StatErr = {2.0e-4};
+    SystErr = {0.0};
   } else if (nObs == 1 && c.EqualTo("WA2021")) {
-    StatErr[0] = 1.11e-4;
-    SystErr[0] = 0.33e-4;
+    StatErr = {1.11e-4};
+    SystErr = {0.33e-4};
   } else if (nObs == 1 && c.EqualTo("Belle&BaBar")) {
-    StatErr[0] = 15.75e-4;
-    SystErr[0] = 4.81e-4;
+    StatErr = {15.75e-4};
+    SystErr = {4.81e-4};
   } else if (nObs == 2 && c.EqualTo("WA2020")) {
-    StatErr[0] = 2.35e-4;
-    SystErr[0] = 0.57e-4;
-    StatErr[1] = 4.30e-4;
-    SystErr[1] = 0.70e-4;
+    StatErr = {2.35e-4, 4.30e-4};
+    SystErr = {0.57e-4, 0.70e-4};
   } else if (nObs == 2 && c.EqualTo("WA2021")) {
-    StatErr[0] = 1.28e-4;
-    SystErr[0] = 0.32e-4;
-    StatErr[1] = 2.36e-4;
-    SystErr[1] = 0.39e-4;
+    StatErr = {1.28e-4, 2.36e-4};
+    SystErr = {0.32e-4, 0.39e-4};
   } else {
     throw std::runtime_error(
         std::format("PDF_DY::setUncertainties ERROR config {} not found for {} DY observables", c.Data(), nObs));
@@ -148,8 +141,4 @@ void PDF_DY::setCorrelations(const TString c) {
     throw std::runtime_error(
         std::format("PDF_DY::setCorrelations ERROR config {} not found for {} DY observables", c.Data(), nObs));
   }
-}
-
-void PDF_DY::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }

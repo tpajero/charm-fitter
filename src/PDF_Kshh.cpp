@@ -11,7 +11,6 @@
 #include <Utils.h>
 
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
 #include <TString.h>
@@ -44,21 +43,21 @@ std::set<std::string> PDF_Kshh::getParameterNames() const {
 
 void PDF_Kshh::initRelations() {
   theory = new RooArgList("theory");
-  theory->add(*(Utils::makeTheoryVar("x_th", "x_th", utils::x_expression(mix_param), parameters)));
-  theory->add(*(Utils::makeTheoryVar("y_th", "y_th", utils::y_expression(mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("x_th", utils::x_expression(mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("y_th", utils::y_expression(mix_param), parameters)));
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    theory->add(*(Utils::makeTheoryVar("qop_th", "qop_th", "qop", parameters)));
-    theory->add(*(Utils::makeTheoryVar("phi_th", "phi_th", "phi", parameters)));
+    theory->add(*(Utils::makeTheoryVar("qop_th", "qop", parameters)));
+    theory->add(*(Utils::makeTheoryVar("phi_th", "phi", parameters)));
     break;
   case mix::theo:
-    theory->add(*(Utils::makeTheoryVar("qop_th", "qop_th",
+    theory->add(*(Utils::makeTheoryVar("qop_th",
                                        "sqrt(  (x12*x12 + y12*y12 + 2 * x12 * y12 * sin(phiM - phiG))"
                                        "     / sqrt(  TMath::Sq(x12*x12 + y12*y12)                       "
                                        "            - TMath::Sq(2 * x12 * y12 * sin(phiM - phiG))))  ",
                                        parameters)));
-    theory->add(*(Utils::makeTheoryVar("phi_th", "phi_th",
+    theory->add(*(Utils::makeTheoryVar("phi_th",
                                        "-0.5 * TMath::ATan("
                                        "      (x12*x12 * sin(2*phiM) + y12*y12 * sin(2*phiG))"
                                        "    / (x12*x12 * cos(2*phiM) + y12*y12 * cos(2*phiG)))",
@@ -126,8 +125,4 @@ void PDF_Kshh::setCorrelations(const TString c) {
   } else {
     throw std::runtime_error(std::format("PDF_Kshh::setCorrelations ERROR config {} not found", c.Data()));
   }
-}
-
-void PDF_Kshh::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }

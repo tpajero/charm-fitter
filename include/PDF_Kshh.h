@@ -19,7 +19,6 @@
 class PDF_Kshh : public PDF_Charm {
  public:
   PDF_Kshh(TString measurement_id, parametrisations::mix mix_param);
-  void buildPdf() override;
   void initObservables() override;
   void initRelations() override;
   void setCorrelations(TString measurement_id) override;

@@ -11,11 +11,12 @@
 #include <Utils.h>
 
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
 #include <format>
+#include <set>
 #include <stdexcept>
+#include <string>
 
 PDF_DY_RS::PDF_DY_RS(const TString measurement_id, const parametrisations::mix mix_param)
     : PDF_Charm{1}, mix_param{mix_param}, measurement_id{measurement_id} {
@@ -42,7 +43,7 @@ std::set<std::string> PDF_DY_RS::getParameterNames() const {
 
 void PDF_DY_RS::initRelations() {
   theory = new RooArgList("theory");
-  theory->add(*(Utils::makeTheoryVar("DY_RS_th", "DY_RS_th", utils::dy_kp_expression(mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("DY_RS_th", utils::dy_kp_expression(mix_param), parameters)));
 }
 
 void PDF_DY_RS::initObservables() {
@@ -66,8 +67,8 @@ void PDF_DY_RS::setObservables(const TString c) {
 void PDF_DY_RS::setUncertainties(const TString c) {
   if (c.EqualTo("LHCb2021")) {
     obsErrSource = "https://inspirehep.net/literature/1864385";
-    StatErr[0] = 0.50e-4;
-    SystErr[0] = 0.23e-4;
+    StatErr = {0.50e-4};
+    SystErr = {0.23e-4};
   } else {
     throw std::runtime_error(std::format("PDF_DY_RS::setUncertainties ERROR config {} not found", c.Data()));
   }
@@ -76,8 +77,4 @@ void PDF_DY_RS::setUncertainties(const TString c) {
 void PDF_DY_RS::setCorrelations(const TString c) {
   resetCorrelations();
   corSource = "No correlations for one observable";
-}
-
-void PDF_DY_RS::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }

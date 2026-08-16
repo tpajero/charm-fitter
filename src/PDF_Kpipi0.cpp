@@ -11,9 +11,9 @@
 #include <Utils.h>
 
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
+#include <algorithm>
 #include <cmath>
 #include <format>
 #include <iostream>
@@ -48,15 +48,15 @@ void PDF_Kpipi0::initRelations() {
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    theory->add(*(Utils::makeTheoryVar("xpp_th", "xpp_th", "x*cos(Delta_Kpipi0) - y*sin(Delta_Kpipi0)", parameters)));
-    theory->add(*(Utils::makeTheoryVar("ypp_th", "ypp_th", "y*cos(Delta_Kpipi0) + x*sin(Delta_Kpipi0)", parameters)));
+    theory->add(*(Utils::makeTheoryVar("xpp_th", "x*cos(Delta_Kpipi0) - y*sin(Delta_Kpipi0)", parameters)));
+    theory->add(*(Utils::makeTheoryVar("ypp_th", "y*cos(Delta_Kpipi0) + x*sin(Delta_Kpipi0)", parameters)));
     break;
   case mix::theo:
-    theory->add(*(Utils::makeTheoryVar("xpp_th", "xpp_th",
+    theory->add(*(Utils::makeTheoryVar("xpp_th",
                                        "  x12*cos(Delta_Kpipi0) * cos(phiM)"
                                        "- y12*sin(Delta_Kpipi0) * cos(phiG)",
                                        parameters)));
-    theory->add(*(Utils::makeTheoryVar("ypp_th", "ypp_th",
+    theory->add(*(Utils::makeTheoryVar("ypp_th",
                                        "  y12 * cos(Delta_Kpipi0) * cos(phiG)"
                                        "+ x12 * sin(Delta_Kpipi0) * cos(phiM)",
                                        parameters)));
@@ -97,8 +97,8 @@ void PDF_Kpipi0::setObservables(const TString c) {
 void PDF_Kpipi0::setUncertainties(const TString c) {
   if (c.EqualTo("BaBar")) {
     obsErrSource = "https://inspirehep.net/literature/791715";
-    StatErr[0] = std::hypot(0.625e-2, 0.39e-2);  // x''
-    StatErr[1] = std::hypot(0.595e-2, 0.34e-2);  // y''
+    StatErr = {std::hypot(0.625e-2, 0.39e-2), std::hypot(0.595e-2, 0.34e-2)};
+    std::ranges::fill(SystErr, 0.0);
   } else {
     throw std::runtime_error(std::format("PDF_Kpipi0::setUncertainties ERROR config {} not found", c.Data()));
   }
@@ -113,8 +113,4 @@ void PDF_Kpipi0::setCorrelations(const TString c) {
   } else {
     throw std::runtime_error(std::format("PDF_Kpipi0::setCorrelations ERROR config {} not found", c.Data()));
   }
-}
-
-void PDF_Kpipi0::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }

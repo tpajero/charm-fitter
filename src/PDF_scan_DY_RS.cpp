@@ -11,7 +11,6 @@
 #include <Utils.h>
 
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
 #include <algorithm>
@@ -43,7 +42,7 @@ std::set<std::string> PDF_scan_DY_RS::getParameterNames() const {
 
 void PDF_scan_DY_RS::initRelations() {
   theory = new RooArgList("theory");
-  theory->add(*(Utils::makeTheoryVar("DY_RS_scan_th", "DY_RS_scan_th",
+  theory->add(*(Utils::makeTheoryVar("DY_RS_scan_th",
                                      std::format("DY_RS - abs({})", utils::dy_kp_expression(mix_param)), parameters)));
 }
 
@@ -52,18 +51,21 @@ void PDF_scan_DY_RS::initObservables() {
   observables->add(*(new RooRealVar("DY_RS_scan_obs", "scan   #Delta#it{Y}_{#it{K^{#minus}#pi^{+}}}", 0, -1e4, 1e4)));
 }
 
-void PDF_scan_DY_RS::setObservables(const TString) { setObservable("DY_RS_scan_obs", 0.); }
+void PDF_scan_DY_RS::setObservables(const TString c) {
+  if (c.EqualTo("truth"))
+    setObservablesTruth();
+  else if (c.EqualTo("toy"))
+    setObservablesToy();
+  else
+    setObservable("DY_RS_scan_obs", 0.);
+}
 
 void PDF_scan_DY_RS::setUncertainties(const TString) {
-  StatErr[0] = 5e-7;
-  std::ranges::fill(SystErr, 0.0);
+  StatErr = {5e-7};
+  SystErr = {0.0};
 }
 
 void PDF_scan_DY_RS::setCorrelations(const TString) {
   resetCorrelations();
   corSource = "No correlations for one observable";
-}
-
-void PDF_scan_DY_RS::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }

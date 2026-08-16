@@ -19,8 +19,8 @@ set(COMBINER_MAIN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/main)
 # -----------------------------------------------------------------------------
 
 set(COMBINER_LIB_SOURCES
-    ${COMBINER_SOURCE_DIR}/CharmUtils.cpp
     ${COMBINER_SOURCE_DIR}/CharmParameters.cpp
+    ${COMBINER_SOURCE_DIR}/CharmUtils.cpp
     ${COMBINER_SOURCE_DIR}/PDF_AcpHH_LHCb_Run12.cpp
     ${COMBINER_SOURCE_DIR}/PDF_BES_CLEO_K3pi_Kpipi0.cpp
     ${COMBINER_SOURCE_DIR}/PDF_BES_Kpi_1d.cpp

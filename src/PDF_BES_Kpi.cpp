@@ -11,7 +11,6 @@
 #include <Utils.h>
 
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
 #include <boost/algorithm/string.hpp>
@@ -54,10 +53,10 @@ void PDF_BES_Kpi::initRelations() {
                   y);
   using Utils::makeTheoryVar;
   theory = new RooArgList("theory");
-  theory->add(*(makeTheoryVar("A_kpi_th", "A_kpi_th", a_kpi_formula, parameters)));
-  theory->add(*(makeTheoryVar("A_kpi_pipipi0_th", "A_kpi_pipipi0_th", a_kpi_pipipi0_formula, parameters)));
-  theory->add(*(makeTheoryVar("rcos_th", "rcos_th", "-r_Kpi*cos(Delta_Kpi)", parameters)));
-  theory->add(*(makeTheoryVar("rsin_th", "rsin_th", " r_Kpi*sin(Delta_Kpi)", parameters)));
+  theory->add(*(makeTheoryVar("A_kpi_th", a_kpi_formula, parameters)));
+  theory->add(*(makeTheoryVar("A_kpi_pipipi0_th", a_kpi_pipipi0_formula, parameters)));
+  theory->add(*(makeTheoryVar("rcos_th", "-r_Kpi*cos(Delta_Kpi)", parameters)));
+  theory->add(*(makeTheoryVar("rsin_th", " r_Kpi*sin(Delta_Kpi)", parameters)));
 }
 
 void PDF_BES_Kpi::initObservables() {
@@ -69,7 +68,11 @@ void PDF_BES_Kpi::initObservables() {
 }
 
 void PDF_BES_Kpi::setObservables(const TString c) {
-  if (c.EqualTo("3fb")) {
+  if (c.EqualTo("truth"))
+    setObservablesTruth();
+  else if (c.EqualTo("toy"))
+    setObservablesToy();
+  else if (c.EqualTo("3fb")) {
     obsValSource = "https://arxiv.org/pdf/2208.09402v2.pdf";
     setObservable("A_kpi_obs", 13.2e-2);
     setObservable("A_kpi_pipipi0_obs", 13.0e-2);
@@ -83,15 +86,9 @@ void PDF_BES_Kpi::setObservables(const TString c) {
 void PDF_BES_Kpi::setUncertainties(const TString c) {
   if (c.EqualTo("3fb")) {
     obsErrSource = "https://arxiv.org/pdf/2208.09402v2.pdf";
-    StatErr[0] = 1.1e-2;
-    SystErr[0] = 0.7e-2;
-    StatErr[1] = 1.2e-2;
-    SystErr[1] = 0.8e-2;
     // The stat. errs. for rcos and rsin include both the statistical and systematic components
-    StatErr[2] = std::hypot(0.81e-2, 0.50e-2, 0.10e-2);
-    SystErr[2] = 0.;
-    StatErr[3] = std::hypot(1.2e-2, 0.7e-2, 0.3e-2);
-    SystErr[3] = 0.;
+    StatErr = {1.1e-2, 1.2e-2, std::hypot(0.81e-2, 0.50e-2, 0.10e-2), std::hypot(1.2e-2, 0.7e-2, 0.3e-2)};
+    SystErr = {0.7e-2, 0.8e-2, 0., 0.};
   } else {
     throw std::runtime_error(std::format("PDF_BES_Kpi::setUncertainties ERROR err config {} not found", c.Data()));
   }
@@ -122,8 +119,4 @@ void PDF_BES_Kpi::setCorrelations(const TString c) {
   } else {
     throw std::runtime_error(std::format("PDF_BES_Kpi::setCorrelations ERROR cor config {} not found", c.Data()));
   }
-}
-
-void PDF_BES_Kpi::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }

@@ -11,10 +11,8 @@
 #include <Utils.h>
 
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
-#include <algorithm>
 #include <format>
 #include <iostream>
 #include <stdexcept>
@@ -47,7 +45,7 @@ void PDF_yCP_plus_yCP_RS::initRelations() {
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    theory->add(*(Utils::makeTheoryVar("yCP_plus_yCP_RS_th", "yCP_plus_yCP_RS_th",
+    theory->add(*(Utils::makeTheoryVar("yCP_plus_yCP_RS_th",
                                        "0.5*( "
                                        "      y*(qop + 1/qop)*cos(phi)"
                                        "    - x*(qop - 1/qop)*sin(phi)"
@@ -57,7 +55,7 @@ void PDF_yCP_plus_yCP_RS::initRelations() {
                                        parameters)));
     break;
   case mix::theo:
-    theory->add(*(Utils::makeTheoryVar("yCP_plus_yCP_RS_th", "yCP_plus_yCP_RS_th",
+    theory->add(*(Utils::makeTheoryVar("yCP_plus_yCP_RS_th",
                                        " y12 * cos(phiG)"
                                        " + r_Kpi * ("
                                        "     - y12 * cos(Delta_Kpi) * cos(phiG)"
@@ -92,8 +90,8 @@ void PDF_yCP_plus_yCP_RS::setObservables(const TString c) {
 void PDF_yCP_plus_yCP_RS::setUncertainties(const TString c) {
   if (c.EqualTo("WA2020")) {
     obsErrSource = "https://cds.cern.ch/record/2747731";
-    StatErr[0] = 1.114e-2;
-    std::ranges::fill(SystErr, 0.0);
+    StatErr = {1.114e-2};
+    SystErr = {0.0};
   } else {
     throw std::runtime_error(std::format("PDF_yCP_plus_yCP_RS::setUncertainties ERROR config {} not found", c.Data()));
   }
@@ -102,8 +100,4 @@ void PDF_yCP_plus_yCP_RS::setUncertainties(const TString c) {
 void PDF_yCP_plus_yCP_RS::setCorrelations(const TString c) {
   resetCorrelations();
   corSource = "No correlations for one observable";
-}
-
-void PDF_yCP_plus_yCP_RS::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }

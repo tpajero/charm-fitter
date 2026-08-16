@@ -11,7 +11,6 @@
 #include <Utils.h>
 
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
 #include <TString.h>
@@ -27,7 +26,7 @@ std::set<std::string> PDF_Fp_pipipi0::getParameterNames() const { return {"F_pip
 
 void PDF_Fp_pipipi0::initRelations() {
   theory = new RooArgList("theory");
-  theory->add(*(Utils::makeTheoryVar("F_pipipi0_th", "F_pipipi0_th", "F_pipipi0", parameters)));
+  theory->add(*(Utils::makeTheoryVar("F_pipipi0_th", "F_pipipi0", parameters)));
 }
 
 void PDF_Fp_pipipi0::initObservables() {
@@ -36,7 +35,11 @@ void PDF_Fp_pipipi0::initObservables() {
 }
 
 void PDF_Fp_pipipi0::setObservables(const TString c) {
-  if (c.EqualTo("Cleo-c")) {
+  if (c.EqualTo("truth"))
+    setObservablesTruth();
+  else if (c.EqualTo("toy"))
+    setObservablesToy();
+  else if (c.EqualTo("Cleo-c")) {
     obsValSource = "https://inspirehep.net/literature/2139827";
     setObservable("F_pipipi0_obs", 0.973);
   } else if (c.EqualTo("BESIII")) {
@@ -51,12 +54,12 @@ void PDF_Fp_pipipi0::setObservables(const TString c) {
 void PDF_Fp_pipipi0::setUncertainties(const TString c) {
   if (c.EqualTo("Cleo-c")) {
     obsErrSource = "https://inspirehep.net/literature/2139827";
-    StatErr[0] = 0.017;
-    std::ranges::fill(SystErr, 0.0);
+    StatErr = {0.017};
+    SystErr = {0.0};
   } else if (c.EqualTo("BESIII")) {
     obsErrSource = "https://inspirehep.net/literature/2827201";
-    StatErr[0] = 0.0036;
-    SystErr[0] = 0.0021;
+    StatErr = {0.0036};
+    SystErr = {0.0021};
   } else {
     std::cout << "PDF_Fp_pipipi0::setObservables() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
@@ -66,8 +69,4 @@ void PDF_Fp_pipipi0::setUncertainties(const TString c) {
 void PDF_Fp_pipipi0::setCorrelations(const TString c) {
   resetCorrelations();
   corSource = "No correlations for one observable";
-}
-
-void PDF_Fp_pipipi0::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }

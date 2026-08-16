@@ -11,7 +11,6 @@
 #include <Utils.h>
 
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
 #include <algorithm>
@@ -46,14 +45,14 @@ std::set<std::string> PDF_Cleo::getParameterNames() const {
 
 void PDF_Cleo::initRelations() {
   theory = new RooArgList("theory");
-  theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "r_Kpi * r_Kpi", parameters)));
+  theory->add(*(Utils::makeTheoryVar("RD_th", "r_Kpi * r_Kpi", parameters)));
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    theory->add(*(Utils::makeTheoryVar("x2_th", "x2_th", "x*x", parameters)));
+    theory->add(*(Utils::makeTheoryVar("x2_th", "x*x", parameters)));
     break;
   case mix::theo:
-    theory->add(*(Utils::makeTheoryVar("x2_th", "x2_th",
+    theory->add(*(Utils::makeTheoryVar("x2_th",
                                        "0.5 * (x12*x12 - y12*y12 + sqrt("
                                        "      TMath::Sq(x12*x12 + y12*y12) "
                                        "    - TMath::Sq(2 * x12 * y12 * sin(phiM - phiG))))",
@@ -63,9 +62,9 @@ void PDF_Cleo::initRelations() {
     throw std::runtime_error(
         std::format("PDF_Cleo::initRelations ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
-  theory->add(*(Utils::makeTheoryVar("y_th", "y_th", utils::y_expression(mix_param), parameters)));
-  theory->add(*(Utils::makeTheoryVar("cos_th", "cos_th", "cos(Delta_Kpi)", parameters)));
-  theory->add(*(Utils::makeTheoryVar("sin_th", "sin_th", "-sin(Delta_Kpi)", parameters)));
+  theory->add(*(Utils::makeTheoryVar("y_th", utils::y_expression(mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("cos_th", "cos(Delta_Kpi)", parameters)));
+  theory->add(*(Utils::makeTheoryVar("sin_th", "-sin(Delta_Kpi)", parameters)));
 }
 
 void PDF_Cleo::initObservables() {
@@ -125,8 +124,4 @@ void PDF_Cleo::setCorrelations(const TString c) {
   } else {
     throw std::runtime_error(std::format("PDF_Cleo::setCorrelations ERROR config {} not found", c.Data()));
   }
-}
-
-void PDF_Cleo::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }

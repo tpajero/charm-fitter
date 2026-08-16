@@ -17,7 +17,6 @@
 
 #include <RooArgList.h>
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
 #include <algorithm>
@@ -39,12 +38,12 @@ std::set<std::string> PDF_BES_CLEO_K3pi_Kpipi0::getParameterNames() const {
 void PDF_BES_CLEO_K3pi_Kpipi0::initRelations() {
   theory = new RooArgList("theory");  ///< the order of this list must match that of the COR matrix!
   using Utils::makeTheoryVar;
-  theory->add(*(makeTheoryVar("k_K3pi_th", "k_K3pi_th", "k_K3pi", parameters)));
-  theory->add(*(makeTheoryVar("Delta_K3pi_th", "Delta_K3pi_th", "Delta_K3pi", parameters)));
-  theory->add(*(makeTheoryVar("k_Kpipi0_th", "k_Kpipi0_th", "k_Kpipi0", parameters)));
-  theory->add(*(makeTheoryVar("Delta_Kpipi0_th", "Delta_Kpipi0_th", "Delta_Kpipi0", parameters)));
-  theory->add(*(makeTheoryVar("r_K3pi_th", "r_K3pi_th", "r_K3pi", parameters)));
-  theory->add(*(makeTheoryVar("r_Kpipi0_th", "r_Kpipi0_th", "r_Kpipi0", parameters)));
+  theory->add(*(makeTheoryVar("k_K3pi_th", "k_K3pi", parameters)));
+  theory->add(*(makeTheoryVar("Delta_K3pi_th", "Delta_K3pi", parameters)));
+  theory->add(*(makeTheoryVar("k_Kpipi0_th", "k_Kpipi0", parameters)));
+  theory->add(*(makeTheoryVar("Delta_Kpipi0_th", "Delta_Kpipi0", parameters)));
+  theory->add(*(makeTheoryVar("r_K3pi_th", "r_K3pi", parameters)));
+  theory->add(*(makeTheoryVar("r_Kpipi0_th", "r_Kpipi0", parameters)));
 }
 
 void PDF_BES_CLEO_K3pi_Kpipi0::initObservables() {
@@ -117,8 +116,4 @@ void PDF_BES_CLEO_K3pi_Kpipi0::setCorrelations(const TString c) {
     std::cout << "PDF_BES_CLEO_K3pi_Kpipi0::setCorrelations() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
-}
-
-void PDF_BES_CLEO_K3pi_Kpipi0::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }

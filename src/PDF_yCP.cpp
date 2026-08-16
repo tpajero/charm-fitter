@@ -11,12 +11,10 @@
 #include <Utils.h>
 
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
 #include <TString.h>
 
-#include <algorithm>
 #include <format>
 #include <iostream>
 #include <stdexcept>
@@ -45,13 +43,13 @@ void PDF_yCP::initRelations() {
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    theory->add(*(Utils::makeTheoryVar("yCP_th", "yCP_th",
+    theory->add(*(Utils::makeTheoryVar("yCP_th",
                                        "0.5*(  y * (qop + 1/qop) * cos(phi)"
                                        "     - x * (qop - 1/qop) * sin(phi))",
                                        parameters)));
     break;
   case mix::theo:
-    theory->add(*(Utils::makeTheoryVar("yCP_th", "yCP_th", "y12*cos(phiG)", parameters)));
+    theory->add(*(Utils::makeTheoryVar("yCP_th", "y12*cos(phiG)", parameters)));
     break;
   default:
     throw std::runtime_error(
@@ -86,16 +84,16 @@ void PDF_yCP::setObservables(const TString c) {
 void PDF_yCP::setUncertainties(const TString c) {
   if (c.EqualTo("WA2020")) {
     obsErrSource = "https://cds.cern.ch/record/2747731";
-    StatErr[0] = 7.04e-3;
-    std::ranges::fill(SystErr, 0.0);
+    StatErr = {7.04e-3};
+    SystErr = {0.0};
   } else if (c.EqualTo("WA2020_biased")) {
     obsErrSource = "HFLAV";
-    StatErr[0] = 1.13e-3;
-    std::ranges::fill(SystErr, 0.0);
+    StatErr = {1.13e-3};
+    SystErr = {0.0};
   } else if (c.EqualTo("LHCb2022_biased")) {
     obsErrSource = "https://inspirehep.net/literature/2035063";
-    StatErr[0] = 0.26e-3;
-    SystErr[0] = 0.13e-3;
+    StatErr = {0.26e-3};
+    SystErr = {0.13e-3};
   } else {
     throw std::runtime_error(std::format("PDF_yCP::setUncertainties ERROR config {} not found", c.Data()));
   }
@@ -104,8 +102,4 @@ void PDF_yCP::setUncertainties(const TString c) {
 void PDF_yCP::setCorrelations(const TString c) {
   resetCorrelations();
   corSource = "No correlations for one observable";
-}
-
-void PDF_yCP::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }
