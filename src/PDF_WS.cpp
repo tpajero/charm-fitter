@@ -185,20 +185,20 @@ void PDF_WS::initRelations() {
 void PDF_WS::initRelationsCCPrime() {
   using parametrisations::dy_fsc;
   theory = new RooArgList("theory");
-  theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "r_Kpi * r_Kpi", parameters)));
-  theory->add(*(Utils::makeTheoryVar("c_th", "c_th", get_formula("c", mix_param), parameters)));
-  theory->add(*(Utils::makeTheoryVar("c'_th", "c'_th", get_formula("c'", mix_param), parameters)));
-  theory->add(*(Utils::makeTheoryVar("AD_th", "AD_th", "Acp_KP", parameters)));
-  theory->add(*(Utils::makeTheoryVar("dc_th", "dc_th", get_formula("dc", mix_param), parameters)));
-  theory->add(*(Utils::makeTheoryVar("dc'_th", "dc'_th", get_formula("dc'", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("RD_th", "r_Kpi * r_Kpi", parameters)));
+  theory->add(*(Utils::makeTheoryVar("c_th", get_formula("c", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("c'_th", get_formula("c'", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("AD_th", "Acp_KP", parameters)));
+  theory->add(*(Utils::makeTheoryVar("dc_th", get_formula("dc", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("dc'_th", get_formula("dc'", mix_param), parameters)));
   if (nObs == 9) {
-    theory->add(*(Utils::makeTheoryVar("ADt_th", "ADt_th", "Acp_KP - 2 * Acp_KK", parameters)));
+    theory->add(*(Utils::makeTheoryVar("ADt_th", "Acp_KP - 2 * Acp_KK", parameters)));
     theory->add(*(Utils::makeTheoryVar(
-        "dc~_th", "dc~_th",
+        "dc~_th",
         std::format("{} - 2 * r_Kpi * ({}) - Acp_KK * ({})", get_formula("dc", mix_param),
                     utils::dy_hh_expression(mix_param, dy_fsc::none, "KK"), get_formula("c", mix_param)),
         parameters)));
-    theory->add(*(Utils::makeTheoryVar("dc'~_th", "dc'~_th",
+    theory->add(*(Utils::makeTheoryVar("dc'~_th",
                                        std::format("{} - 2 * r_Kpi * ({}) * ({}) - 2 * Acp_KK * ({})",
                                                    get_formula("dc'", mix_param), get_formula("c", mix_param),
                                                    utils::dy_hh_expression(mix_param, dy_fsc::none, "KK"),
@@ -209,22 +209,22 @@ void PDF_WS::initRelationsCCPrime() {
 
 void PDF_WS::initRelationsRAXY() {
   theory = new RooArgList("theory");
-  theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "r_Kpi * r_Kpi", parameters)));
-  theory->add(*(Utils::makeTheoryVar("y'+_th", "y'+_th", get_formula("y'+", mix_param), parameters)));
-  theory->add(*(Utils::makeTheoryVar("x'2+_th", "x'2+_th", get_formula("x'2+", mix_param), parameters)));
-  theory->add(*(Utils::makeTheoryVar("AD_th", "AD_th", "Acp_KP", parameters)));
-  theory->add(*(Utils::makeTheoryVar("y'-_th", "y'-_th", get_formula("y'-", mix_param), parameters)));
-  theory->add(*(Utils::makeTheoryVar("x'2-_th", "x'2-_th", get_formula("x'2-", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("RD_th", "r_Kpi * r_Kpi", parameters)));
+  theory->add(*(Utils::makeTheoryVar("y'+_th", get_formula("y'+", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("x'2+_th", get_formula("x'2+", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("AD_th", "Acp_KP", parameters)));
+  theory->add(*(Utils::makeTheoryVar("y'-_th", get_formula("y'-", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("x'2-_th", get_formula("x'2-", mix_param), parameters)));
 }
 
 void PDF_WS::initRelationsRRXY() {
   theory = new RooArgList("theory");
-  theory->add(*(Utils::makeTheoryVar("RD_p_th", "RD_p_th", "r_Kpi * r_Kpi * (1 + Acp_KP)", parameters)));
-  theory->add(*(Utils::makeTheoryVar("y'+_th", "y'+_th", get_formula("y'+", mix_param), parameters)));
-  theory->add(*(Utils::makeTheoryVar("x'2+_th", "x'2+_th", get_formula("x'2+", mix_param), parameters)));
-  theory->add(*(Utils::makeTheoryVar("RD_m_th", "RD_m_th", "r_Kpi * r_Kpi * (1 - Acp_KP)", parameters)));
-  theory->add(*(Utils::makeTheoryVar("y'-_th", "y'-_th", get_formula("y'-", mix_param), parameters)));
-  theory->add(*(Utils::makeTheoryVar("x'2-_th", "x'2-_th", get_formula("x'2-", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("RD_p_th", "r_Kpi * r_Kpi * (1 + Acp_KP)", parameters)));
+  theory->add(*(Utils::makeTheoryVar("y'+_th", get_formula("y'+", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("x'2+_th", get_formula("x'2+", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("RD_m_th", "r_Kpi * r_Kpi * (1 - Acp_KP)", parameters)));
+  theory->add(*(Utils::makeTheoryVar("y'-_th", get_formula("y'-", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("x'2-_th", get_formula("x'2-", mix_param), parameters)));
 }
 
 void PDF_WS::initObservables() {

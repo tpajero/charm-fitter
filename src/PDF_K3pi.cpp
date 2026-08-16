@@ -56,9 +56,9 @@ std::set<std::string> PDF_K3pi::getParameterNames() const {
 
 void PDF_K3pi::initRelations() {
   theory = new RooArgList("theory");  ///< the order of this list must match that of the COR matrix!
-  theory->add(*(Utils::makeTheoryVar("r_K3pi_th", "r_K3pi_th", "r_K3pi", parameters)));
-  theory->add(*(Utils::makeTheoryVar("c1_th", "c1_th", theory_expressions["c1"][mix_param], parameters)));
-  theory->add(*(Utils::makeTheoryVar("c2_th", "c2_th", theory_expressions["c2"][mix_param], parameters)));
+  theory->add(*(Utils::makeTheoryVar("r_K3pi_th", "r_K3pi", parameters)));
+  theory->add(*(Utils::makeTheoryVar("c1_th", theory_expressions["c1"][mix_param], parameters)));
+  theory->add(*(Utils::makeTheoryVar("c2_th", theory_expressions["c2"][mix_param], parameters)));
 }
 
 void PDF_K3pi::initObservables() {

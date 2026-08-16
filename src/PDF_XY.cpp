@@ -47,12 +47,12 @@ void PDF_XY::initRelations() {
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    theory->add(*(Utils::makeTheoryVar("x_th", "x_th", "x", parameters)));
-    theory->add(*(Utils::makeTheoryVar("y_th", "y_th", "y", parameters)));
+    theory->add(*(Utils::makeTheoryVar("x_th", "x", parameters)));
+    theory->add(*(Utils::makeTheoryVar("y_th", "y", parameters)));
     break;
   case mix::theo:
-    theory->add(*(Utils::makeTheoryVar("x_th", "x_th", utils::x_expression(mix_param), parameters)));
-    theory->add(*(Utils::makeTheoryVar("y_th", "y_th", utils::y_expression(mix_param), parameters)));
+    theory->add(*(Utils::makeTheoryVar("x_th", utils::x_expression(mix_param), parameters)));
+    theory->add(*(Utils::makeTheoryVar("y_th", utils::y_expression(mix_param), parameters)));
     break;
   default:
     throw std::runtime_error(

@@ -48,7 +48,7 @@ void PDF_yCP_minus_yCP_KP::initRelations() {
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    theory->add(*(Utils::makeTheoryVar("yCP_minus_yCP_KP_th", "yCP_minus_yCP_KP_th",
+    theory->add(*(Utils::makeTheoryVar("yCP_minus_yCP_KP_th",
                                        " 0.5*( "
                                        "       y*(qop + 1/qop)*cos(phi)"
                                        "     - x*(qop - 1/qop)*sin(phi))"
@@ -58,7 +58,7 @@ void PDF_yCP_minus_yCP_KP::initRelations() {
                                        parameters)));
     break;
   case mix::theo:
-    theory->add(*(Utils::makeTheoryVar("yCP_minus_yCP_KP_th", "yCP_minus_yCP_KP_th",
+    theory->add(*(Utils::makeTheoryVar("yCP_minus_yCP_KP_th",
                                        "y12*cos(phiG)"
                                        "+ 2 * r_Kpi * y12 * cos(Delta_Kpi) * cos(phiG)",
                                        parameters)));

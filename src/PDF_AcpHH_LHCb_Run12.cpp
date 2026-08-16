@@ -143,7 +143,7 @@ void PDF_AcpHH_LHCb_Run12::buildPdf() {
 }
 
 void PDF_AcpHH_LHCb_Run12::add_acpkk(RooArgList* theory, TString name, double avg_time) {
-  theory->add(*(Utils::makeTheoryVar(name, name,
+  theory->add(*(Utils::makeTheoryVar(name,
                                      std::format("Acp_KK + {:.5e} * ({})", avg_time / constants::d0_lifetime,
                                                  utils::dy_hh_expression(mix_param, dy_fsc_param, "KK")),
                                      parameters)));
@@ -151,7 +151,7 @@ void PDF_AcpHH_LHCb_Run12::add_acpkk(RooArgList* theory, TString name, double av
 
 void PDF_AcpHH_LHCb_Run12::add_dacp(RooArgList* theory, TString name, double avg_time_kk, double avg_time_pp) {
   theory->add(*(Utils::makeTheoryVar(
-      name, name,
+      name,
       std::format("Acp_KK + {:.5e} * ({}) - Acp_PP - {:.5e} * ({})", avg_time_kk / constants::d0_lifetime,
                   utils::dy_hh_expression(mix_param, dy_fsc_param, "KK"), avg_time_pp / constants::d0_lifetime,
                   utils::dy_hh_expression(mix_param, dy_fsc_param, "PP")),

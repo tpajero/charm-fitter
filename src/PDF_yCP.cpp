@@ -44,13 +44,13 @@ void PDF_yCP::initRelations() {
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    theory->add(*(Utils::makeTheoryVar("yCP_th", "yCP_th",
+    theory->add(*(Utils::makeTheoryVar("yCP_th",
                                        "0.5*(  y * (qop + 1/qop) * cos(phi)"
                                        "     - x * (qop - 1/qop) * sin(phi))",
                                        parameters)));
     break;
   case mix::theo:
-    theory->add(*(Utils::makeTheoryVar("yCP_th", "yCP_th", "y12*cos(phiG)", parameters)));
+    theory->add(*(Utils::makeTheoryVar("yCP_th", "y12*cos(phiG)", parameters)));
     break;
   default:
     throw std::runtime_error(

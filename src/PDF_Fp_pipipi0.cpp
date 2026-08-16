@@ -27,7 +27,7 @@ std::set<std::string> PDF_Fp_pipipi0::getParameterNames() const { return {"F_pip
 
 void PDF_Fp_pipipi0::initRelations() {
   theory = new RooArgList("theory");
-  theory->add(*(Utils::makeTheoryVar("F_pipipi0_th", "F_pipipi0_th", "F_pipipi0", parameters)));
+  theory->add(*(Utils::makeTheoryVar("F_pipipi0_th", "F_pipipi0", parameters)));
 }
 
 void PDF_Fp_pipipi0::initObservables() {

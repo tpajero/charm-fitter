@@ -43,7 +43,7 @@ std::set<std::string> PDF_scan_DY_RS::getParameterNames() const {
 
 void PDF_scan_DY_RS::initRelations() {
   theory = new RooArgList("theory");
-  theory->add(*(Utils::makeTheoryVar("DY_RS_scan_th", "DY_RS_scan_th",
+  theory->add(*(Utils::makeTheoryVar("DY_RS_scan_th",
                                      std::format("DY_RS - abs({})", utils::dy_kp_expression(mix_param)), parameters)));
 }
 

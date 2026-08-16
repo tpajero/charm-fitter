@@ -57,12 +57,11 @@ std::set<std::string> PDF_DY::getParameterNames() const {
 void PDF_DY::initRelations() {
   theory = new RooArgList("theory");
   if (nObs == 1) {
-    theory->add(*(Utils::makeTheoryVar("DY_th", "DY_th", utils::dy_hh_expression(mix_param), parameters)));
+    theory->add(*(Utils::makeTheoryVar("DY_th", utils::dy_hh_expression(mix_param), parameters)));
   } else if (nObs == 2) {
-    theory->add(*(Utils::makeTheoryVar("DY_KK_th", "DY_KK_th", utils::dy_hh_expression(mix_param, dy_fsc_param, "KK"),
-                                       parameters)));
-    theory->add(*(Utils::makeTheoryVar("DY_PP_th", "DY_PP_th", utils::dy_hh_expression(mix_param, dy_fsc_param, "PP"),
-                                       parameters)));
+    for (const auto& hh : {"KK", "PP"})
+      theory->add(*(Utils::makeTheoryVar(std::format("DY_{}_th", hh),
+                                         utils::dy_hh_expression(mix_param, dy_fsc_param, hh), parameters)));
   }
 }
 

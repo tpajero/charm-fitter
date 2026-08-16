@@ -54,10 +54,10 @@ void PDF_BES_Kpi::initRelations() {
                   y);
   using Utils::makeTheoryVar;
   theory = new RooArgList("theory");
-  theory->add(*(makeTheoryVar("A_kpi_th", "A_kpi_th", a_kpi_formula, parameters)));
-  theory->add(*(makeTheoryVar("A_kpi_pipipi0_th", "A_kpi_pipipi0_th", a_kpi_pipipi0_formula, parameters)));
-  theory->add(*(makeTheoryVar("rcos_th", "rcos_th", "-r_Kpi*cos(Delta_Kpi)", parameters)));
-  theory->add(*(makeTheoryVar("rsin_th", "rsin_th", " r_Kpi*sin(Delta_Kpi)", parameters)));
+  theory->add(*(makeTheoryVar("A_kpi_th", a_kpi_formula, parameters)));
+  theory->add(*(makeTheoryVar("A_kpi_pipipi0_th", a_kpi_pipipi0_formula, parameters)));
+  theory->add(*(makeTheoryVar("rcos_th", "-r_Kpi*cos(Delta_Kpi)", parameters)));
+  theory->add(*(makeTheoryVar("rsin_th", " r_Kpi*sin(Delta_Kpi)", parameters)));
 }
 
 void PDF_BES_Kpi::initObservables() {

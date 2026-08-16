@@ -44,7 +44,7 @@ std::set<std::string> PDF_DY_RS::getParameterNames() const {
 
 void PDF_DY_RS::initRelations() {
   theory = new RooArgList("theory");
-  theory->add(*(Utils::makeTheoryVar("DY_RS_th", "DY_RS_th", utils::dy_kp_expression(mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("DY_RS_th", utils::dy_kp_expression(mix_param), parameters)));
 }
 
 void PDF_DY_RS::initObservables() {

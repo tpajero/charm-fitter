@@ -47,7 +47,7 @@ void PDF_BES_Kpi_1d::initRelations() {
   theory = new RooArgList("theory");
   std::string a_kpi_formula =
       std::format("(2 * r_Kpi * cos(Delta_Kpi) + {0}) / (1 + r_Kpi * r_Kpi)", utils::y_expression(mix_param));
-  theory->add(*(Utils::makeTheoryVar("A_kpi_th", "A_kpi_th", a_kpi_formula, parameters)));
+  theory->add(*(Utils::makeTheoryVar("A_kpi_th", a_kpi_formula, parameters)));
 }
 
 void PDF_BES_Kpi_1d::initObservables() {

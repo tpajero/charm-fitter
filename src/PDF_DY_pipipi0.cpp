@@ -45,9 +45,8 @@ std::set<std::string> PDF_DY_pipipi0::getParameterNames() const {
 
 void PDF_DY_pipipi0::initRelations() {
   theory = new RooArgList("theory");
-  theory->add(
-      *(Utils::makeTheoryVar("DY_pipipi0_th", "DY_pipipi0_th",
-                             std::format("-(2 * F_pipipi0 - 1) * ({})", utils::dy_expression(mix_param)), parameters)));
+  theory->add(*(Utils::makeTheoryVar(
+      "DY_pipipi0_th", std::format("-(2 * F_pipipi0 - 1) * ({})", utils::dy_expression(mix_param)), parameters)));
 }
 
 void PDF_DY_pipipi0::initObservables() {

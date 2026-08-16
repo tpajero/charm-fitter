@@ -72,9 +72,9 @@ std::set<std::string> PDF_WS_NoCPV::getParameterNames() const {
 
 void PDF_WS_NoCPV::initRelations() {
   theory = new RooArgList("theory");
-  theory->add(*(Utils::makeTheoryVar("RD_th", "RD_th", "r_Kpi * r_Kpi", parameters)));
-  theory->add(*(Utils::makeTheoryVar("yp_th", "yp_th", theory_expressions["y'"][mix_param], parameters)));
-  theory->add(*(Utils::makeTheoryVar("xp2_th", "xp2_th", theory_expressions["x'2"][mix_param], parameters)));
+  theory->add(*(Utils::makeTheoryVar("RD_th", "r_Kpi * r_Kpi", parameters)));
+  theory->add(*(Utils::makeTheoryVar("yp_th", theory_expressions["y'"][mix_param], parameters)));
+  theory->add(*(Utils::makeTheoryVar("xp2_th", theory_expressions["x'2"][mix_param], parameters)));
 }
 
 void PDF_WS_NoCPV::initObservables() {

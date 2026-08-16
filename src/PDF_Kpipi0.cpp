@@ -49,15 +49,15 @@ void PDF_Kpipi0::initRelations() {
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    theory->add(*(Utils::makeTheoryVar("xpp_th", "xpp_th", "x*cos(Delta_Kpipi0) - y*sin(Delta_Kpipi0)", parameters)));
-    theory->add(*(Utils::makeTheoryVar("ypp_th", "ypp_th", "y*cos(Delta_Kpipi0) + x*sin(Delta_Kpipi0)", parameters)));
+    theory->add(*(Utils::makeTheoryVar("xpp_th", "x*cos(Delta_Kpipi0) - y*sin(Delta_Kpipi0)", parameters)));
+    theory->add(*(Utils::makeTheoryVar("ypp_th", "y*cos(Delta_Kpipi0) + x*sin(Delta_Kpipi0)", parameters)));
     break;
   case mix::theo:
-    theory->add(*(Utils::makeTheoryVar("xpp_th", "xpp_th",
+    theory->add(*(Utils::makeTheoryVar("xpp_th",
                                        "  x12*cos(Delta_Kpipi0) * cos(phiM)"
                                        "- y12*sin(Delta_Kpipi0) * cos(phiG)",
                                        parameters)));
-    theory->add(*(Utils::makeTheoryVar("ypp_th", "ypp_th",
+    theory->add(*(Utils::makeTheoryVar("ypp_th",
                                        "  y12 * cos(Delta_Kpipi0) * cos(phiG)"
                                        "+ x12 * sin(Delta_Kpipi0) * cos(phiM)",
                                        parameters)));

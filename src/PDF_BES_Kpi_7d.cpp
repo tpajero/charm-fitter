@@ -52,13 +52,13 @@ void PDF_BES_Kpi_7d::initRelations() {
                   y);
   using Utils::makeTheoryVar;
   theory = new RooArgList("theory");
-  theory->add(*(makeTheoryVar("A_kpi_th", "A_kpi_th", a_kpi_formula, parameters)));
-  theory->add(*(makeTheoryVar("A_kpi_pipipi0_th", "A_kpi_pipipi0_th", a_kpi_pipipi0_formula, parameters)));
-  theory->add(*(makeTheoryVar("rcos_3fb_th", "rcos_3fb_th", "-r_Kpi*cos(Delta_Kpi)", parameters)));
-  theory->add(*(makeTheoryVar("rsin_3fb_th", "rsin_3fb_th", " r_Kpi*sin(Delta_Kpi)", parameters)));
-  theory->add(*(makeTheoryVar("rcos_7fbCP_th", "rcos_7fbCP_th", "-r_Kpi*cos(Delta_Kpi)", parameters)));
-  theory->add(*(makeTheoryVar("rcos_7fb_th", "rcos_7fb_th", "-r_Kpi*cos(Delta_Kpi)", parameters)));
-  theory->add(*(makeTheoryVar("rsin_7fb_th", "rsin_7fb_th", " r_Kpi*sin(Delta_Kpi)", parameters)));
+  theory->add(*(makeTheoryVar("A_kpi_th", a_kpi_formula, parameters)));
+  theory->add(*(makeTheoryVar("A_kpi_pipipi0_th", a_kpi_pipipi0_formula, parameters)));
+  theory->add(*(makeTheoryVar("rcos_3fb_th", "-r_Kpi*cos(Delta_Kpi)", parameters)));
+  theory->add(*(makeTheoryVar("rsin_3fb_th", " r_Kpi*sin(Delta_Kpi)", parameters)));
+  theory->add(*(makeTheoryVar("rcos_7fbCP_th", "-r_Kpi*cos(Delta_Kpi)", parameters)));
+  theory->add(*(makeTheoryVar("rcos_7fb_th", "-r_Kpi*cos(Delta_Kpi)", parameters)));
+  theory->add(*(makeTheoryVar("rsin_7fb_th", " r_Kpi*sin(Delta_Kpi)", parameters)));
 }
 
 void PDF_BES_Kpi_7d::initObservables() {
