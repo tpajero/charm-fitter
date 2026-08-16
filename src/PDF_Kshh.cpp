@@ -11,7 +11,6 @@
 #include <Utils.h>
 
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
 #include <TString.h>
@@ -126,8 +125,4 @@ void PDF_Kshh::setCorrelations(const TString c) {
   } else {
     throw std::runtime_error(std::format("PDF_Kshh::setCorrelations ERROR config {} not found", c.Data()));
   }
-}
-
-void PDF_Kshh::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }

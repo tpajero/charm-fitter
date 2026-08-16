@@ -19,7 +19,6 @@
 class PDF_DY : public PDF_Charm {
  public:
   PDF_DY(TString measurement_id, parametrisations::mix mix_param, parametrisations::dy_fsc dy_fsc_param);
-  void buildPdf() override;
   void initObservables() override;
   void initRelations() override;
   void setCorrelations(TString measurement_id) override;

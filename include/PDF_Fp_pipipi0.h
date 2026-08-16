@@ -17,7 +17,6 @@
 class PDF_Fp_pipipi0 : public PDF_Charm {
  public:
   PDF_Fp_pipipi0(TString measurement_id);
-  void buildPdf() override;
   void initObservables() override;
   void initRelations() override;
   void setCorrelations(TString measurement_id) override;

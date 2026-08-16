@@ -11,7 +11,6 @@
 #include <Utils.h>
 
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
 #include <algorithm>
@@ -166,8 +165,4 @@ void PDF_WS_NoCPV::setCorrelations(const TString c) {
   } else {
     throw std::runtime_error(std::format("PDF_WS_NoCPV::setCorrelations ERROR config {} not found", c.Data()));
   }
-}
-
-void PDF_WS_NoCPV::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }

@@ -15,6 +15,7 @@ class PDF_Charm : public PDF_Abs {
  public:
   using PDF_Abs::PDF_Abs;
   void initParameters() override;
+  void buildPdf() override;
 
  protected:
   /**

@@ -21,7 +21,6 @@ class RooArgList;
 class PDF_AcpHH_LHCb_Run12 : public PDF_Charm {
  public:
   PDF_AcpHH_LHCb_Run12(parametrisations::mix mix_param, parametrisations::dy_fsc dy_fsc_param);
-  void buildPdf() override;
   void initObservables() override;
   void initRelations() override;
   void setCorrelations(TString c) override;

@@ -11,7 +11,6 @@
 #include <Utils.h>
 
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
 #include <format>
@@ -142,8 +141,4 @@ void PDF_DY::setCorrelations(const TString c) {
     throw std::runtime_error(
         std::format("PDF_DY::setCorrelations ERROR config {} not found for {} DY observables", c.Data(), nObs));
   }
-}
-
-void PDF_DY::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }

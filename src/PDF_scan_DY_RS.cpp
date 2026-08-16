@@ -11,7 +11,6 @@
 #include <Utils.h>
 
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
 #include <algorithm>
@@ -69,8 +68,4 @@ void PDF_scan_DY_RS::setUncertainties(const TString) {
 void PDF_scan_DY_RS::setCorrelations(const TString) {
   resetCorrelations();
   corSource = "No correlations for one observable";
-}
-
-void PDF_scan_DY_RS::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }

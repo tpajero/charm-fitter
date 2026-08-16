@@ -19,7 +19,6 @@
 class PDF_yCP_minus_yCP_KP : public PDF_Charm {
  public:
   PDF_yCP_minus_yCP_KP(TString measurement_id, parametrisations::mix mix_param);
-  void buildPdf() override;
   void initObservables() override;
   void initRelations() override;
   void setCorrelations(TString measurement_id) override;

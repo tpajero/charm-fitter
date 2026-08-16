@@ -11,7 +11,6 @@
 #include <Utils.h>
 
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
 #include <boost/algorithm/string.hpp>
@@ -81,8 +80,4 @@ void PDF_BES_Kpi_1d::setUncertainties(const TString c) {
 void PDF_BES_Kpi_1d::setCorrelations(const TString c) {
   resetCorrelations();
   corSource = "No correlations for one observable";
-}
-
-void PDF_BES_Kpi_1d::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }

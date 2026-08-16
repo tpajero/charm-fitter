@@ -17,7 +17,6 @@
 
 #include <RooArgList.h>
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
 #include <algorithm>
@@ -117,8 +116,4 @@ void PDF_BES_CLEO_K3pi_Kpipi0::setCorrelations(const TString c) {
     std::cout << "PDF_BES_CLEO_K3pi_Kpipi0::setCorrelations() : ERROR : config " + c + " not found." << std::endl;
     exit(1);
   }
-}
-
-void PDF_BES_CLEO_K3pi_Kpipi0::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }

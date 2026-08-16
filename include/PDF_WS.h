@@ -27,7 +27,6 @@ class PDF_WS : public PDF_Charm {
   PDF_WS(TString measurement_id, parametrisations::mix mix_param,
          parametrisations::kpi p = parametrisations::kpi::rrxy);
   PDF_WS(TString val, TString err, parametrisations::mix mix_param);
-  void buildPdf() override;
   void initObservables() override;
   void initRelations() override;
   void setCorrelations(TString measurement_id) override;

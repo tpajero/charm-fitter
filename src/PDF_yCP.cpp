@@ -11,7 +11,6 @@
 #include <Utils.h>
 
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
 #include <TString.h>
@@ -103,8 +102,4 @@ void PDF_yCP::setUncertainties(const TString c) {
 void PDF_yCP::setCorrelations(const TString c) {
   resetCorrelations();
   corSource = "No correlations for one observable";
-}
-
-void PDF_yCP::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }

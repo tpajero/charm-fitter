@@ -12,7 +12,6 @@
 
 #include <RooArgList.h>
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
 #include <boost/algorithm/string.hpp>
@@ -135,8 +134,4 @@ void PDF_BES_Kpi_7d::setCorrelations(const TString c) {
   } else {
     throw std::runtime_error(std::format("PDF_BES_Kpi_7d::setCorrelations ERROR cor config {} not found", c.Data()));
   }
-}
-
-void PDF_BES_Kpi_7d::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }

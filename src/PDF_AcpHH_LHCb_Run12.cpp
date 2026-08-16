@@ -12,7 +12,6 @@
 
 #include <RooArgList.h>
 #include <RooFormulaVar.h>
-#include <RooMultiVarGaussian.h>
 #include <RooRealVar.h>
 
 #include <format>
@@ -136,10 +135,6 @@ void PDF_AcpHH_LHCb_Run12::setCorrelations(const TString c) {
       // clang-format on
   };
   corSystMatrix = Utils::buildCorMatrix(nObs, dataSyst);
-}
-
-void PDF_AcpHH_LHCb_Run12::buildPdf() {
-  pdf = new RooMultiVarGaussian("pdf_" + name, "pdf_" + name, *(RooArgSet*)observables, *(RooArgSet*)theory, covMatrix);
 }
 
 void PDF_AcpHH_LHCb_Run12::add_acpkk(RooArgList* theory, TString name, double avg_time) {

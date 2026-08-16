@@ -19,7 +19,6 @@
 class PDF_WS_NoCPV : public PDF_Charm {
  public:
   PDF_WS_NoCPV(TString measurement_id, parametrisations::mix mix_param);
-  void buildPdf() override;
   void initObservables() override;
   void initRelations() override;
   void setCorrelations(TString measurement_id) override;
