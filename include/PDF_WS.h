@@ -24,9 +24,12 @@ namespace parametrisations {
 
 class PDF_WS : public PDF_Charm {
  public:
-  PDF_WS(TString measurement_id, parametrisations::mix mix_param,
-         parametrisations::kpi p = parametrisations::kpi::rrxy);
-  PDF_WS(TString val, TString err, parametrisations::mix mix_param);
+  PDF_WS(TString measurement_id, parametrisations::mix, parametrisations::kpi p = parametrisations::kpi::rrxy,
+         hypotheses::dy_fsc dy_fsc_hypo = hypotheses::dy_fsc::none,
+         parametrisations::acp acp_param = parametrisations::acp::acp_dy);
+  PDF_WS(TString val, TString err, parametrisations::mix, parametrisations::kpi p = parametrisations::kpi::rrxy,
+         hypotheses::dy_fsc dy_fsc_hypo = hypotheses::dy_fsc::none,
+         parametrisations::acp acp_param = parametrisations::acp::acp_dy);
   void initObservables() override;
   void initRelations() override;
   void setCorrelations(TString measurement_id) override;
@@ -41,7 +44,9 @@ class PDF_WS : public PDF_Charm {
   std::set<std::string> getParameterNames() const override;
 
   const parametrisations::mix mix_param;
-  const parametrisations::kpi ws_param = parametrisations::kpi::rrxy;
+  const parametrisations::kpi kpi_param;
+  const hypotheses::dy_fsc dy_fsc_hypo;
+  const parametrisations::acp acp_param;
   TString label;
 };
 

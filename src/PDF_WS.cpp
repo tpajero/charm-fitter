@@ -112,40 +112,33 @@ namespace {
   };
 }  // namespace
 
-PDF_WS::PDF_WS(const TString measurement_id, const parametrisations::mix mix_param, parametrisations::kpi p)
-    : PDF_Charm{measurement_id.EqualTo("LHCb_Prompt_Run12_appB") ? 9 : 6}, mix_param{mix_param}, ws_param{p} {
+PDF_WS::PDF_WS(const TString val, const TString err, const parametrisations::mix mix_param,
+               parametrisations::kpi kpi_param, hypotheses::dy_fsc dy_fsc_hypo, parametrisations::acp acp_param)
+    : PDF_Charm{val.EqualTo("LHCb_Prompt_Run12_appB") ? 9 : 6}, mix_param{mix_param}, kpi_param{kpi_param},
+      dy_fsc_hypo{dy_fsc_hypo}, acp_param{acp_param} {
   try {
-    label = labels.at(measurement_id.Data());
+    label = labels.at(val.Data());
   } catch (const std::out_of_range&) {
-    throw std::runtime_error(
-        std::format("PDF_WS::PDF_WS ERROR Measurement ID {} not supported", measurement_id.Data()));
+    throw std::runtime_error(std::format("PDF_WS::PDF_WS ERROR Measurement ID {} not supported", val.Data()));
   }
 
-  if (ws_param == parametrisations::kpi::ccprime && !measurement_id.BeginsWith("LHCb_Prompt_Run12")) {
+  if (kpi_param == parametrisations::kpi::ccprime && !val.BeginsWith("LHCb_Prompt_Run12")) {
     throw std::runtime_error(
         "PDF_WS::PDF_WS ERROR The c/c' parametrisation was introduced only with the LHCb Run 2 measurement");
   }
 
-  name = "WS_" + measurement_id;
-  initialise(measurement_id, measurement_id, measurement_id);
+  name = "WS_" + val;
+  initialise(val, err, val);
 }
 
-PDF_WS::PDF_WS(const TString val, TString err, const parametrisations::mix mix_param)
-    : PDF_Charm{6}, mix_param{mix_param} {
-  if (err.EqualTo("LHCb_Run12"))
-    label = "WS/RS LHCb prompt (Run 1+2)";
-  else
-    throw std::runtime_error(std::format("PDF_WS::PDF_WS ERROR Measurement ID {} not supported", err.Data()));
-
-  name = "WS_" + err;
-  initialise(val, err, err);
-}
+PDF_WS::PDF_WS(TString measurement_id, parametrisations::mix mix_param, parametrisations::kpi kpi_param,
+               hypotheses::dy_fsc dy_fsc_hypo, parametrisations::acp acp_param)
+    : PDF_WS{measurement_id, measurement_id, mix_param, kpi_param, dy_fsc_hypo, acp_param} {}
 
 std::set<std::string> PDF_WS::getParameterNames() const {
   using parametrisations::mix;
   std::set<std::string> names = {"r_Kpi", "Acp_KP"};
   if (mix_param != mix::d0_to_kpi) names.insert("Delta_Kpi");
-  if (nObs == 9) names.insert("Acp_KK");
   switch (mix_param) {
   case mix::pheno:
     names.insert({"x", "y", "qop", "phi"});
@@ -160,12 +153,16 @@ std::set<std::string> PDF_WS::getParameterNames() const {
     throw std::runtime_error(
         std::format("PDF_WS::getParameterNames ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
   }
+  if (nObs == 9) {
+    names.merge(utils::acp_hh_parameters_names(acp_param, {"KK"}));
+    names.merge(utils::dy_hh_parameters_names(dy_fsc_hypo, acp_param, mix_param, {"KK"}));
+  }
   return names;
 }
 
 void PDF_WS::initRelations() {
   using parametrisations::kpi;
-  switch (ws_param) {
+  switch (kpi_param) {
   case kpi::raxy:
     initRelationsRAXY();
     break;
@@ -177,12 +174,12 @@ void PDF_WS::initRelations() {
     break;
   default:
     throw std::runtime_error(
-        std::format("PDF_WS::initRelations ERROR WS parametrisation {} not supported", static_cast<int>(ws_param)));
+        std::format("PDF_WS::initRelations ERROR WS parametrisation {} not supported", static_cast<int>(kpi_param)));
   }
 }
 
 void PDF_WS::initRelationsCCPrime() {
-  using parametrisations::dy_fsc;
+  using hypotheses::dy_fsc;
   theory = new RooArgList("theory");
   theory->add(*(Utils::makeTheoryVar("RD_th", "r_Kpi * r_Kpi", parameters)));
   theory->add(*(Utils::makeTheoryVar("c_th", get_formula("c", mix_param), parameters)));
@@ -191,18 +188,19 @@ void PDF_WS::initRelationsCCPrime() {
   theory->add(*(Utils::makeTheoryVar("dc_th", get_formula("dc", mix_param), parameters)));
   theory->add(*(Utils::makeTheoryVar("dc'_th", get_formula("dc'", mix_param), parameters)));
   if (nObs == 9) {
-    theory->add(*(Utils::makeTheoryVar("ADt_th", "Acp_KP - 2 * Acp_KK", parameters)));
     theory->add(*(Utils::makeTheoryVar(
-        "dc~_th",
-        std::format("{} - 2 * r_Kpi * ({}) - Acp_KK * ({})", get_formula("dc", mix_param),
-                    utils::dy_hh_expression(mix_param, dy_fsc::none, "KK"), get_formula("c", mix_param)),
-        parameters)));
-    theory->add(*(Utils::makeTheoryVar("dc'~_th",
-                                       std::format("{} - 2 * r_Kpi * ({}) * ({}) - 2 * Acp_KK * ({})",
-                                                   get_formula("dc'", mix_param), get_formula("c", mix_param),
-                                                   utils::dy_hh_expression(mix_param, dy_fsc::none, "KK"),
-                                                   get_formula("c'", mix_param)),
+        "ADt_th", std::format("Acp_KP - 2 * ({})", utils::acp_expression(acp_param, "KK")), parameters)));
+    theory->add(*(Utils::makeTheoryVar("dc~_th",
+                                       std::format("{} - 2 * r_Kpi * ({}) - ({}) * ({})", get_formula("dc", mix_param),
+                                                   utils::dy_hh_expression(dy_fsc_hypo, acp_param, mix_param, "KK"),
+                                                   utils::acp_expression(acp_param, "KK"), get_formula("c", mix_param)),
                                        parameters)));
+    theory->add(*(Utils::makeTheoryVar(
+        "dc'~_th",
+        std::format("{} - 2 * r_Kpi * ({}) * ({}) - 2 * ({}) * ({})", get_formula("dc'", mix_param),
+                    get_formula("c", mix_param), utils::dy_hh_expression(dy_fsc_hypo, acp_param, mix_param, "KK"),
+                    utils::acp_expression(acp_param, "KK"), get_formula("c'", mix_param)),
+        parameters)));
   }
 }
 
@@ -229,7 +227,7 @@ void PDF_WS::initRelationsRRXY() {
 void PDF_WS::initObservables() {
   observables = new RooArgList("observables");  // the order of this list must match that of the COR matrix!
   using parametrisations::kpi;
-  switch (ws_param) {
+  switch (kpi_param) {
   case kpi::raxy:
     observables->add(*(new RooRealVar("RD_obs", label + "   #it{R_{K#pi}}", 0., -1e4, 1e4)));
     observables->add(*(new RooRealVar("y'+_obs", label + "   #it{y'^{+}}", 0., -1e4, 1e4)));
@@ -261,7 +259,7 @@ void PDF_WS::initObservables() {
     break;
   default:
     throw std::runtime_error(
-        std::format("PDF_WS::initObservables ERROR WS parametrisation {} not supported", static_cast<int>(ws_param)));
+        std::format("PDF_WS::initObservables ERROR WS parametrisation {} not supported", static_cast<int>(kpi_param)));
   }
 }
 

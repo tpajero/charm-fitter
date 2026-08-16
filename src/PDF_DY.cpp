@@ -17,50 +17,27 @@
 #include <iostream>
 #include <stdexcept>
 
-PDF_DY::PDF_DY(const TString measurement_id, const parametrisations::mix mix_param,
-               const parametrisations::dy_fsc dy_fsc_param)
-    : PDF_Charm{dy_fsc_param == parametrisations::dy_fsc::none ? 1 : 2}, mix_param{mix_param},
-      dy_fsc_param{dy_fsc_param}, measurement_id{measurement_id} {
+PDF_DY::PDF_DY(const TString measurement_id, const hypotheses::dy_fsc dy_fsc_hypo,
+               const parametrisations::acp acp_param, const parametrisations::mix mix_param)
+    : PDF_Charm{dy_fsc_hypo == hypotheses::dy_fsc::none ? 1 : 2}, dy_fsc_hypo{dy_fsc_hypo}, acp_param{acp_param},
+      mix_param{mix_param}, measurement_id{measurement_id} {
   name = "DY_" + measurement_id;
   initialise(measurement_id, measurement_id, measurement_id);
 }
 
 std::set<std::string> PDF_DY::getParameterNames() const {
-  std::set<std::string> names;
-  using parametrisations::mix;
-  switch (mix_param) {
-  case mix::pheno:
-    names.insert({"x", "y", "qop", "phi"});
-    break;
-  case mix::theo:
-    names.insert({"x12", "y12", "phiM"});
-    break;
-  default:
-    throw std::runtime_error(
-        std::format("PDF_DY::getParameterNames ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
-  }
-  using parametrisations::dy_fsc;
-  switch (dy_fsc_param) {
-  case dy_fsc::none:
-    break;
-  case dy_fsc::partial:
-    names.insert({"Acp_KK", "Acp_PP"});
-    break;
-  case dy_fsc::full:
-    names.insert({"Acp_KK", "Acp_PP", "cot_delta_KK", "cot_delta_PP"});
-    break;
-  }
-  return names;
+  return utils::dy_hh_parameters_names(dy_fsc_hypo, acp_param, mix_param, {"KK", "PP"});
 }
 
 void PDF_DY::initRelations() {
   theory = new RooArgList("theory");
   if (nObs == 1) {
-    theory->add(*(Utils::makeTheoryVar("DY_th", utils::dy_hh_expression(mix_param), parameters)));
+    theory->add(
+        *(Utils::makeTheoryVar("DY_th", utils::dy_hh_expression(dy_fsc_hypo, acp_param, mix_param), parameters)));
   } else if (nObs == 2) {
     for (const auto& hh : {"KK", "PP"})
       theory->add(*(Utils::makeTheoryVar(std::format("DY_{}_th", hh),
-                                         utils::dy_hh_expression(mix_param, dy_fsc_param, hh), parameters)));
+                                         utils::dy_hh_expression(dy_fsc_hypo, acp_param, mix_param, hh), parameters)));
   }
 }
 

@@ -15,11 +15,21 @@ CharmParameters::CharmParameters() { defineParameters(); }
 /**
  * Define all (nuisance) parameters.
  *
- * scan:  defines scan range (for Prob and Plugin methods)
- * phys:  physically allowed range (needs to be set!)
+ * scan:  Defines the scan range (for Prob and Plugin methods)
+ * phys:  Defines the physically allowed range (needs to be set!)
  */
 void CharmParameters::defineParameters() {
   Parameter* p = nullptr;
+
+  // Parameters related to CP violation in the decays D0 -> h- h'+ -----------------------------------------------------
+
+  // CP asymmetry in the decay (``direct'' CP asymmetry) of D0 -> K+ pi-
+  p = newParameter("Acp_KP");
+  p->title = "#it{a}_{#it{K}^{+}#it{#pi}^{#minus}}^{d}";
+  p->startvalue = -6e-3;
+  p->unit = "";
+  p->scan = range(-2.5e-2, 2e-2);
+  p->phys = range(-1., 1.);
 
   // CP asymmetry in the decay (``direct'' CP asymmetry) of D0 -> K+ K-
   p = newParameter("Acp_KK");
@@ -37,13 +47,86 @@ void CharmParameters::defineParameters() {
   p->scan = range(-2e-2, 2e-2);
   p->phys = range(-1., 1.);
 
-  // CP asymmetry in the decay (``direct'' CP asymmetry) of D0 -> K+ pi-
-  p = newParameter("Acp_KP");
-  p->title = "#it{a}_{#it{K}^{+}#it{#pi}^{#minus}}^{d}";
-  p->startvalue = -6e-3;
+  // Parametrising the decay amplitude of D0 -> K+ K- decays as
+  //
+  //     A(D0 -> K+ K-) = A_1 (lambda_s - lambda_d) / 2 + A_0 lambda_b,
+  //
+  // the following definitions are adopted:
+  //
+  //    r_KK = |A_0 / A_1|,
+  //    delta_KK = arg(A_0 / A_1).
+  //
+
+  p = newParameter("delta_KK");
+  p->title = "#it{#delta_{#it{K^{+}K^{#minus}}}} [rad]";
+  p->startvalue = -0.6;
   p->unit = "";
-  p->scan = range(-2.5e-2, 2e-2);
-  p->phys = range(-1., 1.);
+  p->scan = range(DegToRad(-180), DegToRad(180));
+  p->phys = range(DegToRad(-180), DegToRad(180));
+
+  p = newParameter("cot_delta_KK");
+  p->title = "cot(#it{#delta_{#it{K^{+}K^{#minus}}}})";
+  p->startvalue = 0.;
+  p->unit = "";
+  p->scan = range(-1e3, 1e3);
+  p->phys = range(-1e4, 1e4);
+
+  p = newParameter("r_KK");
+  p->title = "|A_{#it{K^{+}K^{#minus},0}} / A_{#it{K^{+}K^{#minus},1}}|";
+  p->startvalue = 1.;
+  p->unit = "";
+  p->scan = range(0.0, 1e2);
+  p->phys = range(0.0, 1e4);
+
+  p = newParameter("DY_KK");
+  p->title = "#it{#DeltaY_{K^{+}K^{#minus}}}";
+  p->startvalue = 0.0;
+  p->unit = "";
+  p->scan = range(-3e-4, 3e-4);
+  p->phys = range(-1.0, 1.0);
+
+  // Parametrising the decay amplitude of D0 -> pi+ pi- decays as
+  //
+  //     A(D0 -> pi+ pi-) = -A_1 (lambda_s - lambda_d) / 2 + A_0 lambda_b,
+  //
+  // the following definitions are adopted:
+  //
+  //    r_PP = |A_0 / A_1|,
+  //    delta_PP = arg(A_0 / A_1).
+  //
+  // The minus sign in front of A_1 is chosen such as that in the U-spin limit A_0 and A_1 are the same for KK and PP
+  // decays.
+  //
+
+  p = newParameter("delta_PP");
+  p->title = "#it{#delta_{#it{#pi^{+}#pi^{#minus}}}} [rad]";
+  p->startvalue = -0.6;
+  p->unit = "";
+  p->scan = range(DegToRad(-180), DegToRad(180));
+  p->phys = range(DegToRad(-180), DegToRad(180));
+
+  p = newParameter("cot_delta_PP");
+  p->title = "cot(#it{#delta_{#it{#pi^{+}#pi^{#minus}}}})";
+  p->startvalue = 0.;
+  p->unit = "";
+  p->scan = range(-1e3, 1e3);
+  p->phys = range(-1e4, 1e4);
+
+  p = newParameter("r_PP");
+  p->title = "|A_{#it{#pi^{+}#pi^{#minus},0}} / A_{#it{#pi^{+}#pi^{#minus},1}}|";
+  p->startvalue = 1.;
+  p->unit = "";
+  p->scan = range(0.0, 1e2);
+  p->phys = range(0.0, 1e4);
+
+  p = newParameter("DY_PP");
+  p->title = "#it{#DeltaY_{#it{#pi}^{+}#it{#pi}^{#minus}}}";
+  p->startvalue = 0.0;
+  p->unit = "";
+  p->scan = range(-1e-3, 1e-3);
+  p->phys = range(-1.0, 1.0);
+
+  // Other strong phases, CP-even fractions, and hadronic parameters ---------------------------------------------------
 
   // Ratio of the magnitudes of the decay amplitudes of D0 -> K+ pi- to D0 -> K- pi+
   p = newParameter("r_Kpi");
@@ -115,30 +198,6 @@ void CharmParameters::defineParameters() {
   p->scan = range(DegToRad(-180), DegToRad(180));
   p->phys = range(DegToRad(-180), DegToRad(180));
 
-  // Parametrising the decay amplitude of D0 -> K+ K- decays as
-  //
-  //   A = A_sd (lambda_s - lambda_d) / 2 + A_b lambda_b / 2,
-  //
-  // delta_KK is defined as arg(A_b / A_sd).
-  p = newParameter("cot_delta_KK");
-  p->title = "cot(#it{#delta_{#it{K^{+}K^{#minus}}}})";
-  p->startvalue = 0.;
-  p->unit = "";
-  p->scan = range(-1e4, 1e4);
-  p->phys = range(-1e4, 1e4);
-
-  // Parametrising the decay amplitude of D0 -> pi+ pi- decays as
-  //
-  //   A = A_sd (lambda_s - lambda_d) / 2 + A_b lambda_b / 2,
-  //
-  // delta_PP is defined as arg(A_b / A_sd).
-  p = newParameter("cot_delta_PP");
-  p->title = "cot(#it{#delta_{#it{#pi^{+}#pi^{#minus}}}})";
-  p->startvalue = 0.;
-  p->unit = "";
-  p->scan = range(-1e4, 1e4);
-  p->phys = range(-1e4, 1e4);
-
   // CP-even fraction of D0 -> pi+ pi- pi0
   p = newParameter("F_pipipi0");
   p->title = "#it{F^{#pi#pi#pi^{0}}_{+}}";
@@ -167,7 +226,9 @@ void CharmParameters::defineParameters() {
   constexpr double x12_start = 4.1e-3;
   constexpr double y12_start = 6.6e-3;
 
-  // Phenomenological parametrisation ----------------------------------------------------------------------------------
+  // Mixing parameters -------------------------------------------------------------------------------------------------
+
+  // Phenomenological parametrisation
 
   p = newParameter("x");
   p->title = "#it{x}";
@@ -197,7 +258,7 @@ void CharmParameters::defineParameters() {
   p->scan = range(-0.6, 0.6);
   p->phys = range(DegToRad(-180.), DegToRad(180.));
 
-  // Theoretical parametrisation ---------------------------------------------------------------------------------------
+  // Theoretical parametrisation
 
   p = newParameter("x12");
   p->title = "#it{x}_{12}";
@@ -227,17 +288,7 @@ void CharmParameters::defineParameters() {
   p->scan = range(-0.3, 0.3);
   p->phys = range(DegToRad(-180.), DegToRad(180.));
 
-  // Other parameters --------------------------------------------------------------------------------------------------
-
-  // Nuisance parameter to get predictions for CP violation in RS decays
-  p = newParameter("DY_RS");
-  p->title = "#||{#Delta#it{Y}_{#it{K}^{#minus}#pi^{+}}}";
-  p->startvalue = 5e-6;
-  p->unit = "";
-  p->scan = range(0., 1e-4);
-  p->phys = range(0., 1.);
-
-  // Parameters for (D0 -> Kpi)-only combination -----------------------------------------------------------------------
+  // Parameters for the (D0 -> K pi)-only combination ------------------------------------------------------------------
 
   p = newParameter("yp");
   p->title = "#it{y'}";
@@ -266,4 +317,14 @@ void CharmParameters::defineParameters() {
   p->unit = "";
   p->scan = range(-0.4, 1.);
   p->phys = range(-1e4, 1e4);
+
+  // Others ------------------------------------------------------------------------------------------------------------
+
+  // Nuisance parameter to get predictions for CP violation in RS decays
+  p = newParameter("DY_RS");
+  p->title = "#||{#Delta#it{Y}_{#it{K}^{#minus}#pi^{+}}}";
+  p->startvalue = 5e-6;
+  p->unit = "";
+  p->scan = range(0., 1e-4);
+  p->phys = range(0., 1.);
 }

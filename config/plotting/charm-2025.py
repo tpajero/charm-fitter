@@ -1,4 +1,5 @@
 from charm_fitter.utils import (
+    AcpParam,
     Combiner,
     DYFsc,
     MixParam,
@@ -91,6 +92,7 @@ parameters = {
         title=r"$a^{\rm d}_{K^+K^-}$",
         unit="1e-3",
         plot_opts_1d=PlotOpts1D(legfill=True),
+        acp_params=[AcpParam.ACP_DY, AcpParam.ACP_COT],
     ),
     "Acp_PP": Parameter(
         "Acp_PP",
@@ -99,6 +101,7 @@ parameters = {
         title=r"$a^{\rm d}_{\pi^+\pi^-}$",
         unit="1e-3",
         plot_opts_1d=PlotOpts1D(legpos="r"),
+        acp_params=[AcpParam.ACP_DY, AcpParam.ACP_COT],
     ),
     "Acp_KP": Parameter("Acp_KP", (-2.0, 2.0), title=r"$a^{\rm d}_{K^+\pi^-}$", unit="%"),
     # --- Hadronic nuisance parameters ---
@@ -305,7 +308,7 @@ dy_fsc_baseline = DYFsc.NONE
 dy_fsc_labels = {
     DYFsc.NONE: r"$\Delta Y_{f} = - x_{12}\sin\phi^M_2$",
     DYFsc.PARTIAL: r"$\Delta Y_{f} = - x_{12}\sin\phi^M_2 + y_{12} a^{\rm d}_f$",
-    DYFsc.FULL: r"$\Delta Y_{f} = - x_{12}\sin\phi^M_2 + y_{12} a^{\rm d}_f (1 + \cot\delta \; x_{12} / y_{12})$",
+    DYFsc.FULL: r"$\Delta Y_{f} = - x_{12}\sin\phi^M_2 + y_{12} a^{\rm d}_f (1 + \cot\delta_f \; x_{12} / y_{12})$",
 }
 dy_fsc_comparison_plots_2d = [
     Plot2D(("phiM", "phiG")),
