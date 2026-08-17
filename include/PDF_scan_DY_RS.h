@@ -4,8 +4,7 @@
  * Date: October 2021
  **/
 
-#ifndef PDF_scan_DY_RS_h
-#define PDF_scan_DY_RS_h
+#pragma once
 
 #include "CharmUtils.h"
 
@@ -29,5 +28,3 @@ class PDF_scan_DY_RS : public PDF_Charm {
   std::set<std::string> getParameterNames() const override;
   const parametrisations::mix mix_param;
 };
-
-#endif

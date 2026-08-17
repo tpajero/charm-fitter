@@ -4,8 +4,7 @@
  * Date: October 2021
  **/
 
-#ifndef CharmParameters_h
-#define CharmParameters_h
+#pragma once
 
 #include <ParametersAbs.h>
 
@@ -16,5 +15,3 @@ class CharmParameters : public ParametersAbs {
  private:
   void defineParameters();
 };
-
-#endif

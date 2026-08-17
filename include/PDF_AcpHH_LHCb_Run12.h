@@ -4,8 +4,7 @@
  * Date: September 2022
  **/
 
-#ifndef PDF_AcpHH_LHCb_Run12_h
-#define PDF_AcpHH_LHCb_Run12_h
+#pragma once
 
 #include "CharmUtils.h"
 
@@ -36,5 +35,3 @@ class PDF_AcpHH_LHCb_Run12 : public PDF_Charm {
   const parametrisations::acp acp_param;
   const parametrisations::mix mix_param;
 };
-
-#endif

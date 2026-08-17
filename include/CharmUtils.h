@@ -1,5 +1,4 @@
-#ifndef CHARM_UTILS_H
-#define CHARM_UTILS_H
+#pragma once
 
 #include <ostream>
 #include <set>
@@ -112,5 +111,3 @@ namespace utils {
 std::ostream& operator<<(std::ostream& os, hypotheses::dy_fsc par);
 std::ostream& operator<<(std::ostream& os, parametrisations::acp par);
 std::ostream& operator<<(std::ostream& os, parametrisations::mix par);
-
-#endif

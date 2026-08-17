@@ -4,8 +4,7 @@
  * Date: June 2024
  **/
 
-#ifndef PDF_K3pi_h
-#define PDF_K3pi_h
+#pragma once
 
 #include "CharmUtils.h"
 
@@ -29,5 +28,3 @@ class PDF_K3pi : public PDF_Charm {
   std::set<std::string> getParameterNames() const override;
   const parametrisations::mix mix_param;
 };
-
-#endif

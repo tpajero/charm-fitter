@@ -4,8 +4,7 @@
  * Date: October 2021
  **/
 
-#ifndef PDF_Kpipi0_h
-#define PDF_Kpipi0_h
+#pragma once
 
 #include "CharmUtils.h"
 
@@ -30,5 +29,3 @@ class PDF_Kpipi0 : public PDF_Charm {
   const parametrisations::mix mix_param;
   const TString measurement_id;
 };
-
-#endif

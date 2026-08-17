@@ -4,8 +4,7 @@
  * Date: June 2024
  **/
 
-#ifndef PDF_DY_pipipi0_h
-#define PDF_DY_pipipi0_h
+#pragma once
 
 #include "CharmUtils.h"
 
@@ -30,5 +29,3 @@ class PDF_DY_pipipi0 : public PDF_Charm {
   const parametrisations::mix mix_param;
   const TString measurement_id;
 };
-
-#endif

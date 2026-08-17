@@ -4,8 +4,7 @@
  * Date: June 2024
  **/
 
-#ifndef PDF_BES_CLEO_K3pi_Kpipi0_h
-#define PDF_BES_CLEO_K3pi_Kpipi0_h
+#pragma once
 
 #include <PDF_Charm.h>
 
@@ -26,5 +25,3 @@ class PDF_BES_CLEO_K3pi_Kpipi0 : public PDF_Charm {
  private:
   std::set<std::string> getParameterNames() const override;
 };
-
-#endif
