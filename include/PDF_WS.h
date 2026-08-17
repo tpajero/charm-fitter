@@ -4,8 +4,7 @@
  * Date: October 2021
  **/
 
-#ifndef PDF_WS_h
-#define PDF_WS_h
+#pragma once
 
 #include "CharmUtils.h"
 
@@ -49,5 +48,3 @@ class PDF_WS : public PDF_Charm {
   const parametrisations::acp acp_param;
   TString label;
 };
-
-#endif

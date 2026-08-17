@@ -4,8 +4,7 @@
  * Date: October 2021
  **/
 
-#ifndef PDF_Cleo_h
-#define PDF_Cleo_h
+#pragma once
 
 #include "CharmUtils.h"
 
@@ -29,5 +28,3 @@ class PDF_Cleo : public PDF_Charm {
   std::set<std::string> getParameterNames() const override;
   const parametrisations::mix mix_param;
 };
-
-#endif

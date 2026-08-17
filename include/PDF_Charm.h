@@ -1,5 +1,4 @@
-#ifndef PDF_Charm_h
-#define PDF_Charm_h
+#pragma once
 
 #include <PDF_Abs.h>
 
@@ -29,5 +28,3 @@ class PDF_Charm : public PDF_Abs {
   /// Get the names of the parameters needed for the theory expressions.
   virtual std::set<std::string> getParameterNames() const = 0;
 };
-
-#endif

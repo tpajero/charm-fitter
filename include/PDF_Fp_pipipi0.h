@@ -4,8 +4,7 @@
  * Date: September 2022
  **/
 
-#ifndef PDF_Fp_pipipi0_h
-#define PDF_Fp_pipipi0_h
+#pragma once
 
 #include <PDF_Charm.h>
 
@@ -27,5 +26,3 @@ class PDF_Fp_pipipi0 : public PDF_Charm {
   std::set<std::string> getParameterNames() const override;
   const TString measurement_id;
 };
-
-#endif

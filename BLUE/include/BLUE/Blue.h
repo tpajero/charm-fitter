@@ -15,8 +15,7 @@
 // For the licensing terms see the file COPYING or http://www.gnu.org/licenses.
 //
 //------------------------------------------------------------------------------
-#ifndef Blue_H
-#define Blue_H
+#pragma once
 
 #include "TMatrixD.h"
 #include "TLatex.h"
@@ -841,5 +840,3 @@ private:
   ClassDef(Blue,0);
 
 };
-
-#endif // Blue_H

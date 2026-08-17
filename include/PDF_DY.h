@@ -4,8 +4,7 @@
  * Date: October 2021
  **/
 
-#ifndef PDF_DY_h
-#define PDF_DY_h
+#pragma once
 
 #include "CharmUtils.h"
 
@@ -32,5 +31,3 @@ class PDF_DY : public PDF_Charm {
   const parametrisations::mix mix_param;
   const TString measurement_id;
 };
-
-#endif
