@@ -99,10 +99,10 @@ void PDF_XY_QoP_PHI::setObservables(const TString c) {
 void PDF_XY_QoP_PHI::setUncertainties(const TString c) {
   if (c.EqualTo("Belle")) {
     obsErrSource = "https://inspirehep.net/literature/1289224";
-    StatErr[0] = std::hypot(0.19e-2, 0.093e-2);         // x
-    StatErr[1] = std::hypot(0.15e-2, 0.068e-2);         // y
-    StatErr[2] = std::hypot(0.155, 0.071);              // qop
-    StatErr[3] = Utils::DegToRad(std::hypot(11, 4.6));  // phi
+    StatErr[0] = std::hypot(0.19e-2, (std::hypot(0.04e-2, 0.06e-2) + std::hypot(0.08e-2, 0.08e-2)) / 2.0);  // x
+    StatErr[1] = std::hypot(0.15e-2, (std::hypot(0.04e-2, 0.03e-2) + std::hypot(0.05e-2, 0.07e-2)) / 2.0);  // y
+    StatErr[2] = (std::hypot(0.16, 0.05, 0.06) + std::hypot(0.15, 0.04, 0.05)) / 2.0;                       // qop
+    StatErr[3] = Utils::DegToRad(std::hypot(11.0, 3.0, 3.5));                                               // phi
     std::ranges::fill(SystErr, 0.0);
   } else {
     throw std::runtime_error(std::format("PDF_XY_QoP_PHI::setUncertainties ERROR config {} not found", c.Data()));
