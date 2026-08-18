@@ -214,12 +214,12 @@ int main(int argc, char* argv[]) {
   using parametrisations::kpi;
 
   // clang-format off
-  gc.addPdf(1, new PDF_XY("BaBar_Kshh", mix_param),                                  "XY KShh      BaBar                          ");
-  gc.addPdf(2, new PDF_XY("BaBar_pipipi0", mix_param),                               "XY pipipi0   BaBar                          ");
-  gc.addPdf(3, new PDF_XY("LHCb_KSpipi", mix_param),                                 "XY KSpipi    LHCb     2011     [D* -> D0 pi]");
+  gc.addPdf(1, new PDF_XY("BaBar-KShh", mix_param),                                  "KS h h       BaBar                          ");
+  gc.addPdf(2, new PDF_XY("BaBar-pipipi0", mix_param),                               "pi pi pi0    BaBar                          ");
+  gc.addPdf(3, new PDF_XY("LHCb-KSpipi-2011-prompt", mix_param),                     "KS pi pi     LHCb     2011     [D* -> D0 pi]");
   gc.addPdf(4, new PDF_Kpipi0("BaBar", mix_param, false),                            "Kpipi0       BaBar                          ");
   gc.addPdf(5, new PDF_K3pi("LHCb-R1", mix_param),                                   "K3pi         LHCb     Run 1                 ");
-  gc.addPdf(6, new PDF_XY("Belle_Belle2", mix_param),                                "XY KSpipi    Belle+Belle2 (951+408 fb-1)    ");
+  gc.addPdf(6, new PDF_XY("Belle-Belle2", mix_param),                                "KS pi pi     Belle+Belle2      951+408 fb   ");
 
   gc.addPdf(10, new PDF_RM("HFLAV-2008", mix_param),                                 "R_M          HFLAV    2008                  ");
   gc.addPdf(11, new PDF_RM("LHCb-K3pi-R1", mix_param),                               "K3pi         LHCb     Run 1    [RM only]    ");
