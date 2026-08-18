@@ -14,12 +14,12 @@
 #include <BLUE/Blue.h>
 #include <BLUE/Utils.h>
 
+#include <TMatrixD.h>
+#include <TString.h>
+
 #include <cstdlib>
-#include <iomanip>
-#include <iostream>
-#include <map>
 #include <memory>
-#include <string>
+#include <stdexcept>
 #include <vector>
 
 const BLUE::Combinations combinations = {
@@ -65,22 +65,16 @@ void run(const int flag) {
       // clang-format on
   };
   const auto num_unc = names_unc.size();
-  if (x_est.size() != num_est * (num_unc + 1)) {
-    std::cout << "The size of the uncertainty matrix is inconsistent with the number of estimates and the number of "
-                 "uncertainties per estimate"
-              << std::endl;
-    exit(EXIT_FAILURE);
-  }
+  if (x_est.size() != num_est * (num_unc + 1))
+    throw std::runtime_error("The size of the uncertainty matrix is inconsistent with the number of estimates and the "
+                             "number of uncertainties per estimate");
   auto inp_est = std::make_unique<const TMatrixD>(num_est, num_unc + 1, &x_est[0]);
 
   // Statistical uncertainties are not correlated
   // All systematic uncertainties are uncorrelated
   const std::vector<double> rho_val = {0., 0., 0.};
-  if (rho_val.size() == num_unc + 1) {
-    std::cout << "The size of correlation vector among uncertainties is inconsistent with the number of uncertainties"
-              << std::endl;
-    exit(EXIT_FAILURE);
-  }
+  if (rho_val.size() != num_unc)
+    throw std::runtime_error("The size of the correlation vector is inconsistent with the number of uncertainties");
 
   // Statistical precision in systematic uncertainties
   const std::vector<double> s_unc(num_est * num_unc, 0.);
