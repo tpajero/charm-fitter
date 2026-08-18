@@ -225,10 +225,10 @@ int main(int argc, char* argv[]) {
   gc.addPdf(11, new PDF_RM("LHCb-K3pi-R1", mix_param),                               "K3pi         LHCb     Run 1    [RM only]    ");
 
   gc.addPdf(20, new PDF_XY_QoP_PHI("Belle", mix_param),                              "KShh         Belle                          ");
-  gc.addPdf(21, new PDF_BinFlip("LHCb_Run1", mix_param),                             "Bin-flip     LHCb     Run 1                 ");
-  gc.addPdf(22, new PDF_BinFlip("LHCb_Run2_prompt", mix_param),                      "Bin-flip     LHCb     Run 2    [D* -> D0 pi]");
-  gc.addPdf(23, new PDF_BinFlip("LHCb_Run2_sl", mix_param),                          "Bin-flip     LHCb     Run 2    [B -> D0 mu] ");
-  gc.addPdf(24, new PDF_BinFlip("LHCb_Run2", mix_param),                             "Bin-flip     LHCb     Run 2                 ");
+  gc.addPdf(21, new PDF_BinFlip("LHCb-R1", mix_param),                               "Bin-flip     LHCb     Run 1                 ");
+  gc.addPdf(22, new PDF_BinFlip("LHCb-R2-prompt", mix_param),                        "Bin-flip     LHCb     Run 2    [D* -> D0 pi]");
+  gc.addPdf(23, new PDF_BinFlip("LHCb-R2-SL", mix_param),                            "Bin-flip     LHCb     Run 2    [B -> D0 mu] ");
+  gc.addPdf(24, new PDF_BinFlip("LHCb-R2", mix_param),                               "Bin-flip     LHCb     Run 2                 ");
 
   gc.addPdf(30, new PDF_WS_NoCPV("CDF", mix_param),                                  "WS/RS        CDF                            ");
   gc.addPdf(31, new PDF_WS_NoCPV("BaBar", mix_param),                                "WS/RS        BaBar    no CPV                ");
