@@ -15,6 +15,11 @@
 #include <set>
 #include <string>
 
+/**
+ * Implements any measurement using the bin-flip variables (xCP, yCP, DeltaX, DeltaY).
+ *
+ * Mostly useful for analyses of D0 -> KS h- h+ decays.
+ */
 class PDF_BinFlip : public PDF_Charm {
  public:
   PDF_BinFlip(TString measurement_id, parametrisations::mix mix_param);

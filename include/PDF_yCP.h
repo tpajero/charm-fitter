@@ -15,6 +15,10 @@
 #include <set>
 #include <string>
 
+/**
+ * Model for measurements of the yCP parameter in CP-even final states, not using any reference channels that can cause
+ * biases.
+ */
 class PDF_yCP : public PDF_Charm {
  public:
   PDF_yCP(TString measurement_id, parametrisations::mix mix_param);

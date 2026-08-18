@@ -15,6 +15,11 @@
 #include <set>
 #include <string>
 
+/**
+ * Models measurements of (x, y, |q/p|, phi2).
+ *
+ * Currently, it is only used for the amplitude analysis of D0 -> KS pi- pi+ decays by the Belle collaboration.
+ */
 class PDF_XY_QoP_PHI : public PDF_Charm {
  public:
   PDF_XY_QoP_PHI(TString measurement_id, parametrisations::mix mix_param);

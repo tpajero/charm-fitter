@@ -15,6 +15,10 @@
 #include <set>
 #include <string>
 
+/**
+ * Model for measurements of the yCP parameter in CP-even final states, using untagged D -> K- pi+ decays as reference
+ * channel.
+ */
 class PDF_yCP_minus_yCP_KP : public PDF_Charm {
  public:
   PDF_yCP_minus_yCP_KP(TString measurement_id, parametrisations::mix mix_param);

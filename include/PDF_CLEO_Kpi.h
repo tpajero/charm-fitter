@@ -15,6 +15,9 @@
 #include <set>
 #include <string>
 
+/**
+ * Implements the CLEO-c measurement of D0 -> K+ pi- (https://inspirehep.net/literature/1189182).
+ */
 class PDF_CLEO_Kpi : public PDF_Charm {
  public:
   PDF_CLEO_Kpi(TString measurement_id, parametrisations::mix mix_param);

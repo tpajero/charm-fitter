@@ -15,6 +15,12 @@
 #include <set>
 #include <string>
 
+/**
+ * Models the first measurement of strong parameters of D0 -> K+ pi- decays by the BESIII collaboration.
+ *
+ * References:
+ *   - http://inspirehep.net/record/1291279
+ */
 class PDF_BES_Kpi : public PDF_Charm {
  public:
   PDF_BES_Kpi(parametrisations::mix mix_param);

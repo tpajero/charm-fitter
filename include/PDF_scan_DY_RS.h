@@ -15,6 +15,10 @@
 #include <set>
 #include <string>
 
+/**
+ * Implements a constraint with very small uncertainty (where "very small" is currently 5e-7 and should be tuned to the
+ * precision of the combination) to set an upper bound on the value of |DeltaY(D0 -> K- pi+)|.
+ */
 class PDF_scan_DY_RS : public PDF_Charm {
  public:
   PDF_scan_DY_RS(parametrisations::mix mix_param);
