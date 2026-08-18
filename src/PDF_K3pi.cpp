@@ -32,7 +32,9 @@ namespace {
       {"c2",
        {
            {mix::pheno, "(x * x + y * y) / 4"},
-           {mix::theo, "(x12 * x12 + y12 * y12) / 4"},
+           {mix::theo, "0.25 * sqrt( "
+                       "    + TMath::Sq(x12*x12 + y12*y12)"
+                       "    - TMath::Sq(2 * x12 * y12 * sin(phiM - phiG)))"},
        }},
   };
 }  // namespace
@@ -46,18 +48,31 @@ PDF_K3pi::PDF_K3pi(const TString measurement_id, const parametrisations::mix mix
 std::set<std::string> PDF_K3pi::getParameterNames() const {
   std::set<std::string> names = {"r_K3pi", "k_K3pi", "Delta_K3pi"};
   using parametrisations::mix;
-  if (mix_param == mix::pheno)
+  switch (mix_param) {
+  case mix::pheno:
     names.insert({"x", "y", "qop", "phi"});
-  else
+    break;
+  case mix::theo:
     names.insert({"x12", "y12", "phiM", "phiG"});
+    break;
+  default:
+    throw std::runtime_error(
+        std::format("PDF_K3pi::getParameterNames ERROR Parametrisation {} not supported", utils::to_string(mix_param)));
+  }
   return names;
 }
 
 void PDF_K3pi::initRelations() {
   theory = new RooArgList("theory");  ///< the order of this list must match that of the COR matrix!
   theory->add(*(Utils::makeTheoryVar("r_K3pi_th", "r_K3pi", parameters)));
-  theory->add(*(Utils::makeTheoryVar("c1_th", theory_expressions["c1"][mix_param], parameters)));
-  theory->add(*(Utils::makeTheoryVar("c2_th", theory_expressions["c2"][mix_param], parameters)));
+  try {
+    theory->add(*(Utils::makeTheoryVar("c1_th", theory_expressions["c1"][mix_param], parameters)));
+    theory->add(*(Utils::makeTheoryVar("c2_th", theory_expressions["c2"][mix_param], parameters)));
+  } catch (const std::out_of_range& e) {
+    throw std::runtime_error(
+        std::format("PDF_K3pi::initRelations ERROR Parametrisation {} not handled for observable c1 or c2: {}",
+                    utils::to_string(mix_param), e.what()));
+  }
 }
 
 void PDF_K3pi::initObservables() {
@@ -73,10 +88,10 @@ void PDF_K3pi::setObservables(const TString c) {
     setObservablesTruth();
   else if (c.EqualTo("toy"))
     setObservablesToy();
-  else if (c.EqualTo("LHCb-run1")) {
+  else if (c.EqualTo("LHCb-R1")) {
     obsValSource = "https://arxiv.org/abs/1602.07224v2";
     setObservable("r_K3pi_obs", 5.67e-2);
-    setObservable("c1_obs", 3e-4);
+    setObservable("c1_obs", 0.3e-3);
     setObservable("c2_obs", 4.8e-5);
   } else {
     throw std::runtime_error(std::format("PDF_K3pi::setObservables ERROR config {} not found", c.Data()));
@@ -84,7 +99,7 @@ void PDF_K3pi::setObservables(const TString c) {
 }
 
 void PDF_K3pi::setUncertainties(const TString c) {
-  if (c.EqualTo("LHCb-run1")) {
+  if (c.EqualTo("LHCb-R1")) {
     obsErrSource = "https://arxiv.org/abs/1602.07224v2";
     StatErr = {0.12e-2, 1.8e-3, 1.8e-5};
     std::ranges::fill(SystErr, 0.0);
@@ -95,7 +110,7 @@ void PDF_K3pi::setUncertainties(const TString c) {
 
 void PDF_K3pi::setCorrelations(const TString c) {
   resetCorrelations();
-  if (c.EqualTo("LHCb-run1")) {
+  if (c.EqualTo("LHCb-R1")) {
     corSource = "https://arxiv.org/abs/1602.07224v2";
     std::vector<double> corrs = {
         // clang-format off
