@@ -264,7 +264,7 @@ int main(int argc, char* argv[]) {
   gc.addPdf(71, new PDF_DY("WA2020", dy_fsc_hypo, acp_param, mix_param),             "DY           WA       2020                  ");
   gc.addPdf(72, new PDF_DY("WA2021", dy_fsc_hypo, acp_param, mix_param),             "DY           WA       2021                  ");
 
-  gc.addPdf(80, new PDF_DY_RS("LHCb2021", mix_param),                                "DY(RS)       LHCb     2021                  ");
+  gc.addPdf(80, new PDF_DY_RS("LHCb-R2-prompt", mix_param),                          "DY(RS)       LHCb     Run 2    [D* -> D0 pi]");
 
   if (dy_fsc_hypo == dy_fsc::none) {
     gc.addPdf(85, new PDF_DY_pipipi0("LHCb-R2", mix_param),                          "DY(pipipi0)  LHCb     Run2                  ");
