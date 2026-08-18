@@ -1,6 +1,8 @@
 """Define default titles for parameters, default combiners and relative ranges for 1D and 2D scans."""
 
-from charm_fitter.utils import PlotParameter, Range
+import numpy as np
+
+from charm_fitter.utils import Combiner, PlotParameter, Range, Scan1D, Scan2D
 
 PARAMETERS = [
     # --- Mixing in the phenomenological parametrisation ---
@@ -43,22 +45,22 @@ PARAMETERS = [
 # Default scan parameters for 1D scans, tuned for different combiners.
 RANGES_1D = {
     "LHCb-R1": {
-        "x": Range((-2.0, 8.0), unit="1e-3"),
-        "y": Range((4.0, 9.0), unit="1e-3"),
-        "qop": Range((0.8, 1.2)),
+        "x": Range((-3.0, 8.0), unit="1e-3"),
+        "y": Range((4.0, 8.0), unit="1e-3"),
+        "qop": Range((0.75, 1.2)),
         "phi": Range((-500.0, 250.0), unit="mrad"),
         "x12": Range((0.0, 8.0), unit="1e-3"),
-        "y12": Range((4.0, 9.0), unit="1e-3"),
-        "phiM": Range((-300.0, 500.0), unit="mrad"),
+        "y12": Range((4.0, 8.0), unit="1e-3"),
+        "phiM": Range((-np.pi, np.pi), unit="rad"),
         "phiG": Range((-300.0, 500.0), unit="mrad"),
         "Acp_KK": Range((-5.0, 5.0), unit="1e-3"),
         "Acp_PP": Range((-5.0, 6.0), unit="1e-3"),
-        "Acp_KP": Range((-0.2, 0.2), unit="%"),
+        "Acp_KP": Range((-8.0, 3.0), unit="%"),
         "Delta_Kpi": Range((-0.7, 0.3), unit="rad"),
-        "r_Kpi": Range((5.8, 6.05), unit="%"),
+        "r_Kpi": Range((5.74, 6.03), unit="%"),
         "r_K3pi": Range((5.2, 5.7), unit="%"),
         "k_K3pi": Range((0.2, 0.8)),
-        "F_pipipi0": Range((0.91, 0.96)),
+        "F_pipipi0": Range((0.92, 0.97)),
     },
     "LHCb-R12": {
         "x": Range((1.5, 7.0), unit="1e-3"),
@@ -74,20 +76,75 @@ RANGES_1D = {
         "Acp_KP": Range((-2.0, 2.0), unit="%"),
         "Delta_Kpi": Range((-0.5, 0.1), unit="rad"),
         "r_Kpi": Range((5.82, 5.92), unit="%"),
-        "r_K3pi": Range((5.25, 5.7), unit="%"),
+        "r_K3pi": Range((5.2, 5.7), unit="%"),
         "k_K3pi": Range((0.2, 0.8)),
-        "F_pipipi0": Range((0.92, 0.96)),
+        "F_pipipi0": Range((0.92, 0.97)),
     },
 }
 
 RANGES_2D = {
+    "LHCb-R1": {
+        ("Delta_Kpi", "r_Kpi"): (Range((-0.7, 0.4), unit="rad"), Range((5.7, 6.1), unit="%")),
+        ("x12", "y12"): (Range((0.0, 8.0), unit="1e-3"), Range((3.5, 8.5), unit="1e-3")),
+        ("phiM", "phiG"): (Range((-np.pi, np.pi), unit="rad"), Range((-400.0, 600.0), unit="mrad")),
+        ("x", "y"): (Range((-4.0, 8.0), unit="1e-3"), Range((3.5, 8.5), unit="1e-3")),
+        ("qop", "phi"): (Range((0.7, 1.2)), Range((-550.0, 400.0), unit="mrad")),
+        ("Acp_KK", "Acp_PP"): (Range((-7.0, 7.0), unit="1e-3"), Range((-7.0, 8.0), unit="1e-3")),
+        ("Acp_KK", "phiM"): (Range((-6.0, 6.0), unit="1e-3"), Range((-np.pi, np.pi), unit="rad")),
+    },
     "LHCb-R12": {
+        ("Delta_Kpi", "r_Kpi"): (Range((-0.5, 0.0), unit="rad"), Range((5.82, 5.92), unit="%")),
         ("x12", "y12"): (Range((2.0, 6.0), unit="1e-3"), Range((5.4, 7.4), unit="1e-3")),
         ("phiM", "phiG"): (Range((-80.0, 100.0), unit="mrad"), Range((-80.0, 160.0), unit="mrad")),
         ("x", "y"): (Range((2.0, 6.0), unit="1e-3"), Range((5.4, 7.4), unit="1e-3")),
         ("qop", "phi"): (Range((0.9, 1.05)), Range((-120.0, 60.0), unit="mrad")),
-        ("Delta_Kpi", "r_Kpi"): (Range((-0.5, 0.0), unit="rad"), Range((5.82, 5.92), unit="%")),
         ("Acp_KK", "Acp_PP"): (Range((-1.5, 3.0), unit="1e-3"), Range((0.0, 5.5), unit="1e-3")),
         ("Acp_KK", "phiM"): (Range((-2.0, 3.5), unit="1e-3"), Range((-75.0, 95.0), unit="mrad")),
     },
+}
+
+COMBINERS = {
+    "LHCb-R1": Combiner(
+        300,
+        "LHCb Run 1",
+        scans_1d=[
+            Scan1D(
+                par,
+                r,
+                parfile="config/charm-combo/start/LHCb-R1.dat",
+                extra_args="--pr " + ("--npoints 300" if par == "phiM" else ""),
+            )
+            for par, r in RANGES_1D["LHCb-R1"].items()
+        ],
+        scans_2d=[
+            Scan2D(
+                xpar,
+                ypar,
+                xrange,
+                yrange,
+                parfile="config/charm-combo/start/"
+                + (
+                    "LHCb-R1-AcpKK-phiM.dat"
+                    if (xpar, ypar) == ("Acp_KK", "phiM")
+                    else "LHCb-R1-phiM-phiG.dat"
+                    if (xpar, ypar) == ("phiM", "phiG")
+                    else "LHCb-R1.dat"
+                ),
+                extra_args="--pr "
+                + ("--npoints2dx 150" if xpar == "phiM" else "--npoints2dy 150" if ypar == "phiM" else ""),
+            )
+            for (xpar, ypar), (xrange, yrange) in RANGES_2D["LHCb-R1"].items()
+        ],
+    ),
+    "LHCb-R12": Combiner(
+        301,
+        "LHCb Run 1+2",
+        scans_1d=[
+            Scan1D(par, r, parfile="config/charm-combo/start/LHCb-R12.dat") for par, r in RANGES_1D["LHCb-R12"].items()
+        ],
+        scans_2d=[
+            Scan2D(xpar, ypar, xrange, yrange, parfile="config/charm-combo/start/LHCb-R12.dat")
+            for (xpar, ypar), (xrange, yrange) in RANGES_2D["LHCb-R12"].items()
+        ],
+    ),
 }
