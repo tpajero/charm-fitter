@@ -15,9 +15,9 @@
 #include <set>
 #include <string>
 
-class PDF_Kshh : public PDF_Charm {
+class PDF_XY_QoP_PHI : public PDF_Charm {
  public:
-  PDF_Kshh(TString measurement_id, parametrisations::mix mix_param);
+  PDF_XY_QoP_PHI(TString measurement_id, parametrisations::mix mix_param);
   void initObservables() override;
   void initRelations() override;
   void setCorrelations(TString measurement_id) override;

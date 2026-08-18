@@ -17,11 +17,11 @@
 #include <PDF_Fp_pipipi0.h>
 #include <PDF_K3pi.h>
 #include <PDF_Kpipi0.h>
-#include <PDF_Kshh.h>
 #include <PDF_RM.h>
 #include <PDF_WS.h>
 #include <PDF_WS_NoCPV.h>
 #include <PDF_XY.h>
+#include <PDF_XY_QoP_PHI.h>
 #include <PDF_scan_DY_RS.h>
 #include <PDF_yCP.h>
 #include <PDF_yCP_minus_yCP_KP.h>
@@ -226,7 +226,7 @@ int main(int argc, char* argv[]) {
   gc.addPdf(10, new PDF_RM("HFLAV2016", mix_param),                                  "R_M          HFLAV    2016                  ");
   gc.addPdf(11, new PDF_RM("LHCb_K3pi_Run1", mix_param),                             "R_M K3pi     LHCb                           ");
 
-  gc.addPdf(20, new PDF_Kshh("Belle", mix_param),                                    "KShh         Belle                          ");
+  gc.addPdf(20, new PDF_XY_QoP_PHI("Belle", mix_param),                              "KShh         Belle                          ");
   gc.addPdf(21, new PDF_BinFlip("LHCb_Run1", mix_param),                             "Bin-flip     LHCb     Run 1                 ");
   gc.addPdf(22, new PDF_BinFlip("LHCb_Run2_prompt", mix_param),                      "Bin-flip     LHCb     Run 2    [D* -> D0 pi]");
   gc.addPdf(23, new PDF_BinFlip("LHCb_Run2_sl", mix_param),                          "Bin-flip     LHCb     Run 2    [B -> D0 mu] ");
