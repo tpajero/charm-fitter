@@ -41,10 +41,10 @@ void PDF_Fp_pipipi0::setObservables(const TString c) {
     setObservablesTruth();
   else if (c.EqualTo("toy"))
     setObservablesToy();
-  else if (c.EqualTo("Cleo-c")) {
-    obsValSource = "https://inspirehep.net/literature/2139827";
+  else if (c.EqualTo("CLEO-c")) {
+    obsValSource = "https://inspirehep.net/literature/1364362";
     setObservable("F_pipipi0_obs", 0.973);
-  } else if (c.EqualTo("BESIII")) {
+  } else if (c.EqualTo("BESIII-8fb")) {
     obsValSource = "https://inspirehep.net/literature/2827201";
     setObservable("F_pipipi0_obs", 0.9406);
   } else {
@@ -53,14 +53,14 @@ void PDF_Fp_pipipi0::setObservables(const TString c) {
 }
 
 void PDF_Fp_pipipi0::setUncertainties(const TString c) {
-  if (c.EqualTo("Cleo-c")) {
-    obsErrSource = "https://inspirehep.net/literature/2139827";
+  if (c.EqualTo("CLEO-c")) {
+    obsErrSource = "https://inspirehep.net/literature/1364362";
     StatErr = {0.017};
     SystErr = {0.0};
-  } else if (c.EqualTo("BESIII")) {
+  } else if (c.EqualTo("BESIII-8fb")) {
     obsErrSource = "https://inspirehep.net/literature/2827201";
-    StatErr = {0.0036};
-    SystErr = {0.0021};
+    StatErr = {0.0055};
+    SystErr = {0.0033};
   } else {
     throw std::runtime_error(std::format("PDF_Fp_pipipi0::setUncertainties ERROR config \"{}\" not found", c.Data()));
   }
