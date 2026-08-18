@@ -24,7 +24,6 @@ class PDF_scan_DY_RS : public PDF_Charm {
   PDF_scan_DY_RS(parametrisations::mix mix_param);
   void initObservables() override;
   void initRelations() override;
-  void setCorrelations(TString c) override;
   void setObservables(TString c) override;
   void setUncertainties(TString c) override;
 

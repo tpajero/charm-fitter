@@ -65,8 +65,3 @@ void PDF_Fp_pipipi0::setUncertainties(const TString c) {
     throw std::runtime_error(std::format("PDF_Fp_pipipi0::setUncertainties ERROR config \"{}\" not found", c.Data()));
   }
 }
-
-void PDF_Fp_pipipi0::setCorrelations(const TString c) {
-  resetCorrelations();
-  corSource = "No correlations for one observable";
-}

@@ -78,8 +78,3 @@ void PDF_DY_pipipi0::setUncertainties(const TString c) {
         "PDF_DY_pipipi0::setUncertainties ERROR config {} not found for {} DY_pipipi0 observables", c.Data(), nObs));
   }
 }
-
-void PDF_DY_pipipi0::setCorrelations(const TString c) {
-  resetCorrelations();
-  corSource = "No correlations for one observable";
-}
