@@ -20,7 +20,13 @@
  */
 class PDF_Kpipi0 : public PDF_Charm {
  public:
-  PDF_Kpipi0(TString measurement_id, parametrisations::mix mix_param);
+  /**
+   * Constructor.
+   *
+   * @param allow_cpv Sets whether to use results allowing for CP violation or not.
+   *     The likelihood of the BaBar measurement allowing for CP violation is way less Gaussian.
+   */
+  PDF_Kpipi0(TString measurement_id, parametrisations::mix mix_param, bool allow_cpv);
   void initObservables() override;
   void initRelations() override;
   void setCorrelations(TString measurement_id) override;
@@ -31,4 +37,5 @@ class PDF_Kpipi0 : public PDF_Charm {
   std::set<std::string> getParameterNames() const override;
   const parametrisations::mix mix_param;
   const TString measurement_id;
+  const bool allow_cpv;
 };
