@@ -122,9 +122,9 @@ PDF_WS::PDF_WS(const TString val, const TString err, const parametrisations::mix
     throw std::runtime_error(std::format("PDF_WS::PDF_WS ERROR Measurement ID {} not supported", val.Data()));
   }
 
-  if (kpi_param == parametrisations::kpi::ccprime && !val.BeginsWith("LHCb_Prompt_Run12")) {
-    throw std::runtime_error(
-        "PDF_WS::PDF_WS ERROR The c/c' parametrisation was introduced only with the LHCb Run 2 measurement");
+  if ((kpi_param == parametrisations::kpi::ccprime) != val.BeginsWith("LHCb_Prompt_Run12")) {
+    throw std::runtime_error("PDF_WS::PDF_WS ERROR The c/c' parametrisation can (and must) be used only for the LHCb "
+                             "Run 1+2 prompt measurement");
   }
 
   name = "WS_" + val;
