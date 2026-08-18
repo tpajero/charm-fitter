@@ -50,14 +50,18 @@ before running any executables.
 ### Main combiner
 
 One- and two-dimensional confidence intervals for the theory parameters of interest can be plotted with
-[Matplotlib](https://matplotlib.org/) using the script [scripts/charm-combo.py](scripts/charm-combo.py),
-while the list of parameters to plot, their ranges and the axes titles are set in the configuration files
-in [config/plotting](config/plotting).
+[Matplotlib](https://matplotlib.org/) using the script [scripts/charm-combo.py](scripts/charm-combo.py).
+To see all available options, run `python scripts/charm-combo.py -h`.
+The configuration files that steer what plots should be produced, the scan ranges, axes titles etc. live in
+[config/charm-combo/plotting](config/charm-combo/plotting).
+In particular:
+- `WA-<date>.py` prepares the plots for the world average at a given date;
+- `LHCb-R12-vs-R1.py` shows the precision improvement between LHCb Run 1 and 2;
 For example, you can plot the results of the world average of 2025 with
 
-    python scripts/charm-combo.py --config config/plotting/charm-2025.py -a all --rescan
+    python scripts/charm-combo.py --config config/charm-combo/plotting/WA-2025-06.py -a all --rescan
 
-To see all available options, run `python scripts/charm-combo.py -h`.
+
 Analogous plots for the subset of WS/RS D0 -> Kpi measurements can be obtained through a sibling script,
 see `python scripts/ws-combo.py -h`.
 
