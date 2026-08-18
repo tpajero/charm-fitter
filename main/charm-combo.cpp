@@ -221,8 +221,8 @@ int main(int argc, char* argv[]) {
   gc.addPdf(5, new PDF_K3pi("LHCb-run1", mix_param),                                 "K3pi         LHCb     Run 1                 ");
   gc.addPdf(6, new PDF_XY("Belle_Belle2", mix_param),                                "XY KSpipi    Belle+Belle2 (951+408 fb-1)    ");
 
-  gc.addPdf(10, new PDF_RM("HFLAV2016", mix_param),                                  "R_M          HFLAV    2016                  ");
-  gc.addPdf(11, new PDF_RM("LHCb_K3pi_Run1", mix_param),                             "R_M K3pi     LHCb                           ");
+  gc.addPdf(10, new PDF_RM("HFLAV-2008", mix_param),                                 "R_M          HFLAV    2008                  ");
+  gc.addPdf(11, new PDF_RM("LHCb-K3pi-R1", mix_param),                               "K3pi         LHCb     Run 1    [RM only]    ");
 
   gc.addPdf(20, new PDF_XY_QoP_PHI("Belle", mix_param),                              "KShh         Belle                          ");
   gc.addPdf(21, new PDF_BinFlip("LHCb_Run1", mix_param),                             "Bin-flip     LHCb     Run 1                 ");
