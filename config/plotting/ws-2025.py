@@ -75,25 +75,25 @@ _lhcb_dxp2_range = (-26e-5, 36e-5)
 combiners = {
     "NonLHCb2025": Combiner(1, "CDF + BaBar + Belle"),
     "LHCbPrompt2025": Combiner(
-        [23], "LHCb Run 1+2 prompt", scanparams_1d=_scanparams_1d_wa, scanparams_2d=_scanparams_2d_wa
+        [35], "LHCb Run 1+2 prompt", scanparams_1d=_scanparams_1d_wa, scanparams_2d=_scanparams_2d_wa
     ),
     "LHCbDT2025": Combiner(
-        [25],
+        [37],
         "LHCb Run 1+2 double tag",
         scanparams_2d=[
             ScanParams2D(("yp", "xp2"), xrange=_lhcb_yp_range, yrange=_lhcb_xp2_range),
             ScanParams2D(("dyp", "dxp2"), xrange=_lhcb_dyp_range, yrange=_lhcb_dxp2_range),
         ],
     ),
-    "LHCb2025": Combiner(11, "LHCb Run 1+2", scanparams_1d=_scanparams_1d_wa, scanparams_2d=_scanparams_2d_wa),
-    "WA2025": Combiner(20, "WA 2025", scanparams_1d=_scanparams_1d_wa, scanparams_2d=_scanparams_2d_wa),
+    "LHCb-R12": Combiner(201, "LHCb Run 1+2", scanparams_1d=_scanparams_1d_wa, scanparams_2d=_scanparams_2d_wa),
+    "WA-2024": Combiner(300, "WA 2024", scanparams_1d=_scanparams_1d_wa, scanparams_2d=_scanparams_2d_wa),
 }
 
 baseline_combiners = list(combiners.keys())
 
 # Parameters and options for 2D plots ----------------------------------------------------------------------------------
 
-_lhcb_combiners = ["LHCbDT2025", "LHCbPrompt2025", "LHCb2025"]
+_lhcb_combiners = ["LHCbDT2025", "LHCbPrompt2025", "LHCb-R12"]
 
 # List all 2D plots to be produced.
 plots_2d = [
