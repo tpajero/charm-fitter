@@ -76,8 +76,3 @@ void PDF_BES_Kpi_1d::setUncertainties(const TString c) {
     throw std::runtime_error(std::format("PDF_BES_Kpi_1d::setUncertainties ERROR config {} not found", c.Data()));
   }
 }
-
-void PDF_BES_Kpi_1d::setCorrelations(const TString c) {
-  resetCorrelations();
-  corSource = "No correlations for one observable";
-}

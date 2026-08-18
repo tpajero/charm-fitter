@@ -18,7 +18,6 @@ class PDF_Fp_pipipi0 : public PDF_Charm {
   PDF_Fp_pipipi0(TString measurement_id);
   void initObservables() override;
   void initRelations() override;
-  void setCorrelations(TString measurement_id) override;
   void setObservables(TString measurement_id) override;
   void setUncertainties(TString measurement_id) override;
 

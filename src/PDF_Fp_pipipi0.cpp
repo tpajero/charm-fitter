@@ -65,8 +65,3 @@ void PDF_Fp_pipipi0::setUncertainties(const TString c) {
     exit(1);
   }
 }
-
-void PDF_Fp_pipipi0::setCorrelations(const TString c) {
-  resetCorrelations();
-  corSource = "No correlations for one observable";
-}

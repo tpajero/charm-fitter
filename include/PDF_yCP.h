@@ -20,7 +20,6 @@ class PDF_yCP : public PDF_Charm {
   PDF_yCP(TString measurement_id, parametrisations::mix mix_param);
   void initObservables() override;
   void initRelations() override;
-  void setCorrelations(TString measurement_id) override;
   void setObservables(TString measurement_id) override;
   void setUncertainties(TString measurement_id) override;
 

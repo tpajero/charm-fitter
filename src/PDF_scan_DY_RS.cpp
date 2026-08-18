@@ -64,8 +64,3 @@ void PDF_scan_DY_RS::setUncertainties(const TString) {
   StatErr = {5e-7};
   SystErr = {0.0};
 }
-
-void PDF_scan_DY_RS::setCorrelations(const TString) {
-  resetCorrelations();
-  corSource = "No correlations for one observable";
-}
