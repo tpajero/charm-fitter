@@ -15,6 +15,9 @@
 #include <set>
 #include <string>
 
+/**
+ * Models measurements of the mixing parameters x and y.
+ */
 class PDF_XY : public PDF_Charm {
  public:
   PDF_XY(TString measurement_id, parametrisations::mix mix_param);

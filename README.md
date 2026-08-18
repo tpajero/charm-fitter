@@ -55,9 +55,13 @@ while the list of parameters to plot, their ranges and the axes titles are set i
 in [config/plotting](config/plotting).
 For example, you can plot the results of the world average of 2025 with
 
-    python scripts/charm-combo.py --config config/plotting/charm-2025.py -a all --rescan
+    python scripts/charm-combo.py --config config/plotting/world-average-2025.py -a all --rescan
 
 To see all available options, run `python scripts/charm-combo.py -h`.
+The configuration files that steer what plots should be produced live in the folder `config/plotting`.
+In particular:
+- `LHCb-R12-vs-R1.py` shows the improvements between LHCb Run 1 and 2;
+
 Analogous plots for the subset of WS/RS D0 -> Kpi measurements can be obtained through a sibling script,
 see `python scripts/ws-combo.py -h`.
 

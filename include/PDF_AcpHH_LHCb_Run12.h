@@ -17,6 +17,13 @@
 
 class RooArgList;
 
+/**
+ * Models the LHCb measurements of DeltaACP and of ACP(K- K+) performed during Run 1 and 2.
+ *
+ * This requires a specific PDF owing to their non-negligible correlations. On the other hand, measurements of
+ * DeltaY(h- h+) are assumed to be uncorrelated (due, in particular, to the kinematic equalisation of these last
+ * measurements).
+ */
 class PDF_AcpHH_LHCb_Run12 : public PDF_Charm {
  public:
   PDF_AcpHH_LHCb_Run12(hypotheses::dy_fsc, parametrisations::acp, parametrisations::mix);

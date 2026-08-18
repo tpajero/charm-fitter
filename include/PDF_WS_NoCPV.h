@@ -15,6 +15,12 @@
 #include <set>
 #include <string>
 
+/**
+ * Models measurements of the WS/RS ratio of D0 -> K+ pi- decays, without allowing for CP violation.
+ *
+ * Should be mostly equivalent to using PDF_WS with CP violation fixed to zero, up to non-Gaussian effects in the
+ * likelihood of the various measurements.
+ */
 class PDF_WS_NoCPV : public PDF_Charm {
  public:
   PDF_WS_NoCPV(TString measurement_id, parametrisations::mix mix_param);

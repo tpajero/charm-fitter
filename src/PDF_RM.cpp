@@ -68,32 +68,27 @@ void PDF_RM::setObservables(const TString c) {
     setObservablesTruth();
   else if (c.EqualTo("toy"))
     setObservablesToy();
-  else if (c.EqualTo("HFLAV2016")) {
-    obsValSource = "https://hflav-eos.web.cern.ch/hflav-eos/charm/CHARM21/results_mixing.html";
+  else if (c.EqualTo("HFLAV-2008")) {
+    obsValSource = "https://hflav-eos.web.cern.ch/hflav-eos/charm/ICHEP08/results_mixing.html";
     setObservable("RM_obs", 1.30e-4);
-  } else if (c.EqualTo("LHCb_K3pi_Run1")) {
+  } else if (c.EqualTo("LHCb-K3pi-R1")) {
     obsValSource = "https://inspirehep.net/literature/1423070";
-    setObservable("RM_obs", 2 * 0.48e-4);
+    setObservable("RM_obs", 2.0 * 4.8e-5);
   } else {
     throw std::runtime_error(std::format("PDF_RM::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
 void PDF_RM::setUncertainties(const TString c) {
-  if (c.EqualTo("HFLAV2016")) {
-    obsErrSource = "https://hflav-eos.web.cern.ch/hflav-eos/charm/CHARM21/results_mixing.html";
+  if (c.EqualTo("HFLAV-2008")) {
+    obsErrSource = "https://hflav-eos.web.cern.ch/hflav-eos/charm/ICHEP08/results_mixing.html";
     StatErr = {2.69e-4};
     SystErr = {0.0};
-  } else if (c.EqualTo("LHCb_K3pi_Run1")) {
+  } else if (c.EqualTo("LHCb-K3pi-R1")) {
     obsErrSource = "https://inspirehep.net/literature/1423070";
-    StatErr = {2 * 0.18e-4};
+    StatErr = {2.0 * 1.8e-5};
     SystErr = {0.0};
   } else {
     throw std::runtime_error(std::format("PDF_RM::setUncertainties ERROR config {} not found", c.Data()));
   }
-}
-
-void PDF_RM::setCorrelations(const TString c) {
-  resetCorrelations();
-  corSource = "No correlations for one observable";
 }

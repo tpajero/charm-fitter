@@ -1,6 +1,6 @@
 /**
  * Charm Combination
- * Author: tommaso.pajero@cern.ch
+ * Author: Tommaso Pajero, tommaso.pajero@cern.ch
  * Date: October 2021
  **/
 
@@ -15,9 +15,14 @@
 #include <set>
 #include <string>
 
-class PDF_BES_Kpi_1d : public PDF_Charm {
+/**
+ * Models any measurement of (x, y, |q/p|, phi2).
+ *
+ * Currently only used for the amplitude analysis of D0 -> KS pi+ pi- decays by the Belle collaboration.
+ */
+class PDF_XY_QoP_PHI : public PDF_Charm {
  public:
-  PDF_BES_Kpi_1d(parametrisations::mix mix_param);
+  PDF_XY_QoP_PHI(TString measurement_id, parametrisations::mix mix_param);
   void initObservables() override;
   void initRelations() override;
   void setCorrelations(TString measurement_id) override;
@@ -27,4 +32,5 @@ class PDF_BES_Kpi_1d : public PDF_Charm {
  private:
   std::set<std::string> getParameterNames() const override;
   const parametrisations::mix mix_param;
+  const TString measurement_id;
 };

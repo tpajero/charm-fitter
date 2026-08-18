@@ -15,6 +15,12 @@
 #include <set>
 #include <string>
 
+/**
+ * Models measurements of DeltaY(D0 -> h- h+).
+ *
+ * Depending on the value of `dy_fsc_hypo`, separate measurements for the K- K+ and pi- pi+ final states are taken into
+ * account, or a single average is employed.
+ */
 class PDF_DY : public PDF_Charm {
  public:
   PDF_DY(TString measurement_id, hypotheses::dy_fsc, parametrisations::acp, parametrisations::mix);

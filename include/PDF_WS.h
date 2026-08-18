@@ -15,12 +15,13 @@
 #include <set>
 #include <string>
 
-class RooArgList;
-
 namespace parametrisations {
   enum class kpi { raxy, rrxy, ccprime };
 }  // namespace parametrisations
 
+/**
+ * Models measurements of the WS/RS ratio of D0 -> K+ pi- decays.
+ */
 class PDF_WS : public PDF_Charm {
  public:
   PDF_WS(TString measurement_id, parametrisations::mix, parametrisations::kpi p = parametrisations::kpi::rrxy,
@@ -39,7 +40,12 @@ class PDF_WS : public PDF_Charm {
   void initRelationsCCPrime();
   void initRelationsRAXY();
   void initRelationsRRXY();
-  void initRelationsXYM(RooArgList* theory);
+
+  /// Add the y'+_th and x'2+_th theory relations.
+  void addYpXp2Plus();
+  /// Add the y'-_th and x'2-_th theory relations.
+  void addYpXp2Minus();
+
   std::set<std::string> getParameterNames() const override;
 
   const parametrisations::mix mix_param;

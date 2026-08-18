@@ -17,7 +17,9 @@
 #include <cmath>
 #include <format>
 #include <iostream>
+#include <map>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 PDF_BinFlip::PDF_BinFlip(const TString measurement_id, const parametrisations::mix mix_param)
@@ -44,18 +46,18 @@ void PDF_BinFlip::initRelations() {
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    theory->add(*(Utils::makeTheoryVar("x_th",
+    theory->add(*(Utils::makeTheoryVar("xCP_th",
                                        "0.5*(  x*cos(phi)*(qop + 1/qop)"
                                        "     + y*sin(phi)*(qop - 1/qop))",
                                        parameters)));
-    theory->add(*(Utils::makeTheoryVar("y_th",
+    theory->add(*(Utils::makeTheoryVar("yCP_th",
                                        "0.5*(  y*cos(phi)*(qop + 1./qop)"
                                        "     - x*sin(phi)*(qop - 1./qop))",
                                        parameters)));
     break;
   case mix::theo:
-    theory->add(*(Utils::makeTheoryVar("x_th", " x12*cos(phiM)", parameters)));
-    theory->add(*(Utils::makeTheoryVar("y_th", " y12*cos(phiG)", parameters)));
+    theory->add(*(Utils::makeTheoryVar("xCP_th", " x12*cos(phiM)", parameters)));
+    theory->add(*(Utils::makeTheoryVar("yCP_th", " y12*cos(phiG)", parameters)));
     break;
   default:
     throw std::runtime_error(
@@ -66,19 +68,18 @@ void PDF_BinFlip::initRelations() {
 }
 
 void PDF_BinFlip::initObservables() {
-  TString label;
-  if (measurement_id.EqualTo("LHCb_Run1"))
-    label = "LHCb Binflip Run 1";
-  else if (measurement_id.EqualTo("LHCb_Run2_prompt"))
-    label = "LHCb Binflip Run 2 (prompt)";
-  else if (measurement_id.EqualTo("LHCb_Run2_sl"))
-    label = "LHCb Binflip Run 2 (muon-tagged)";
-  else if (measurement_id.EqualTo("LHCb_Run2"))
-    label = "LHCb Binflip Run 2";
+  static const std::map<std::string, std::string> labels = {
+      {"LHCb-R1", "LHCb Binflip Run 1"},
+      {"LHCb-R2-prompt", "LHCb Binflip Run 2 (prompt)"},
+      {"LHCb-R2-SL", "LHCb Binflip Run 2 (muon-tagged)"},
+      {"LHCb-R2", "LHCb Binflip Run 2"},
+  };
+  const auto it = labels.find(measurement_id.Data());
+  const TString label = it != labels.end() ? it->second : name;
 
   observables = new RooArgList("observables");  ///< the order of this list must match that of the COR matrix!
-  observables->add(*(new RooRealVar("x_obs", label + "   #it{x_{CP}}", 0., -1e4, 1e4)));
-  observables->add(*(new RooRealVar("y_obs", label + "   #it{y_{CP}}", 0., -1e4, 1e4)));
+  observables->add(*(new RooRealVar("xCP_obs", label + "   #it{x_{CP}}", 0., -1e4, 1e4)));
+  observables->add(*(new RooRealVar("yCP_obs", label + "   #it{y_{CP}}", 0., -1e4, 1e4)));
   observables->add(*(new RooRealVar("dx_obs", label + "   #it{#Deltax}", 0., -1e4, 1e4)));
   observables->add(*(new RooRealVar("dy_obs", label + "   #it{#Deltay}", 0., -1e4, 1e4)));
 }
@@ -88,28 +89,28 @@ void PDF_BinFlip::setObservables(const TString c) {
     setObservablesTruth();
   else if (c.EqualTo("toy"))
     setObservablesToy();
-  else if (c.EqualTo("LHCb_Run1")) {
+  else if (c.EqualTo("LHCb-R1")) {
     obsValSource = "https://inspirehep.net/literature/1724179";
-    setObservable("x_obs", 2.7e-3);
-    setObservable("y_obs", 7.4e-3);
+    setObservable("xCP_obs", 2.7e-3);
+    setObservable("yCP_obs", 7.4e-3);
     setObservable("dx_obs", -0.53e-3);
     setObservable("dy_obs", 0.6e-3);
-  } else if (c.EqualTo("LHCb_Run2_prompt")) {
-    obsValSource = "https://inspirehep.net/literature/1867376";
-    setObservable("x_obs", 3.973e-3);
-    setObservable("y_obs", 4.589e-3);
+  } else if (c.EqualTo("LHCb-R2-prompt")) {
+    obsValSource = "https://inspirehep.net/literature/1867376; https://cds.cern.ch/record/2713310 Table 28";
+    setObservable("xCP_obs", 3.973e-3);
+    setObservable("yCP_obs", 4.589e-3);
     setObservable("dx_obs", -0.271e-3);
     setObservable("dy_obs", 0.203e-3);
-  } else if (c.EqualTo("LHCb_Run2_sl")) {
+  } else if (c.EqualTo("LHCb-R2-SL")) {
     obsValSource = "https://inspirehep.net/literature/2135966";
-    setObservable("x_obs", 4.29e-3);
-    setObservable("y_obs", 12.61e-3);
+    setObservable("xCP_obs", 4.29e-3);
+    setObservable("yCP_obs", 12.61e-3);
     setObservable("dx_obs", -0.77e-3);
     setObservable("dy_obs", 3.01e-3);
-  } else if (c.EqualTo("LHCb_Run2")) {
+  } else if (c.EqualTo("LHCb-R2")) {
     obsValSource = "https://inspirehep.net/literature/2135966";
-    setObservable("x_obs", 4.00e-3);
-    setObservable("y_obs", 5.51e-3);
+    setObservable("xCP_obs", 4.01e-3);
+    setObservable("yCP_obs", 5.51e-3);
     setObservable("dx_obs", -0.29e-3);
     setObservable("dy_obs", 0.31e-3);
   } else {
@@ -119,20 +120,19 @@ void PDF_BinFlip::setObservables(const TString c) {
 
 void PDF_BinFlip::setUncertainties(const TString c) {
   // x, y, dx, dy
-  if (c.EqualTo("LHCb_Run1")) {
+  if (c.EqualTo("LHCb-R1")) {
     obsErrSource = "https://inspirehep.net/literature/1724179";
-    StatErr = {1.6e-3, 3.6e-3, 0.7e-3, 1.6e-3};
+    StatErr = {1.6e-3, 3.6e-3, 0.70e-3, 1.6e-3};
     SystErr = {0.4e-3, 1.1e-3, 0.22e-3, 0.3e-3};
-  } else if (c.EqualTo("LHCb_Run2_prompt")) {
-    obsErrSource = "https://inspirehep.net/literature/1867376";
-    StatErr = {std::hypot(0.459e-3, 0.29e-3), std::hypot(1.198e-3, 0.85e-3), std::hypot(0.182e-3, 0.01e-3),
-               std::hypot(0.365e-3, 0.11e-3)};
-    std::ranges::fill(SystErr, 0.0);
-  } else if (c.EqualTo("LHCb_Run2_sl")) {
+  } else if (c.EqualTo("LHCb-R2-prompt")) {
+    obsErrSource = "https://inspirehep.net/literature/1867376; https://cds.cern.ch/record/2713310 Table 28";
+    StatErr = {0.459e-3, 1.198e-3, 0.182e-3, 0.365e-3};
+    SystErr = {0.29e-3, 0.85e-3, 0.01e-3, 0.11e-3};
+  } else if (c.EqualTo("LHCb-R2-SL")) {
     obsErrSource = "https://inspirehep.net/literature/2135966";
     StatErr = {1.48e-3, 3.12e-3, 0.93e-3, 1.92e-3};
     SystErr = {0.26e-3, 0.83e-3, 0.28e-3, 0.26e-3};
-  } else if (c.EqualTo("LHCb_Run2")) {
+  } else if (c.EqualTo("LHCb-R2")) {
     obsErrSource = "https://inspirehep.net/literature/2135966";
     StatErr = {0.45e-3, 1.16e-3, 0.18e-3, 0.35e-3};
     SystErr = {0.195e-3, 0.594e-3, 0.013e-3, 0.128e-3};
@@ -143,7 +143,7 @@ void PDF_BinFlip::setUncertainties(const TString c) {
 
 void PDF_BinFlip::setCorrelations(const TString c) {
   resetCorrelations();
-  if (c.EqualTo("LHCb_Run1")) {
+  if (c.EqualTo("LHCb-R1")) {
     corSource = "https://inspirehep.net/literature/1724179";
     std::vector<double> dataStat = {
         // clang-format off
@@ -163,18 +163,27 @@ void PDF_BinFlip::setCorrelations(const TString c) {
         // clang-format on
     };
     corSystMatrix = Utils::buildCorMatrix(nObs, dataSyst);
-  } else if (c.EqualTo("LHCb_Run2_prompt")) {
+  } else if (c.EqualTo("LHCb-R2-prompt")) {
     corSource = "https://inspirehep.net/literature/1867376";
     std::vector<double> dataStat = {
         // clang-format off
-        1., 0.111,  -0.017, -0.010,  // x
-            1.,     -0.011, -0.051,  // y
-                     1.,     0.077,  // dx
-                             1.      // dy
+        1., 0.11, -0.02, -0.01,  // x
+            1.,   -0.01, -0.05,  // y
+                   1.,    0.08,  // dx
+                          1.     // dy
         // clang-format on
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
-  } else if (c.EqualTo("LHCb_Run2_sl")) {
+    std::vector<double> dataSyst = {
+        // clang-format off
+        1., 0.13,  0.01, 0.01,  // x
+            1.,   -0.02, 0.01,  // y
+                   1.,   0.31,  // dx
+                         1.     // dy
+        // clang-format on
+    };
+    corSystMatrix = Utils::buildCorMatrix(nObs, dataSyst);
+  } else if (c.EqualTo("LHCb-R2-SL")) {
     corSource = "https://inspirehep.net/literature/2135966";
     std::vector<double> dataStat = {
         // clang-format off
@@ -194,7 +203,7 @@ void PDF_BinFlip::setCorrelations(const TString c) {
         // clang-format on
     };
     corSystMatrix = Utils::buildCorMatrix(nObs, dataSyst);
-  } else if (c.EqualTo("LHCb_Run2")) {
+  } else if (c.EqualTo("LHCb-R2")) {
     corSource = "https://inspirehep.net/literature/2135966";
     std::vector<double> dataStat = {
         // clang-format off

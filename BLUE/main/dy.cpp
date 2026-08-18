@@ -14,39 +14,52 @@
 #include <BLUE/Blue.h>
 #include <BLUE/Utils.h>
 
+#include <TMatrixD.h>
+#include <TString.h>
+
 #include <cstdlib>
-#include <iomanip>
-#include <iostream>
-#include <map>
 #include <memory>
-#include <string>
+#include <stdexcept>
 #include <vector>
 
 const BLUE::Combinations combinations = {
-    {0, {"LHCb average 2021", {4, 5, 6, 7, 8, 9, 10, 11}}},
-    {1, {"LHCb average 2021 (K+ K-)", {4, 6, 8, 10}}},
-    {2, {"LHCb average 2021 (pi+ pi-)", {5, 7, 9, 11}}},
-    {3, {"LHCb average 2024", {4, 5, 6, 7, 8, 9, 10, 11, 12}}},
-    {100, {"World average 2021", {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}}},
-    {101, {"World average 2021 (K+ K-)", {1, 4, 6, 8, 10}}},
-    {102, {"World average 2021 (pi+ pi-)", {2, 5, 7, 9, 11}}},
-    {103, {"World average 2024", {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}}},
+    // LHCb only
+    {0, {"LHCb Run 1", {4, 5, 6, 7}}},
+    {1, {"LHCb Run 1 (K+ K-)", {4, 6}}},
+    {2, {"LHCb Run 1 (pi+ pi-)", {5, 7}}},
+    {3, {"LHCb Run 1+2 (h+ h-)", {4, 5, 6, 7, 8, 9, 10, 11}}},
+    {4, {"LHCb Run 1+2 (K+ K-)", {4, 6, 8, 10}}},
+    {5, {"LHCb Run 1+2 (pi+ pi-)", {5, 7, 9, 11}}},
+    {6, {"LHCb Run 1+2", {4, 5, 6, 7, 8, 9, 10, 11, 12}}},
+    // World averages
+    {100, {"World average 2019", {0, 1, 2, 3, 4, 5, 6, 7}}},
+    {101, {"World average 2019 (K+ K-)", {1, 4, 6}}},
+    {102, {"World average 2019 (pi+ pi-)", {2, 5, 7}}},
+    {103, {"World average 2020", {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}}},
+    {104, {"World average 2020 (K+ K-)", {1, 4, 6, 8}}},
+    {105, {"World average 2020 (pi+ pi-)", {2, 5, 7, 9}}},
+    {106, {"World average 2021", {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}}},
+    {107, {"World average 2021 (K+ K-)", {1, 4, 6, 8, 10}}},
+    {108, {"World average 2021 (pi+ pi-)", {2, 5, 7, 9, 11}}},
+    {109, {"World average 2024", {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}}},
+    // B-factories (the only D0 -> h+ h- measurements not separated by K+ K- / pi+ pi-)
+    {200, {"BaBar + Belle", {0, 3}}},
 };
 
 const std::vector<TString> names = {
-    "BaBar            ",  //  0  https://inspirehep.net/literature/1186384
-    "CDF KK           ",  //  1  https://inspirehep.net/literature/1323066
-    "CDF PP           ",  //  2  https://inspirehep.net/literature/1323066
-    "Belle            ",  //  3  https://inspirehep.net/literature/1395100
-    "LHCb R1 mu KK    ",  //  4  https://inspirehep.net/literature/1341286
-    "LHCb R1 mu PP    ",  //  5  https://inspirehep.net/literature/1341286
-    "LHCb R1 prompt KK",  //  6  https://inspirehep.net/literature/1514549
-    "LHCb R1 prompt PP",  //  7  https://inspirehep.net/literature/1514549
-    "LHCb R2 mu KK    ",  //  8  https://inspirehep.net/literature/1762838
-    "LHCb R2 mu PP    ",  //  9  https://inspirehep.net/literature/1762838
-    "LHCb R2 prompt KK",  // 10  https://inspirehep.net/literature/1864385
-    "LHCb R2 prompt PP",  // 11  https://inspirehep.net/literature/1864385
-    "LHCb R2 pipipi0  ",  // 12  https://inspirehep.net/literature/2785424
+    "BaBar                 ",  //  0  https://inspirehep.net/literature/1186384  2012
+    "CDF KK                ",  //  1  https://inspirehep.net/literature/1323066  2014
+    "CDF PP                ",  //  2  https://inspirehep.net/literature/1323066  2014
+    "Belle                 ",  //  3  https://inspirehep.net/literature/1395100  2015
+    "LHCb Run 1 mu KK      ",  //  4  https://inspirehep.net/literature/1341286  2015
+    "LHCb Run 1 mu PP      ",  //  5  https://inspirehep.net/literature/1341286  2015
+    "LHCb Run 1 prompt KK  ",  //  6  https://inspirehep.net/literature/1514549  2017
+    "LHCb Run 1 prompt PP  ",  //  7  https://inspirehep.net/literature/1514549  2017
+    "LHCb Run 2 mu KK      ",  //  8  https://inspirehep.net/literature/1762838  2020
+    "LHCb Run 2 mu PP      ",  //  9  https://inspirehep.net/literature/1762838  2020
+    "LHCb Run 2 prompt KK  ",  // 10  https://inspirehep.net/literature/1864385  2021
+    "LHCb Run 2 prompt PP  ",  // 11  https://inspirehep.net/literature/1864385  2021
+    "LHCb Run 2 pi+ pi- pi0",  // 12  https://inspirehep.net/literature/2785424  2024
 };
 
 /**
@@ -94,22 +107,16 @@ void run(const int flag) {
       // clang-format on
   };
   const auto num_unc = names_unc.size();
-  if (x_est.size() != num_est * (num_unc + 1)) {
-    std::cout << "The size of the uncertainty matrix is inconsistent with the number of estimates and the number of "
-                 "uncertainties per estimate"
-              << std::endl;
-    exit(EXIT_FAILURE);
-  }
+  if (x_est.size() != num_est * (num_unc + 1))
+    throw std::runtime_error("The size of the uncertainty matrix is inconsistent with the number of estimates and the "
+                             "number of uncertainties per estimate");
   auto inp_est = std::make_unique<const TMatrixD>(num_est, num_unc + 1, &x_est[0]);
 
   // Statistical uncertainties are not correlated
   // All systematic uncertainties except "Other" are 100% correlated
   const std::vector<double> rho_val = {0., 1., 1., 1., 1., 1., 1., 1., 1., 0.};
-  if (rho_val.size() == num_unc + 1) {
-    std::cout << "The size of correlation vector among uncertainties is inconsistent with the number of uncertainties"
-              << std::endl;
-    exit(EXIT_FAILURE);
-  }
+  if (rho_val.size() != num_unc)
+    throw std::runtime_error("The size of the correlation vector is inconsistent with the number of uncertainties");
 
   // Statistical precision in systematic uncertainties
   const std::vector<double> s_unc(num_est * num_unc, 0.);
