@@ -211,7 +211,6 @@ int main(int argc, char* argv[]) {
   ///////////////////////////////////////////////////
 
   using hypotheses::dy_fsc;
-  using parametrisations::kpi;
 
   // clang-format off
   gc.addPdf(1, new PDF_XY("BaBar-KShh", mix_param),                                  "KS h h       BaBar                          ");
@@ -235,13 +234,14 @@ int main(int argc, char* argv[]) {
   gc.addPdf(32, new PDF_WS_NoCPV("Belle", mix_param),                                "WS/RS        Belle    no CPV                ");
   gc.addPdf(33, new PDF_WS("BaBar", mix_param),                                      "WS/RS        BaBar                          ");
   gc.addPdf(34, new PDF_WS("Belle", mix_param),                                      "WS/RS        Belle                          ");
-  gc.addPdf(35, new PDF_WS("LHCb_DT_Run1", mix_param),                               "WS/RS        LHCb     Run 1    [B -> D* mu] ");
-  gc.addPdf(36, new PDF_WS("LHCb_Run1", mix_param),                                  "WS/RS        LHCb     Run 1                 ");
-  gc.addPdf(37, new PDF_WS("LHCb_Prompt_2011_2016", mix_param),                      "WS/RS        LHCb     2011-6   [D* -> D0 pi]");
-  gc.addPdf(38, new PDF_WS("LHCb_Prompt_Run12_sec9", mix_param, kpi::ccprime),       "WS/RS        LHCb     Run 1+2  [D* -> D0 pi]");
-  gc.addPdf(39, new PDF_WS("LHCb_Prompt_Run12_appB", mix_param, kpi::ccprime, dy_fsc_hypo, acp_param), "WS/RS        LHCb     Run 1+2  [D* -> D0 pi]");
-  gc.addPdf(40, new PDF_WS("LHCb_DT_Run2", mix_param),                               "WS/RS        LHCb     Run 2    [B -> D* mu] ");
-  gc.addPdf(41, new PDF_WS("LHCb_DT_Run12", mix_param),                              "WS/RS        LHCb     Run 1-2  [B -> D* mu] ");
+  gc.addPdf(35, new PDF_WS("LHCb-R1-DT", mix_param),                                 "WS/RS        LHCb     Run 1    [B -> D* mu] ");
+  gc.addPdf(36, new PDF_WS("LHCb-R1-prompt", mix_param),                             "WS/RS        LHCb     Run 1    [D* -> D0 pi]");
+  gc.addPdf(37, new PDF_WS("LHCb-2011-2016-prompt", mix_param),                      "WS/RS        LHCb     2011-6   [D* -> D0 pi]");
+  gc.addPdf(38, new PDF_WS("LHCb-R12-prompt-sec9", mix_param),                       "WS/RS        LHCb     Run 1+2  [D* -> D0 pi]");
+  gc.addPdf(39, new PDF_WS("LHCb-R12-prompt-appB", mix_param, dy_fsc_hypo, acp_param),
+                                                                                     "WS/RS        LHCb     Run 1+2  [D* -> D0 pi]");
+  gc.addPdf(40, new PDF_WS("LHCb-R2-DT", mix_param),                                 "WS/RS        LHCb     Run 2    [B -> D* mu] ");
+  gc.addPdf(41, new PDF_WS("LHCb-R12-DT", mix_param),                                "WS/RS        LHCb     Run 1-2  [B -> D* mu] ");
 
   gc.addPdf(50, new PDF_CLEO_Kpi("Cleo-c", mix_param),                               "Delta_Kpi    Cleo-c                         ");
   gc.addPdf(51, new PDF_BES_Kpi(mix_param),                                          "Delta_Kpi    BES      3fb      [A_kpi only] ");
