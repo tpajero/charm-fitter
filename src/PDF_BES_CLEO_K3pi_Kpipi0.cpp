@@ -20,7 +20,9 @@
 #include <RooRealVar.h>
 
 #include <algorithm>
+#include <format>
 #include <map>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -73,8 +75,8 @@ void PDF_BES_CLEO_K3pi_Kpipi0::setObservables(const TString c) {
     setObservable("r_K3pi_obs", 5.46e-2);
     setObservable("r_Kpipi0_obs", 4.41e-2);
   } else {
-    std::cout << "PDF_BES_CLEO_K3pi_Kpipi0::setObservables() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_BES_CLEO_K3pi_Kpipi0::setObservables ERROR config \"{}\" not found", c.Data()));
   }
 }
 
@@ -91,8 +93,8 @@ void PDF_BES_CLEO_K3pi_Kpipi0::setUncertainties(const TString c) {
 
     std::ranges::fill(SystErr, 0.0);
   } else {
-    std::cout << "PDF_BES_CLEO_K3pi_Kpipi0::setUncertainties() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_BES_CLEO_K3pi_Kpipi0::setUncertainties ERROR config \"{}\" not found", c.Data()));
   }
 }
 
@@ -113,7 +115,7 @@ void PDF_BES_CLEO_K3pi_Kpipi0::setCorrelations(const TString c) {
     };
     corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
   } else {
-    std::cout << "PDF_BES_CLEO_K3pi_Kpipi0::setCorrelations() : ERROR : config " + c + " not found." << std::endl;
-    exit(1);
+    throw std::runtime_error(
+        std::format("PDF_BES_CLEO_K3pi_Kpipi0::setCorrelations ERROR config \"{}\" not found", c.Data()));
   }
 }
