@@ -15,8 +15,6 @@
 #include <set>
 #include <string>
 
-class RooArgList;
-
 namespace parametrisations {
   enum class kpi { raxy, rrxy, ccprime };
 }  // namespace parametrisations
@@ -39,7 +37,12 @@ class PDF_WS : public PDF_Charm {
   void initRelationsCCPrime();
   void initRelationsRAXY();
   void initRelationsRRXY();
-  void initRelationsXYM(RooArgList* theory);
+
+  /// Add the y'+_th and x'2+_th theory relations.
+  void addYpXp2Plus();
+  /// Add the y'-_th and x'2-_th theory relations.
+  void addYpXp2Minus();
+
   std::set<std::string> getParameterNames() const override;
 
   const parametrisations::mix mix_param;
