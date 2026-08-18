@@ -20,7 +20,13 @@
  */
 class PDF_Kpipi0 : public PDF_Charm {
  public:
-  PDF_Kpipi0(TString measurement_id, parametrisations::mix mix_param);
+  /**
+   * Constructor.
+   *
+   * @param allow_cpv Sets whether to use results allowing for CP violation or not. While one would like to allow for
+   *     CP violation to obtain unbiased results, the likelihood of these inputs are less Gaussian.
+   */
+  PDF_Kpipi0(TString measurement_id, parametrisations::mix mix_param, bool allow_cpv = true);
   void initObservables() override;
   void initRelations() override;
   void setCorrelations(TString measurement_id) override;
@@ -31,4 +37,5 @@ class PDF_Kpipi0 : public PDF_Charm {
   std::set<std::string> getParameterNames() const override;
   const parametrisations::mix mix_param;
   const TString measurement_id;
+  const bool allow_cpv;
 };
