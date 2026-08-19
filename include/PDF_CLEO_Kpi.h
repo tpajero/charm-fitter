@@ -15,9 +15,9 @@
 #include <set>
 #include <string>
 
-class PDF_Cleo : public PDF_Charm {
+class PDF_CLEO_Kpi : public PDF_Charm {
  public:
-  PDF_Cleo(TString measurement_id, parametrisations::mix mix_param);
+  PDF_CLEO_Kpi(TString measurement_id, parametrisations::mix mix_param);
   void initObservables() override;
   void initRelations() override;
   void setCorrelations(TString measurement_id) override;

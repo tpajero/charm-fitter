@@ -10,7 +10,7 @@
 #include <PDF_BES_Kpi_1d.h>
 #include <PDF_BES_Kpi_7d.h>
 #include <PDF_BinFlip.h>
-#include <PDF_Cleo.h>
+#include <PDF_CLEO_Kpi.h>
 #include <PDF_DY.h>
 #include <PDF_DY_RS.h>
 #include <PDF_DY_pipipi0.h>
@@ -245,7 +245,7 @@ int main(int argc, char* argv[]) {
   gc.addPdf(40, new PDF_WS("LHCb_DT_Run2", mix_param),                               "WS/RS        LHCb     Run 2    [B -> D* mu] ");
   gc.addPdf(41, new PDF_WS("LHCb_DT_Run12", mix_param),                              "WS/RS        LHCb     Run 1-2  [B -> D* mu] ");
 
-  gc.addPdf(50, new PDF_Cleo("Cleo-c", mix_param),                                   "Delta_Kpi    Cleo-c                         ");
+  gc.addPdf(50, new PDF_CLEO_Kpi("Cleo-c", mix_param),                               "Delta_Kpi    Cleo-c                         ");
   gc.addPdf(51, new PDF_BES_Kpi_1d(mix_param),                                       "Delta_Kpi    BES      3fb      [A_kpi only] ");
   gc.addPdf(52, new PDF_BES_Kpi(mix_param),                                          "Delta_Kpi    BES      3fb                   ");
   gc.addPdf(53, new PDF_Fp_pipipi0("Cleo-c"),                                        "Fpipipi0     Cleo-c                         ");
