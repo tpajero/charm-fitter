@@ -20,7 +20,6 @@ class PDF_BES_Kpi : public PDF_Charm {
   PDF_BES_Kpi(parametrisations::mix mix_param);
   void initObservables() override;
   void initRelations() override;
-  void setCorrelations(TString c) override;
   void setObservables(TString c) override;
   void setUncertainties(TString c) override;
 

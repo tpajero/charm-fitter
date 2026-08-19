@@ -1,7 +1,7 @@
 /**
  * Charm Combination
  * Author: tommaso.pajero@cern.ch
- * Date: October 2021
+ * Date: October 2025
  **/
 
 #pragma once
@@ -15,15 +15,17 @@
 #include <set>
 #include <string>
 
-class PDF_BES_Kpi_1d : public PDF_Charm {
+class PDF_BES_Kpi_pipipi0 : public PDF_Charm {
  public:
-  PDF_BES_Kpi_1d(parametrisations::mix mix_param);
+  PDF_BES_Kpi_pipipi0(TString measurement_id, parametrisations::mix mix_param);
   void initObservables() override;
   void initRelations() override;
+  void setCorrelations(TString measurement_id) override;
   void setObservables(TString measurement_id) override;
   void setUncertainties(TString measurement_id) override;
 
  private:
   std::set<std::string> getParameterNames() const override;
   const parametrisations::mix mix_param;
+  const TString measurement_id;
 };
