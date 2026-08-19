@@ -15,6 +15,9 @@
 #include <set>
 #include <string>
 
+/**
+ * Models the measurements of strong-phase rotated mixing parameters in D0 -> K+ pi- pi0 decays.
+ */
 class PDF_Kpipi0 : public PDF_Charm {
  public:
   PDF_Kpipi0(TString measurement_id, parametrisations::mix mix_param);

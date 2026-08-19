@@ -96,8 +96,3 @@ void PDF_yCP_minus_yCP_KP::setUncertainties(const TString c) {
     throw std::runtime_error(std::format("PDF_yCP_minus_yCP_KP::setUncertainties ERROR config {} not found", c.Data()));
   }
 }
-
-void PDF_yCP_minus_yCP_KP::setCorrelations(const TString c) {
-  resetCorrelations();
-  corSource = "No correlations for one observable";
-}

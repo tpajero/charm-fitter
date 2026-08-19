@@ -1,7 +1,7 @@
 /**
  * Charm Combination
- * Author: Tommaso Pajero, tommaso.pajero@cern.ch
- * Date: October 2021
+ * Author: tommaso.pajero@cern.ch
+ * Date: October 2025
  **/
 
 #pragma once
@@ -15,9 +15,17 @@
 #include <set>
 #include <string>
 
-class PDF_Cleo : public PDF_Charm {
+/**
+ * Models the simultaneous measurements of strong parameters of D0 -> K+ pi- and D0 -> pi+ pi- pi0 decays by the BESIII
+ * collaboration.
+ *
+ * References:
+ *   - https://inspirehep.net/literature/2139447
+ *   - https://arxiv.org/abs/2506.07907
+ */
+class PDF_BES_Kpi_pipipi0 : public PDF_Charm {
  public:
-  PDF_Cleo(TString measurement_id, parametrisations::mix mix_param);
+  PDF_BES_Kpi_pipipi0(TString measurement_id, parametrisations::mix mix_param);
   void initObservables() override;
   void initRelations() override;
   void setCorrelations(TString measurement_id) override;
@@ -27,4 +35,5 @@ class PDF_Cleo : public PDF_Charm {
  private:
   std::set<std::string> getParameterNames() const override;
   const parametrisations::mix mix_param;
+  const TString measurement_id;
 };

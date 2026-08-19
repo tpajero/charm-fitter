@@ -15,12 +15,16 @@
 #include <set>
 #include <string>
 
+/**
+ * Model for measurements of the yCP parameter in CP-odd final states, using D0 -> K- pi+ decays as reference channel.
+ *
+ * Currently used only for the Belle measurement of D0 -> KS omega decays.
+ */
 class PDF_yCP_plus_yCP_RS : public PDF_Charm {
  public:
   PDF_yCP_plus_yCP_RS(TString measurement_id, parametrisations::mix mix_param);
   void initObservables() override;
   void initRelations() override;
-  void setCorrelations(TString measurement_id) override;
   void setObservables(TString measurement_id) override;
   void setUncertainties(TString measurement_id) override;
 

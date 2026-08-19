@@ -15,6 +15,8 @@ class PDF_Charm : public PDF_Abs {
   using PDF_Abs::PDF_Abs;
   void initParameters() override;
   void buildPdf() override;
+  /// Default for single-observable PDFs; PDFs with more than one observable must override this.
+  void setCorrelations(TString c) override;
 
  protected:
   /**

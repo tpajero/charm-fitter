@@ -1,6 +1,6 @@
 /**
  * Charm Combination
- * Author: tommaso.pajero@cern.ch
+ * Author: Tommaso Pajero, tommaso.pajero@cern.ch
  * Date: October 2021
  **/
 
@@ -15,9 +15,12 @@
 #include <set>
 #include <string>
 
-class PDF_BES_Kpi_1d : public PDF_Charm {
+/**
+ * Implements the CLEO-c measurement of D0 -> K+ pi- (https://inspirehep.net/literature/1189182).
+ */
+class PDF_CLEO_Kpi : public PDF_Charm {
  public:
-  PDF_BES_Kpi_1d(parametrisations::mix mix_param);
+  PDF_CLEO_Kpi(TString measurement_id, parametrisations::mix mix_param);
   void initObservables() override;
   void initRelations() override;
   void setCorrelations(TString measurement_id) override;

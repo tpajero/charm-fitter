@@ -15,6 +15,11 @@
 #include <set>
 #include <string>
 
+/**
+ * Models phase-space integrated measurements of D0 -> K+ pi- pi- pi+ decays.
+ *
+ * Currently used only for the publication based on LHCb Run 1 data.
+ */
 class PDF_K3pi : public PDF_Charm {
  public:
   PDF_K3pi(TString measurement_id, parametrisations::mix mix_param);

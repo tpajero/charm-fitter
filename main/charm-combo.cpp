@@ -7,21 +7,20 @@
 #include <PDF_AcpHH_LHCb_Run12.h>
 #include <PDF_BES_CLEO_K3pi_Kpipi0.h>
 #include <PDF_BES_Kpi.h>
-#include <PDF_BES_Kpi_1d.h>
-#include <PDF_BES_Kpi_7d.h>
+#include <PDF_BES_Kpi_pipipi0.h>
 #include <PDF_BinFlip.h>
-#include <PDF_Cleo.h>
+#include <PDF_CLEO_Kpi.h>
 #include <PDF_DY.h>
 #include <PDF_DY_RS.h>
 #include <PDF_DY_pipipi0.h>
 #include <PDF_Fp_pipipi0.h>
 #include <PDF_K3pi.h>
 #include <PDF_Kpipi0.h>
-#include <PDF_Kshh.h>
 #include <PDF_RM.h>
 #include <PDF_WS.h>
 #include <PDF_WS_NoCPV.h>
 #include <PDF_XY.h>
+#include <PDF_XY_QoP_PHI.h>
 #include <PDF_scan_DY_RS.h>
 #include <PDF_yCP.h>
 #include <PDF_yCP_minus_yCP_KP.h>
@@ -226,7 +225,7 @@ int main(int argc, char* argv[]) {
   gc.addPdf(10, new PDF_RM("HFLAV2016", mix_param),                                  "R_M          HFLAV    2016                  ");
   gc.addPdf(11, new PDF_RM("LHCb_K3pi_Run1", mix_param),                             "R_M K3pi     LHCb                           ");
 
-  gc.addPdf(20, new PDF_Kshh("Belle", mix_param),                                    "KShh         Belle                          ");
+  gc.addPdf(20, new PDF_XY_QoP_PHI("Belle", mix_param),                              "KShh         Belle                          ");
   gc.addPdf(21, new PDF_BinFlip("LHCb_Run1", mix_param),                             "Bin-flip     LHCb     Run 1                 ");
   gc.addPdf(22, new PDF_BinFlip("LHCb_Run2_prompt", mix_param),                      "Bin-flip     LHCb     Run 2    [D* -> D0 pi]");
   gc.addPdf(23, new PDF_BinFlip("LHCb_Run2_sl", mix_param),                          "Bin-flip     LHCb     Run 2    [B -> D0 mu] ");
@@ -245,13 +244,13 @@ int main(int argc, char* argv[]) {
   gc.addPdf(40, new PDF_WS("LHCb_DT_Run2", mix_param),                               "WS/RS        LHCb     Run 2    [B -> D* mu] ");
   gc.addPdf(41, new PDF_WS("LHCb_DT_Run12", mix_param),                              "WS/RS        LHCb     Run 1-2  [B -> D* mu] ");
 
-  gc.addPdf(50, new PDF_Cleo("Cleo-c", mix_param),                                   "Delta_Kpi    Cleo-c                         ");
-  gc.addPdf(51, new PDF_BES_Kpi_1d(mix_param),                                       "Delta_Kpi    BES      3fb      [A_kpi only] ");
-  gc.addPdf(52, new PDF_BES_Kpi(mix_param),                                          "Delta_Kpi    BES      3fb                   ");
+  gc.addPdf(50, new PDF_CLEO_Kpi("Cleo-c", mix_param),                               "Delta_Kpi    Cleo-c                         ");
+  gc.addPdf(51, new PDF_BES_Kpi(mix_param),                                          "Delta_Kpi    BES      3fb      [A_kpi only] ");
+  gc.addSubsetPdf(52, new PDF_BES_Kpi_pipipi0("3fb", mix_param), 0, 1, 2, 3,         "Kpi+pipipi0  BES      3fb                   ");
   gc.addPdf(53, new PDF_Fp_pipipi0("Cleo-c"),                                        "Fpipipi0     Cleo-c                         ");
   gc.addPdf(54, new PDF_BES_CLEO_K3pi_Kpipi0("BES3-CLEO"),                           "K3pi-Kpipi0  BES3 + Cleo                    ");
   gc.addPdf(55, new PDF_Fp_pipipi0("BESIII"),                                        "Fpipipi0     BES3                           ");
-  gc.addPdf(56, new PDF_BES_Kpi_7d(mix_param),                                       "Delta_Kpi    BES3     3+7fb                 ");
+  gc.addPdf(56, new PDF_BES_Kpi_pipipi0("3+7fb", mix_param),                         "Kpi+pipipi0  BES3     3+7fb                 ");
 
   gc.addPdf(60, new PDF_yCP("WA2020", mix_param),                                    "yCP          WA       2020                  ");
   gc.addPdf(61, new PDF_yCP_minus_yCP_RS("WA2020", mix_param),                       "yCP-yCP(RS)  WA       2020                  ");

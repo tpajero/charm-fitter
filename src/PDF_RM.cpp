@@ -92,8 +92,3 @@ void PDF_RM::setUncertainties(const TString c) {
     throw std::runtime_error(std::format("PDF_RM::setUncertainties ERROR config {} not found", c.Data()));
   }
 }
-
-void PDF_RM::setCorrelations(const TString c) {
-  resetCorrelations();
-  corSource = "No correlations for one observable";
-}

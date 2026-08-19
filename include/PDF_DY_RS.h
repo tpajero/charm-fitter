@@ -15,12 +15,14 @@
 #include <set>
 #include <string>
 
+/**
+ * Models measurements of DeltaY(D0 -> K- pi+).
+ */
 class PDF_DY_RS : public PDF_Charm {
  public:
   PDF_DY_RS(TString measurement_id, parametrisations::mix mix_param);
   void initObservables() override;
   void initRelations() override;
-  void setCorrelations(TString measurement_id) override;
   void setObservables(TString measurement_id) override;
   void setUncertainties(TString measurement_id) override;
 

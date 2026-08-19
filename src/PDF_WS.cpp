@@ -122,9 +122,9 @@ PDF_WS::PDF_WS(const TString val, const TString err, const parametrisations::mix
     throw std::runtime_error(std::format("PDF_WS::PDF_WS ERROR Measurement ID {} not supported", val.Data()));
   }
 
-  if (kpi_param == parametrisations::kpi::ccprime && !val.BeginsWith("LHCb_Prompt_Run12")) {
-    throw std::runtime_error(
-        "PDF_WS::PDF_WS ERROR The c/c' parametrisation was introduced only with the LHCb Run 2 measurement");
+  if ((kpi_param == parametrisations::kpi::ccprime) != val.BeginsWith("LHCb_Prompt_Run12")) {
+    throw std::runtime_error("PDF_WS::PDF_WS ERROR The c/c' parametrisation can (and must) be used only for the LHCb "
+                             "Run 1+2 prompt measurement");
   }
 
   name = "WS_" + val;
@@ -204,24 +204,30 @@ void PDF_WS::initRelationsCCPrime() {
   }
 }
 
+void PDF_WS::addYpXp2Plus() {
+  theory->add(*(Utils::makeTheoryVar("y'+_th", get_formula("y'+", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("x'2+_th", get_formula("x'2+", mix_param), parameters)));
+}
+
+void PDF_WS::addYpXp2Minus() {
+  theory->add(*(Utils::makeTheoryVar("y'-_th", get_formula("y'-", mix_param), parameters)));
+  theory->add(*(Utils::makeTheoryVar("x'2-_th", get_formula("x'2-", mix_param), parameters)));
+}
+
 void PDF_WS::initRelationsRAXY() {
   theory = new RooArgList("theory");
   theory->add(*(Utils::makeTheoryVar("RD_th", "r_Kpi * r_Kpi", parameters)));
-  theory->add(*(Utils::makeTheoryVar("y'+_th", get_formula("y'+", mix_param), parameters)));
-  theory->add(*(Utils::makeTheoryVar("x'2+_th", get_formula("x'2+", mix_param), parameters)));
+  addYpXp2Plus();
   theory->add(*(Utils::makeTheoryVar("AD_th", "Acp_KP", parameters)));
-  theory->add(*(Utils::makeTheoryVar("y'-_th", get_formula("y'-", mix_param), parameters)));
-  theory->add(*(Utils::makeTheoryVar("x'2-_th", get_formula("x'2-", mix_param), parameters)));
+  addYpXp2Minus();
 }
 
 void PDF_WS::initRelationsRRXY() {
   theory = new RooArgList("theory");
   theory->add(*(Utils::makeTheoryVar("RD_p_th", "r_Kpi * r_Kpi * (1 + Acp_KP)", parameters)));
-  theory->add(*(Utils::makeTheoryVar("y'+_th", get_formula("y'+", mix_param), parameters)));
-  theory->add(*(Utils::makeTheoryVar("x'2+_th", get_formula("x'2+", mix_param), parameters)));
+  addYpXp2Plus();
   theory->add(*(Utils::makeTheoryVar("RD_m_th", "r_Kpi * r_Kpi * (1 - Acp_KP)", parameters)));
-  theory->add(*(Utils::makeTheoryVar("y'-_th", get_formula("y'-", mix_param), parameters)));
-  theory->add(*(Utils::makeTheoryVar("x'2-_th", get_formula("x'2-", mix_param), parameters)));
+  addYpXp2Minus();
 }
 
 void PDF_WS::initObservables() {
