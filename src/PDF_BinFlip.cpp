@@ -44,18 +44,18 @@ void PDF_BinFlip::initRelations() {
   using parametrisations::mix;
   switch (mix_param) {
   case mix::pheno:
-    theory->add(*(Utils::makeTheoryVar("x_th",
+    theory->add(*(Utils::makeTheoryVar("xCP_th",
                                        "0.5*(  x*cos(phi)*(qop + 1/qop)"
                                        "     + y*sin(phi)*(qop - 1/qop))",
                                        parameters)));
-    theory->add(*(Utils::makeTheoryVar("y_th",
+    theory->add(*(Utils::makeTheoryVar("yCP_th",
                                        "0.5*(  y*cos(phi)*(qop + 1./qop)"
                                        "     - x*sin(phi)*(qop - 1./qop))",
                                        parameters)));
     break;
   case mix::theo:
-    theory->add(*(Utils::makeTheoryVar("x_th", " x12*cos(phiM)", parameters)));
-    theory->add(*(Utils::makeTheoryVar("y_th", " y12*cos(phiG)", parameters)));
+    theory->add(*(Utils::makeTheoryVar("xCP_th", " x12*cos(phiM)", parameters)));
+    theory->add(*(Utils::makeTheoryVar("yCP_th", " y12*cos(phiG)", parameters)));
     break;
   default:
     throw std::runtime_error(
@@ -77,8 +77,8 @@ void PDF_BinFlip::initObservables() {
     label = "LHCb Binflip Run 2";
 
   observables = new RooArgList("observables");  ///< the order of this list must match that of the COR matrix!
-  observables->add(*(new RooRealVar("x_obs", label + "   #it{x_{CP}}", 0., -1e4, 1e4)));
-  observables->add(*(new RooRealVar("y_obs", label + "   #it{y_{CP}}", 0., -1e4, 1e4)));
+  observables->add(*(new RooRealVar("xCP_obs", label + "   #it{x_{CP}}", 0., -1e4, 1e4)));
+  observables->add(*(new RooRealVar("yCP_obs", label + "   #it{y_{CP}}", 0., -1e4, 1e4)));
   observables->add(*(new RooRealVar("dx_obs", label + "   #it{#Deltax}", 0., -1e4, 1e4)));
   observables->add(*(new RooRealVar("dy_obs", label + "   #it{#Deltay}", 0., -1e4, 1e4)));
 }
@@ -90,26 +90,26 @@ void PDF_BinFlip::setObservables(const TString c) {
     setObservablesToy();
   else if (c.EqualTo("LHCb_Run1")) {
     obsValSource = "https://inspirehep.net/literature/1724179";
-    setObservable("x_obs", 2.7e-3);
-    setObservable("y_obs", 7.4e-3);
+    setObservable("xCP_obs", 2.7e-3);
+    setObservable("yCP_obs", 7.4e-3);
     setObservable("dx_obs", -0.53e-3);
     setObservable("dy_obs", 0.6e-3);
   } else if (c.EqualTo("LHCb_Run2_prompt")) {
     obsValSource = "https://inspirehep.net/literature/1867376";
-    setObservable("x_obs", 3.973e-3);
-    setObservable("y_obs", 4.589e-3);
+    setObservable("xCP_obs", 3.973e-3);
+    setObservable("yCP_obs", 4.589e-3);
     setObservable("dx_obs", -0.271e-3);
     setObservable("dy_obs", 0.203e-3);
   } else if (c.EqualTo("LHCb_Run2_sl")) {
     obsValSource = "https://inspirehep.net/literature/2135966";
-    setObservable("x_obs", 4.29e-3);
-    setObservable("y_obs", 12.61e-3);
+    setObservable("xCP_obs", 4.29e-3);
+    setObservable("yCP_obs", 12.61e-3);
     setObservable("dx_obs", -0.77e-3);
     setObservable("dy_obs", 3.01e-3);
   } else if (c.EqualTo("LHCb_Run2")) {
     obsValSource = "https://inspirehep.net/literature/2135966";
-    setObservable("x_obs", 4.00e-3);
-    setObservable("y_obs", 5.51e-3);
+    setObservable("xCP_obs", 4.00e-3);
+    setObservable("yCP_obs", 5.51e-3);
     setObservable("dx_obs", -0.29e-3);
     setObservable("dy_obs", 0.31e-3);
   } else {
