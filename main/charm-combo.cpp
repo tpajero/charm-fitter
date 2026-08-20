@@ -44,8 +44,7 @@ namespace {
           24,  // BinFlip          Run 2
           35,  // WS               DT Run 1
           39,  // WS               Prompt Run 1+2
-          61,  // yCP_minus_yCP_RS WA2020          TODO
-          64,  // yCP_minus_yCP_RS 2022 prompt
+          64,  // yCP_minus_yCP_RS WA 2022
           72,  // DY average
           90,  // AcpHH
       };
@@ -252,11 +251,11 @@ int main(int argc, char* argv[]) {
   gc.addPdf(55, new PDF_Fp_pipipi0("BESIII"),                                        "Fpipipi0     BES3                           ");
   gc.addPdf(56, new PDF_BES_Kpi_pipipi0("3+7fb", mix_param),                         "Kpi+pipipi0  BES3     3+7fb                 ");
 
-  gc.addPdf(60, new PDF_yCP("WA2020", mix_param),                                    "yCP          WA       2020                  ");
-  gc.addPdf(61, new PDF_yCP_minus_yCP_RS("WA2020", mix_param),                       "yCP-yCP(RS)  WA       2020                  ");
-  gc.addPdf(62, new PDF_yCP_minus_yCP_KP("WA2020", mix_param),                       "yCP-yCP(KP)  WA       2020                  ");
-  gc.addPdf(63, new PDF_yCP_plus_yCP_RS("WA2020", mix_param),                        "yCP+yCP(RS)  WA       2020                  ");
-  gc.addPdf(64, new PDF_yCP_minus_yCP_RS("LHCb2022", mix_param),                     "yCP-yCP(RS)  LHCb     2022                  ");
+  gc.addPdf(60, new PDF_yCP("WA-2015", mix_param),                                   "yCP          WA       2015                  ");
+  gc.addPdf(61, new PDF_yCP_minus_yCP_RS("WA-2018", mix_param),                      "yCP-yCP(RS)  WA       2018                  ");
+  gc.addPdf(62, new PDF_yCP_minus_yCP_KP("WA-2015", mix_param),                      "yCP-yCP(KP)  WA       2015                  ");
+  gc.addPdf(63, new PDF_yCP_plus_yCP_RS("Belle", mix_param),                         "yCP+yCP(RS)  Belle    2019                  ");
+  gc.addPdf(64, new PDF_yCP_minus_yCP_RS("LHCb-R2", mix_param),                      "yCP-yCP(RS)  LHCb     2022                  ");
 
   if (dy_fsc_hypo == dy_fsc::none) {
     gc.addPdf(70, new PDF_DY("WA2019", dy_fsc_hypo, acp_param, mix_param),           "DY           WA       2019                  ");
@@ -276,8 +275,8 @@ int main(int argc, char* argv[]) {
 
   gc.addPdf(100, new PDF_scan_DY_RS(mix_param),                                      "ScanDYRS     This is just a nuisance parameter");
 
-  gc.addPdf(110, new PDF_yCP("WA2020_biased", mix_param),                            "yCP          WA       2020     [biased]     ");
-  gc.addPdf(111, new PDF_yCP("LHCb2022_biased", mix_param),                          "yCP-yCP(RS)  LHCb     2022     [biased]     ");
+  gc.addPdf(110, new PDF_yCP("WA-biased-2019", mix_param),                           "yCP          WA       2019     [biased]     ");
+  gc.addPdf(111, new PDF_yCP("WA-biased-2022", mix_param),                           "yCP-yCP(RS)  WA       2022     [biased]     ");
   // clang-format on
 
   ///////////////////////////////////////////////////
@@ -317,7 +316,6 @@ int main(int argc, char* argv[]) {
   gc.getCombiner(31)->delPdf(gc[62]);
   gc.getCombiner(31)->delPdf(gc[63]);
   gc.getCombiner(31)->delPdf(gc[64]);
-  gc.getCombiner(31)->addPdf(gc[110]);
   gc.getCombiner(31)->addPdf(gc[111]);
 
   // WA September 2022

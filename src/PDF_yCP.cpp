@@ -63,37 +63,64 @@ void PDF_yCP::initObservables() {
 }
 
 void PDF_yCP::setObservables(const TString c) {
+  obsValSource = "https://github.com/tpajero/charm-fitter/blob/main/BLUE/main/ycp.cpp";
   if (c.EqualTo("truth"))
     setObservablesTruth();
   else if (c.EqualTo("toy"))
     setObservablesToy();
-  else if (c.EqualTo("WA2020")) {
-    obsValSource = "https://cds.cern.ch/record/2747731";
+  else if (c.EqualTo("Belle")) {
+    obsValSource = "https://inspirehep.net/literature/821323";
+    setObservable("yCP_obs", 1.1e-3);
+  } else if (c.EqualTo("WA-2015")) {
     setObservable("yCP_obs", -3.70e-3);
-  } else if (c.EqualTo("WA2020_biased")) {
-    obsValSource = "HFLAV";
-    setObservable("yCP_obs", 7.19e-3);
-  } else if (c.EqualTo("LHCb2022_biased")) {
-    obsValSource = "https://inspirehep.net/literature/2035063";
-    setObservable("yCP_obs", 6.96e-3);
+    // Biased world averages including also yCP +/- yCP(RS/KP) measurements --------------------------------------------
+  } else if (c.EqualTo("WA-biased-2015-01")) {
+    setObservable("yCP_obs", 6.56e-3);
+  } else if (c.EqualTo("WA-biased-2015-09")) {
+    setObservable("yCP_obs", 8.41e-3);
+  } else if (c.EqualTo("WA-biased-2018")) {
+    setObservable("yCP_obs", 7.11e-3);
+  } else if (c.EqualTo("WA-biased-2019")) {
+    setObservable("yCP_obs", 7.14e-3);
+  } else if (c.EqualTo("WA-biased-2022")) {
+    setObservable("yCP_obs", 6.97e-3);
+    // Biased world averages including also yCP +/- yCP(RS/KP) measurements, but without LHCb --------------------------
+  } else if (c.EqualTo("WA-biased-no-LHCb-2019")) {
+    setObservable("yCP_obs", 8.55e-3);
   } else {
     throw std::runtime_error(std::format("PDF_yCP::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
 void PDF_yCP::setUncertainties(const TString c) {
-  if (c.EqualTo("WA2020")) {
-    obsErrSource = "https://cds.cern.ch/record/2747731";
-    StatErr = {7.04e-3};
-    SystErr = {0.0};
-  } else if (c.EqualTo("WA2020_biased")) {
-    obsErrSource = "HFLAV";
-    StatErr = {1.13e-3};
-    SystErr = {0.0};
-  } else if (c.EqualTo("LHCb2022_biased")) {
-    obsErrSource = "https://inspirehep.net/literature/2035063";
-    StatErr = {0.26e-3};
+  obsErrSource = "https://github.com/tpajero/charm-fitter/blob/main/BLUE/main/ycp.cpp";
+  if (c.EqualTo("Belle")) {
+    obsErrSource = "https://inspirehep.net/literature/821323";
+    StatErr = {6.1e-3};
+    SystErr = {5.2e-3};
+  } else if (c.EqualTo("WA-2015")) {
+    StatErr = {5.56e-3};
+    SystErr = {4.32e-3};
+    // Biased world averages including also yCP +/- yCP(RS/KP) measurements --------------------------------------------
+  } else if (c.EqualTo("WA-biased-2015-01")) {
+    StatErr = {1.64e-3};
+    SystErr = {1.10e-3};
+  } else if (c.EqualTo("WA-biased-2015-09")) {
+    StatErr = {1.32e-3};
+    SystErr = {0.75e-3};
+  } else if (c.EqualTo("WA-biased-2018")) {
+    StatErr = {0.93e-3};
+    SystErr = {0.58e-3};
+  } else if (c.EqualTo("WA-biased-2019")) {
+    StatErr = {0.92e-3};
+    SystErr = {0.58e-3};
+  } else if (c.EqualTo("WA-biased-2022")) {
+    StatErr = {0.25e-3};
     SystErr = {0.13e-3};
+    // Biased world averages including also yCP +/- yCP(RS/KP) measurements, but without LHCb --------------------------
+  } else if (c.EqualTo("WA-biased-no-LHCb-2019")) {
+    StatErr = {1.34e-3};
+    SystErr = {0.75e-3};
   } else {
     throw std::runtime_error(std::format("PDF_yCP::setUncertainties ERROR config {} not found", c.Data()));
   }

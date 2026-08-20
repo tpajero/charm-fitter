@@ -79,19 +79,19 @@ void PDF_yCP_minus_yCP_KP::setObservables(const TString c) {
     setObservablesTruth();
   else if (c.EqualTo("toy"))
     setObservablesToy();
-  else if (c.EqualTo("WA2020")) {
-    obsValSource = "https://cds.cern.ch/record/2747731";
-    setObservable("yCP_minus_yCP_KP_obs", 0.732e-2);
+  else if (c.EqualTo("WA-2015")) {
+    obsValSource = "https://github.com/tpajero/charm-fitter/blob/main/BLUE/main/ycp.cpp";
+    setObservable("yCP_minus_yCP_KP_obs", 7.70e-3);
   } else {
     throw std::runtime_error(std::format("PDF_yCP_minus_yCP_KP::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
 void PDF_yCP_minus_yCP_KP::setUncertainties(const TString c) {
-  if (c.EqualTo("WA2020")) {
-    obsErrSource = "https://cds.cern.ch/record/2747731";
-    StatErr = {3.068e-2};
-    SystErr = {0.0};
+  if (c.EqualTo("WA-2015")) {
+    obsErrSource = "https://github.com/tpajero/charm-fitter/blob/main/BLUE/main/ycp.cpp";
+    StatErr = {1.78e-3};
+    SystErr = {1.18e-3};
   } else {
     throw std::runtime_error(std::format("PDF_yCP_minus_yCP_KP::setUncertainties ERROR config {} not found", c.Data()));
   }

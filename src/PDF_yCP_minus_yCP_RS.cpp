@@ -77,30 +77,56 @@ void PDF_yCP_minus_yCP_RS::initObservables() {
 }
 
 void PDF_yCP_minus_yCP_RS::setObservables(const TString c) {
+  obsValSource = "https://github.com/tpajero/charm-fitter/blob/main/BLUE/main/ycp.cpp";
   if (c.EqualTo("truth"))
     setObservablesTruth();
   else if (c.EqualTo("toy"))
     setObservablesToy();
-  else if (c.EqualTo("WA2020")) {
-    obsValSource = "https://cds.cern.ch/record/2747731";
-    setObservable("yCP_minus_yCP_RS_obs", 7.38e-3);
-  } else if (c.EqualTo("LHCb2022")) {
+  else if (c.EqualTo("LHCb-R1")) {
+    obsValSource = "https://inspirehep.net/literature/1698962";
+    setObservable("yCP_minus_yCP_RS_obs", 5.7e-3);
+  } else if (c.EqualTo("LHCb-R2")) {
     obsValSource = "https://inspirehep.net/literature/2035063";
     setObservable("yCP_minus_yCP_RS_obs", 6.96e-3);
+    // World averages --------------------------------------------------------------------------------------------------
+  } else if (c.EqualTo("WA-2015")) {
+    setObservable("yCP_minus_yCP_RS_obs", 10.45e-3);
+  } else if (c.EqualTo("WA-2018")) {
+    setObservable("yCP_minus_yCP_RS_obs", 7.26e-3);
+  } else if (c.EqualTo("WA-2022")) {
+    setObservable("yCP_minus_yCP_RS_obs", 6.97e-3);
+    // World averages without LHCb -------------------------------------------------------------------------------------
+  } else if (c.EqualTo("WA-no-LHCb-2015")) {
+    setObservable("yCP_minus_yCP_RS_obs", 10.94e-3);
   } else {
     throw std::runtime_error(std::format("PDF_yCP_minus_yCP_RS::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
 void PDF_yCP_minus_yCP_RS::setUncertainties(const TString c) {
-  if (c.EqualTo("WA2020")) {
-    obsErrSource = "https://cds.cern.ch/record/2747731";
-    StatErr = {1.11e-3};
-    SystErr = {0.0};
-  } else if (c.EqualTo("LHCb2022")) {
+  obsErrSource = "https://github.com/tpajero/charm-fitter/blob/main/BLUE/main/ycp.cpp";
+  if (c.EqualTo("LHCb-R1")) {
+    obsErrSource = "https://inspirehep.net/literature/1698962";
+    StatErr = {1.3e-3};
+    SystErr = {0.9e-3};
+  } else if (c.EqualTo("LHCb-R2")) {
     obsErrSource = "https://inspirehep.net/literature/2035063";
     StatErr = {0.26e-3};
     SystErr = {0.13e-3};
+    // World averages --------------------------------------------------------------------------------------------------
+  } else if (c.EqualTo("WA-2015")) {
+    StatErr = {2.07e-3};
+    SystErr = {0.90e-3};
+  } else if (c.EqualTo("WA-2018")) {
+    StatErr = {1.11e-3};
+    SystErr = {0.67e-3};
+  } else if (c.EqualTo("WA-2022")) {
+    StatErr = {0.25e-3};
+    SystErr = {0.13e-3};
+    // World averages without LHCb -------------------------------------------------------------------------------------
+  } else if (c.EqualTo("WA-no-LHCb-2015")) {
+    StatErr = {2.19e-3};
+    SystErr = {0.90e-3};
   } else {
     throw std::runtime_error(std::format("PDF_yCP_minus_yCP_RS::setUncertainties ERROR config {} not found", c.Data()));
   }
