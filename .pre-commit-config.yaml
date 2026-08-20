@@ -1,4 +1,4 @@
-exclude: "BLUE/(src|include)/.*"
+exclude: "BLUE/.*Blue.*"
 
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
