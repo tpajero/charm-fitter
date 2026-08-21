@@ -209,6 +209,7 @@ def plot_measurements(
     color_fn: Callable[[Measurement], str] | None = None,
     arxiv: bool,
     pub: bool,
+    add_subdir: bool = True,
 ) -> None:
     """Draw a summary plot of a set of measurements and save it to `out_path`.
 
@@ -220,6 +221,7 @@ def plot_measurements(
         DeltaY to A_Gamma measurements.
     :param color_fn: Function returning the color to be used for a given measurement. If not provided, the color is set
         from the `color` member of the `Measurement` object.
+    :param add_subdir: Whether to add a subdirectory to `out_path` depending on the `arxiv` and `pub` flags.
     """
 
     def _default_val_transform(v: float) -> float:
@@ -313,6 +315,10 @@ def plot_measurements(
         avg = vals[-1]
         plt.plot([avg, avg], [y_min, y_max], linestyle="--", linewidth=1, color="k")
 
+    if add_subdir:
+        subdir = "arxiv" if arxiv else "pub" if pub else "no-refs"
+        out_path = out_path.parent / subdir / out_path.name
+
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Need more than one iteration in constrained_layout mode to ensure correct rendering (see dy.py).
@@ -324,7 +330,7 @@ def plot_measurements(
 
 def blue_parser(default_outdir: str) -> argparse.ArgumentParser:
     """Create a argument parser for the BLUE scripts with the arguments shared by all scripts."""
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
     outdir = repo_path / "plots" / "BLUE" / default_outdir
     parser.add_argument(
         "-o",
