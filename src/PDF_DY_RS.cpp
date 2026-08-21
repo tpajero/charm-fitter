@@ -56,7 +56,7 @@ void PDF_DY_RS::setObservables(const TString c) {
     setObservablesTruth();
   else if (c.EqualTo("toy"))
     setObservablesToy();
-  else if (c.EqualTo("LHCb2021")) {
+  else if (c.EqualTo("LHCb-R2-prompt")) {
     obsValSource = "https://inspirehep.net/literature/1864385";
     setObservable("DY_RS_obs", -0.36e-4);
   } else {
@@ -65,7 +65,7 @@ void PDF_DY_RS::setObservables(const TString c) {
 }
 
 void PDF_DY_RS::setUncertainties(const TString c) {
-  if (c.EqualTo("LHCb2021")) {
+  if (c.EqualTo("LHCb-R2-prompt")) {
     obsErrSource = "https://inspirehep.net/literature/1864385";
     StatErr = {0.50e-4};
     SystErr = {0.23e-4};
