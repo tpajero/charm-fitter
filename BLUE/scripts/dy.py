@@ -8,34 +8,12 @@ To check what options are available, run:
 """
 
 import argparse
+import itertools
 import sys
 from pathlib import Path
 
-from charm_fitter.blue import Measurement, blue_parser, plot_measurements
+from charm_fitter.blue import Combination, Measurement, blue_parser, plot_measurements
 from charm_fitter.utils import setup_matplotlib
-
-AVG_MEASURES = {
-    # LHCb averages ----------------------------------------------------------------------------------------------------
-    "lhcb-avg-2021": {
-        fs: Measurement(r"LHCb average 2021", val, stat, syst, is_average=True)
-        for fs, (val, stat, syst) in [
-            ("all", (-1.08, 1.13, 0.33)),
-            ("kk", (-0.35, 1.28, 0.32)),
-            ("pipi", (-3.61, 2.38, 0.40)),
-        ]
-    },
-    "lhcb-avg-2024": {"all": Measurement("LHCb average", -1.09, 1.11, 0.32, is_average=True)},
-    # World averages ---------------------------------------------------------------------------------------------------
-    "wa-2021": {
-        fs: Measurement("World average", val, stat, syst, is_average=True)
-        for fs, (val, stat, syst) in [
-            ("all", (-0.96, 1.12, 0.32)),
-            ("kk", (-0.20, 1.28, 0.32)),
-            ("pipi", (-3.53, 2.36, 0.39)),
-        ]
-    },
-    "wa-2024": {"all": Measurement("World average", -0.97, 1.11, 0.32, is_average=True)},
-}
 
 MEASURES = {
     "babar-2012": {"all": Measurement("BaBar 2012", -8.8, 25.5, 5.8, arxiv="1209.3896")},
@@ -91,7 +69,47 @@ MEASURES = {
     "lhcb-2024": {
         "all": Measurement(r"LHCb 2024 $D^0\to\pi^{+}\pi^{-}\pi^{0}$ (6 fb$^{-1}$)", -1.3, 6.3, 2.4, arxiv="2405.06556")
     },
-} | AVG_MEASURES
+}
+
+# One entry per combination id in BLUE/main/dy.cpp. Organised as: {avg-id: {fs: combination}}
+COMBINATIONS: dict[str, dict[str, Combination]] = {
+    # LHCb averages ----------------------------------------------------------------------------------------------------
+    "lhcb-2021": {
+        fs: Combination(
+            Measurement(r"LHCb average 2021", val, stat, syst, is_average=True),
+            ["lhcb-2015", "lhcb-2017", "lhcb-2020", "lhcb-2021"],
+        )
+        for fs, (val, stat, syst) in [
+            ("all", (-1.08, 1.13, 0.33)),
+            ("kk", (-0.35, 1.28, 0.32)),
+            ("pipi", (-3.61, 2.38, 0.40)),
+        ]
+    },
+    "lhcb-2024": {
+        "all": Combination(
+            Measurement("LHCb average", -1.09, 1.11, 0.32, is_average=True),
+            ["lhcb-2015", "lhcb-2017", "lhcb-2020", "lhcb-2021", "lhcb-2024"],
+        )
+    },
+    # World averages ---------------------------------------------------------------------------------------------------
+    "wa-2021": {
+        fs: Combination(
+            Measurement("World average", val, stat, syst, is_average=True),
+            ["babar-2012", "cdf-2014", "belle-2016", "lhcb-2015", "lhcb-2017", "lhcb-2020", "lhcb-2021"],
+        )
+        for fs, (val, stat, syst) in [
+            ("all", (-0.96, 1.12, 0.32)),
+            ("kk", (-0.20, 1.28, 0.32)),
+            ("pipi", (-3.53, 2.36, 0.39)),
+        ]
+    },
+    "wa-2024": {
+        "all": Combination(
+            Measurement("World average", -0.97, 1.11, 0.32, is_average=True),
+            ["babar-2012", "cdf-2014", "lhcb-2015", "belle-2016", "lhcb-2017", "lhcb-2020", "lhcb-2021", "lhcb-2024"],
+        )
+    },
+}
 
 
 def get_measures(comb: str, final_state: str) -> list[Measurement]:
@@ -101,53 +119,18 @@ def get_measures(comb: str, final_state: str) -> list[Measurement]:
     :type comb: str
     :type final_state: str
     """
-    comb_measures = []
-    if "lhcb" not in comb:
-        if final_state == "all":
-            comb_measures.append(MEASURES["babar-2012"]["all"])
-        comb_measures.append(MEASURES["cdf-2014"][final_state])
-    comb_measures.append(MEASURES["lhcb-2015"][final_state])
-    if "lhcb" not in comb and final_state == "all":
-        comb_measures.append(MEASURES["belle-2016"]["all"])
-    comb_measures.extend(
-        [
-            MEASURES["lhcb-2017"][final_state],
-            MEASURES["lhcb-2020"][final_state],
-            MEASURES["lhcb-2021"][final_state],
-        ]
-    )
-    if "2024" in comb and final_state == "all":
-        comb_measures.append(MEASURES["lhcb-2024"]["all"])
     try:
-        comb_measures.append(MEASURES[comb][final_state])  # World/LHCb average
+        combination = COMBINATIONS[comb][final_state]
     except KeyError:
-        sys.exit(
-            f"ERROR: Only the following final states are available for combination {comb}: {list(MEASURES[comb].keys())}. Exiting..."
+        err_str = (
+            f"Available combinations: {list(COMBINATIONS.keys())}"
+            if comb not in COMBINATIONS
+            else f"Available final states for combination {comb}: {list(COMBINATIONS[comb].keys())}"
         )
-    return comb_measures
-
-
-def get_xrange(comb: str, final_state: str, dy_notation: bool) -> tuple[float, float]:
-    """Get the x ranges for a given summary plot, in 10^-4 units."""
-    xrange = {
-        "lhcb-avg-2021": {
-            "all": (-7.0 if dy_notation else -23.0, 54.0 if dy_notation else 38.0),
-            "kk": (-6.0 if dy_notation else -24.0, 56.0 if dy_notation else 40.0),
-            "pipi": (-13.0 if dy_notation else -27.0, 70.0 if dy_notation else 58.0),
-        },
-        "lhcb-avg-2024": {
-            "all": (-12.0 if dy_notation else -23.0, 80.0 if dy_notation else 67.0),
-        },
-        "wa-2021": {
-            "all": (-40.0 if dy_notation else -27.0, 105.0 if dy_notation else 115.0),
-            "kk": (-10.0 if dy_notation else -38.0, 90.0 if dy_notation else 57.0),
-            "pipi": (-20.0 if dy_notation else -27.0, 84.0 if dy_notation else 72.0),
-        },
-        "wa-2024": {
-            "all": (-40.0 if dy_notation else -30.0, 145.0 if dy_notation else 157.0),
-        },
-    }
-    return xrange[comb][final_state]
+        sys.exit(f"ERROR: Combination {comb!r} with final state {final_state!r} not available. {err_str}. Exiting...")
+    return [MEASURES[name][final_state] for name in combination.members if final_state in MEASURES[name]] + [
+        combination.average
+    ]
 
 
 def make_plot(
@@ -172,7 +155,6 @@ def make_plot(
 
     plot_measurements(
         measures,
-        get_xrange(comb, final_state, dy_notation),
         xlabel,
         out_dir / f"{fig_name}.pdf",
         val_transform=lambda v: v if dy_notation else -v,
@@ -188,9 +170,9 @@ def parse_args() -> argparse.Namespace:
         "-c",
         "--comb",
         type=str,
-        default=list(AVG_MEASURES.keys())[0],
+        default=list(COMBINATIONS.keys())[-1],
         help="Combination id",
-        choices=list(AVG_MEASURES.keys()),
+        choices=list(COMBINATIONS.keys()),
     )
     parser.add_argument(
         "--fs",
@@ -205,10 +187,23 @@ def parse_args() -> argparse.Namespace:
         dest="dy_notation",
         help="Use the A_Gamma notation rather than DeltaY",
     )
+    parser.add_argument(
+        "--run-all",
+        action="store_true",
+        help="Run all available combinations (ignores --comb, --fs, --agamma, --arxiv and --pub).",
+    )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
     setup_matplotlib(usetex=args.latex)
-    make_plot(args.comb, args.fs, args.outdir, dy_notation=args.dy_notation, arxiv=args.arxiv, pub=args.pub)
+    if args.run_all:
+        for comb_id in COMBINATIONS:
+            for fs in COMBINATIONS[comb_id]:
+                for dy_notation, (arxiv, pub) in itertools.product(
+                    [False, True], [(False, False), (True, False), (False, True)]
+                ):
+                    make_plot(comb_id, fs, args.outdir, dy_notation=dy_notation, arxiv=arxiv, pub=pub)
+    else:
+        make_plot(args.comb, args.fs, args.outdir, dy_notation=args.dy_notation, arxiv=args.arxiv, pub=args.pub)

@@ -13,6 +13,7 @@
 #include <RooFormulaVar.h>
 #include <RooRealVar.h>
 
+#include <cmath>
 #include <format>
 #include <iostream>
 #include <stdexcept>
@@ -79,19 +80,19 @@ void PDF_yCP_plus_yCP_RS::setObservables(const TString c) {
     setObservablesTruth();
   else if (c.EqualTo("toy"))
     setObservablesToy();
-  else if (c.EqualTo("WA2020")) {
-    obsValSource = "https://cds.cern.ch/record/2747731";
-    setObservable("yCP_plus_yCP_RS_obs", 0.960e-2);
+  else if (c.EqualTo("Belle")) {
+    obsValSource = "https://inspirehep.net/literature/1772245";
+    setObservable("yCP_plus_yCP_RS_obs", 9.6e-3);
   } else {
     throw std::runtime_error(std::format("PDF_yCP_plus_yCP_RS::setObservables ERROR config {} not found", c.Data()));
   }
 }
 
 void PDF_yCP_plus_yCP_RS::setUncertainties(const TString c) {
-  if (c.EqualTo("WA2020")) {
-    obsErrSource = "https://cds.cern.ch/record/2747731";
-    StatErr = {1.114e-2};
-    SystErr = {0.0};
+  if (c.EqualTo("Belle")) {
+    obsErrSource = "https://inspirehep.net/literature/1772245";
+    StatErr = {9.1e-3};
+    SystErr = {std::hypot(6.2e-3, 1.7e-3)};  // The second uncertainty is not halved for symmetrisation.
   } else {
     throw std::runtime_error(std::format("PDF_yCP_plus_yCP_RS::setUncertainties ERROR config {} not found", c.Data()));
   }

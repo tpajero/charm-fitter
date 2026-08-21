@@ -121,7 +121,7 @@ if(BUILD_BLUE)
   root_generate_dictionary(G__${BLUE_LIB} BLUE/Blue.h MODULE ${BLUE_LIB}
                            LINKDEF ${BLUE_INCLUDE_DIR}/BLUE/LinkDef.h)
 
-  set(BLUE_EXECUTABLES dy d0-to-ksks ycp ycp-minus-ycp-rs)
+  set(BLUE_EXECUTABLES dy d0-to-ksks ycp)
   foreach(exec ${BLUE_EXECUTABLES})
     add_executable(${exec} ${BLUE_MAIN_DIR}/${exec}.cpp)
     target_link_libraries(${exec} PUBLIC ${BLUE_LIB})

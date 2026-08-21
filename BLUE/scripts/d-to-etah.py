@@ -246,13 +246,12 @@ def plot_average(meas_type: str, decay: str, date: str, out_dir: Path, *, arxiv:
         print(f"No measurements available for {meas_type} of {decay}. Will not produce the plot")
         return
 
-    (x_min, x_max), units = get_xrange_and_units(meas_type, decay, pub)
+    _, units = get_xrange_and_units(meas_type, decay, pub)
     meas_label = "BF" if meas_type == "BF" else "A_{CP}"
     xlabel = rf"${meas_label}({get_decay_label(decay)})$ $[{get_units_label(units)}]$"
 
     plot_measurements(
         measures,
-        (x_min / units, x_max / units),
         xlabel,
         out_dir / f"{meas_type.lower()}-{decay}-{date}.pdf",
         figsize=(6, 6),

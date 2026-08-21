@@ -20,6 +20,7 @@ PUBLICATIONS: dict[str, tuple[str, str]] = {
     "0905.4185": ("Phys. Rev. D 80 (2009) 052006", "10.1103/PhysRevD.80.052006"),
     "0906.3198": ("Phys. Rev. D 81 (2010) 052013", "10.1103/PhysRevD.81.052013"),
     "1107.0553": ("Phys. Rev. Lett. 107 (2011) 221801", "10.1103/PhysRevLett.107.221801"),
+    "1112.4698": ("JHEP 04 (2012) 129", "10.1007/JHEP04(2012)129"),
     "1209.3896": ("Phys. Rev. D 87 (2013) 012004", "10.1103/PhysRevD.87.012004"),
     "1306.5363": ("Phys. Rev. D 88 (2013) 032009", "10.1103/PhysRevD.88.032009"),
     "1307.6240": ("JHEP 09 (2013) 139", "10.1007/JHEP09(2013)139"),
@@ -30,9 +31,11 @@ PUBLICATIONS: dict[str, tuple[str, str]] = {
     "1509.08266": ("Phys. Lett. B 753 (2016) 412", "10.1016/j.physletb.2015.12.025"),
     "1701.01871": ("Phys. Lett. B 771 (2017) 21", "10.1016/j.physletb.2017.05.013"),
     "1702.06490": ("Phys. Rev. Lett. 118 (2017) 261803", "10.1103/PhysRevLett.118.261803"),
+    "1705.05966": ("Phys. Rev. Lett. 119 (2017) 171801", "10.1103/PhysRevLett.119.171801"),
     "1802.03119": ("Phys. Rev. D 97 (2018) 072004", "10.1103/PhysRevD.97.072004"),
     "1810.06874": ("Phys. Rev. Lett. 122 (2019) 011802", "10.1103/PhysRevLett.122.011802"),
     "1911.01114": ("Phys. Rev. D 101 (2020) 012005", "10.1103/PhysRevD.101.012005"),
+    "1912.10912": ("Phys. Rev. D 102 (2020) 071102", "10.1103/PhysRevD.102.071102"),
     "2005.05072": ("JHEP 08 (2020) 146", "10.1007/JHEP08(2020)146"),
     "2103.09969": ("Phys. Rev. D 103 (2021) 112005", "10.1103/PhysRevD.103.112005"),
     "2103.11058": ("JHEP 06 (2021) 019", "10.1007/JHEP06(2021)019"),
@@ -67,7 +70,7 @@ class Measurement:
     _EXPERIMENT_COLORS = {
         "BaBar": "g",
         "Belle": "r",
-        "BES": "g",
+        "BES": "tab:orange",
         "CDF": "m",
         "CLEO": "m",
         "CMS": "g",
@@ -175,6 +178,19 @@ class Measurement:
             return sqrt(err2)
 
 
+@dataclass(frozen=True)
+class Combination:
+    """An average of measurements.
+
+    Attributes:
+        average: The resulting average measurement.
+        members: Labels of the input measurements feeding into the average.
+    """
+
+    average: Measurement
+    members: list[str]
+
+
 def get_units_label(units: float) -> str:
     """Get the LaTeX label (e.g. "\\%" or "10^{-2}") for a given power-of-ten unit scale."""
     raw_exp = log(units) / log(10)
@@ -184,30 +200,44 @@ def get_units_label(units: float) -> str:
     return r"\%" if exp == -2 else f"10^{{{exp}}}"
 
 
+def text_size_pixels(text: str, fontsize: float) -> tuple[float, float]:
+    """Get the size of the bounding box of a rendered text string in pixels."""
+    if not text:
+        return 0, 0
+    fig = plt.figure()
+    t = plt.text(0, 0, text, fontsize=fontsize)
+    fig.canvas.draw()
+    bbox = t.get_window_extent(fig.canvas.get_renderer())
+    plt.close(fig)
+    return bbox.width, bbox.height
+
+
 def plot_measurements(
     measures: list[Measurement],
-    xrange: tuple[float, float],
     xlabel: str,
     out_path: Path,
     *,
     figsize: tuple[float, float] | None = None,
+    xrange: tuple[float, float] | None = None,
     xlabel_fontsize: float | None = None,
     units: float = 1.0,
     val_transform: Callable[[float], float] | None = None,
     color_fn: Callable[[Measurement], str] | None = None,
     arxiv: bool,
     pub: bool,
+    add_subdir: bool = True,
 ) -> None:
     """Draw a summary plot of a set of measurements and save it to `out_path`.
 
     A horizontal divider line is drawn above every measurement flagged `is_average`, and if the last measurement is
     flagged `is_average` a dashed vertical line is drawn at its value.
 
-    :param xrange: Plot x-axis range, already expressed in units of `units`.
+    :param xrange: Plot x-axis range, already expressed in units of `units`. If None, the range is fit automatically.
     :param val_transform: Transformation applied to `meas.val` before converting to plotting units. Needed to pass from
         DeltaY to A_Gamma measurements.
     :param color_fn: Function returning the color to be used for a given measurement. If not provided, the color is set
         from the `color` member of the `Measurement` object.
+    :param add_subdir: Whether to add a subdirectory to `out_path` depending on the `arxiv` and `pub` flags.
     """
 
     def _default_val_transform(v: float) -> float:
@@ -222,41 +252,70 @@ def plot_measurements(
 
     n_meas = len(measures)
     fig, ax = plt.subplots(figsize=figsize or (6, n_meas))
-    x_min, x_max = xrange
-    y_min, y_max = -0.5, n_meas - 0.5
-    plt.xlim(x_min, x_max)
+    y_min, y_max = -0.5, n_meas - (0.5 if n_meas > 2 else 0.4)
     plt.ylim(y_min, y_max)
     plt.tick_params(axis="y", which="both", right=False, left=False, labelleft=False)
     plt.xlabel(xlabel, ha="center", **({"fontsize": xlabel_fontsize} if xlabel_fontsize is not None else {}))
 
-    x_text = max(val_transform(meas.val) + meas.err() / units for meas in measures) + 0.05 * (x_max - x_min)
+    vals = [val_transform(meas.val) for meas in measures]
+    errs = [meas.err() / units for meas in measures]
+    data_lo = min(v - e for v, e in zip(vals, errs))
+    data_hi = max(v + e for v, e in zip(vals, errs))
+
+    fontsize = matplotlib.rcParams["font.size"]
+    labels = [f"{meas.label}\n{meas.result_str(units)}" for meas in measures]
+    ref_labels = [(meas.reference_str(pub=pub) if (arxiv or pub) else "") for meas in measures]
+    ref_fontsize = fontsize * (0.8 if pub else 0.9)
+    height_px = ax.bbox.height
+    fontsize_yscale = fig.dpi / 72 * (y_max - y_min) / height_px
+
+    # Fraction of x-axis range between the highest of all estimates intervals and text labels
+    f_centre = 0.05
+
+    if xrange is None:
+        text_max_width_px = max(
+            max(text_size_pixels(l, fontsize)[0] for l in labels),
+            max(text_size_pixels(l, ref_fontsize)[0] for l in ref_labels),
+        )
+        f_text = text_max_width_px / (
+            fig.bbox.width - plt.rcParams["figure.constrained_layout.w_pad"] * 2 * plt.rcParams["figure.dpi"]
+        )
+        f_left = 0.03
+        f_right = 0.03
+        data_span = data_hi - data_lo
+        assert 1 - f_left - f_centre - f_text - f_right > 0.2, (
+            "There is not enough space for showing the average itself. Please reduce the length of the labels"
+        )
+        conversion = data_span / (1 - f_left - f_centre - f_text - f_right)
+        x_min = data_lo - f_left * conversion
+        x_max = data_hi + (f_centre + f_text + f_right) * conversion
+    else:
+        x_min, x_max = xrange
+
+    plt.xlim(x_min, x_max)
+    x_text = data_hi + f_centre * (x_max - x_min)
+
     for i, meas in enumerate(measures):
         y = n_meas - 1 - i
         col = color_fn(meas)
-        plt.errorbar(val_transform(meas.val), y, xerr=meas.err() / units, fmt=".", markersize=8, capsize=7, color=col)
-        plt.errorbar(val_transform(meas.val), y, xerr=meas.stat / units, capsize=5, color=col)
+        plt.errorbar(vals[i], y, xerr=errs[i], fmt=".", markersize=8, capsize=7, color=col)
+        plt.errorbar(vals[i], y, xerr=meas.stat / units, capsize=5, color=col)
 
-        height_px = ax.bbox.height
-        fontsize_yscale = fig.dpi / 72 * (y_max - y_min) / height_px
-
-        fontsize = matplotlib.rcParams["font.size"]
         y_text = y - 0.8 * fontsize_yscale * fontsize
 
-        ref = meas.reference_str(pub=pub)
-        if (arxiv or pub) and ref:
-            ref_fontsize = fontsize * (0.8 if pub else 0.9)
+        if ref_labels[i]:
             y_text += 0.5 * fontsize_yscale * ref_fontsize
             plt.text(
                 x_text,
                 y_text - fontsize_yscale * ref_fontsize,
-                ref,
+                ref_labels[i],
                 fontsize=ref_fontsize,
                 color="deepskyblue",
             )
         plt.text(
             x_text,
             y_text,
-            f"{meas.label}\n{meas.result_str(units)}",
+            labels[i],
             fontsize=fontsize,
             color=col,
         )
@@ -269,17 +328,25 @@ def plot_measurements(
 
     # Dashed vertical line at the combined/world-average value, if the last measurement shown is one
     if measures[-1].is_average:
-        avg = val_transform(measures[-1].val)
+        avg = vals[-1]
         plt.plot([avg, avg], [y_min, y_max], linestyle="--", linewidth=1, color="k")
 
+    if add_subdir:
+        subdir = "arxiv" if arxiv else "pub" if pub else "no-refs"
+        out_path = out_path.parent / subdir / out_path.name
+
     out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Need more than one iteration in constrained_layout mode to ensure correct rendering (see dy.py).
+    # https://matplotlib.org/stable/users/explain/axes/constrainedlayout_guide.html -> other caveats
+    fig.canvas.draw()
     fig.savefig(out_path)
     plt.close(fig)
 
 
 def blue_parser(default_outdir: str) -> argparse.ArgumentParser:
     """Create a argument parser for the BLUE scripts with the arguments shared by all scripts."""
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
     outdir = repo_path / "plots" / "BLUE" / default_outdir
     parser.add_argument(
         "-o",
