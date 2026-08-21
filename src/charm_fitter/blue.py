@@ -30,6 +30,7 @@ PUBLICATIONS: dict[str, tuple[str, str]] = {
     "1509.08266": ("Phys. Lett. B 753 (2016) 412", "10.1016/j.physletb.2015.12.025"),
     "1701.01871": ("Phys. Lett. B 771 (2017) 21", "10.1016/j.physletb.2017.05.013"),
     "1702.06490": ("Phys. Rev. Lett. 118 (2017) 261803", "10.1103/PhysRevLett.118.261803"),
+    "1705.05966": ("Phys. Rev. Lett. 119 (2017) 171801", "10.1103/PhysRevLett.119.171801"),
     "1802.03119": ("Phys. Rev. D 97 (2018) 072004", "10.1103/PhysRevD.97.072004"),
     "1810.06874": ("Phys. Rev. Lett. 122 (2019) 011802", "10.1103/PhysRevLett.122.011802"),
     "1911.01114": ("Phys. Rev. D 101 (2020) 012005", "10.1103/PhysRevD.101.012005"),
@@ -173,6 +174,19 @@ class Measurement:
             if self.sys2:
                 err2 += (self.sys2) ** 2
             return sqrt(err2)
+
+
+@dataclass(frozen=True)
+class Combination:
+    """An average of measurements.
+
+    Attributes:
+        average: The resulting average measurement.
+        members: Labels of the input measurements feeding into the average.
+    """
+
+    average: Measurement
+    members: list[str]
 
 
 def get_units_label(units: float) -> str:
