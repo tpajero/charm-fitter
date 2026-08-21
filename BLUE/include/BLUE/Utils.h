@@ -19,6 +19,9 @@ namespace BLUE {
   struct Estimate {
     std::string name;
     std::vector<double> vals;
+    /// Index of the observable measured by the estimate. Ignored if negative (placeholder for single-observable
+    /// combinations).
+    int obs = -1;
   };
 
   using Estimates = std::vector<Estimate>;
@@ -42,11 +45,23 @@ namespace BLUE {
   /**
    * Parse the arguments of the main function of BLUE executables.
    *
-   * Looks for a single integer argument, which is interpreted as the combination flag, and for the "-h" or "--help",
-   * which instead prints all available combinations, including flag, title, and the names of the measurements that
-   * it includes.
+   * Looks for a single integer argument, which is interpreted as the combination flag, and for "-h" or "--help", which
+   * prints all available combinations, including flag, title, and the names of the measurements that it includes.
    */
   int parse_args(int argc, char** argv, const Combinations& combinations);
+
+  /**
+   * Parse the arguments of the main function of BLUE executables, specifically for h+ h- final states that can be
+   * combined separately for K- K+ and pi- pi+, or all together.
+   *
+   * Looks for a single integer argument, which is interpreted as the combination flag, for "--single-avg", that forces
+   * a single average of all final states, and for "-h" or "--help", which prints all available combinations, including
+   * flag, title, and the names of the measurements that it includes.
+   *
+   * @return A pair consisting of the combination flag (int) and a boolean indicating whether a single average is
+   *         requested.
+   */
+  std::pair<int, bool> parse_args_hh(int argc, char** argv, const Combinations& combinations);
 
   /**
    * Run the combination of a set of 1D estimates.
@@ -61,10 +76,13 @@ namespace BLUE {
    * estimate.
    * @param rho The vector of correlation coefficients for the uncertainties, in the order they appear in `names_unc`.
    * @param format The output format for printing the results.
+   * @param single_avg Parameter that steers the behaviour of the DeltaY combination, which can perform a single average
+   *     of K- K+ and pi- pi+ final states (also adding the pi- pi0 pi+ final state), or two separate averages for each
+   *     of them.
    */
   void run_combination(const int flag, const std::string& combo_category, const Combinations& combinations,
-                       const Estimates& estimates, const std::vector<TString>& names_obs,
+                       const Estimates& estimates, std::vector<TString> names_obs,
                        const std::vector<TString>& names_unc, const std::vector<double>& rho,
-                       const OutputFormat& format);
+                       const OutputFormat& format, const bool single_avg = true);
 
 }  // namespace BLUE
