@@ -47,16 +47,11 @@ def get_measures(comb: str) -> list[Measurement]:
     return measures
 
 
-def get_xrange(date: str, pub: bool) -> tuple[float, float]:
-    return -45.0, 60.0 if pub else 55.0
-
-
 def plot_average(date: str, out_dir: Path, *, arxiv: bool, pub: bool) -> None:
     measures = get_measures(date)
     units = 1e-2
     plot_measurements(
         measures,
-        get_xrange(date, pub),
         rf"$A_{{CP}}(D^0 \to K^0_S K^0_S)$ $[{get_units_label(units)}]$",
         out_dir / f"acp-d0-to-ksks-{date}.pdf",
         units=units,

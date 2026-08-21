@@ -127,29 +127,6 @@ def get_measures(comb: str, final_state: str) -> list[Measurement]:
     return comb_measures
 
 
-def get_xrange(comb: str, final_state: str, dy_notation: bool) -> tuple[float, float]:
-    """Get the x ranges for a given summary plot, in 10^-4 units."""
-    xrange = {
-        "lhcb-avg-2021": {
-            "all": (-7.0 if dy_notation else -23.0, 54.0 if dy_notation else 38.0),
-            "kk": (-6.0 if dy_notation else -24.0, 56.0 if dy_notation else 40.0),
-            "pipi": (-13.0 if dy_notation else -27.0, 70.0 if dy_notation else 58.0),
-        },
-        "lhcb-avg-2024": {
-            "all": (-12.0 if dy_notation else -23.0, 80.0 if dy_notation else 67.0),
-        },
-        "wa-2021": {
-            "all": (-40.0 if dy_notation else -27.0, 105.0 if dy_notation else 115.0),
-            "kk": (-10.0 if dy_notation else -38.0, 90.0 if dy_notation else 57.0),
-            "pipi": (-20.0 if dy_notation else -27.0, 84.0 if dy_notation else 72.0),
-        },
-        "wa-2024": {
-            "all": (-40.0 if dy_notation else -30.0, 145.0 if dy_notation else 157.0),
-        },
-    }
-    return xrange[comb][final_state]
-
-
 def make_plot(
     comb: str,
     final_state: str,
@@ -172,7 +149,6 @@ def make_plot(
 
     plot_measurements(
         measures,
-        get_xrange(comb, final_state, dy_notation),
         xlabel,
         out_dir / f"{fig_name}.pdf",
         val_transform=lambda v: v if dy_notation else -v,
