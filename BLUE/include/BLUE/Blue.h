@@ -286,7 +286,12 @@ public:
   void PrintNamObs() const;
 
   void PrintCovRes() const;
+  /// Print the correlation matrix for the total uncertainties of the active solved observables.
   void PrintRhoRes() const;
+  /// Print the correlation matrix for the statistical uncertainties of the active solved observables.
+  void PrintStatRhoRes() const;
+  /// Print the correlation matrix for the systematic uncertainties of the active solved observables.
+  void PrintSystRhoRes() const;
   void PrintWeight() const;
   void PrintResult() const; 
   void PrintCompatObs() const;
