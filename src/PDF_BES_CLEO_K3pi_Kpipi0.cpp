@@ -3,9 +3,9 @@
  * Author: Tommaso Pajero, tommaso.pajero@cern.ch
  * Date: June 2024
  *
- * Note that this part of the combination is slightly sloppy, as the CLEO + BESIII combination:
+ * Note that this part of the combination is slightly sloppy, as the BESIII + CLEO-c combination:
  *   1. employs external inputs for the mixing parameters (the effect on this combination is probably negligible,
- *      as the relative precision coming from K3pi and Kpipi0 is much poorer than than of the other decay channels.
+ *      as the relative precision coming from K3pi and Kpipi0 is much poorer than that of the other decay channels).
  *   2. the PDF is not Gaussian, and this effect cannot be taken into account as the full likelihood is not public.
  **/
 
@@ -49,7 +49,7 @@ void PDF_BES_CLEO_K3pi_Kpipi0::initRelations() {
 }
 
 void PDF_BES_CLEO_K3pi_Kpipi0::initObservables() {
-  const TString label = "BES3 + CLEO";
+  const TString label = "BESIII + CLEO-c";
   observables = new RooArgList("observables");  ///< the order of this list must match that of the COR matrix!
   observables->add(*(new RooRealVar("k_K3pi_obs", label + "   #it{#kappa_{K3#pi}}", 1, -2, 2)));
   observables->add(
@@ -66,8 +66,8 @@ void PDF_BES_CLEO_K3pi_Kpipi0::setObservables(const TString c) {
     setObservablesTruth();
   else if (c.EqualTo("toy"))
     setObservablesToy();
-  else if (c.EqualTo("BES3-CLEO")) {
-    obsValSource = "BES+CLEO, arXiv:2103.05988";
+  else if (c.EqualTo("BESIII--CLEO-c")) {
+    obsValSource = "https://inspirehep.net/literature/1850941 Tab. 18";
     setObservable("k_K3pi_obs", 0.49);
     setObservable("Delta_K3pi_obs", DegToRad(26));
     setObservable("k_Kpipi0_obs", 0.79);
@@ -81,16 +81,15 @@ void PDF_BES_CLEO_K3pi_Kpipi0::setObservables(const TString c) {
 }
 
 void PDF_BES_CLEO_K3pi_Kpipi0::setUncertainties(const TString c) {
-  if (c.EqualTo("BES3-CLEO")) {
-    obsErrSource = "BES+CLEO, arXiv:2103.05988";
+  if (c.EqualTo("BESIII--CLEO-c")) {
+    obsErrSource = "https://inspirehep.net/literature/1850941 Tab. 18";
     // Values are the average of the upper and lower asymmetric uncertainties
-    StatErr[0] = 0.105;         // k_K3pi
-    StatErr[1] = DegToRad(18);  // Delta_K3pi
-    StatErr[2] = 0.04;          // k_Kpipi0
-    StatErr[3] = DegToRad(11);  // Delta_Kpipi0
-    StatErr[4] = 0.08e-2;       // r_K3pi
-    StatErr[5] = 0.11e-2;       // r_Kpipi0
-
+    StatErr = {0.105,         // k_K3pi
+               DegToRad(18),  // Delta_K3pi
+               0.04,          // k_Kpipi0
+               DegToRad(11),  // Delta_Kpipi0
+               0.08e-2,       // r_K3pi
+               0.11e-2};      // r_Kpipi0
     std::ranges::fill(SystErr, 0.0);
   } else {
     throw std::runtime_error(
@@ -100,8 +99,8 @@ void PDF_BES_CLEO_K3pi_Kpipi0::setUncertainties(const TString c) {
 
 void PDF_BES_CLEO_K3pi_Kpipi0::setCorrelations(const TString c) {
   resetCorrelations();
-  if (c.EqualTo("BES3-CLEO")) {
-    corSource = "BES+CLEO, arXiv:2103.05988";
+  if (c.EqualTo("BESIII--CLEO-c")) {
+    corSource = "https://inspirehep.net/literature/1850941 Tab. 19";
     std::vector<double> dataStat = {
         // clang-format off
         // k_K3pi Delta_K3pi k_Kpipi0 Delta_Kpipi0 r_K3pi r_Kpipi0

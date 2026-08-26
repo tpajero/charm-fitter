@@ -24,11 +24,9 @@ namespace parametrisations {
  */
 class PDF_WS : public PDF_Charm {
  public:
-  PDF_WS(TString measurement_id, parametrisations::mix, parametrisations::kpi p = parametrisations::kpi::rrxy,
-         hypotheses::dy_fsc dy_fsc_hypo = hypotheses::dy_fsc::none,
+  PDF_WS(TString measurement_id, parametrisations::mix, hypotheses::dy_fsc dy_fsc_hypo = hypotheses::dy_fsc::none,
          parametrisations::acp acp_param = parametrisations::acp::acp_dy);
-  PDF_WS(TString val, TString err, parametrisations::mix, parametrisations::kpi p = parametrisations::kpi::rrxy,
-         hypotheses::dy_fsc dy_fsc_hypo = hypotheses::dy_fsc::none,
+  PDF_WS(TString val, TString err, parametrisations::mix, hypotheses::dy_fsc dy_fsc_hypo = hypotheses::dy_fsc::none,
          parametrisations::acp acp_param = parametrisations::acp::acp_dy);
   void initObservables() override;
   void initRelations() override;

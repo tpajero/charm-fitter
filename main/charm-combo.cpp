@@ -211,44 +211,44 @@ int main(int argc, char* argv[]) {
   ///////////////////////////////////////////////////
 
   using hypotheses::dy_fsc;
-  using parametrisations::kpi;
 
   // clang-format off
-  gc.addPdf(1, new PDF_XY("BaBar_Kshh", mix_param),                                  "XY KShh      BaBar                          ");
-  gc.addPdf(2, new PDF_XY("BaBar_pipipi0", mix_param),                               "XY pipipi0   BaBar                          ");
-  gc.addPdf(3, new PDF_XY("LHCb_KSpipi", mix_param),                                 "XY KSpipi    LHCb     2011     [D* -> D0 pi]");
-  gc.addPdf(4, new PDF_Kpipi0("BaBar", mix_param),                                   "Kpipi0       BaBar                          ");
-  gc.addPdf(5, new PDF_K3pi("LHCb-run1", mix_param),                                 "K3pi         LHCb     Run 1                 ");
-  gc.addPdf(6, new PDF_XY("Belle_Belle2", mix_param),                                "XY KSpipi    Belle+Belle2 (951+408 fb-1)    ");
+  gc.addPdf(1, new PDF_XY("BaBar-KShh", mix_param),                                  "KS h h       BaBar                          ");
+  gc.addPdf(2, new PDF_XY("BaBar-pipipi0", mix_param),                               "pi pi pi0    BaBar                          ");
+  gc.addPdf(3, new PDF_XY("LHCb-KSpipi-2011-prompt", mix_param),                     "KS pi pi     LHCb     2011     [D* -> D0 pi]");
+  gc.addPdf(4, new PDF_Kpipi0("BaBar", mix_param, false),                            "Kpipi0       BaBar                          ");
+  gc.addPdf(5, new PDF_K3pi("LHCb-R1", mix_param),                                   "K3pi         LHCb     Run 1                 ");
+  gc.addPdf(6, new PDF_XY("Belle-Belle2", mix_param),                                "KS pi pi     Belle+Belle2      951+408 fb   ");
 
-  gc.addPdf(10, new PDF_RM("HFLAV2016", mix_param),                                  "R_M          HFLAV    2016                  ");
-  gc.addPdf(11, new PDF_RM("LHCb_K3pi_Run1", mix_param),                             "R_M K3pi     LHCb                           ");
+  gc.addPdf(10, new PDF_RM("HFLAV-2008", mix_param),                                 "R_M          HFLAV    2008                  ");
+  gc.addPdf(11, new PDF_RM("LHCb-K3pi-R1", mix_param),                               "K3pi         LHCb     Run 1    [RM only]    ");
 
   gc.addPdf(20, new PDF_XY_QoP_PHI("Belle", mix_param),                              "KShh         Belle                          ");
-  gc.addPdf(21, new PDF_BinFlip("LHCb_Run1", mix_param),                             "Bin-flip     LHCb     Run 1                 ");
-  gc.addPdf(22, new PDF_BinFlip("LHCb_Run2_prompt", mix_param),                      "Bin-flip     LHCb     Run 2    [D* -> D0 pi]");
-  gc.addPdf(23, new PDF_BinFlip("LHCb_Run2_sl", mix_param),                          "Bin-flip     LHCb     Run 2    [B -> D0 mu] ");
-  gc.addPdf(24, new PDF_BinFlip("LHCb_Run2", mix_param),                             "Bin-flip     LHCb     Run 2                 ");
+  gc.addPdf(21, new PDF_BinFlip("LHCb-R1", mix_param),                               "Bin-flip     LHCb     Run 1                 ");
+  gc.addPdf(22, new PDF_BinFlip("LHCb-R2-prompt", mix_param),                        "Bin-flip     LHCb     Run 2    [D* -> D0 pi]");
+  gc.addPdf(23, new PDF_BinFlip("LHCb-R2-SL", mix_param),                            "Bin-flip     LHCb     Run 2    [B -> D0 mu] ");
+  gc.addPdf(24, new PDF_BinFlip("LHCb-R2", mix_param),                               "Bin-flip     LHCb     Run 2                 ");
 
   gc.addPdf(30, new PDF_WS_NoCPV("CDF", mix_param),                                  "WS/RS        CDF                            ");
   gc.addPdf(31, new PDF_WS_NoCPV("BaBar", mix_param),                                "WS/RS        BaBar    no CPV                ");
   gc.addPdf(32, new PDF_WS_NoCPV("Belle", mix_param),                                "WS/RS        Belle    no CPV                ");
   gc.addPdf(33, new PDF_WS("BaBar", mix_param),                                      "WS/RS        BaBar                          ");
   gc.addPdf(34, new PDF_WS("Belle", mix_param),                                      "WS/RS        Belle                          ");
-  gc.addPdf(35, new PDF_WS("LHCb_DT_Run1", mix_param),                               "WS/RS        LHCb     Run 1    [B -> D* mu] ");
-  gc.addPdf(36, new PDF_WS("LHCb_Run1", mix_param),                                  "WS/RS        LHCb     Run 1                 ");
-  gc.addPdf(37, new PDF_WS("LHCb_Prompt_2011_2016", mix_param),                      "WS/RS        LHCb     2011-6   [D* -> D0 pi]");
-  gc.addPdf(38, new PDF_WS("LHCb_Prompt_Run12_sec9", mix_param, kpi::ccprime),       "WS/RS        LHCb     Run 1+2  [D* -> D0 pi]");
-  gc.addPdf(39, new PDF_WS("LHCb_Prompt_Run12_appB", mix_param, kpi::ccprime, dy_fsc_hypo, acp_param), "WS/RS        LHCb     Run 1+2  [D* -> D0 pi]");
-  gc.addPdf(40, new PDF_WS("LHCb_DT_Run2", mix_param),                               "WS/RS        LHCb     Run 2    [B -> D* mu] ");
-  gc.addPdf(41, new PDF_WS("LHCb_DT_Run12", mix_param),                              "WS/RS        LHCb     Run 1-2  [B -> D* mu] ");
+  gc.addPdf(35, new PDF_WS("LHCb-R1-DT", mix_param),                                 "WS/RS        LHCb     Run 1    [B -> D* mu] ");
+  gc.addPdf(36, new PDF_WS("LHCb-R1-prompt", mix_param),                             "WS/RS        LHCb     Run 1    [D* -> D0 pi]");
+  gc.addPdf(37, new PDF_WS("LHCb-2011-2016-prompt", mix_param),                      "WS/RS        LHCb     2011-6   [D* -> D0 pi]");
+  gc.addPdf(38, new PDF_WS("LHCb-R12-prompt-sec9", mix_param),                       "WS/RS        LHCb     Run 1+2  [D* -> D0 pi]");
+  gc.addPdf(39, new PDF_WS("LHCb-R12-prompt-appB", mix_param, dy_fsc_hypo, acp_param),
+                                                                                     "WS/RS        LHCb     Run 1+2  [D* -> D0 pi]");
+  gc.addPdf(40, new PDF_WS("LHCb-R2-DT", mix_param),                                 "WS/RS        LHCb     Run 2    [B -> D* mu] ");
+  gc.addPdf(41, new PDF_WS("LHCb-R12-DT", mix_param),                                "WS/RS        LHCb     Run 1-2  [B -> D* mu] ");
 
   gc.addPdf(50, new PDF_CLEO_Kpi("Cleo-c", mix_param),                               "Delta_Kpi    Cleo-c                         ");
   gc.addPdf(51, new PDF_BES_Kpi(mix_param),                                          "Delta_Kpi    BES      3fb      [A_kpi only] ");
   gc.addSubsetPdf(52, new PDF_BES_Kpi_pipipi0("3fb", mix_param), 0, 1, 2, 3,         "Kpi+pipipi0  BES      3fb                   ");
-  gc.addPdf(53, new PDF_Fp_pipipi0("Cleo-c"),                                        "Fpipipi0     Cleo-c                         ");
-  gc.addPdf(54, new PDF_BES_CLEO_K3pi_Kpipi0("BES3-CLEO"),                           "K3pi-Kpipi0  BES3 + Cleo                    ");
-  gc.addPdf(55, new PDF_Fp_pipipi0("BESIII"),                                        "Fpipipi0     BES3                           ");
+  gc.addPdf(53, new PDF_Fp_pipipi0("CLEO-c"),                                        "Fpipipi0     Cleo-c                         ");
+  gc.addPdf(54, new PDF_BES_CLEO_K3pi_Kpipi0("BESIII--CLEO-c"),                      "K3pi-Kpipi0  BESIII + CLEO-c                ");
+  gc.addPdf(55, new PDF_Fp_pipipi0("BESIII-8fb"),                                    "Fpipipi0     BES3     8fb                   ");
   gc.addPdf(56, new PDF_BES_Kpi_pipipi0("3+7fb", mix_param),                         "Kpi+pipipi0  BES3     3+7fb                 ");
 
   gc.addPdf(60, new PDF_yCP("WA-2015", mix_param),                                   "yCP          WA       2015                  ");
@@ -264,7 +264,7 @@ int main(int argc, char* argv[]) {
   gc.addPdf(71, new PDF_DY("WA2020", dy_fsc_hypo, acp_param, mix_param),             "DY           WA       2020                  ");
   gc.addPdf(72, new PDF_DY("WA2021", dy_fsc_hypo, acp_param, mix_param),             "DY           WA       2021                  ");
 
-  gc.addPdf(80, new PDF_DY_RS("LHCb2021", mix_param),                                "DY(RS)       LHCb     2021                  ");
+  gc.addPdf(80, new PDF_DY_RS("LHCb-R2-prompt", mix_param),                          "DY(RS)       LHCb     Run 2    [D* -> D0 pi]");
 
   if (dy_fsc_hypo == dy_fsc::none) {
     gc.addPdf(85, new PDF_DY_pipipi0("LHCb-R2", mix_param),                          "DY(pipipi0)  LHCb     Run2                  ");
