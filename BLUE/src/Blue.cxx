@@ -29,6 +29,8 @@
 #include "TRandom3.h"
 #include <BLUE/Blue.h>
 
+#include <memory>
+
 // ----> First the implementation of the public member functions
 
 //------------------------------------------------------------------------------
@@ -5315,6 +5317,79 @@ void Blue::PrintRhoRes() const {
 
   // Return
   return;
+};
+
+//------------------------------------------------------------------------------
+
+void Blue::PrintStatRhoRes() const {
+  const auto activeObs = CovRes->GetNrows();
+  if (activeObs == 1) return;
+
+  if (IsSolved() == 0) {
+    printf("... Blue->PrintStatRhoRes: Presently not available, call Solve()\n");
+    return;
+  }
+
+  auto StatCovRes = std::make_unique<TMatrixD>(activeObs, activeObs);
+  for (Int_t i = 0; i < activeObs; ++i) {
+    for (Int_t j = i; j < activeObs; ++j) {
+      const auto d = CorRes->operator()(i, j);
+      StatCovRes->operator()(i, j) = d;
+      StatCovRes->operator()(j, i) = d;
+    }
+  } 
+
+  auto StatCorRes = std::make_unique<TMatrixD>(activeObs, activeObs);
+  for (Int_t i = 0; i < activeObs; ++i) {
+    for (Int_t j = i; j < activeObs; ++j) {
+      if (i == j) {
+        StatCorRes->operator()(i, j) = 1.0;
+      } else {
+        StatCorRes->operator()(i, j) = StatCovRes->operator()(i, j) / TMath::Sqrt(StatCovRes->operator()(i, i) * StatCovRes->operator()(j, j));
+        StatCorRes->operator()(j, i) = StatCorRes->operator()(i, j);
+      }
+    }
+  }
+  printf("... Blue->PrintStatRhoRes: The correlation matrix for the total statistical uncertainties of the results\n");
+  StatCorRes->Print();
+};
+
+//------------------------------------------------------------------------------
+
+void Blue::PrintSystRhoRes() const {
+  const auto activeObs = CovRes->GetNrows();
+  if (activeObs == 1) return;
+
+  if (IsSolved() == 0) {
+    printf("... Blue->PrintSystRhoRes: Presently not available, call Solve()\n");
+    return;
+  }
+
+  auto SystCovRes = std::make_unique<TMatrixD>(activeObs, activeObs);
+  SystCovRes->Zero();
+  for (Int_t i = 0; i < activeObs; ++i) {
+    for (Int_t j = i; j < activeObs; ++j) {
+      for (Int_t k = 1; k < InpUnc; k++) {
+        const auto d = CorRes->operator()(k * InpObs + i, k * InpObs + j);
+        SystCovRes->operator()(i, j) += d;
+        if (i != j) { SystCovRes->operator()(j,i) += d; }
+      }
+    }
+  } 
+
+  auto SystCorRes = std::make_unique<TMatrixD>(activeObs, activeObs);
+  for (Int_t i = 0; i < activeObs; ++i) {
+    for (Int_t j = i; j < activeObs; ++j) {
+      if (i == j) {
+        SystCorRes->operator()(i, j) = 1.0;
+      } else {
+        SystCorRes->operator()(i, j) = SystCovRes->operator()(i, j) / TMath::Sqrt(SystCovRes->operator()(i, i) * SystCovRes->operator()(j, j));
+        SystCorRes->operator()(j, i) = SystCorRes->operator()(i, j);
+      }
+    }
+  }
+  printf("... Blue->PrintSystRhoRes: The correlation matrix for the total systematic uncertainties of the results\n");
+  SystCorRes->Print();
 };
 
 //------------------------------------------------------------------------------

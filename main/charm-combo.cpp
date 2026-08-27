@@ -258,11 +258,11 @@ int main(int argc, char* argv[]) {
   gc.addPdf(64, new PDF_yCP_minus_yCP_RS("LHCb-R2", mix_param),                      "yCP-yCP(RS)  LHCb     2022                  ");
 
   if (dy_fsc_hypo == dy_fsc::none) {
-    gc.addPdf(70, new PDF_DY("WA2019", dy_fsc_hypo, acp_param, mix_param),           "DY           WA       2019                  ");
-    gc.addPdf(73, new PDF_DY("Belle&BaBar", dy_fsc_hypo, acp_param, mix_param),      "DY           B-factories                    ");
+    gc.addPdf(70, new PDF_DY("WA-2019", dy_fsc_hypo, acp_param, mix_param),          "DY           WA       2019                  ");
+    gc.addPdf(73, new PDF_DY("Belle+BaBar", dy_fsc_hypo, acp_param, mix_param),      "DY           B-factories                    ");
   }
-  gc.addPdf(71, new PDF_DY("WA2020", dy_fsc_hypo, acp_param, mix_param),             "DY           WA       2020                  ");
-  gc.addPdf(72, new PDF_DY("WA2021", dy_fsc_hypo, acp_param, mix_param),             "DY           WA       2021                  ");
+  gc.addPdf(71, new PDF_DY("WA-2020", dy_fsc_hypo, acp_param, mix_param),            "DY           WA       2020                  ");
+  gc.addPdf(72, new PDF_DY("WA-2021", dy_fsc_hypo, acp_param, mix_param),            "DY           WA       2021                  ");
 
   gc.addPdf(80, new PDF_DY_RS("LHCb-R2-prompt", mix_param),                          "DY(RS)       LHCb     Run 2    [D* -> D0 pi]");
 
