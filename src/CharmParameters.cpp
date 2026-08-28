@@ -158,7 +158,7 @@ void CharmParameters::defineParameters() {
   p->startvalue = 0.44;
   p->unit = "";
   p->scan = range(0., 1.);
-  p->phys = range(0, 1e4);
+  p->phys = range(0, 1.);
 
   // Coherence parameters for the decay amplitudes of D0 -> K+ pi- pi0 to D0 -> K- pi+ pi0
   p = newParameter("k_Kpipi0");
@@ -166,7 +166,7 @@ void CharmParameters::defineParameters() {
   p->startvalue = 0.79;
   p->unit = "";
   p->scan = range(0., 1.);
-  p->phys = range(0, 1e4);
+  p->phys = range(0, 1.);
 
   // Strong-phase difference between the decay amplitudes of D0 -> K+ pi- to D0 -> K- pi+
   // Follows the convention of:
@@ -204,7 +204,7 @@ void CharmParameters::defineParameters() {
   p->startvalue = 0.943;
   p->unit = "";
   p->scan = range(0, 1);
-  p->phys = range(-1, 2);
+  p->phys = range(0., 1.);
   p->force = range(0, 1);
 
   /**
@@ -242,7 +242,7 @@ void CharmParameters::defineParameters() {
   p->startvalue = y12_start;
   p->unit = "";
   p->scan = range(1e-3, 1e-2);
-  p->phys = range(-1e2, 1e2);
+  p->phys = range(0., 1.);
 
   p = newParameter("qop");
   p->title = "|#it{q/p}|";
@@ -279,7 +279,7 @@ void CharmParameters::defineParameters() {
   p->startvalue = 0.02;
   p->unit = "";
   p->scan = range(-0.5, 0.5);
-  p->phys = range(-1.5, -1.5 + DegToRad(360.));
+  p->phys = range(-3.5, 3.5);
 
   p = newParameter("phiG");
   p->title = "#it{#phi}^{#Gamma}_{2} [rad]";
