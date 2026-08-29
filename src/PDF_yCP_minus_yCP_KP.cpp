@@ -33,7 +33,7 @@ std::set<std::string> PDF_yCP_minus_yCP_KP::getParameterNames() const {
     names.insert({"x", "y", "qop", "phi"});
     break;
   case mix::theo:
-    names.insert({"phiG", "x12", "y12"});
+    names.insert({"phiG", "y12"});
     break;
   default:
     throw std::runtime_error(std::format(

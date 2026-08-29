@@ -81,7 +81,7 @@ void PDF_CLEO_Kpi::setObservables(const TString c) {
     setObservablesTruth();
   else if (c.EqualTo("toy"))
     setObservablesToy();
-  else if (c.EqualTo("Cleo-c")) {
+  else if (c.EqualTo("CLEO-c")) {
     obsValSource = "https://inspirehep.net/literature/1189182";
     setObservable("RD_obs", 5.33e-3);
     setObservable("x2_obs", 0.6e-3);
@@ -94,7 +94,7 @@ void PDF_CLEO_Kpi::setObservables(const TString c) {
 }
 
 void PDF_CLEO_Kpi::setUncertainties(const TString c) {
-  if (c.EqualTo("Cleo-c")) {
+  if (c.EqualTo("CLEO-c")) {
     obsErrSource = "https://inspirehep.net/literature/1189182";
     StatErr[0] = std::hypot(1.07e-3, 0.45e-3);  // RD
     StatErr[1] = std::hypot(2.3e-3, 1.1e-3);    // x2
@@ -109,7 +109,7 @@ void PDF_CLEO_Kpi::setUncertainties(const TString c) {
 
 void PDF_CLEO_Kpi::setCorrelations(const TString c) {
   resetCorrelations();
-  if (c.EqualTo("Cleo-c")) {
+  if (c.EqualTo("CLEO-c")) {
     corSource = "https://inspirehep.net/literature/1189182";
     std::vector<double> dataStat = {
         // clang-format off
