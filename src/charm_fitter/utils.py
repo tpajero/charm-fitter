@@ -71,6 +71,41 @@ class MixParam(Enum):
     D0_TO_KPI = "d0-to-kpi"
 
 
+# List of parameters that exist only in specific parametrisations of aCP(h- h+).
+ACP_DY_PARAMS = ["DY_KK", "DY_PP"]
+ACP_COT_PARAMS = ["cot_delta_KK", "cot_delta_PP"]
+R_DELTA_PARAMS = ["r_KK", "r_PP", "delta_KK", "delta_PP"]
+
+# List of parameters that exist only in specific parametrisations of mixing.
+PHENO_PARAMS = ["x", "y", "qop", "phi"]
+THEO_PARAMS = ["x12", "y12", "phiM", "phiG"]
+D0_TO_KPI_PARAMS = ["yp", "dyp", "xp2", "dxp2"]
+
+# List of parameters defined in CharmParameters.cpp
+SCAN_PARAMS = (
+    ACP_DY_PARAMS
+    + ACP_COT_PARAMS
+    + R_DELTA_PARAMS
+    + PHENO_PARAMS
+    + THEO_PARAMS
+    + D0_TO_KPI_PARAMS
+    + [
+        "Acp_KK",
+        "Acp_PP",
+        "Acp_KP",
+        "Delta_Kpi",
+        "Delta_Kpipi0",
+        "Delta_K3pi",
+        "r_Kpi",
+        "r_K3pi",
+        "r_Kpipi0",
+        "k_K3pi",
+        "k_Kpipi0",
+        "F_pipipi0",
+    ]
+)
+
+
 # Utility functions and classes for 1D and 2D scans and plots ----------------------------------------------------------
 
 
@@ -177,41 +212,6 @@ class _Scan:
     fix_parfile: str = ""
 
     def __post_init__(self):
-
-        # List of parameters that exist only in specific parametrisations of aCP(h- h+).
-        ACP_DY_PARAMS = ["DY_KK", "DY_PP"]
-        ACP_COT_PARAMS = ["cot_delta_KK", "cot_delta_PP"]
-        R_DELTA_PARAMS = ["r_KK", "r_PP", "delta_KK", "delta_PP"]
-
-        # List of parameters that exist only in specific parametrisations of mixing.
-        PHENO_PARAMS = ["x", "y", "qop", "phi"]
-        THEO_PARAMS = ["x12", "y12", "phiM", "phiG"]
-        D0_TO_KPI_PARAMS = ["yp", "dyp", "xp2", "dxp2"]
-
-        # List of parameters defined in CharmParameters.cpp
-        SCAN_PARAMS = (
-            ACP_DY_PARAMS
-            + ACP_COT_PARAMS
-            + R_DELTA_PARAMS
-            + PHENO_PARAMS
-            + THEO_PARAMS
-            + D0_TO_KPI_PARAMS
-            + [
-                "Acp_KK",
-                "Acp_PP",
-                "Acp_KP",
-                "Delta_Kpi",
-                "Delta_Kpipi0",
-                "Delta_K3pi",
-                "r_Kpi",
-                "r_K3pi",
-                "r_Kpipi0",
-                "k_K3pi",
-                "k_Kpipi0",
-                "F_pipipi0",
-            ]
-        )
-
         pars = self._pars()
 
         if any(p not in SCAN_PARAMS for p in pars):
