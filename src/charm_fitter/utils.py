@@ -5,7 +5,7 @@ import re
 import subprocess
 from collections.abc import Callable
 from contextlib import contextmanager
-from dataclasses import KW_ONLY, dataclass, field
+from dataclasses import KW_ONLY, InitVar, dataclass, field
 from enum import Enum
 from multiprocessing import Pool
 from pathlib import Path
@@ -788,15 +788,16 @@ class PlottingConfig:
         plots_2d: 2D plots to be produced.
     """
 
-    parameters: list[PlotParameter]
+    parameters_list: InitVar[list[PlotParameter]]
     baseline_combiners: dict[str, Combiner]
     _: KW_ONLY
     plots_1d: list[Plot1D] = field(default_factory=list)
     plots_2d: list[Plot2D] = field(default_factory=list)
     combiners: dict[str, Combiner] = field(init=False, default_factory=dict)
+    parameters: dict[str, PlotParameter] = field(init=False, default_factory=dict)
 
-    def __post_init__(self):
-        object.__setattr__(self, "parameters", {p.name: p for p in self.parameters})
+    def __post_init__(self, parameters_list: list[PlotParameter]):
+        object.__setattr__(self, "parameters", {p.name: p for p in parameters_list})
         object.__setattr__(self, "combiners", dict(self.baseline_combiners))
 
 
@@ -820,8 +821,8 @@ class CharmPlottingConfig(PlottingConfig):
     plots_dy_fsc_2d: list[Plot2D] = field(default_factory=list)
     compare_dcs_hypos: bool = True
 
-    def __post_init__(self):
-        super().__post_init__()
+    def __post_init__(self, parameters_list: list[PlotParameter]):
+        super().__post_init__(parameters_list)
         object.__setattr__(self, "combiners", {**self.combiners, **self.combiners_breakdown})
 
 
