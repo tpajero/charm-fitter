@@ -7,6 +7,12 @@ name = "charm_fitter"
 version = "0.1.0"
 description = "Plotting utils for CharmFitter"
 requires-python = ">=3.11"
+dependencies = [
+  "gc_core",
+  "matplotlib",
+  "numpy",
+  "scipy",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
