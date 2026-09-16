@@ -204,11 +204,21 @@ def text_size_pixels(text: str, fontsize: float) -> tuple[float, float]:
     """Get the size of the bounding box of a rendered text string in pixels."""
     if not text:
         return 0, 0
+
+    had_open_figure = bool(plt.get_fignums())
+    old_fig = plt.gcf() if had_open_figure else None
+    old_ax = plt.gca() if had_open_figure else None
+
     fig = plt.figure()
     t = plt.text(0, 0, text, fontsize=fontsize)
     fig.canvas.draw()
     bbox = t.get_window_extent(fig.canvas.get_renderer())
     plt.close(fig)
+
+    if had_open_figure:
+        plt.figure(old_fig.number)
+        plt.sca(old_ax)
+
     return bbox.width, bbox.height
 
 

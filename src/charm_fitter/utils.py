@@ -5,7 +5,7 @@ import re
 import subprocess
 from collections.abc import Callable
 from contextlib import contextmanager
-from dataclasses import KW_ONLY, dataclass, field
+from dataclasses import KW_ONLY, InitVar, dataclass, field
 from enum import Enum
 from multiprocessing import Pool
 from pathlib import Path
@@ -69,6 +69,41 @@ class MixParam(Enum):
     PHENO = "pheno"
     THEO = "theo"
     D0_TO_KPI = "d0-to-kpi"
+
+
+# List of parameters that exist only in specific parametrisations of aCP(h- h+).
+ACP_DY_PARAMS = ["DY_KK", "DY_PP"]
+ACP_COT_PARAMS = ["cot_delta_KK", "cot_delta_PP"]
+R_DELTA_PARAMS = ["r_KK", "r_PP", "delta_KK", "delta_PP"]
+
+# List of parameters that exist only in specific parametrisations of mixing.
+PHENO_PARAMS = ["x", "y", "qop", "phi"]
+THEO_PARAMS = ["x12", "y12", "phiM", "phiG"]
+D0_TO_KPI_PARAMS = ["yp", "dyp", "xp2", "dxp2"]
+
+# List of parameters defined in CharmParameters.cpp
+SCAN_PARAMS = (
+    ACP_DY_PARAMS
+    + ACP_COT_PARAMS
+    + R_DELTA_PARAMS
+    + PHENO_PARAMS
+    + THEO_PARAMS
+    + D0_TO_KPI_PARAMS
+    + [
+        "Acp_KK",
+        "Acp_PP",
+        "Acp_KP",
+        "Delta_Kpi",
+        "Delta_Kpipi0",
+        "Delta_K3pi",
+        "r_Kpi",
+        "r_K3pi",
+        "r_Kpipi0",
+        "k_K3pi",
+        "k_Kpipi0",
+        "F_pipipi0",
+    ]
+)
 
 
 # Utility functions and classes for 1D and 2D scans and plots ----------------------------------------------------------
@@ -177,41 +212,6 @@ class _Scan:
     fix_parfile: str = ""
 
     def __post_init__(self):
-
-        # List of parameters that exist only in specific parametrisations of aCP(h- h+).
-        ACP_DY_PARAMS = ["DY_KK", "DY_PP"]
-        ACP_COT_PARAMS = ["cot_delta_KK", "cot_delta_PP"]
-        R_DELTA_PARAMS = ["r_KK", "r_PP", "delta_KK", "delta_PP"]
-
-        # List of parameters that exist only in specific parametrisations of mixing.
-        PHENO_PARAMS = ["x", "y", "qop", "phi"]
-        THEO_PARAMS = ["x12", "y12", "phiM", "phiG"]
-        D0_TO_KPI_PARAMS = ["yp", "dyp", "xp2", "dxp2"]
-
-        # List of parameters defined in CharmParameters.cpp
-        SCAN_PARAMS = (
-            ACP_DY_PARAMS
-            + ACP_COT_PARAMS
-            + R_DELTA_PARAMS
-            + PHENO_PARAMS
-            + THEO_PARAMS
-            + D0_TO_KPI_PARAMS
-            + [
-                "Acp_KK",
-                "Acp_PP",
-                "Acp_KP",
-                "Delta_Kpi",
-                "Delta_Kpipi0",
-                "Delta_K3pi",
-                "r_Kpi",
-                "r_K3pi",
-                "r_Kpipi0",
-                "k_K3pi",
-                "k_Kpipi0",
-                "F_pipipi0",
-            ]
-        )
-
         pars = self._pars()
 
         if any(p not in SCAN_PARAMS for p in pars):
@@ -788,15 +788,16 @@ class PlottingConfig:
         plots_2d: 2D plots to be produced.
     """
 
-    parameters: list[PlotParameter]
+    parameters_list: InitVar[list[PlotParameter]]
     baseline_combiners: dict[str, Combiner]
     _: KW_ONLY
     plots_1d: list[Plot1D] = field(default_factory=list)
     plots_2d: list[Plot2D] = field(default_factory=list)
     combiners: dict[str, Combiner] = field(init=False, default_factory=dict)
+    parameters: dict[str, PlotParameter] = field(init=False, default_factory=dict)
 
-    def __post_init__(self):
-        object.__setattr__(self, "parameters", {p.name: p for p in self.parameters})
+    def __post_init__(self, parameters_list: list[PlotParameter]):
+        object.__setattr__(self, "parameters", {p.name: p for p in parameters_list})
         object.__setattr__(self, "combiners", dict(self.baseline_combiners))
 
 
@@ -820,8 +821,8 @@ class CharmPlottingConfig(PlottingConfig):
     plots_dy_fsc_2d: list[Plot2D] = field(default_factory=list)
     compare_dcs_hypos: bool = True
 
-    def __post_init__(self):
-        super().__post_init__()
+    def __post_init__(self, parameters_list: list[PlotParameter]):
+        super().__post_init__(parameters_list)
         object.__setattr__(self, "combiners", {**self.combiners, **self.combiners_breakdown})
 
 
