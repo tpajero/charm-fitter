@@ -1,6 +1,7 @@
 // Core
 #include <Combiner.h>
 #include <GammaComboEngine.h>
+#include <OptParser.h>
 
 // CharmFitter
 #include <CharmUtils.h>
@@ -27,6 +28,7 @@
 #include <PDF_yCP_minus_yCP_RS.h>
 #include <PDF_yCP_plus_yCP_RS.h>
 
+#include <algorithm>
 #include <format>
 #include <iostream>
 #include <set>
@@ -125,8 +127,8 @@ namespace {
               << "      Changes the combiner name to <combiner-name>_<mix>.\n\n"
               << "  --dcs-cpv\n"
               << "      Allow for CP violation in doubly Cabibbo-suppressed D0 -> K+ pi- decays.\n"
-              << "      Changes the combiner name to <combiner-name>_dcs-cpv. If not set, `--fix Acp_KP=0` is\n"
-              << "      automatically passed to GammaComboEngine.\n\n"
+              << "      Changes the combiner name to <combiner-name>_dcs-cpv. If not set, the `Acp_KP` parameter\n"
+              << "      is automatically fixed to zero in all combiners.\n\n"
               << "-------------------------------------------------------------------------------------------"
               << std::endl;
   }
@@ -175,14 +177,10 @@ namespace {
     if (!help) utils::check_compatibility(dy_fsc_hypo, acp_param);
 
     // Prepare the arguments to pass to GammaComboEngine
-    std::vector<const char*> extra_args;
-    if (!dcs_cpv) { extra_args.insert(extra_args.end(), {"--fix", "Acp_KP=0"}); }
-
     std::vector<char*> combiner_argv = {};
     for (int i = 0; i < argc; ++i) {
       if (!to_remove.contains(i)) combiner_argv.emplace_back(argv[i]);
     }
-    for (auto arg : extra_args) combiner_argv.emplace_back(const_cast<char*>(arg));
 
     return {dy_fsc_hypo, acp_param, mix_param, dcs_cpv, help, std::move(combiner_argv)};
   }
@@ -200,8 +198,8 @@ namespace {
  *   --mix [pheno|theo] Choose the mixing parametrisation (default: `theo`).
  *       Changes the combiner name to <combiner_name>_<mix>, where <mix> is one of `pheno` or `theo`.
  *   --dcs-cpv Do allow for CP violation in doubly Cabibbo-suppressed D0 -> K+ pi- decays.
- *       It changes the combiner name to `<combiner_name>_dcs-cpv`. If not set, the argument `--fix Acp_KP=0` is
- *       automatically passed to GammaComboEngine.
+ *       It changes the combiner name to `<combiner_name>_dcs-cpv`. If not set, Acp_KP=0 is added to the fixed
+ *       parameters of every combiner.
  *
  * Passing "-h" or "--help" prints the options above, followed by the full list of GammaCombo options.
  */
@@ -228,6 +226,25 @@ int main(int argc, char* argv[]) {
                                           utils::get_id(acp_param), utils::get_id(mix_param));
   if (dcs_cpv) { combiner_name += "_dcs-cpv"; }
   GammaComboEngine gc(combiner_name, combiner_argv.size(), &combiner_argv[0]);
+
+  // A single --fix applies to every combiner, while multiple --fix are matched one-to-one to the -c arguments (and
+  // combiners beyond the last --fix get none).
+  if (!dcs_cpv) {
+    for (const auto& pars : gc.getArg()->fixParameters) {
+      if (std::ranges::any_of(pars, [](const auto& p) { return p.name == "Acp_KP"; }))
+        throw std::runtime_error("main ERROR Option \"--fix Acp_KP=...\" requires \"--dcs-cpv\"");
+    }
+    for (const auto& pars : gc.getArg()->fixParametersFromParfile) {
+      if (std::ranges::any_of(pars, [](const auto& p) { return p == "Acp_KP"; }))
+        throw std::runtime_error("main ERROR Option \"--fix-from-parfile Acp_KP\" requires \"--dcs-cpv\"");
+    }
+    auto& fix = gc.getArg()->fixParameters;
+    if (fix.empty())
+      fix.emplace_back();
+    else if (fix.size() > 1)
+      fix.resize(std::max(fix.size(), gc.getArg()->combid.size()));
+    for (auto& pars : fix) pars.push_back({"Acp_KP", 0., true});
+  }
 
   ///////////////////////////////////////////////////
   //
