@@ -251,7 +251,7 @@ class _Scan:
         if self.dy_fsc != DYFsc.NONE:
             extra_args += f" --dy-fsc {self.dy_fsc.value}"
         if self.acp_param != AcpParam.ACP_DY:
-            extra_args += f" --acp-param {self.acp_param.value}"
+            extra_args += f" --acp {self.acp_param.value}"
         if self.mix_param == MixParam.PHENO:
             extra_args += " --mix pheno"
         if self.parfile:
