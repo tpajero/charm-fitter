@@ -226,6 +226,8 @@ int main(int argc, char* argv[]) {
                                           utils::get_id(acp_param), utils::get_id(mix_param));
   if (dcs_cpv) { combiner_name += "_dcs-cpv"; }
   GammaComboEngine gc(combiner_name, combiner_argv.size(), &combiner_argv[0]);
+  // Batch jobs re-run this executable, so they need the CharmFitter-specific options stripped from combiner_argv
+  gc.setBatchScriptArgs(argc, argv);
 
   // A single --fix applies to every combiner, while multiple --fix are matched one-to-one to the -c arguments (and
   // combiners beyond the last --fix get none).
