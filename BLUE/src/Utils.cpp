@@ -35,6 +35,12 @@ namespace {
     }
   }
 
+  [[noreturn]] void print_help_and_exit(const std::string& usage, const BLUE::Combinations& combinations) {
+    std::cout << usage;
+    print_help(combinations);
+    std::exit(EXIT_SUCCESS);
+  }
+
   /// Build a name -> index map for the estimates, throwing on a duplicate name.
   std::map<std::string, int> index_estimates(const BLUE::Estimates& estimates) {
     std::map<std::string, int> index;
@@ -74,17 +80,13 @@ namespace BLUE {
                                argv[0]);
       std::exit(EXIT_FAILURE);
     }
-    auto print_help_and_exit = [&argv](const Combinations& combinations) {
-      std::cout << std::format("\nUsage: {} <n-combination>\n\n", argv[0]);
-      print_help(combinations);
-      std::exit(EXIT_SUCCESS);
-    };
-    if (std::string(argv[1]) == "-h" || std::string(argv[1]) == "--help") { print_help_and_exit(combinations); }
+    const auto usage = std::format("\nUsage: {} <n-combination>\n\n", argv[0]);
+    if (std::string(argv[1]) == "-h" || std::string(argv[1]) == "--help") { print_help_and_exit(usage, combinations); }
     try {
       return std::stoi(argv[1]);
     } catch (const std::exception& e) {
       std::cerr << std::format("Error: Invalid argument '{}'\n", argv[1]);
-      print_help_and_exit(combinations);
+      print_help_and_exit(usage, combinations);
     }
   }
 
@@ -97,15 +99,11 @@ namespace BLUE {
     };
     if (argc < 2 || argc > 3) { print_use_and_exit(); }
 
-    auto print_help_and_exit = [&argv](const Combinations& combinations) {
-      std::cout << std::format("\nUsage: {} <n-combination> [--single-avg]\n"
-                               "--single-avg: Force a single average of all final states.\n\n",
-                               argv[0]);
-      print_help(combinations);
-      std::exit(EXIT_SUCCESS);
-    };
+    const auto usage = std::format("\nUsage: {} <n-combination> [--single-avg]\n"
+                                   "--single-avg: Force a single average of all final states.\n\n",
+                                   argv[0]);
     if (argc == 2 && (std::string(argv[1]) == "-h" || std::string(argv[1]) == "--help")) {
-      print_help_and_exit(combinations);
+      print_help_and_exit(usage, combinations);
     }
     if (argc == 3 && std::string(argv[2]) != "--single-avg") {
       std::cerr << std::format("Error: Invalid argument '{}'\n", argv[2]);
@@ -116,7 +114,7 @@ namespace BLUE {
       return {std::stoi(argv[1]), single_avg};
     } catch (const std::exception& e) {
       std::cerr << std::format("Error: Invalid argument '{}'\n", argv[1]);
-      print_help_and_exit(combinations);
+      print_help_and_exit(usage, combinations);
     }
   }
 
