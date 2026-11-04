@@ -1,6 +1,7 @@
 // Core
 #include <Combiner.h>
 #include <GammaComboEngine.h>
+#include <OptParser.h>
 
 // CharmFitter
 #include <CharmUtils.h>
@@ -27,6 +28,7 @@
 #include <PDF_yCP_minus_yCP_RS.h>
 #include <PDF_yCP_plus_yCP_RS.h>
 
+#include <algorithm>
 #include <format>
 #include <iostream>
 #include <set>
@@ -115,18 +117,16 @@ namespace {
     std::cout << "charm-combo: Global fit of charm-quark mixing and CP-violation measurements\n\n"
               << "CharmFitter-specific options (in addition to all GammaCombo options listed below):\n\n"
               << "  --dy-fsc [" << join_ids(supported_dyfsc) << "]  (default: " << utils::get_id(dy_fsc::none) << ")\n"
-              << "      Choose the final-state correction to be applied to DeltaY(h- h+).\n"
-              << "      Changes the combiner name to <combiner-name>_<dy_fsc>-dyfsc.\n\n"
+              << "      Choose the final-state correction to be applied to DeltaY(h- h+).\n\n"
               << "  --acp [" << join_ids(supported_acp) << "]  (default: " << utils::get_id(acp::acp_dy) << ")\n"
-              << "      Choose the parametrisation for aCP(h- h+).\n"
-              << "      Changes the combiner name to <combiner-name>_<acp>.\n\n"
+              << "      Choose the parametrisation for aCP(h- h+).\n\n"
               << "  --mix [" << join_ids(supported_mix) << "]  (default: " << utils::get_id(mix::theo) << ")\n"
-              << "      Choose the mixing parametrisation.\n"
-              << "      Changes the combiner name to <combiner-name>_<mix>.\n\n"
+              << "      Choose the mixing parametrisation.\n\n"
               << "  --dcs-cpv\n"
               << "      Allow for CP violation in doubly Cabibbo-suppressed D0 -> K+ pi- decays.\n"
-              << "      Changes the combiner name to <combiner-name>_dcs-cpv. If not set, `--fix Acp_KP=0` is\n"
-              << "      automatically passed to GammaComboEngine.\n\n"
+              << "      If not set, the `Acp_KP` parameter is automatically fixed to zero in all combiners.\n\n"
+              << "The chosen configuration is encoded in the name of every combiner (and hence in all output\n"
+              << "file names) as <combiner-name>_<dy_fsc>-dyfsc_<acp>_<mix>[_dcs-cpv].\n\n"
               << "-------------------------------------------------------------------------------------------"
               << std::endl;
   }
@@ -175,14 +175,10 @@ namespace {
     if (!help) utils::check_compatibility(dy_fsc_hypo, acp_param);
 
     // Prepare the arguments to pass to GammaComboEngine
-    std::vector<const char*> extra_args;
-    if (!dcs_cpv) { extra_args.insert(extra_args.end(), {"--fix", "Acp_KP=0"}); }
-
     std::vector<char*> combiner_argv = {};
     for (int i = 0; i < argc; ++i) {
       if (!to_remove.contains(i)) combiner_argv.emplace_back(argv[i]);
     }
-    for (auto arg : extra_args) combiner_argv.emplace_back(const_cast<char*>(arg));
 
     return {dy_fsc_hypo, acp_param, mix_param, dcs_cpv, help, std::move(combiner_argv)};
   }
@@ -193,15 +189,13 @@ namespace {
  *
  * Accepts all command-line arguments of GammaComboEngine, and in addition:
  *   --dy-fsc [no|partial|full] Choose the final-state correction to be applied to DeltaY(h- h+).
- *       Changes the combiner name to <combiner_name>_<dy_fsc>-dyfsc, where <dy_fsc> is one of `no`, `partial`,
- *       or `full`.
  *   --acp [acp-dy|acp-cot|r-delta] Choose the parametrisation for aCP(h- h+) (default: `acp-dy`).
- *       Changes the combiner name to <combiner_name>_<acp>, where <acp> is one of `acp-dy`, `acp-cot` or `r-delta`.
  *   --mix [pheno|theo] Choose the mixing parametrisation (default: `theo`).
- *       Changes the combiner name to <combiner_name>_<mix>, where <mix> is one of `pheno` or `theo`.
  *   --dcs-cpv Do allow for CP violation in doubly Cabibbo-suppressed D0 -> K+ pi- decays.
- *       It changes the combiner name to `<combiner_name>_dcs-cpv`. If not set, the argument `--fix Acp_KP=0` is
- *       automatically passed to GammaComboEngine.
+ *       If not set, Acp_KP=0 is added to the fixed parameters of every combiner.
+ *
+ * The chosen configuration is encoded in the name of every combiner (and hence in all output file names) as
+ * `<combiner_name>_<dy_fsc>-dyfsc_<acp>_<mix>[_dcs-cpv]`.
  *
  * Passing "-h" or "--help" prints the options above, followed by the full list of GammaCombo options.
  */
@@ -224,10 +218,33 @@ int main(int argc, char* argv[]) {
               << std::noboolalpha << std::endl;
   }
 
-  std::string combiner_name = std::format("charm-combo_{}-dyfsc_{}_{}", utils::get_id(dy_fsc_hypo),
-                                          utils::get_id(acp_param), utils::get_id(mix_param));
-  if (dcs_cpv) { combiner_name += "_dcs-cpv"; }
-  GammaComboEngine gc(combiner_name, combiner_argv.size(), &combiner_argv[0]);
+  // The configuration is encoded in the combiner names rather than in the GammaComboEngine name, because the
+  // latter does not enter all output paths (e.g. the Plugin toy and batch-script directories)
+  std::string combiner_suffix =
+      std::format("_{}-dyfsc_{}_{}", utils::get_id(dy_fsc_hypo), utils::get_id(acp_param), utils::get_id(mix_param));
+  if (dcs_cpv) { combiner_suffix += "_dcs-cpv"; }
+  GammaComboEngine gc("charm-combo", combiner_argv.size(), &combiner_argv[0]);
+  // Batch jobs re-run this executable, so they need the CharmFitter-specific options stripped from combiner_argv
+  gc.setBatchScriptArgs(argc, argv);
+
+  // A single --fix applies to every combiner, while multiple --fix are matched one-to-one to the -c arguments (and
+  // combiners beyond the last --fix get none).
+  if (!dcs_cpv) {
+    for (const auto& pars : gc.getArg()->fixParameters) {
+      if (std::ranges::any_of(pars, [](const auto& p) { return p.name == "Acp_KP"; }))
+        throw std::runtime_error("main ERROR Option \"--fix Acp_KP=...\" requires \"--dcs-cpv\"");
+    }
+    for (const auto& pars : gc.getArg()->fixParametersFromParfile) {
+      if (std::ranges::any_of(pars, [](const auto& p) { return p == "Acp_KP"; }))
+        throw std::runtime_error("main ERROR Option \"--fix-from-parfile Acp_KP\" requires \"--dcs-cpv\"");
+    }
+    auto& fix = gc.getArg()->fixParameters;
+    if (fix.empty())
+      fix.emplace_back();
+    else if (fix.size() > 1)
+      fix.resize(std::max(fix.size(), gc.getArg()->combid.size()));
+    for (auto& pars : fix) pars.push_back({"Acp_KP", 0., true});
+  }
 
   ///////////////////////////////////////////////////
   //
@@ -461,6 +478,11 @@ int main(int argc, char* argv[]) {
   // Run
   //
   ///////////////////////////////////////////////////
+
+  for (const auto id : gc.getCombinersIds()) {
+    auto c = gc.getCombiner(id);
+    c->setName(c->getName() + combiner_suffix);
+  }
 
   gc.run();
 

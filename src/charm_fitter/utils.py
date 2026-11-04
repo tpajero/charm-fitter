@@ -251,7 +251,7 @@ class _Scan:
         if self.dy_fsc != DYFsc.NONE:
             extra_args += f" --dy-fsc {self.dy_fsc.value}"
         if self.acp_param != AcpParam.ACP_DY:
-            extra_args += f" --acp-param {self.acp_param.value}"
+            extra_args += f" --acp {self.acp_param.value}"
         if self.mix_param == MixParam.PHENO:
             extra_args += " --mix pheno"
         if self.parfile:
@@ -881,28 +881,33 @@ def _combiner_string(id: int | list[int]) -> str:
         return "0:+" + ",+".join([str(i) for i in sorted(id)])
 
 
-def _combiner_file_string(pdf_ids: list[int]):
-    return "empty+" + "+".join([str(pdf_id) for pdf_id in sorted(pdf_ids)])
+def _combiner_file_string(cname: str, combiner: Combiner, suffix: str) -> str:
+    """Get the combiner name used in the output file names of the combination executable."""
+    if isinstance(combiner.id, int):
+        return f"{cname}{suffix}"
+    # Combiners built on the fly with "-c 0:+N,..." are named after combiner 0, followed by the PDF IDs
+    return f"empty{suffix}+" + "+".join([str(pdf_id) for pdf_id in sorted(combiner.id)])
 
 
-def _get_prefix(
-    args_prefix: str,
+def _get_combiner_suffix(
     *,
     dy_fsc: DYFsc,
     acp_param: AcpParam,
     mix_param: MixParam,
     dcs_cpv: bool,
-):
-    """Get the prefix of the scanner ROOT file to read to produce Matplotlib plots."""
+) -> str:
+    """Get the suffix that the combination executable appends to the combiner names to encode its configuration.
+
+    Must match `combiner_suffix` in main/charm-combo.cpp.
+    """
     if mix_param == MixParam.D0_TO_KPI:
-        return args_prefix
+        return ""
 
-    args_prefix = args_prefix.replace("_scanner", f"_{dy_fsc.value}-dyfsc_{acp_param.value}_{mix_param.value}_scanner")
-
+    suffix = f"_{dy_fsc.value}-dyfsc_{acp_param.value}_{mix_param.value}"
     if dcs_cpv:
-        args_prefix = args_prefix.replace("_scanner", "_dcs-cpv_scanner")
+        suffix += "_dcs-cpv"
 
-    return args_prefix
+    return suffix
 
 
 def _dcs_cpv_label(dcs_cpv: bool | None, args: argparse.Namespace, cfg: PlottingConfig):
@@ -1138,26 +1143,25 @@ def plots_1d(
         i = 0
         for cname in plot.combiners:
             combiner = cfg.combiners[cname]
-            combiner_arg = cname if isinstance(combiner.id, int) else _combiner_file_string(combiner.id)
             for dcs_cpv in dcs_cpv_vals:
                 for dy_fsc in plot.dy_fsc:
                     scan = next((x for x in combiner.scans_1d if x.par == par.cf_par and x.dy_fsc == dy_fsc), None)
                     if scan is None:
                         raise ValueError(f"Cannot find 1D scan for parameter {par.cf_par} in combiner {cname}")
-                    prefix = _get_prefix(
-                        args.prefix,
+                    suffix = _get_combiner_suffix(
                         dy_fsc=scan.dy_fsc,
                         acp_param=scan.acp_param,
                         mix_param=scan.mix_param,
                         dcs_cpv=dcs_cpv,
                     )
+                    combiner_arg = _combiner_file_string(cname, combiner, suffix)
                     label = (
                         (combiner.title + _dcs_cpv_label(dcs_cpv, args, cfg))
                         if len(plot.dy_fsc) == 1
                         else dy_fsc_labels[dy_fsc]
                     )
                     plotter.add_scan(
-                        f"{prefix}_{combiner_arg}",
+                        f"{args.prefix}_{combiner_arg}",
                         pars=[par.cf_par],
                         label=label,
                         col=opts.colors[i],
@@ -1229,7 +1233,6 @@ def plots_2d(
         i = 0
         for cname in plot.combiners:
             combiner = cfg.combiners[cname]
-            combiner_arg = cname if isinstance(combiner.id, int) else _combiner_file_string(combiner.id)
             for dcs_cpv in dcs_cpv_vals:
                 for dy_fsc in plot.dy_fsc:
                     scan = next(
@@ -1244,15 +1247,15 @@ def plots_2d(
                         raise ValueError(
                             f"Cannot find 2D scan for parameters {xpar.name} and {ypar.name} in combiner {cname}"
                         )
-                    prefix = _get_prefix(
-                        args.prefix,
+                    suffix = _get_combiner_suffix(
                         dy_fsc=scan.dy_fsc,
                         acp_param=scan.acp_param,
                         mix_param=scan.mix_param,
                         dcs_cpv=dcs_cpv,
                     )
+                    combiner_arg = _combiner_file_string(cname, combiner, suffix)
                     plotter.add_scan(
-                        f"{prefix}_{combiner_arg}",
+                        f"{args.prefix}_{combiner_arg}",
                         pars=[xpar.name, ypar.name],
                         label=(combiner.title + _dcs_cpv_label(dcs_cpv, args, cfg))
                         if len(plot.dy_fsc) == 1
