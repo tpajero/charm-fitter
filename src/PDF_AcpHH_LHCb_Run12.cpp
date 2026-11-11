@@ -82,7 +82,7 @@ void PDF_AcpHH_LHCb_Run12::setObservables(const TString c) {
 void PDF_AcpHH_LHCb_Run12::setUncertainties(const TString c) {
   obsErrSource = "https://cds.cern.ch/record/2799916/";
   StatErr = {15.0e-4, 15.0e-4, 8.8e-4, 6.7e-4, 16.0e-4, 8.0e-4, 8.0e-4, 3.2e-4};
-  SystErr = {10.0e-4, 10.0e-4, 1.6e-4, 2.0e-4, 8.0e-4, 3.0e-4, 5.0e-4, 0.9e-4};
+  SystErr = {9.7e-4, 10.0e-4, 1.6e-4, 2.0e-4, 8.0e-4, 3.0e-4, 5.0e-4, 0.9e-4};
 }
 
 void PDF_AcpHH_LHCb_Run12::setCorrelations(const TString c) {
@@ -102,16 +102,30 @@ void PDF_AcpHH_LHCb_Run12::setCorrelations(const TString c) {
   };
   corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
 
+  /**
+   * The correlation of the two ACP(KK) Run 1 measurements is calculated from:
+   * - Tab. 43 of https://cds.cern.ch/record/1556318;
+   * - Tab. 27 of https://cds.cern.ch/record/2126060.
+   *
+   * The following uncertainties are taken to be 100% correlated,
+   *                 ACP(KK) mu  ACP(KK) prompt
+   * - Weighting     5.3e-4      6.2e-4
+   * - Weighting toy 3.0e-4      5.4e-4
+   * - K0 asymmetry  1.4e-4      1.4e-4
+   * while the others are assumed to be uncorrelated.
+   *
+   * The correlation between the two ACP(KK) measurements is then (1.4**2 + 5.3 * 6.2 + 3.0 * 5.4) / (9.7 * 10.0) = 0.53
+   */
   std::vector<double> dataSyst = {
       // clang-format off
-      1., 1., 0., 0.,   0.40, 0., 0., 0.,  // ACP(KK) Run 1 mu
-          1., 0., 0.,   0.,   0., 0., 0.,  // ACP(KK) Run 1 prompt
-              1., 0.28, 0.,   0., 0., 0.,  // ACP(KK) Run 2 CDP
-                  1.,   0.,   0., 0., 0.,  // ACP(KK) Run 2 CDS
-                        1.,   0., 0., 0.,  // DeltaACP Run 1 mu
-                              1., 0., 0.,  // DeltaACP Run 1 prompt
-                                  1., 0.,  // DeltaACP Run 2 mu
-                                      1.,  // DeltaACP Run 2 prompt
+      1., 0.53, 0., 0.,   0.40, 0., 0., 0.,  // ACP(KK) Run 1 mu
+          1.  , 0., 0.,   0.,   0., 0., 0.,  // ACP(KK) Run 1 prompt
+                1., 0.28, 0.,   0., 0., 0.,  // ACP(KK) Run 2 CDP
+                    1.,   0.,   0., 0., 0.,  // ACP(KK) Run 2 CDS
+                          1.,   0., 0., 0.,  // DeltaACP Run 1 mu
+                                1., 0., 0.,  // DeltaACP Run 1 prompt
+                                    1., 0.,  // DeltaACP Run 2 mu
+                                        1.,  // DeltaACP Run 2 prompt
       // clang-format on
   };
   corSystMatrix = Utils::buildCorMatrix(nObs, dataSyst);
