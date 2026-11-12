@@ -5,7 +5,7 @@
 
 // CharmFitter
 #include <CharmUtils.h>
-#include <PDF_AcpHH_LHCb_Run12.h>
+#include <PDF_AcpHH.h>
 #include <PDF_BES_CLEO_K3pi_Kpipi0.h>
 #include <PDF_BES_Kpi.h>
 #include <PDF_BES_Kpi_pipipi0.h>
@@ -301,11 +301,11 @@ int main(int argc, char* argv[]) {
   gc.addPdf(201, new PDF_DY("WA-2020", dy_fsc_hypo, acp_param, mix_param),       "DY           WA       2020                  ");
   gc.addPdf(202, new PDF_DY("WA-2021", dy_fsc_hypo, acp_param, mix_param),       "DY           WA       2021                  ");
 
-  gc.addSubsetPdf(220, new PDF_AcpHH_LHCb_Run12(dy_fsc_hypo, acp_param, mix_param), 0, 1, 4, 5,
+  gc.addSubsetPdf(220, new PDF_AcpHH("LHCb-R12", dy_fsc_hypo, acp_param, mix_param), 0, 1, 4, 5,
                                                                                  "ACP(KK/PP)   LHCb     Run1                  ");  // Superseded by 221, 222
-  gc.addSubsetPdf(221, new PDF_AcpHH_LHCb_Run12(dy_fsc_hypo, acp_param, mix_param), 0, 1, 4, 5, 6, 7,
+  gc.addSubsetPdf(221, new PDF_AcpHH("LHCb-R12", dy_fsc_hypo, acp_param, mix_param), 0, 1, 4, 5, 6, 7,
                                                                                  "ACP(KK/PP)   LHCb     DeltaACP R12, ACPKK R1");  // Supersedes 220, superseded by 222
-  gc.addPdf(222, new PDF_AcpHH_LHCb_Run12(dy_fsc_hypo, acp_param, mix_param),    "ACP(KK/PP)   LHCb     Run1+2                ");  // Supersedes 220, 221
+  gc.addPdf(222, new PDF_AcpHH("LHCb-R12", dy_fsc_hypo, acp_param, mix_param),   "ACP(KK/PP)   LHCb     Run1+2                ");  // Supersedes 220, 221
 
   // D0 -> K+ pi-
 
