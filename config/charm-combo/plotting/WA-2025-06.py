@@ -51,7 +51,7 @@ _BASELINE_COMBINERS = {
 _COMBINERS_BREAKDOWN = {
     "ext-kpi": Combiner(
         [1, 21, 40, 41],
-        r"CLEO/BES $D^0 \to K^\pm \pi^\mp$",
+        r"CLEO/BESIII $D \to K^\pm \pi^\mp$",
         col="y",
         ls="dash3dots",
         scans_2d=[
@@ -73,7 +73,24 @@ _COMBINERS_BREAKDOWN = {
             Scan2D(
                 "Delta_Kpi",
                 "r_Kpi",
-                xrange=Range((-1.35, 0.55)),
+                xrange=Range((-1.35, 0.75)),
+                yrange=Range((5.81e-2, 5.92e-2)),
+                parfile="config/charm-combo/start/WA-2025-06-breakdown-kpi-rd.dat",
+                extra_args="--npoints2dx 200",
+            ),
+        ],
+    ),
+    "lhcb-hhprime": Combiner(
+        # LHCb D0 -> K pi and yCP(hh) - yCP(RS)
+        [140, 141, 286, 288],
+        r"LHCb $D^0 \to h^+ h^{'-}$",
+        col="b",
+        ls="shortdash",
+        scans_2d=[
+            Scan2D(
+                "Delta_Kpi",
+                "r_Kpi",
+                xrange=Range((-1.35, 0.75)),
                 yrange=Range((5.81e-2, 5.92e-2)),
                 parfile="config/charm-combo/start/WA-2025-06-breakdown-kpi-rd.dat",
                 extra_args="--npoints2dx 200",
@@ -298,7 +315,7 @@ _PLOTS_BREAKDOWN = [
     Plot2D(
         _BREAKDOWN_MIX_COMBOS,
         ("x", "y"),
-        xrange=Range((-7.0, 12.0), unit="1e-3"),
+        xrange=Range((-5.0, 10.0), unit="1e-3"),
         yrange=Range((2.0, 10.0), unit="1e-3"),
         combiners_label=_BASELINE_COMBINER,
         levels=2,
@@ -329,9 +346,9 @@ _PLOTS_BREAKDOWN = [
         levels=2,
     ),
     Plot2D(
-        ["ext-kpi", "lhcb-kpi", _BASELINE_COMBINER],
+        ["ext-kpi", "lhcb-kpi", "lhcb-hhprime", _BASELINE_COMBINER],
         ("Delta_Kpi", "r_Kpi"),
-        xrange=Range((-1.3, 0.5), unit="rad"),
+        xrange=Range((-1.3, 0.7), unit="rad"),
         yrange=Range((5.6, 6.1), unit="1e-2"),
         combiners_label=_BASELINE_COMBINER,
         levels=2,
