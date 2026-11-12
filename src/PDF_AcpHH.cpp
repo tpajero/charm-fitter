@@ -54,6 +54,109 @@ const std::map<std::string, PDF_AcpHH::Dataset>& PDF_AcpHH::datasets() {
   static const std::map<std::string, Dataset> datasets = [] {
     std::map<std::string, Dataset> d;
 
+    d["BaBar"] = {
+        .source = "https://doi.org/10.1103/PhysRevLett.100.061803",
+        .measurements =
+            {
+                // clang-format off
+                // type            name                  title                                       avg. times                value     stat     syst
+                {ObsType::acp_kk,  "acp_d0_to_kk_babar", "#it{A_{CP}(K^{+}K^{#minus})} BaBar",       {constants::d0_lifetime},  0.0e-3,  3.4e-3,  1.3e-3},
+                {ObsType::acp_pp,  "acp_d0_to_pp_babar", "#it{A_{CP}(#pi^{+}#pi^{#minus})} BaBar",   {constants::d0_lifetime}, -2.4e-3,  5.2e-3,  2.2e-3},
+                // clang-format on
+            },
+        /**
+         * The statistical uncertainties include that of the soft-pion efficiency map, 1.0e-3 for both modes, which is
+         * measured on the same D0 -> K- pi+ sample and is thus fully correlated.
+         *
+         * The correlation is then (1.0 * 1.0) / (3.4 * 5.2) = 0.06.
+         */
+        .cor_stat =
+            {
+                // clang-format off
+                1., 0.06,  // ACP(KK)
+                    1.,    // ACP(pipi)
+                     // clang-format on
+            },
+        /**
+         * From Tab. II, the soft-pion-correction uncertainty is fully correlated (it is evaluated on the K+K- sample
+         * and assigned to both modes), while those from the PDF shapes and the ACP extraction are uncorrelated (the
+         * latter is driven by the sample size),
+         *                         ACP(KK)  ACP(pipi)
+         * - Soft pion correction  0.08%    0.08%
+         *
+         * The correlation is then (0.08 * 0.08) / (0.13 * 0.22) = 0.22.
+         */
+        .cor_syst =
+            {
+                // clang-format off
+                1., 0.22,  // ACP(KK)
+                    1.,    // ACP(pipi)
+                     // clang-format on
+            },
+    };
+
+    d["Belle"] = {
+        .source = "https://doi.org/10.1016/j.physletb.2008.10.052",
+        .measurements =
+            {
+                // clang-format off
+                // type            name                  title                                       avg. times                value     stat     syst
+                {ObsType::acp_kk,  "acp_d0_to_kk_belle", "#it{A_{CP}(K^{+}K^{#minus})} Belle",       {constants::d0_lifetime}, -4.3e-3,  3.0e-3,  1.1e-3},
+                {ObsType::acp_pp,  "acp_d0_to_pp_belle", "#it{A_{CP}(#pi^{+}#pi^{#minus})} Belle",   {constants::d0_lifetime},  4.3e-3,  5.2e-3,  1.2e-3},
+                // clang-format on
+            },
+        .cor_stat =
+            {
+                // clang-format off
+                1., 0.,  // ACP(KK)
+                    1.,  // ACP(pipi)
+                     // clang-format on
+            },
+        /**
+         * From Tab. 1, the slow-pion-correction and ACP-extraction uncertainties are fully correlated, while those
+         * from signal counting are uncorrelated,
+         *                         ACP(KK)  ACP(pipi)
+         * - Slow pion corrections 0.10%    0.10%
+         * - ACP extraction        0.03%    0.04%
+         *
+         * The correlation is then (0.10 * 0.10 + 0.03 * 0.04) / (0.11 * 0.12) = 0.85.
+         */
+        .cor_syst =
+            {
+                // clang-format off
+                1., 0.85,  // ACP(KK)
+                    1.,    // ACP(pipi)
+                     // clang-format on
+            },
+    };
+
+    d["CDF"] = {
+        .source = "CDF internal note (courtesy of Angelo Di Canto)",
+        /**
+         * The average decay times are taken from https://doi.org/10.1103/PhysRevD.85.012009, while the values and
+         * uncertainties are the combination of https://arxiv.org/abs/1208.2517, which also includes the DeltaACP
+         * results of https://doi.org/10.1103/PhysRevLett.109.111801.
+         *
+         * The correlation matrix of the three original results is
+         *              ACP(KK)  ACP(pipi)  DeltaACP
+         * - ACP(KK)    1        0.2930     0.4815
+         * - ACP(pipi)           1         -0.6970
+         * - DeltaACP                       1
+         *
+         * The two values below and their correlation come from the combination of these three results.
+         */
+        .measurements =
+            {
+                // clang-format off
+                // type            name                title                                   avg. times                       value     stat     syst
+                {ObsType::acp_kk,  "acp_d0_to_kk_cdf", "#it{A_{CP}(K^{+}K^{#minus})} CDF",     {2.65 * constants::d0_lifetime}, -3.2e-3,  2.1e-3,  0.},
+                {ObsType::acp_pp,  "acp_d0_to_pp_cdf", "#it{A_{CP}(#pi^{+}#pi^{#minus})} CDF", {2.40 * constants::d0_lifetime},  3.1e-3,  2.2e-3,  0.},
+                // clang-format on
+            },
+        .cor_stat = {1., 0.412, 1.},
+        .cor_syst = {1., 0., 1.},
+    };
+
     d["LHCb-R12"] = {
         // Values, uncertainties, correlations and average decay times from https://cds.cern.ch/record/2799916/
         .source = "https://cds.cern.ch/record/2799916/",
