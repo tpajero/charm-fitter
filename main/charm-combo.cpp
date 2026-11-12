@@ -5,7 +5,7 @@
 
 // CharmFitter
 #include <CharmUtils.h>
-#include <PDF_AcpHH_LHCb_Run12.h>
+#include <PDF_AcpHH.h>
 #include <PDF_BES_CLEO_K3pi_Kpipi0.h>
 #include <PDF_BES_Kpi.h>
 #include <PDF_BES_Kpi_pipipi0.h>
@@ -43,7 +43,7 @@ namespace {
       pdfs = {
           140,  // yCP - yCP(RS)
           190,  // DeltaY(h- h+)
-          220,  // DeltaACP, ACP(K- K+)
+          223,  // DeltaACP, ACP(K- K+)
           281,  // D0 -> K+ pi-          Prompt
           282,  // D0 -> K+ pi-          DT
           322,  // D0 -> KS pi- pi+      Prompt 2011 (AmAna)
@@ -55,7 +55,7 @@ namespace {
           140,  // yCP - yCP(RS)         Run 1
           141,  // yCP - yCP(RS)         Run 2
           191,  // DeltaY(h- h+)         Run 1+2
-          222,  // DeltaACP, ACP(K- K+)  Run 1+2
+          225,  // DeltaACP, ACP(K- K+)  Run 1+2
           286,  // D0 -> K+ pi-          Run 1+2 prompt (App. B)
           288,  // D0 -> K+ pi-          Run 1+2 DT
           // 310,  // DeltaY(K- pi+)        Run 2
@@ -301,11 +301,14 @@ int main(int argc, char* argv[]) {
   gc.addPdf(201, new PDF_DY("WA-2020", dy_fsc_hypo, acp_param, mix_param),       "DY           WA       2020                  ");
   gc.addPdf(202, new PDF_DY("WA-2021", dy_fsc_hypo, acp_param, mix_param),       "DY           WA       2021                  ");
 
-  gc.addSubsetPdf(220, new PDF_AcpHH_LHCb_Run12(dy_fsc_hypo, acp_param, mix_param), 0, 1, 4, 5,
-                                                                                 "ACP(KK/PP)   LHCb     Run1                  ");  // Superseded by 221, 222
-  gc.addSubsetPdf(221, new PDF_AcpHH_LHCb_Run12(dy_fsc_hypo, acp_param, mix_param), 0, 1, 4, 5, 6, 7,
-                                                                                 "ACP(KK/PP)   LHCb     DeltaACP R12, ACPKK R1");  // Supersedes 220, superseded by 222
-  gc.addPdf(222, new PDF_AcpHH_LHCb_Run12(dy_fsc_hypo, acp_param, mix_param),    "ACP(KK/PP)   LHCb     Run1+2                ");  // Supersedes 220, 221
+  gc.addPdf(220, new PDF_AcpHH("BaBar", dy_fsc_hypo, acp_param, mix_param),      "ACP(KK/PP)   BaBar                           ");
+  gc.addPdf(221, new PDF_AcpHH("Belle", dy_fsc_hypo, acp_param, mix_param),      "ACP(KK/PP)   Belle                           ");
+  gc.addPdf(222, new PDF_AcpHH("CDF", dy_fsc_hypo, acp_param, mix_param),        "ACP(KK/PP)   CDF                             ");
+  gc.addSubsetPdf(223, new PDF_AcpHH("LHCb-R12", dy_fsc_hypo, acp_param, mix_param), 0, 1, 4, 5,
+                                                                                 "ACP(KK/PP)   LHCb     Run1                  ");  // Superseded by 224, 225
+  gc.addSubsetPdf(224, new PDF_AcpHH("LHCb-R12", dy_fsc_hypo, acp_param, mix_param), 0, 1, 4, 5, 6, 7,
+                                                                                 "ACP(KK/PP)   LHCb     DeltaACP R12, ACPKK R1");  // Supersedes 223, superseded by 225
+  gc.addPdf(225, new PDF_AcpHH("LHCb-R12", dy_fsc_hypo, acp_param, mix_param),   "ACP(KK/PP)   LHCb     Run1+2                ");  // Supersedes 223, 224
 
   // D0 -> K+ pi-
 
@@ -391,18 +394,16 @@ int main(int argc, char* argv[]) {
   gc.getCombiner()->addPdf(gc[323]);
   */
 
-  gc.newCombiner(1, "base", "base",
-                 {1, 2, 100, 110, 120, 130, 161, 200, 250, 252, 260, 282, 284, 320, 321, 323, 350, 360, 371});
+  gc.newCombiner(1, "base", "base", {1,   2,   100, 110, 120, 130, 161, 200, 220, 221, 222, 224,
+                                     250, 252, 260, 282, 284, 320, 321, 323, 350, 360, 371});
 
   // New LHCb measurement of DeltaY(h- h+) with Run 2 SL data (Brookhaven Forum)
   gc.cloneCombiner(2, 1, "WA-2019-09", "World average (Sep 2019)");
-  gc.getCombiner(2)->delPdf(gc[200]);
-  gc.getCombiner(2)->addPdf(gc[201]);
+  gc.getCombiner(2)->replacePdf(gc[200], gc[201]);
 
   // New LHCb measurement of DeltaY(h- h+) with Run 2 prompt data (LHC seminar)
   gc.cloneCombiner(3, 2, "WA-2021-02", "World average (Feb 2021)");
-  gc.getCombiner(3)->delPdf(gc[201]);
-  gc.getCombiner(3)->addPdf(gc[202]);
+  gc.getCombiner(3)->replacePdf(gc[201], gc[202]);
 
   // New LHCb bin-flip measurement of D0 -> KS pi- pi+ with Run 2 prompt data (Moriond QCD)
   // New BESIII deterrmination of strong parameters for D0 -> K+ pi- pi- pi+ and D0 -> K+ pi- pi0
@@ -412,30 +413,25 @@ int main(int argc, char* argv[]) {
 
   // New LHCb bin-flip measurement of D0 -> KS pi- pi+ with Run 2 SL data (PANIC 2021)
   gc.cloneCombiner(5, 4, "WA-2021-09", "World average (Sep 2021)");
-  gc.getCombiner(5)->delPdf(gc[324]);  // Bin-flip LHCb Run 2 prompt
-  gc.getCombiner(5)->addPdf(gc[326]);  // Bin-flip LHCb Run 2
+  gc.getCombiner(5)->replacePdf(gc[324], gc[326]);  // Bin-flip LHCb Run 2 (prompt -> prompt + SL)
 
   // New LHCb measurement of yCP - yCP(RS) with Run 2 data (La Thuile 2022)
   gc.cloneCombiner(6, 5, "WA-2022-03", "World average (Mar 2022)");
-  gc.getCombiner(6)->delPdf(gc[161]);
-  gc.getCombiner(6)->addPdf(gc[162]);
+  gc.getCombiner(6)->replacePdf(gc[161], gc[162]);
 
   // New LHCb measurement of ACP(K- K+) (ICHEP 2022)
   gc.cloneCombiner(7, 6, "WA-2022-07", "World average (Jul 2022)");
-  gc.getCombiner(7)->delPdf(gc[221]);  // LHCb DeltaACP Run 1+2, ACP(K- K+) Run 1
-  gc.getCombiner(7)->addPdf(gc[222]);  // LHCb DeltaACP Run 1+2, ACP(K- K+) Run 1+2
+  gc.getCombiner(7)->replacePdf(gc[224], gc[225]);  // LHCb DeltaACP Run 1+2; ACP(K- K+) (Run 1 -> Run 1+2)
 
   // New BESIII measurement of Delta_Kpi and F+(pi+ pi- pi0) with 3 fb
   gc.cloneCombiner(8, 7, "WA-2022-08", "World average (Aug 2022)");
-  gc.getCombiner(8)->delPdf(gc[2]);   // BESIII delta_Kpi
-  gc.getCombiner(8)->addPdf(gc[20]);  // BESIII delta_Kpi + pipipi0 3fb
+  gc.getCombiner(8)->replacePdf(gc[2], gc[20]);  // BESIII delta_Kpi -> delta_Kpi + pipipi0 3fb
 
   // New LHCb measurements for Moriond EW:
   //   - WS/RS ratio in D0 -> K+ pi- decays with LHCb Run 2 prompt data
   //   - DeltaY(pi- pi+ pi0) with 2012 + Run 2 data
   gc.cloneCombiner(9, 8, "WA-2024-03", "World average (Mar 2024)");
-  gc.getCombiner(9)->delPdf(gc[284]);  // LHCb WS/RS in D0 -> K+ pi+ 2011-2016 prompt
-  gc.getCombiner(9)->addPdf(gc[286]);  // LHCb WS/RS in D0 -> K+ pi+ Run 1+2   prompt
+  gc.getCombiner(9)->replacePdf(gc[284], gc[286]);  // LHCb WS/RS in D0 -> K+ pi+ prompt (2011-2016 -> Run 1+2)
   if (dy_fsc_hypo == dy_fsc::none) { gc.getCombiner(9)->addPdf(gc[351]); }
 
   // New measurement of F+(pi+pi-pi0) by BESIII
@@ -445,15 +441,12 @@ int main(int argc, char* argv[]) {
   // - New measurement of the WS/RS ratio in D0 -> K+ pi- decays with LHCb Run 2 DT data (LHCb Implications Workshop)
   // - New Belle + Belle2 bin-flip measurement of D0 -> KS pi- pi+
   gc.cloneCombiner(11, 10, "WA-2024-10", "World average (Oct 2024)");
-  gc.getCombiner(11)->delPdf(gc[282]);  // WS/RS in D0 -> Kpi, LHCb Run 1   DT
-  gc.getCombiner(11)->addPdf(gc[288]);  // WS/RS in D0 -> Kpi, LHCb Run 1+2 DT
-  gc.getCombiner(11)->delPdf(gc[321]);  // D0 -> KS h- h+   from Belle
-  gc.getCombiner(11)->addPdf(gc[327]);  // D0 -> KS pi- pi+ from Belle + Belle 2
+  gc.getCombiner(11)->replacePdf(gc[282], gc[288]);  // WS/RS in D0 -> Kpi, LHCb DT (Run 1 -> Run 1+2)
+  gc.getCombiner(11)->replacePdf(gc[321], gc[327]);  // D0 -> KS h- h+ (Belle -> Belle + Belle 2)
 
   // New BESIII measurement of Delta_Kpi with 8 fb
   gc.cloneCombiner(12, 11, "WA-2025-06", "World average (Jun 2025)");
-  gc.getCombiner(12)->delPdf(gc[20]);  // BESIII delta_Kpi + pipipi0 3   fb
-  gc.getCombiner(12)->addPdf(gc[21]);  // BESIII delta_Kpi + pipipi0 3+7 fb
+  gc.getCombiner(12)->replacePdf(gc[20], gc[21]);  // BESIII delta_Kpi + pipipi0 (3 fb -> 3+7 fb)
 
   // New LHCb measurements of WS/RS in D0 -> K+ pi- pi- pi+ with Run 2 prompt data (CKM 2025) TODO
   // gc.cloneCombiner(13, 12, "WA-2025-09", "World average (Sep 2025)");

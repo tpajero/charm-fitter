@@ -4,8 +4,20 @@
 #include <set>
 #include <string>
 
+/**
+ * Units of time, with the second as base unit.
+ */
+namespace units {
+  constexpr double s = 1.;
+  constexpr double ms = 1e-3 * s;
+  constexpr double us = 1e-6 * s;
+  constexpr double ns = 1e-9 * s;
+  constexpr double ps = 1e-12 * s;
+  constexpr double fs = 1e-15 * s;
+}  // namespace units
+
 namespace constants {
-  constexpr double d0_lifetime = 4.103e-13;
+  constexpr double d0_lifetime = 410.3 * units::fs;
 
   /**
    * CKM constant responsible for CP violation in charm decays:

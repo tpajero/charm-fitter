@@ -12,23 +12,22 @@ _DY_FSCS = [DYFsc.FULL, DYFsc.NONE]
 _DY_FSC_1D_VARS = ["phiM", "phiG", "qop", "phi", "Acp_KK", "Acp_PP"]
 _DY_FSC_2D_VARS = [("phiM", "phiG"), ("qop", "phi"), ("Acp_KK", "Acp_PP"), ("Acp_KK", "phiM")]
 
+_FIX_PARFILE = "config/charm-combo/start/WA-2025-06.dat"
+
 _BASELINE_COMBINERS = {
     _BASELINE_COMBINER: Combiner(
         12,
         "WA June 2025",
         title_long="World Average June 2025",
-        scans_1d=[
-            Scan1D(par, r, parfile="config/charm-combo/start/WA-2025-06.dat")
-            for par, r in RANGES_1D["LHCb-R12"].items()
-        ]
+        scans_1d=[Scan1D(par, r, parfile=_FIX_PARFILE) for par, r in RANGES_1D["LHCb-R12"].items()]
         + [
-            Scan1D(par, RANGES_1D["LHCb-R12"][par], dy_fsc=dy_fsc, parfile="config/charm-combo/start/WA-2025-06.dat")
+            Scan1D(par, RANGES_1D["LHCb-R12"][par], dy_fsc=dy_fsc, parfile=_FIX_PARFILE)
             for dy_fsc in _DY_FSCS
             if dy_fsc != DYFsc.NONE
             for par in _DY_FSC_1D_VARS
         ],
         scans_2d=[
-            Scan2D(xpar, ypar, xrange, yrange, parfile="config/charm-combo/start/WA-2025-06.dat")
+            Scan2D(xpar, ypar, xrange, yrange, parfile=_FIX_PARFILE)
             for (xpar, ypar), (xrange, yrange) in RANGES_2D["LHCb-R12"].items()
         ]
         + [
@@ -38,7 +37,7 @@ _BASELINE_COMBINERS = {
                 RANGES_2D["LHCb-R12"][(xpar, ypar)][0],
                 RANGES_2D["LHCb-R12"][(xpar, ypar)][1],
                 dy_fsc=dy_fsc,
-                parfile="config/charm-combo/start/WA-2025-06.dat",
+                parfile=_FIX_PARFILE,
             )
             for dy_fsc in _DY_FSCS
             if dy_fsc != DYFsc.NONE
@@ -49,12 +48,10 @@ _BASELINE_COMBINERS = {
     ),
 }
 
-_FIX_PARFILE = "config/charm-combo/start/WA-2025-06.dat"
-
 _COMBINERS_BREAKDOWN = {
     "ext-kpi": Combiner(
         [1, 21, 40, 41],
-        r"CLEO/BES $D^0 \to K^\pm \pi^\mp$",
+        r"CLEO/BESIII $D \to K^\pm \pi^\mp$",
         col="y",
         ls="dash3dots",
         scans_2d=[
@@ -76,7 +73,24 @@ _COMBINERS_BREAKDOWN = {
             Scan2D(
                 "Delta_Kpi",
                 "r_Kpi",
-                xrange=Range((-1.35, 0.55)),
+                xrange=Range((-1.35, 0.75)),
+                yrange=Range((5.81e-2, 5.92e-2)),
+                parfile="config/charm-combo/start/WA-2025-06-breakdown-kpi-rd.dat",
+                extra_args="--npoints2dx 200",
+            ),
+        ],
+    ),
+    "lhcb-hhprime": Combiner(
+        # LHCb D0 -> K pi and yCP(hh) - yCP(RS)
+        [140, 141, 286, 288],
+        r"LHCb $D^0 \to h^+ h^{'-}$",
+        col="b",
+        ls="shortdash",
+        scans_2d=[
+            Scan2D(
+                "Delta_Kpi",
+                "r_Kpi",
+                xrange=Range((-1.35, 0.75)),
                 yrange=Range((5.81e-2, 5.92e-2)),
                 parfile="config/charm-combo/start/WA-2025-06-breakdown-kpi-rd.dat",
                 extra_args="--npoints2dx 200",
@@ -184,16 +198,16 @@ _COMBINERS_BREAKDOWN = {
             Scan2D(
                 "x12",
                 "y12",
-                xrange=Range((2e-3, 6e-3)),
-                yrange=Range((2e-3, 10e-3)),
+                xrange=Range((2.5e-3, 5.5e-3)),
+                yrange=Range((2e-3, 8e-3)),
                 fixed_pars=["phiM", "phiG"],
                 fix_parfile=_FIX_PARFILE,
             ),
             Scan2D(
                 "qop",
                 "phi",
-                xrange=Range((0.85, 1.2)),
-                yrange=Range((-0.25, 0.1)),
+                xrange=Range((0.85, 1.16)),
+                yrange=Range((-0.2, 0.08)),
                 fixed_pars=["x", "y"],
                 fix_parfile=_FIX_PARFILE,
             ),
@@ -301,7 +315,7 @@ _PLOTS_BREAKDOWN = [
     Plot2D(
         _BREAKDOWN_MIX_COMBOS,
         ("x", "y"),
-        xrange=Range((-7.0, 12.0), unit="1e-3"),
+        xrange=Range((-5.0, 10.0), unit="1e-3"),
         yrange=Range((2.0, 10.0), unit="1e-3"),
         combiners_label=_BASELINE_COMBINER,
         levels=2,
@@ -332,9 +346,9 @@ _PLOTS_BREAKDOWN = [
         levels=2,
     ),
     Plot2D(
-        ["ext-kpi", "lhcb-kpi", _BASELINE_COMBINER],
+        ["ext-kpi", "lhcb-kpi", "lhcb-hhprime", _BASELINE_COMBINER],
         ("Delta_Kpi", "r_Kpi"),
-        xrange=Range((-1.3, 0.5), unit="rad"),
+        xrange=Range((-1.3, 0.7), unit="rad"),
         yrange=Range((5.6, 6.1), unit="1e-2"),
         combiners_label=_BASELINE_COMBINER,
         levels=2,
