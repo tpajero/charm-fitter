@@ -1,8 +1,10 @@
 """Define default titles for parameters, default combiners and relative ranges for 1D and 2D scans."""
 
+from typing import Any
+
 import numpy as np
 
-from charm_fitter.utils import Combiner, MixParam, PlotParameter, Range, Scan1D, Scan2D
+from charm_fitter.utils import Combiner, DYFsc, MixParam, Plot1D, Plot2D, PlotParameter, Range, Scan1D, Scan2D
 
 PARAMETERS = [
     # --- Mixing in the phenomenological parametrisation ---
@@ -41,6 +43,7 @@ PARAMETERS = [
     PlotParameter("R_Kpi_", cf_par="r_Kpi", title=r"$R_{K\pi}$", transf=lambda x: x * x),
     PlotParameter("delta_Kpi_", cf_par="Delta_Kpi", title=r"$\delta_{K\pi}$", transf=lambda x: -x),
 ]
+PARAMETERS_BY_NAME = {p.name: p for p in PARAMETERS}
 
 # Default scan parameters for 1D scans, tuned for different combiners.
 RANGES_1D = {
@@ -149,8 +152,134 @@ COMBINERS = {
     ),
 }
 
-# Legend labels and plotting styles of the subsets of measurements entering breakdown plots. Use them as
-# `Combiner(pdf_ids, **BREAKDOWN_STYLES[key], scans_2d=...)`.
+# World averages: baseline combiner and plots --------------------------------------------------------------------------
+
+# DeltaY(h- h+) final-state-correction hypotheses compared in the plots, and parameters for which they are compared.
+DY_FSCS = [DYFsc.FULL, DYFsc.NONE]
+DY_FSC_1D_VARS = ["phiM", "phiG", "qop", "phi", "Acp_KK", "Acp_PP"]
+DY_FSC_2D_VARS = [("phiM", "phiG"), ("qop", "phi"), ("Acp_KK", "Acp_PP"), ("Acp_KK", "phiM")]
+
+_WA_1D_LEG_RIGHT = ["x", "y", "qop", "x12", "y12", "Delta_Kpi", "r_Kpi", "r_K3pi", "r_Kpipi0", "k_K3pi", "R_Kpi_"]
+_WA_1D_LEGFILL = ["phi", "phiM", "Acp_KK", "Acp_PP", "r_K3pi"]
+
+
+def wa_combiner(
+    id: int,
+    title: str,
+    title_long: str,
+    parfile: str,
+    ranges_1d: dict[str, Range],
+    ranges_2d: dict[tuple[str, str], tuple[Range, Range]],
+) -> Combiner:
+    """Build the combiner of a world average, including the 1D and 2D scans for all DeltaY(h- h+) FSC hypotheses.
+
+    Args:
+        id: Numerical ID of the combiner.
+        title: Title used in plot legends.
+        title_long: Longer version of the title (e.g. for the subtitle under the logo).
+        parfile: Start-parameter file used for all scans.
+        ranges_1d: Ranges of the 1D scans, by parameter name.
+        ranges_2d: Ranges of the 2D scans, by (xpar, ypar).
+
+    Returns:
+        The world-average combiner.
+    """
+    dy_fscs = [dy_fsc for dy_fsc in DY_FSCS if dy_fsc != DYFsc.NONE]
+    return Combiner(
+        id,
+        title,
+        title_long=title_long,
+        scans_1d=[Scan1D(par, r, parfile=parfile) for par, r in ranges_1d.items()]
+        + [Scan1D(par, ranges_1d[par], dy_fsc=dy_fsc, parfile=parfile) for dy_fsc in dy_fscs for par in DY_FSC_1D_VARS],
+        scans_2d=[
+            Scan2D(xpar, ypar, xrange, yrange, parfile=parfile) for (xpar, ypar), (xrange, yrange) in ranges_2d.items()
+        ]
+        + [
+            Scan2D(xpar, ypar, *ranges_2d[(xpar, ypar)], dy_fsc=dy_fsc, parfile=parfile)
+            for dy_fsc in dy_fscs
+            for (xpar, ypar) in DY_FSC_2D_VARS
+        ],
+        col="r",
+        ls="-",
+    )
+
+
+def wa_plots_1d(combiner: str, ranges_1d: dict[str, Range]) -> list[Plot1D]:
+    """1D plots of all parameters (including reparametrisations) whose charm-fitter parameter has a range defined."""
+    return [
+        Plot1D(
+            [combiner],
+            name,
+            ranges_1d[par.cf_par].transformed_range(par.transf),
+            legpos="r" if name in _WA_1D_LEG_RIGHT else "l",
+            legfill=name in _WA_1D_LEGFILL,
+            legfontsize=14,
+        )
+        for name, par in PARAMETERS_BY_NAME.items()
+        if par.cf_par in ranges_1d
+    ]
+
+
+def wa_plots_2d(combiner: str, ranges_2d: dict[tuple[str, str], tuple[Range, Range]]) -> list[Plot2D]:
+    """2D plots for all the given pairs of parameters."""
+    return [
+        Plot2D(
+            [combiner],
+            (xpar, ypar),
+            xrange.transformed_range(PARAMETERS_BY_NAME[xpar].transf),
+            yrange.transformed_range(PARAMETERS_BY_NAME[ypar].transf),
+            legfill=xpar in ["Acp_KK", "phiM"],
+        )
+        for (xpar, ypar), (xrange, yrange) in ranges_2d.items()
+    ]
+
+
+def dy_fsc_plots_1d(combiner: str, ranges_1d: dict[str, Range]) -> list[Plot1D]:
+    """1D plots comparing the DeltaY(h- h+) final-state-correction hypotheses."""
+    return [
+        Plot1D(
+            [combiner],
+            par,
+            ranges_1d[par].transformed_range(PARAMETERS_BY_NAME[par].transf),
+            legpos="r",
+            legfontsize=12,
+            dy_fsc=DY_FSCS,
+        )
+        for par in DY_FSC_1D_VARS
+    ]
+
+
+def dy_fsc_plots_2d(
+    combiner: str,
+    ranges_2d: dict[tuple[str, str], tuple[Range, Range]],
+    legfill: list[tuple[str, str]] | None = None,
+) -> list[Plot2D]:
+    """2D plots comparing the DeltaY(h- h+) final-state-correction hypotheses.
+
+    Args:
+        combiner: Name of the combiner.
+        ranges_2d: Plot ranges by (xpar, ypar), used as they are (no transformation applied).
+        legfill: Pairs of parameters for which the legend box should be filled.
+    """
+    return [
+        Plot2D(
+            [combiner],
+            (xpar, ypar),
+            xrange,
+            yrange,
+            logo="br",
+            legfill=(xpar, ypar) in (legfill or []),
+            legpos="l",
+            legfontsize=12,
+            dy_fsc=DY_FSCS,
+        )
+        for (xpar, ypar), (xrange, yrange) in ranges_2d.items()
+    ]
+
+
+# Breakdown plots ------------------------------------------------------------------------------------------------------
+
+# Legend labels and plotting styles of the subsets of measurements entering breakdown plots.
 BREAKDOWN_STYLES = {
     "cf-kpi": {"title": r"CLEO/BESIII $D \to K^\pm \pi^\mp$", "col": "y", "ls": "dash3dots"},
     "d0-kpi": {"title": r"$D^0 \to K^\pm \pi^\mp$", "col": "g", "ls": "dash2dots"},
@@ -158,9 +287,117 @@ BREAKDOWN_STYLES = {
     "kpi": {"title": r"$D^0 \to K^\pm \pi^\mp$", "col": "g", "ls": "dash2dots"},
     "k3pi": {"title": r"$D^0 \to K^\pm \pi^\mp \pi^+ \pi^-$", "col": "p", "ls": "dash3dots"},
     "kspipi": {"title": r"$D^0 \to K_{\rm S}^0 \pi^+ \pi^-$", "col": "lb", "ls": "shortdash"},
-    "hh-mix": {"title": r"$D^0 \to h^+ h^-$", "col": "y", "ls": "dashdot"},
     "hh": {"title": r"$D^0 \to h^+ h^-$", "col": "y", "ls": "dashdot"},
 }
+
+# Pairs of mixing parameters scanned in the breakdown plots.
+MIX_PAIRS = [("x", "y"), ("x12", "y12")]
+CPV_PAIRS = [("qop", "phi"), ("phiM", "phiG")]
+
+# Mixing parameters (complementary to the scanned ones) that are fixed in breakdown scans.
+_BREAKDOWN_FIXED_MIX_PARS = {
+    ("x", "y"): ["qop", "phi"],
+    ("x12", "y12"): ["phiM", "phiG"],
+    ("qop", "phi"): ["x", "y"],
+    ("phiM", "phiG"): ["x12", "y12"],
+}
+# Additional parameters that are fixed in breakdown scans, as they are not constrained by the subset of measurements.
+_BREAKDOWN_FIXED_PARS = {"hh": ["r_Kpi", "Delta_Kpi"]}
+
+# Default settings (`Scan2D` keyword arguments) of the 2D breakdown scans, tuned on the latest world average. Ranges may
+# need retuning when the subset of measurements changes: override them via `breakdown_combiner(..., overrides=...)`.
+BREAKDOWN_SCANS_2D: dict[str, dict[tuple[str, str], dict[str, Any]]] = {
+    "kpi": {
+        ("x", "y"): {
+            "xrange": Range((-8e-3, 8e-3)),
+            "yrange": Range((3e-3, 8e-3)),
+            "parfile": "config/charm-combo/start/WA-2025-06-breakdown-kpi-x-y.dat",
+            "extra_args": "--npoints2dx 100 --npoints2dy 100",
+        },
+        ("x12", "y12"): {
+            "xrange": Range((0.0, 8e-3)),
+            "yrange": Range((3e-3, 8e-3)),
+            "parfile": "config/charm-combo/start/WA-2025-06-breakdown-kpi-x12-y12.dat",
+            "extra_args": "--npoints2dx 100 --npoints2dy 100",
+        },
+        ("qop", "phi"): {
+            "xrange": Range((0.7, 1.4)),
+            "yrange": Range((-0.4, 0.35)),
+            "extra_args": "--npoints2dx 100 --npoints2dy 100",
+        },
+        ("phiM", "phiG"): {"xrange": Range((-0.1, 0.1)), "yrange": Range((-0.41, 0.3))},
+    },
+    "k3pi": {
+        ("x", "y"): {"xrange": Range((-2e-3, 10e-3)), "yrange": Range((0.0, 10e-3))},
+        ("x12", "y12"): {"xrange": Range((0.0, 10e-3)), "yrange": Range((0.0, 10e-3))},
+        ("qop", "phi"): {"xrange": Range((0.9, 1.1)), "yrange": Range((-0.2, 0.2))},
+        ("phiM", "phiG"): {"xrange": Range((-0.2, 0.2)), "yrange": Range((-0.2, 0.2))},
+    },
+    "kspipi": {
+        ("x", "y"): {"xrange": Range((2e-3, 6.5e-3)), "yrange": Range((2e-3, 8e-3))},
+        ("x12", "y12"): {"xrange": Range((2e-3, 6.5e-3)), "yrange": Range((2e-3, 8e-3))},
+        ("qop", "phi"): {"xrange": Range((0.85, 1.15)), "yrange": Range((-0.2, 0.1))},
+        ("phiM", "phiG"): {"xrange": Range((-0.2, 0.35)), "yrange": Range((-0.1, 0.2))},
+    },
+    "hh": {
+        ("x", "y"): {
+            "xrange": Range((-8e-3, 12.5e-3)),
+            "yrange": Range((5e-3, 8e-3)),
+            "extra_args": "--npoints2dx 100",
+        },
+        ("x12", "y12"): {
+            "xrange": Range((0.0, 10.5e-3)),
+            "yrange": Range((5e-3, 8e-3)),
+            "extra_args": "--npoints2dx 100",
+        },
+        ("qop", "phi"): {
+            "xrange": Range((0.78, 1.3)),
+            "yrange": Range((-0.4, 0.4)),
+            "extra_args": "--npoints2dx 80 --npoints2dy 80",
+        },
+        ("phiM", "phiG"): {"xrange": Range((-0.1, 0.15)), "yrange": Range((-0.5, 0.5))},
+    },
+}
+
+
+def breakdown_combiner(
+    key: str,
+    pdf_ids: list[int],
+    fix_parfile: str,
+    pairs: list[tuple[str, str]] | None = None,
+    overrides: dict[tuple[str, str], dict[str, Any]] | None = None,
+) -> Combiner:
+    """Build the combiner of a subset of measurements entering the breakdown plots.
+
+    The mixing parameters complementary to the scanned ones (e.g. qop and phi when scanning x and y) are fixed to their
+    values in `fix_parfile`, together with any parameter not constrained by the subset (see `_BREAKDOWN_FIXED_PARS`).
+
+    Args:
+        key: Subset of measurements, defining the plotting style and the default scan settings (`BREAKDOWN_SCANS_2D`).
+        pdf_ids: IDs of the PDFs of the measurements in the subset.
+        fix_parfile: Parameter file (typically, that of the world average) used to fix the parameters.
+        pairs: Pairs of parameters to be scanned. Defaults to all pairs in `BREAKDOWN_SCANS_2D[key]`.
+        overrides: `Scan2D` keyword arguments (e.g. `xrange`, `yrange`, `extra_args`) overriding the defaults, by pair.
+
+    Returns:
+        The breakdown combiner.
+    """
+    defaults = BREAKDOWN_SCANS_2D[key]
+    overrides = overrides or {}
+    return Combiner(
+        pdf_ids,
+        **BREAKDOWN_STYLES[key],
+        scans_2d=[
+            Scan2D(
+                *pair,
+                fixed_pars=_BREAKDOWN_FIXED_MIX_PARS[pair] + _BREAKDOWN_FIXED_PARS.get(key, []),
+                fix_parfile=fix_parfile,
+                **(defaults.get(pair, {}) | overrides.get(pair, {})),
+            )
+            for pair in (pairs if pairs is not None else list(defaults))
+        ],
+    )
+
 
 # Breakdown of the constraints on the D0 -> K+ pi- hadronic parameters, independent of the specific average.
 _KPI_RD_SCAN_LHCB = Scan2D(
@@ -185,7 +422,38 @@ BREAKDOWN_COMBINERS_KPI_RD = {
             )
         ],
     ),
-    "d0-kpi": Combiner([250, 252, 260, 286, 288], **BREAKDOWN_STYLES["d0-kpi"], scans_2d=[_KPI_RD_SCAN_LHCB]),
+    # The theoretical parametrisation gets stuck in local minima of (x12, y12, phiM, phiG) for this subset, which
+    # makes the contours jagged: use the phenomenological one (the plotted parameters are independent of it)
+    "d0-kpi": Combiner(
+        [250, 252, 260, 286, 288],
+        **BREAKDOWN_STYLES["d0-kpi"],
+        scans_2d=[
+            Scan2D(
+                "Delta_Kpi",
+                "r_Kpi",
+                xrange=_KPI_RD_SCAN_LHCB.xrange,
+                yrange=_KPI_RD_SCAN_LHCB.yrange,
+                parfile="config/charm-combo/start/WA-2026-11-breakdown-kpi-rd-pheno.dat",
+                extra_args="--npoints2dx 200",
+                mix_param=MixParam.PHENO,
+            )
+        ],
+    ),
     # LHCb D0 -> K pi and yCP(hh) - yCP(RS)
     "hhprime": Combiner([140, 141, 286, 288], **BREAKDOWN_STYLES["hhprime"], scans_2d=[_KPI_RD_SCAN_LHCB]),
 }
+
+
+def breakdown_plot_kpi_rd(combiner: str) -> Plot2D:
+    """Breakdown plot of the constraints on the D0 -> K+ pi- hadronic parameters (`BREAKDOWN_COMBINERS_KPI_RD`)."""
+    return Plot2D(
+        [*BREAKDOWN_COMBINERS_KPI_RD, combiner],
+        ("Delta_Kpi", "r_Kpi"),
+        xrange=Range((-1.3, 0.7), unit="rad"),
+        yrange=Range((5.6, 6.1), unit="1e-2"),
+        combiners_label=combiner,
+        levels=2,
+        logo="l",
+        legpos="bl",
+        legfill=True,
+    )
