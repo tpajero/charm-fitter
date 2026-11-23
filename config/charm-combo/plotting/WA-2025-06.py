@@ -289,7 +289,7 @@ _PLOTS_BREAKDOWN = [
         levels=2,
     ),
     Plot2D(
-        ["ext-kpi", "lhcb-kpi", "lhcb-hhprime", _BASELINE_COMBINER],
+        ["cf-kpi", "d0-kpi", "hhprime", _BASELINE_COMBINER],
         ("Delta_Kpi", "r_Kpi"),
         xrange=Range((-1.3, 0.7), unit="rad"),
         yrange=Range((5.6, 6.1), unit="1e-2"),

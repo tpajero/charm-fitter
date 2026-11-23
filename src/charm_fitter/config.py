@@ -152,9 +152,9 @@ COMBINERS = {
 # Legend labels and plotting styles of the subsets of measurements entering breakdown plots. Use them as
 # `Combiner(pdf_ids, **BREAKDOWN_STYLES[key], scans_2d=...)`.
 BREAKDOWN_STYLES = {
-    "ext-kpi": {"title": r"CLEO/BESIII $D \to K^\pm \pi^\mp$", "col": "y", "ls": "dash3dots"},
-    "lhcb-kpi": {"title": r"LHCb $D^0 \to K^\pm \pi^\mp$", "col": "g", "ls": "dash2dots"},
-    "lhcb-hhprime": {"title": r"LHCb $D^0 \to h^+ h^{'-}$", "col": "b", "ls": "shortdash"},
+    "cf-kpi": {"title": r"CLEO/BESIII $D \to K^\pm \pi^\mp$", "col": "y", "ls": "dash3dots"},
+    "d0-kpi": {"title": r"$D^0 \to K^\pm \pi^\mp$", "col": "g", "ls": "dash2dots"},
+    "hhprime": {"title": r"$D^0 \to h^+ h^{'-}$", "col": "b", "ls": "shortdash"},
     "kpi": {"title": r"$D^0 \to K^\pm \pi^\mp$", "col": "g", "ls": "dash2dots"},
     "k3pi": {"title": r"$D^0 \to K^\pm \pi^\mp \pi^+ \pi^-$", "col": "p", "ls": "dash3dots"},
     "kspipi": {"title": r"$D^0 \to K_{\rm S}^0 \pi^+ \pi^-$", "col": "lb", "ls": "shortdash"},
@@ -172,9 +172,9 @@ _KPI_RD_SCAN_LHCB = Scan2D(
     extra_args="--npoints2dx 200",
 )
 BREAKDOWN_COMBINERS_KPI_RD = {
-    "ext-kpi": Combiner(
+    "cf-kpi": Combiner(
         [1, 21, 40, 41],
-        **BREAKDOWN_STYLES["ext-kpi"],
+        **BREAKDOWN_STYLES["cf-kpi"],
         scans_2d=[
             Scan2D(
                 "Delta_Kpi",
@@ -185,7 +185,7 @@ BREAKDOWN_COMBINERS_KPI_RD = {
             )
         ],
     ),
-    "lhcb-kpi": Combiner([286, 288], **BREAKDOWN_STYLES["lhcb-kpi"], scans_2d=[_KPI_RD_SCAN_LHCB]),
+    "d0-kpi": Combiner([250, 252, 260, 286, 288], **BREAKDOWN_STYLES["d0-kpi"], scans_2d=[_KPI_RD_SCAN_LHCB]),
     # LHCb D0 -> K pi and yCP(hh) - yCP(RS)
-    "lhcb-hhprime": Combiner([140, 141, 286, 288], **BREAKDOWN_STYLES["lhcb-hhprime"], scans_2d=[_KPI_RD_SCAN_LHCB]),
+    "hhprime": Combiner([140, 141, 286, 288], **BREAKDOWN_STYLES["hhprime"], scans_2d=[_KPI_RD_SCAN_LHCB]),
 }
