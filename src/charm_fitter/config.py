@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from charm_fitter.utils import Combiner, PlotParameter, Range, Scan1D, Scan2D
+from charm_fitter.utils import Combiner, MixParam, PlotParameter, Range, Scan1D, Scan2D
 
 PARAMETERS = [
     # --- Mixing in the phenomenological parametrisation ---
@@ -147,4 +147,45 @@ COMBINERS = {
             for (xpar, ypar), (xrange, yrange) in RANGES_2D["LHCb-R12"].items()
         ],
     ),
+}
+
+# Legend labels and plotting styles of the subsets of measurements entering breakdown plots. Use them as
+# `Combiner(pdf_ids, **BREAKDOWN_STYLES[key], scans_2d=...)`.
+BREAKDOWN_STYLES = {
+    "ext-kpi": {"title": r"CLEO/BESIII $D \to K^\pm \pi^\mp$", "col": "y", "ls": "dash3dots"},
+    "lhcb-kpi": {"title": r"LHCb $D^0 \to K^\pm \pi^\mp$", "col": "g", "ls": "dash2dots"},
+    "lhcb-hhprime": {"title": r"LHCb $D^0 \to h^+ h^{'-}$", "col": "b", "ls": "shortdash"},
+    "kpi": {"title": r"$D^0 \to K^\pm \pi^\mp$", "col": "g", "ls": "dash2dots"},
+    "k3pi": {"title": r"$D^0 \to K^\pm \pi^\mp \pi^+ \pi^-$", "col": "p", "ls": "dash3dots"},
+    "kspipi": {"title": r"$D^0 \to K_{\rm S}^0 \pi^+ \pi^-$", "col": "lb", "ls": "shortdash"},
+    "hh-mix": {"title": r"$D^0 \to h^+ h^-$", "col": "y", "ls": "dashdot"},
+    "hh": {"title": r"$D^0 \to h^+ h^-$", "col": "y", "ls": "dashdot"},
+}
+
+# Breakdown of the constraints on the D0 -> K+ pi- hadronic parameters, independent of the specific average.
+_KPI_RD_SCAN_LHCB = Scan2D(
+    "Delta_Kpi",
+    "r_Kpi",
+    xrange=Range((-1.35, 0.75)),
+    yrange=Range((5.81e-2, 5.92e-2)),
+    parfile="config/charm-combo/start/WA-2025-06-breakdown-kpi-rd.dat",
+    extra_args="--npoints2dx 200",
+)
+BREAKDOWN_COMBINERS_KPI_RD = {
+    "ext-kpi": Combiner(
+        [1, 21, 40, 41],
+        **BREAKDOWN_STYLES["ext-kpi"],
+        scans_2d=[
+            Scan2D(
+                "Delta_Kpi",
+                "r_Kpi",
+                xrange=Range((-0.6, 0.3)),
+                yrange=Range((5.55e-2, 6.15e-2)),
+                mix_param=MixParam.PHENO,
+            )
+        ],
+    ),
+    "lhcb-kpi": Combiner([286, 288], **BREAKDOWN_STYLES["lhcb-kpi"], scans_2d=[_KPI_RD_SCAN_LHCB]),
+    # LHCb D0 -> K pi and yCP(hh) - yCP(RS)
+    "lhcb-hhprime": Combiner([140, 141, 286, 288], **BREAKDOWN_STYLES["lhcb-hhprime"], scans_2d=[_KPI_RD_SCAN_LHCB]),
 }

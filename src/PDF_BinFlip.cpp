@@ -22,6 +22,10 @@
 #include <string>
 #include <vector>
 
+namespace {
+  const TString lhcb_paper_2026_src = "https://arxiv.org/abs/2611.26449; ";
+}  // namespace
+
 PDF_BinFlip::PDF_BinFlip(const TString measurement_id, const parametrisations::mix mix_param)
     : PDF_Charm{4}, mix_param{mix_param}, measurement_id{measurement_id} {
   name = "BinFlip_" + measurement_id;
@@ -73,6 +77,8 @@ void PDF_BinFlip::initObservables() {
       {"LHCb-R2-prompt", "LHCb Binflip Run 2 (prompt)"},
       {"LHCb-R2-SL", "LHCb Binflip Run 2 (muon-tagged)"},
       {"LHCb-R2", "LHCb Binflip Run 2"},
+      {"LHCb-R1-BESIII-8fb", "LHCb Binflip Run 1 (BESIII 8 fb^{-1})"},
+      {"LHCb-R2-BESIII-8fb", "LHCb Binflip Run 2 (BESIII 8 fb^{-1})"},
   };
   const auto it = labels.find(measurement_id.Data());
   const TString label = it != labels.end() ? it->second : name;
@@ -113,6 +119,20 @@ void PDF_BinFlip::setObservables(const TString c) {
     setObservable("yCP_obs", 5.51e-3);
     setObservable("dx_obs", -0.29e-3);
     setObservable("dy_obs", 0.31e-3);
+  } else if (c.EqualTo("LHCb-R1-BESIII-8fb")) {
+    // Update of LHCb-R1 with the strong-phase inputs measured by BESIII with 8 fb-1 (Table 4)
+    obsValSource = lhcb_paper_2026_src;
+    setObservable("xCP_obs", 3.808e-3);
+    setObservable("yCP_obs", 6.407e-3);
+    setObservable("dx_obs", -0.621e-3);
+    setObservable("dy_obs", 0.538e-3);
+  } else if (c.EqualTo("LHCb-R2-BESIII-8fb")) {
+    // Update of LHCb-R2 with the strong-phase inputs measured by BESIII with 8 fb-1 (Table 4)
+    obsValSource = lhcb_paper_2026_src;
+    setObservable("xCP_obs", 4.903e-3);
+    setObservable("yCP_obs", 5.123e-3);
+    setObservable("dx_obs", -0.329e-3);
+    setObservable("dy_obs", 0.282e-3);
   } else {
     throw std::runtime_error(std::format("PDF_BinFlip::setObservables ERROR config {} not found", c.Data()));
   }
@@ -136,6 +156,14 @@ void PDF_BinFlip::setUncertainties(const TString c) {
     obsErrSource = "https://inspirehep.net/literature/2135966";
     StatErr = {0.45e-3, 1.16e-3, 0.18e-3, 0.35e-3};
     SystErr = {0.195e-3, 0.594e-3, 0.013e-3, 0.128e-3};
+  } else if (c.EqualTo("LHCb-R1-BESIII-8fb")) {
+    obsErrSource = lhcb_paper_2026_src;
+    StatErr = {1.993e-3, 3.202e-3, 0.910e-3, 1.505e-3};  // total uncertainties
+    std::ranges::fill(SystErr, 0.0);
+  } else if (c.EqualTo("LHCb-R2-BESIII-8fb")) {
+    obsErrSource = lhcb_paper_2026_src;
+    StatErr = {0.661e-3, 1.184e-3, 0.220e-3, 0.347e-3};  // total uncertainties
+    std::ranges::fill(SystErr, 0.0);
   } else {
     throw std::runtime_error(std::format("PDF_BinFlip::setUncertainties ERROR config {} not found", c.Data()));
   }
@@ -223,6 +251,28 @@ void PDF_BinFlip::setCorrelations(const TString c) {
         // clang-format on
     };
     corSystMatrix = Utils::buildCorMatrix(nObs, dataSyst);
+  } else if (c.EqualTo("LHCb-R1-BESIII-8fb")) {
+    corSource = lhcb_paper_2026_src;  // total correlations
+    std::vector<double> dataStat = {
+        // clang-format off
+        1., -0.031, -0.006,  0.002,  // x
+             1.,     0.014, -0.002,  // y
+                     1.,    -0.044,  // dx
+                             1.      // dy
+        // clang-format on
+    };
+    corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
+  } else if (c.EqualTo("LHCb-R2-BESIII-8fb")) {
+    corSource = lhcb_paper_2026_src;  // total correlations
+    std::vector<double> dataStat = {
+        // clang-format off
+        1., 0.042, -0.083, -0.007,  // x
+            1.,    -0.004, -0.072,  // y
+                    1.,     0.012,  // dx
+                            1.      // dy
+        // clang-format on
+    };
+    corStatMatrix = Utils::buildCorMatrix(nObs, dataStat);
   } else {
     throw std::runtime_error(std::format("PDF_BinFlip::setCorrelations ERROR config {} not found", c.Data()));
   }

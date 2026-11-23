@@ -1311,7 +1311,7 @@ def parse_args(*, combo: str = "charm", dcs_cpv_default: bool = False) -> argpar
         "-c",
         "--config",
         type=Path,
-        default=repo_path / f"config/{combo}-combo/plotting" / ("2024.py" if combo == "ws" else "WA-2025-06.py"),
+        default=repo_path / f"config/{combo}-combo/plotting" / ("2024.py" if combo == "ws" else "WA-2026-11.py"),
         help="Path of the configuration file",
     )
     parser.add_argument("-e", "--execfile", type=str, default=default_execname, help="Executable name")

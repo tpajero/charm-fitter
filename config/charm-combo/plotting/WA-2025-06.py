@@ -1,7 +1,7 @@
 """Configuration file for summary plots of the World Average of 2025."""
 
-from charm_fitter.config import PARAMETERS, RANGES_1D, RANGES_2D
-from charm_fitter.utils import CharmPlottingConfig, Combiner, DYFsc, MixParam, Plot1D, Plot2D, Range, Scan1D, Scan2D
+from charm_fitter.config import BREAKDOWN_COMBINERS_KPI_RD, BREAKDOWN_STYLES, PARAMETERS, RANGES_1D, RANGES_2D
+from charm_fitter.utils import CharmPlottingConfig, Combiner, DYFsc, Plot1D, Plot2D, Range, Scan1D, Scan2D
 
 # Parameters and combiners ---------------------------------------------------------------------------------------------
 
@@ -49,59 +49,10 @@ _BASELINE_COMBINERS = {
 }
 
 _COMBINERS_BREAKDOWN = {
-    "ext-kpi": Combiner(
-        [1, 21, 40, 41],
-        r"CLEO/BESIII $D \to K^\pm \pi^\mp$",
-        col="y",
-        ls="dash3dots",
-        scans_2d=[
-            Scan2D(
-                "Delta_Kpi",
-                "r_Kpi",
-                xrange=Range((-0.6, 0.3)),
-                yrange=Range((5.55e-2, 6.15e-2)),
-                mix_param=MixParam.PHENO,
-            )
-        ],
-    ),
-    "lhcb-kpi": Combiner(
-        [286, 288],
-        r"LHCb $D^0 \to K^\pm \pi^\mp$",
-        col="g",
-        ls="dash2dots",
-        scans_2d=[
-            Scan2D(
-                "Delta_Kpi",
-                "r_Kpi",
-                xrange=Range((-1.35, 0.75)),
-                yrange=Range((5.81e-2, 5.92e-2)),
-                parfile="config/charm-combo/start/WA-2025-06-breakdown-kpi-rd.dat",
-                extra_args="--npoints2dx 200",
-            ),
-        ],
-    ),
-    "lhcb-hhprime": Combiner(
-        # LHCb D0 -> K pi and yCP(hh) - yCP(RS)
-        [140, 141, 286, 288],
-        r"LHCb $D^0 \to h^+ h^{'-}$",
-        col="b",
-        ls="shortdash",
-        scans_2d=[
-            Scan2D(
-                "Delta_Kpi",
-                "r_Kpi",
-                xrange=Range((-1.35, 0.75)),
-                yrange=Range((5.81e-2, 5.92e-2)),
-                parfile="config/charm-combo/start/WA-2025-06-breakdown-kpi-rd.dat",
-                extra_args="--npoints2dx 200",
-            ),
-        ],
-    ),
+    **BREAKDOWN_COMBINERS_KPI_RD,
     "kpi": Combiner(
         [1, 21, 40, 41, 286, 288],
-        r"$D^0 \to K^\pm \pi^\mp$",
-        col="g",
-        ls="dash2dots",
+        **BREAKDOWN_STYLES["kpi"],
         scans_2d=[
             Scan2D(
                 "x",
@@ -143,9 +94,7 @@ _COMBINERS_BREAKDOWN = {
     ),
     "k3pi": Combiner(
         [60, 371],
-        r"$D^0 \to K^\pm \pi^\mp \pi^+ \pi^-$",
-        col="p",
-        ls="dash3dots",
+        **BREAKDOWN_STYLES["k3pi"],
         scans_2d=[
             Scan2D(
                 "x",
@@ -183,9 +132,7 @@ _COMBINERS_BREAKDOWN = {
     ),
     "kspipi": Combiner(
         [320, 322, 323, 326, 327],
-        r"$D^0 \to K_S^0 \pi^+ \pi^-$",
-        col="lb",
-        ls="shortdash",
+        **BREAKDOWN_STYLES["kspipi"],
         scans_2d=[
             Scan2D(
                 "x",
@@ -223,9 +170,7 @@ _COMBINERS_BREAKDOWN = {
     ),
     "hh-mix": Combiner(
         [110, 130, 162],  # yCP only
-        r"$D^0 \to h^+ h^-$",
-        col="y",
-        ls="dashdot",
+        **BREAKDOWN_STYLES["hh-mix"],
         scans_2d=[
             Scan2D(
                 "x",
@@ -249,9 +194,7 @@ _COMBINERS_BREAKDOWN = {
     ),
     "hh": Combiner(
         [110, 130, 162, 202],  # yCP + DeltaY
-        r"$D^0 \to h^+ h^-$",
-        col="y",
-        ls="dashdot",
+        **BREAKDOWN_STYLES["hh"],
         scans_2d=[
             Scan2D(
                 "qop",
