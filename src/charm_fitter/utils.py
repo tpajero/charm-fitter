@@ -365,7 +365,8 @@ class _Plot:
         legpos: Legend position.
         legfill: Whether to fill the legend box.
         legfontsize: Font size for the legend.
-        logo: Position of the "CharmFitter" logo.
+        legncol: Number of columns of the legend.
+        logo: Position of the "CharmFitter" logo ("l", "r", "bl" or "br").
         dy_fsc: List of DeltaY(h- h+) final-state-correction hypotheses to be included in the plot.
     """
 
@@ -375,6 +376,7 @@ class _Plot:
     legpos: str = "l"
     legfill: bool = False
     legfontsize: int = -1
+    legncol: int = 1
     logo: str = "r"
     dy_fsc: list[DYFsc] = field(default_factory=lambda: [DYFsc.NONE])
 
@@ -444,6 +446,7 @@ class Plotter:
     legpos: str = ""
     legfill: bool = False
     legfontsize: int = -1
+    legncol: int = 1
     cls: str = ""
     axes_origin: tuple[int, int] = (-1, -1)
     prune_xlabel: bool = False
@@ -530,58 +533,26 @@ class Plotter:
     def plot(self, interactive=False):
         legopts = {}
 
+        # Legend bounding box: one row per 0.07 of the axes height and one column per 0.2 of its width. Boxes anchored
+        # on the right keep their right edge fixed, so that multi-column legends grow towards the left.
         leg_top_after_logo = 0.88
-        xleg_right = 0.78
+        leg_right = 0.98
+        leg_h = 0.07 * -(-len(self.scanpoints) // self.legncol)
+        leg_w = 0.2 * self.legncol
         if self.logo == "l" and self.legpos == "l":
-            legopts = dict(
-                bbox_to_anchor=(
-                    0.01,
-                    leg_top_after_logo - 0.07 * len(self.scanpoints),
-                    0.2,
-                    0.07 * len(self.scanpoints),
-                ),
-                loc="upper left",
-            )
+            legopts = dict(bbox_to_anchor=(0.01, leg_top_after_logo - leg_h, leg_w, leg_h), loc="upper left")
         elif self.logo == "r" and self.legpos == "r":
             legopts = dict(
-                bbox_to_anchor=(
-                    xleg_right,
-                    leg_top_after_logo - 0.07 * len(self.scanpoints),
-                    0.2,
-                    0.07 * len(self.scanpoints),
-                ),
-                loc="upper right",
+                bbox_to_anchor=(leg_right - leg_w, leg_top_after_logo - leg_h, leg_w, leg_h), loc="upper right"
             )
         elif self.logo == "l" and self.legpos == "r":
-            legopts = dict(
-                bbox_to_anchor=(
-                    xleg_right,
-                    0.997 - 0.07 * len(self.scanpoints),
-                    0.2,
-                    0.07 * len(self.scanpoints),
-                ),
-                loc="upper right",
-            )
-        elif self.logo in ["r", "br"] and self.legpos == "l":
-            legopts = dict(
-                bbox_to_anchor=(
-                    0.01,
-                    0.997 - 0.07 * len(self.scanpoints),
-                    0.2,
-                    0.07 * len(self.scanpoints),
-                ),
-                loc="upper left",
-            )
+            legopts = dict(bbox_to_anchor=(leg_right - leg_w, 0.997 - leg_h, leg_w, leg_h), loc="upper right")
+        elif self.logo in ["r", "bl", "br"] and self.legpos == "l":
+            legopts = dict(bbox_to_anchor=(0.01, 0.997 - leg_h, leg_w, leg_h), loc="upper left")
         elif self.legpos == "bl":
-            legopts = dict(
-                bbox_to_anchor=(0.01, 0.02, 0.2, 0.07 * len(self.scanpoints)),
-                loc="lower left",
-            )
+            legopts = dict(bbox_to_anchor=(0.01, 0.02, leg_w, leg_h), loc="lower left")
         elif self.legpos == "br":
-            legopts = dict(
-                bbox_to_anchor=(0.8, 0.01, 0.2, 0.07 * len(self.scanpoints)),
-                loc="lower right",
-            )
+            legopts = dict(bbox_to_anchor=(1.0 - leg_w, 0.01, leg_w, leg_h), loc="lower right")
 
         if self.legfill:
             legopts["frameon"] = True
@@ -592,6 +563,9 @@ class Plotter:
 
         if self.legfontsize != -1:
             legopts["fontsize"] = self.legfontsize
+
+        if self.legncol != 1:
+            legopts["ncol"] = self.legncol
 
         fig, ax = plt.subplots()
         if self.axes_origin != (-1, -1):
@@ -686,14 +660,17 @@ class Plotter:
         logo_xright = 0.97
         if self.logo == "l":
             logo_x, logo_y = 0.03, 0.92
-        elif self.logo == "br":
-            logo_x, logo_y = logo_xright, 0.06
+        elif self.logo in ["bl", "br"]:
+            logo_x, logo_y = (0.03 if self.logo == "bl" else logo_xright), 0.06
             if self.logo_subtitle:
                 logo_y += 0.04
         else:
             logo_x, logo_y = logo_xright, 0.92
         charm_fitter_logo(
-            pos=(logo_x, logo_y), subtitle=self.logo_subtitle, ax=ax, ha="left" if self.logo == "l" else "right"
+            pos=(logo_x, logo_y),
+            subtitle=self.logo_subtitle,
+            ax=ax,
+            ha="left" if self.logo in ["l", "bl"] else "right",
         )
 
         # limits
@@ -1125,6 +1102,7 @@ def plots_1d(
             legpos=plot.legpos,
             legfill=plot.legfill,
             legfontsize=plot.legfontsize,
+            legncol=plot.legncol,
         )
 
         dcs_cpv_vals = _dcs_cpv_vals(args, compare_dcs_hypos)
@@ -1214,6 +1192,7 @@ def plots_2d(
             legpos=plot.legpos,
             legfill=plot.legfill,
             legfontsize=plot.legfontsize,
+            legncol=plot.legncol,
         )
 
         dcs_cpv_vals = _dcs_cpv_vals(args, compare_dcs_hypos)
