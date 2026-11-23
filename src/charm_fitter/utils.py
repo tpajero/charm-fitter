@@ -617,12 +617,6 @@ class Plotter:
             )
             u_spin_line = "Acp_KK" in str(self.save) and "Acp_PP" in str(self.save)
 
-            if no_cpv_marker:
-                self.legtitles.append(r"No $C\!P$ violation")
-                self.lopts.append({})
-                self.fopts.append({})
-                self.mopts.append({"marker": NO_CPV_MS, "color": "k"})
-
             if u_spin_line:
                 self.legtitles.extend(["U-spin symmetry", "Improved U-spin prediction"])
                 self.lopts.extend(
@@ -633,6 +627,12 @@ class Plotter:
                 )
                 self.fopts.extend([{}, {}])
                 self.mopts.extend([{}, {}])
+
+            if no_cpv_marker:
+                self.legtitles.append(r"No CP violation")
+                self.lopts.append({})
+                self.fopts.append({})
+                self.mopts.append({"marker": NO_CPV_MS, "color": "k"})
 
             if "mrad" in self.ytitle:
                 self.ylabelpad = -2.0
