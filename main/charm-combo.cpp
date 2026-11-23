@@ -399,7 +399,7 @@ int main(int argc, char* argv[]) {
   */
 
   gc.newCombiner(1, "base", "base", {1,   2,   100, 110, 120, 130, 161, 200, 220, 221, 222, 224,
-                                     250, 252, 260, 282, 284, 320, 321, 323, 350, 360, 371});
+                                     250, 252, 260, 282, 284, 320, 321, 322, 323, 350, 360, 371});
 
   // New LHCb measurement of DeltaY(h- h+) with Run 2 SL data (Brookhaven Forum)
   gc.cloneCombiner(2, 1, "WA-2019-09", "World average (Sep 2019)");
