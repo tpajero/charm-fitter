@@ -23,20 +23,8 @@ _BASELINE_COMBINER = "WA-2026-11"
 _FIX_PARFILE = "config/charm-combo/start/WA-2026-11.dat"
 
 # Ranges of the LHCb Run 1+2 average, adapted to the larger value of x (x12) and the improved precision on CPV in mixing
-_RANGES_1D = RANGES_1D["LHCb-R12"] | {
-    "x": Range((2.0, 7.5), unit="1e-3"),
-    "x12": Range((2.0, 7.5), unit="1e-3"),
-    "phi": Range((-90.0, 70.0), unit="mrad"),
-    "phiM": Range((-60.0, 60.0), unit="mrad"),
-    "phiG": Range((-120.0, 150.0), unit="mrad"),
-}
-_RANGES_2D = RANGES_2D["LHCb-R12"] | {
-    ("x12", "y12"): (Range((2.5, 7.0), unit="1e-3"), Range((5.4, 7.2), unit="1e-3")),
-    ("phiM", "phiG"): (Range((-50.0, 55.0), unit="mrad"), Range((-80.0, 130.0), unit="mrad")),
-    ("x", "y"): (Range((2.5, 7.0), unit="1e-3"), Range((5.4, 7.2), unit="1e-3")),
-    ("qop", "phi"): (Range((0.93, 1.05)), Range((-70.0, 50.0), unit="mrad")),
-    ("Acp_KK", "phiM"): (Range((-2.0, 3.5), unit="1e-3"), Range((-50.0, 55.0), unit="mrad")),
-}
+_RANGES_1D = RANGES_1D["LHCb-R12"]
+_RANGES_2D = RANGES_2D["LHCb-R12"]
 
 _BASELINE_COMBINERS = {
     _BASELINE_COMBINER: wa_combiner(13, "World average", _FIX_PARFILE, _RANGES_1D, _RANGES_2D),
@@ -57,7 +45,12 @@ _COMBINERS_BREAKDOWN = {
 _PLOTS_1D = wa_plots_1d(_BASELINE_COMBINER, _RANGES_1D)
 _PLOTS_2D = wa_plots_2d(
     _BASELINE_COMBINER,
-    _RANGES_2D | {("Acp_KK", "Acp_PP"): (_RANGES_2D[("Acp_KK", "Acp_PP")][0], Range((-0.5, 5.5), unit="1e-3"))},
+    _RANGES_2D
+    | {
+        ("phiM", "phiG"): (Range((-50.0, 80.0), unit="mrad"), Range((-80.0, 180.0), unit="mrad")),
+        ("Acp_KK", "phiM"): (Range((-2.0, 3.0), unit="1e-3"), Range((-50.0, 110.0), unit="mrad")),
+        ("Acp_KK", "Acp_PP"): (Range((-1.5, 2.5), unit="1e-3"), Range((-0.5, 5.5), unit="1e-3")),
+    },
 )
 
 # Breakdown 2D plots ---------------------------------------------------------------------------------------------------
@@ -116,7 +109,7 @@ _PLOTS_DY_FSC_2D = dy_fsc_plots_2d(
     {
         ("phiM", "phiG"): (Range((-60.0, 80.0), unit="mrad"), Range((-80.0, 180.0), unit="mrad")),
         ("qop", "phi"): (Range((-0.08, 0.05)), Range((-90.0, 60.0), unit="mrad")),
-        ("Acp_KK", "Acp_PP"): (Range((-1.5, 3.0), unit="1e-3"), Range((-0.5, 6.5), unit="1e-3")),
+        ("Acp_KK", "Acp_PP"): (Range((-1.5, 3.0), unit="1e-3"), Range((-0.5, 7.0), unit="1e-3")),
         ("Acp_KK", "phiM"): (Range((-2.0, 3.5), unit="1e-3"), Range((-60.0, 70.0), unit="mrad")),
     },
 )

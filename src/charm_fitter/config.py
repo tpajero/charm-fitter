@@ -85,6 +85,7 @@ RANGES_1D = {
     },
 }
 
+# Ranges tuned to work both with --dcs-cpv and without it
 RANGES_2D = {
     "LHCb-R1": {
         ("Delta_Kpi", "r_Kpi"): (Range((-0.7, 0.4), unit="rad"), Range((5.7, 6.1), unit="%")),
@@ -97,12 +98,12 @@ RANGES_2D = {
     },
     "LHCb-R12": {
         ("Delta_Kpi", "r_Kpi"): (Range((-0.5, 0.0), unit="rad"), Range((5.82, 5.92), unit="%")),
-        ("x12", "y12"): (Range((2.0, 6.0), unit="1e-3"), Range((5.4, 7.4), unit="1e-3")),
-        ("phiM", "phiG"): (Range((-80.0, 100.0), unit="mrad"), Range((-80.0, 160.0), unit="mrad")),
-        ("x", "y"): (Range((2.0, 6.0), unit="1e-3"), Range((5.4, 7.4), unit="1e-3")),
-        ("qop", "phi"): (Range((0.9, 1.05)), Range((-120.0, 60.0), unit="mrad")),
-        ("Acp_KK", "Acp_PP"): (Range((-1.5, 3.0), unit="1e-3"), Range((0.0, 5.5), unit="1e-3")),
-        ("Acp_KK", "phiM"): (Range((-2.0, 3.5), unit="1e-3"), Range((-75.0, 95.0), unit="mrad")),
+        ("x12", "y12"): (Range((2.0, 7.0), unit="1e-3"), Range((5.3, 7.4), unit="1e-3")),
+        ("phiM", "phiG"): (Range((-50.0, 80.0), unit="mrad"), Range((-80.0, 140.0), unit="mrad")),
+        ("x", "y"): (Range((2.0, 7.0), unit="1e-3"), Range((5.3, 7.4), unit="1e-3")),
+        ("qop", "phi"): (Range((0.93, 1.05)), Range((-100.0, 70.0), unit="mrad")),
+        ("Acp_KK", "Acp_PP"): (Range((-1.5, 2.5), unit="1e-3"), Range((-0.5, 5.0), unit="1e-3")),
+        ("Acp_KK", "phiM"): (Range((-2.0, 3.0), unit="1e-3"), Range((-50.0, 80.0), unit="mrad")),
     },
 }
 
@@ -225,7 +226,6 @@ def wa_plots_2d(combiner: str, ranges_2d: dict[tuple[str, str], tuple[Range, Ran
             (xpar, ypar),
             xrange.transformed_range(PARAMETERS_BY_NAME[xpar].transf),
             yrange.transformed_range(PARAMETERS_BY_NAME[ypar].transf),
-            legfill=xpar in ["Acp_KK", "phiM"],
         )
         for (xpar, ypar), (xrange, yrange) in ranges_2d.items()
     ]
