@@ -16,6 +16,7 @@
 #include <PDF_DY_pipipi0.h>
 #include <PDF_Fp_pipipi0.h>
 #include <PDF_K3pi.h>
+#include <PDF_K3pi_Combo.h>
 #include <PDF_Kpipi0.h>
 #include <PDF_RM.h>
 #include <PDF_WS.h>
@@ -60,10 +61,10 @@ namespace {
           288,  // D0 -> K+ pi-          Run 1+2 DT
           // 310,  // DeltaY(K- pi+)        Run 2
           322,  // D0 -> KS pi- pi+      Prompt 2011 (AmAna)
-          323,  // D0 -> KS pi- pi+      Binflip Run 1
-          326,  // D0 -> KS pi- pi+      Binflip Run 2
+          328,  // D0 -> KS pi- pi+      Binflip Run 1
+          329,  // D0 -> KS pi- pi+      Binflip Run 2
           371,  // D0 -> K+ pi- pi- pi+  Run 1
-                // TODO add D0 -> K+ pi- pi- pi+ Run 2
+          372,  // D0 -> K+ pi- pi- pi+  Run 2
       };
       if (dy_fsc_hypo == hypotheses::dy_fsc::none) {
         pdfs.push_back(351);  // DY_pipipi0 Run 2
@@ -339,11 +340,13 @@ int main(int argc, char* argv[]) {
   gc.addPdf(320, new PDF_XY("BaBar-KShh", mix_param),                            "KS h+ h-     BaBar    2010                  ");
   gc.addPdf(321, new PDF_XY_QoP_PHI("Belle", mix_param),                         "KS h+ h-     Belle    2014                  ");  // Superseded by 327
   gc.addPdf(322, new PDF_XY("LHCb-KSpipi-2011-prompt", mix_param),               "KS pi+ pi-   LHCb     2011     [D* -> D0 pi]");
-  gc.addPdf(323, new PDF_BinFlip("LHCb-R1", mix_param),                          "Bin-flip     LHCb     Run 1                 ");
+  gc.addPdf(323, new PDF_BinFlip("LHCb-R1", mix_param),                          "Bin-flip     LHCb     Run 1                 ");  // Superseded by 328
   gc.addPdf(324, new PDF_BinFlip("LHCb-R2-prompt", mix_param),                   "Bin-flip     LHCb     Run 2    [D* -> D0 pi]");
   gc.addPdf(325, new PDF_BinFlip("LHCb-R2-SL", mix_param),                       "Bin-flip     LHCb     Run 2    [B -> D0 mu] ");
-  gc.addPdf(326, new PDF_BinFlip("LHCb-R2", mix_param),                          "Bin-flip     LHCb     Run 2                 ");
+  gc.addPdf(326, new PDF_BinFlip("LHCb-R2", mix_param),                          "Bin-flip     LHCb     Run 2                 ");  // Superseded by 329
   gc.addPdf(327, new PDF_XY("Belle-Belle2", mix_param),                          "KS pi+ pi-   Belle+Belle2 (951+408 fb-1)    ");  // Supersedes 321
+  gc.addPdf(328, new PDF_BinFlip("LHCb-R1-BESIII-8fb", mix_param),               "Bin-flip     LHCb     Run 1    [BESIII 8fb] ");  // Supersedes 323
+  gc.addPdf(329, new PDF_BinFlip("LHCb-R2-BESIII-8fb", mix_param),               "Bin-flip     LHCb     Run 2    [BESIII 8fb] ");  // Supersedes 326
 
   // D0 -> pi+ pi- pi0
 
@@ -358,12 +361,13 @@ int main(int argc, char* argv[]) {
 
   // D0 -> K+ pi- pi- pi+
 
-  gc.addPdf(370, new PDF_RM("LHCb-K3pi-R1", mix_param),                          "R_M  K3pi    LHCb     R1                    ");  // Subset of 371
-  gc.addPdf(371, new PDF_K3pi("LHCb-R1", mix_param),                             "K3pi         LHCb     R1                    ");  // Superset of 370
+  gc.addPdf(370, new PDF_RM("LHCb-K3pi-R1", mix_param),                          "R_M  K3pi    LHCb     Run 1                 ");  // Subset of 371
+  gc.addPdf(371, new PDF_K3pi("LHCb-R1", mix_param),                             "K3pi         LHCb     Run 1                 ");  // Superset of 370
+  gc.addPdf(372, new PDF_K3pi_Combo("LHCb-PAPER-2026-058", mix_param),           "K3pi         LHCb+CF  Run 2    [combination]");
 
   // --- Nuisance parameters ---
 
-  gc.addPdf(390, new PDF_scan_DY_RS(mix_param),                                      "ScanDYRS     This is just a nuisance parameter");
+  gc.addPdf(390, new PDF_scan_DY_RS(mix_param),                                  "ScanDYRS     This is just a nuisance parameter");
 
   // clang-format on
 
@@ -395,7 +399,7 @@ int main(int argc, char* argv[]) {
   */
 
   gc.newCombiner(1, "base", "base", {1,   2,   100, 110, 120, 130, 161, 200, 220, 221, 222, 224,
-                                     250, 252, 260, 282, 284, 320, 321, 323, 350, 360, 371});
+                                     250, 252, 260, 282, 284, 320, 321, 322, 323, 350, 360, 371});
 
   // New LHCb measurement of DeltaY(h- h+) with Run 2 SL data (Brookhaven Forum)
   gc.cloneCombiner(2, 1, "WA-2019-09", "World average (Sep 2019)");
@@ -448,9 +452,14 @@ int main(int argc, char* argv[]) {
   gc.cloneCombiner(12, 11, "WA-2025-06", "World average (Jun 2025)");
   gc.getCombiner(12)->replacePdf(gc[20], gc[21]);  // BESIII delta_Kpi + pipipi0 (3 fb -> 3+7 fb)
 
-  // New LHCb measurements of WS/RS in D0 -> K+ pi- pi- pi+ with Run 2 prompt data (CKM 2025) TODO
-  // gc.cloneCombiner(13, 12, "WA-2025-09", "World average (Sep 2025)");
-  // gc.getCombiner(13)->addPdf(gc[]);
+  // - New LHCb + charm-factory combination of D0 -> K+ pi- pi- pi+ measurements with Run 2 data (LHCb-PAPER-2026-058)
+  //   (this overlaps with PDF 60, but the impact on the total average should be small since the Run 1 K3pi result is
+  //    not very precise);
+  // - LHCb bin-flip measurements of D0 -> KS pi- pi+ updated with the BESIII strong-phase inputs from 8 fb-1.
+  gc.cloneCombiner(13, 12, "WA-2026-11", "World average (Nov 2026)");
+  gc.getCombiner(13)->addPdf(gc[372]);               // LHCb Run 2 + CF combination
+  gc.getCombiner(13)->replacePdf(gc[323], gc[328]);  // Bin-flip LHCb Run 1, BESIII 8fb inputs
+  gc.getCombiner(13)->replacePdf(gc[326], gc[329]);  // Bin-flip LHCb Run 2, BESIII 8fb inputs
 
   // LHCb-only averages ------------------------------------------------------------------------------------------------
 

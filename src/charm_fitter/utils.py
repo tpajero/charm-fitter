@@ -261,7 +261,26 @@ class _Scan:
         if self.fixed_pars:
             pars_string = ",".join(self.fixed_pars)
             extra_args += f" --fix-from-parfile {pars_string} --fix-parfile {self.fix_parfile}"
+            # Tag the output files, as their names otherwise do not depend on the values of the fixed parameters
+            extra_args += f" --ext {self.file_tag}"
         object.__setattr__(self, "extra_args", extra_args.strip())
+
+    @property
+    def file_tag(self) -> str:
+        """Tag added by the combination executable to the output file names (empty if no parameter is fixed)."""
+        return "-".join([Path(self.fix_parfile).stem] + self.fixed_pars) if self.fixed_pars else ""
+
+    def file_prefix(self, prefix: str) -> str:
+        """Prefix of the scan file locations, including the file tag of the scan.
+
+        Args:
+            prefix: Prefix of the scan file locations of untagged scans, e.g. "charm-combo_scanner".
+        """
+        if not self.file_tag:
+            return prefix
+        if not prefix.endswith("_scanner"):
+            raise ValueError(f"Cannot add the file tag {self.file_tag!r} to prefix {prefix!r} (not ending in _scanner)")
+        return f"{prefix.removesuffix('_scanner')}_{self.file_tag}_scanner"
 
 
 @dataclass(frozen=True)
@@ -307,7 +326,6 @@ class Combiner:
     Args:
         id: Numerical ID of the combiner, or list of the IDs of the PDFs that it should be built from.
         title: Title that will be used in plots legends.
-        title_long: Longer version of the title for e.g. the subtitle under the logo "CharmFitter". Defaults to `title`.
         col: Color to be used in plots.
         ls: Line style to be used in plots.
         marker: Marker style to be used in plots.
@@ -318,16 +336,11 @@ class Combiner:
     id: int | list[int]
     title: str
     _: KW_ONLY
-    title_long: str = ""
     col: str = ""
     ls: str = ""
     marker: str = ""
     scans_1d: list[Scan1D] = field(default_factory=list)
     scans_2d: list[Scan2D] = field(default_factory=list)
-
-    def __post_init__(self):
-        if not self.title_long:
-            object.__setattr__(self, "title_long", self.title)
 
 
 # Plotting classes --------------------------------------------------------------------------------------------------------------
@@ -365,7 +378,8 @@ class _Plot:
         legpos: Legend position.
         legfill: Whether to fill the legend box.
         legfontsize: Font size for the legend.
-        logo: Position of the "CharmFitter" logo.
+        legncol: Number of columns of the legend.
+        logo: Position of the "CharmFitter" logo ("l", "r", "bl" or "br").
         dy_fsc: List of DeltaY(h- h+) final-state-correction hypotheses to be included in the plot.
     """
 
@@ -375,6 +389,7 @@ class _Plot:
     legpos: str = "l"
     legfill: bool = False
     legfontsize: int = -1
+    legncol: int = 1
     logo: str = "r"
     dy_fsc: list[DYFsc] = field(default_factory=lambda: [DYFsc.NONE])
 
@@ -444,6 +459,7 @@ class Plotter:
     legpos: str = ""
     legfill: bool = False
     legfontsize: int = -1
+    legncol: int = 1
     cls: str = ""
     axes_origin: tuple[int, int] = (-1, -1)
     prune_xlabel: bool = False
@@ -452,7 +468,7 @@ class Plotter:
     # Mutable defaults must use default_factory
     scanpoints: list[list[float]] = field(default_factory=list)
     bfs: list[float | None] = field(default_factory=list)
-    legtitles: list[str] = field(default_factory=list)
+    legtitles: list[str | None] = field(default_factory=list)
     lopts: list[Any] = field(default_factory=list)
     fopts: list[Any] = field(default_factory=list)
     mopts: list[Any] = field(default_factory=list)
@@ -527,101 +543,22 @@ class Plotter:
                 else:
                     self.mopts.append(dict())
 
+    def _legtitles_or_none(self) -> list[str | None] | None:
+        """Legend titles, or None if no scan has a label (so that no empty legend is drawn)."""
+        return self.legtitles if any(t is not None for t in self.legtitles) else None
+
     def plot(self, interactive=False):
         legopts = {}
 
-        leg_top_after_logo = 0.88
-        xleg_right = 0.78
-        if self.logo == "l" and self.legpos == "l":
-            legopts = dict(
-                bbox_to_anchor=(
-                    0.01,
-                    leg_top_after_logo - 0.07 * len(self.scanpoints),
-                    0.2,
-                    0.07 * len(self.scanpoints),
-                ),
-                loc="upper left",
-            )
-        elif self.logo == "r" and self.legpos == "r":
-            legopts = dict(
-                bbox_to_anchor=(
-                    xleg_right,
-                    leg_top_after_logo - 0.07 * len(self.scanpoints),
-                    0.2,
-                    0.07 * len(self.scanpoints),
-                ),
-                loc="upper right",
-            )
-        elif self.logo == "l" and self.legpos == "r":
-            legopts = dict(
-                bbox_to_anchor=(
-                    xleg_right,
-                    0.997 - 0.07 * len(self.scanpoints),
-                    0.2,
-                    0.07 * len(self.scanpoints),
-                ),
-                loc="upper right",
-            )
-        elif self.logo in ["r", "br"] and self.legpos == "l":
-            legopts = dict(
-                bbox_to_anchor=(
-                    0.01,
-                    0.997 - 0.07 * len(self.scanpoints),
-                    0.2,
-                    0.07 * len(self.scanpoints),
-                ),
-                loc="upper left",
-            )
-        elif self.legpos == "bl":
-            legopts = dict(
-                bbox_to_anchor=(0.01, 0.02, 0.2, 0.07 * len(self.scanpoints)),
-                loc="lower left",
-            )
-        elif self.legpos == "br":
-            legopts = dict(
-                bbox_to_anchor=(0.8, 0.01, 0.2, 0.07 * len(self.scanpoints)),
-                loc="lower right",
-            )
-
-        if self.legfill:
-            legopts["frameon"] = True
-            legopts["framealpha"] = 0.8
-            legopts["facecolor"] = "w"
-            legopts["edgecolor"] = "0.7"
-            legopts["borderpad"] = 0.2
-
-        if self.legfontsize != -1:
-            legopts["fontsize"] = self.legfontsize
-
-        fig, ax = plt.subplots()
-        if self.axes_origin != (-1, -1):
-            kwargs = {"axes_origin": self.axes_origin}
-        else:
-            kwargs = {}
-        if self.dim == 1:
-            plot1d(
-                self.scanpoints,
-                self.lopts,
-                self.fopts,
-                xtitle=self.xtitle,
-                legtitles=self.legtitles,
-                ax=ax,
-                legopts=legopts,
-                **kwargs,
-            )
-        elif self.dim == 2:
-            NO_CPV_MS = "X"
+        # Extra legend entries of 2D plots (reference lines and markers), added before sizing the legend box
+        NO_CPV_MS = "X"
+        no_cpv_marker = u_spin_line = False
+        if self.dim == 2:
             no_cpv_marker = any(
                 var1 in str(self.save) and var2 in str(self.save)
                 for var1, var2 in [("phiM", "phiG"), ("qop", "phi"), ("Acp_KK", "Acp_PP"), ("Acp_KK", "phiM")]
             )
             u_spin_line = "Acp_KK" in str(self.save) and "Acp_PP" in str(self.save)
-
-            if no_cpv_marker:
-                self.legtitles.append(r"No $C\!P$ violation")
-                self.lopts.append({})
-                self.fopts.append({})
-                self.mopts.append({"marker": NO_CPV_MS, "color": "k"})
 
             if u_spin_line:
                 self.legtitles.extend(["U-spin symmetry", "Improved U-spin prediction"])
@@ -634,6 +571,64 @@ class Plotter:
                 self.fopts.extend([{}, {}])
                 self.mopts.extend([{}, {}])
 
+            if no_cpv_marker:
+                self.legtitles.append(r"No CP violation")
+                self.lopts.append({})
+                self.fopts.append({})
+                self.mopts.append({"marker": NO_CPV_MS, "color": "k"})
+
+        # Legend bounding box: one row per 0.07 of the axes height and one column per 0.2 of its width. Boxes anchored
+        # on the right keep their right edge fixed, so that multi-column legends grow towards the left.
+        n_leg_entries = sum(t is not None for t in self.legtitles)
+        leg_top_after_logo = 0.83 if self.logo_subtitle else 0.88
+        leg_right = 0.98
+        leg_h = 0.07 * -(-n_leg_entries // self.legncol)
+        leg_w = 0.2 * self.legncol
+        if self.logo == "l" and self.legpos == "l":
+            legopts = dict(bbox_to_anchor=(0.01, leg_top_after_logo - leg_h, leg_w, leg_h), loc="upper left")
+        elif self.logo == "r" and self.legpos == "r":
+            legopts = dict(
+                bbox_to_anchor=(leg_right - leg_w, leg_top_after_logo - leg_h, leg_w, leg_h), loc="upper right"
+            )
+        elif self.logo == "l" and self.legpos == "r":
+            legopts = dict(bbox_to_anchor=(leg_right - leg_w, 0.997 - leg_h, leg_w, leg_h), loc="upper right")
+        elif self.logo in ["r", "bl", "br"] and self.legpos == "l":
+            legopts = dict(bbox_to_anchor=(0.01, 0.997 - leg_h, leg_w, leg_h), loc="upper left")
+        elif self.legpos == "bl":
+            legopts = dict(bbox_to_anchor=(0.01, 0.02, leg_w, leg_h), loc="lower left")
+        elif self.legpos == "br":
+            legopts = dict(bbox_to_anchor=(1.0 - leg_w, 0.01, leg_w, leg_h), loc="lower right")
+
+        if self.legfill:
+            legopts["frameon"] = True
+            legopts["framealpha"] = 0.8
+            legopts["facecolor"] = "w"
+            legopts["edgecolor"] = "0.7"
+            legopts["borderpad"] = 0.2
+
+        if self.legfontsize != -1:
+            legopts["fontsize"] = self.legfontsize
+
+        if self.legncol != 1:
+            legopts["ncol"] = self.legncol
+
+        fig, ax = plt.subplots()
+        if self.axes_origin != (-1, -1):
+            kwargs = {"axes_origin": self.axes_origin}
+        else:
+            kwargs = {}
+        if self.dim == 1:
+            plot1d(
+                self.scanpoints,
+                self.lopts,
+                self.fopts,
+                xtitle=self.xtitle,
+                legtitles=self._legtitles_or_none(),
+                ax=ax,
+                legopts=legopts,
+                **kwargs,
+            )
+        elif self.dim == 2:
             if "mrad" in self.ytitle:
                 self.ylabelpad = -2.0
 
@@ -645,7 +640,7 @@ class Plotter:
                 title=[self.xtitle, self.ytitle],
                 labelpad=(self.xlabelpad, self.ylabelpad),
                 levels=self.levels,
-                legtitles=self.legtitles,
+                legtitles=self._legtitles_or_none(),
                 ax=ax,
                 bf=self.bfs,
                 cl2d=True,
@@ -686,14 +681,17 @@ class Plotter:
         logo_xright = 0.97
         if self.logo == "l":
             logo_x, logo_y = 0.03, 0.92
-        elif self.logo == "br":
-            logo_x, logo_y = logo_xright, 0.06
+        elif self.logo in ["bl", "br"]:
+            logo_x, logo_y = (0.03 if self.logo == "bl" else logo_xright), 0.06
             if self.logo_subtitle:
                 logo_y += 0.04
         else:
             logo_x, logo_y = logo_xright, 0.92
         charm_fitter_logo(
-            pos=(logo_x, logo_y), subtitle=self.logo_subtitle, ax=ax, ha="left" if self.logo == "l" else "right"
+            pos=(logo_x, logo_y),
+            subtitle=self.logo_subtitle,
+            ax=ax,
+            ha="left" if self.logo in ["l", "bl"] else "right",
         )
 
         # limits
@@ -786,6 +784,7 @@ class PlottingConfig:
             combiners), used to resolve the combiner labels referenced by `plots_1d`/`plots_2d` entries.
         plots_1d: 1D plots to be produced.
         plots_2d: 2D plots to be produced.
+        logo_date: Date shown under the "CharmFitter" logo of all plots (e.g. "Month YYYY"); none if empty.
     """
 
     parameters_list: InitVar[list[PlotParameter]]
@@ -793,6 +792,7 @@ class PlottingConfig:
     _: KW_ONLY
     plots_1d: list[Plot1D] = field(default_factory=list)
     plots_2d: list[Plot2D] = field(default_factory=list)
+    logo_date: str = ""
     combiners: dict[str, Combiner] = field(init=False, default_factory=dict)
     parameters: dict[str, PlotParameter] = field(init=False, default_factory=dict)
 
@@ -910,10 +910,35 @@ def _get_combiner_suffix(
     return suffix
 
 
-def _dcs_cpv_label(dcs_cpv: bool | None, args: argparse.Namespace, cfg: PlottingConfig):
-    if dcs_cpv == args.dcs_cpv_default or dcs_cpv is None:
+def _dcs_cpv_label(dcs_cpv: bool | None, args: argparse.Namespace, cfg: PlottingConfig, *, compare: bool) -> str:
+    """Label of the hypothesis on CPV in DCS D0 -> K+ pi- decays (empty for the default one, unless comparing)."""
+    if dcs_cpv is None or (dcs_cpv == args.dcs_cpv_default and not compare):
         return ""
-    return ", {} {} 0$".format(cfg.parameters["Acp_KP"].title.strip()[:-1], r"\neq" if dcs_cpv else "=")
+    return "{} {} 0$".format(cfg.parameters["Acp_KP"].title.strip()[:-1], r"\neq" if dcs_cpv else "=")
+
+
+def _scan_label(
+    combiner: Combiner,
+    dcs_cpv: bool | None,
+    dy_fsc: DYFsc,
+    *,
+    n_combiners: int,
+    n_dcs_cpv: int,
+    n_dy_fsc: int,
+    args: argparse.Namespace,
+    cfg: PlottingConfig,
+    dy_fsc_labels: dict[DYFsc, str],
+) -> str | None:
+    """Legend label of a scan. The combiner title is only shown when comparing several combiners.
+
+    Returns None when there is nothing to show (i.e. a single set of contours under the default hypotheses).
+    """
+    if n_dy_fsc > 1:
+        return dy_fsc_labels[dy_fsc]
+    dcs_label = _dcs_cpv_label(dcs_cpv, args, cfg, compare=n_dcs_cpv > 1)
+    if n_combiners > 1:
+        return combiner.title + (f", {dcs_label}" if dcs_label else "")
+    return dcs_label or None
 
 
 def _dcs_cpv_vals(args: argparse.Namespace, compare_dcs_hypos: bool) -> list[bool | None]:
@@ -1122,9 +1147,11 @@ def plots_1d(
             xtransf=lambda x: plot.range.transf(par.transf(x)),
             cls="r",
             logo=plot.logo,
+            logo_subtitle=cfg.logo_date,
             legpos=plot.legpos,
             legfill=plot.legfill,
             legfontsize=plot.legfontsize,
+            legncol=plot.legncol,
         )
 
         dcs_cpv_vals = _dcs_cpv_vals(args, compare_dcs_hypos)
@@ -1140,6 +1167,14 @@ def plots_1d(
             n_plots,
         )
 
+        label_kwargs = dict(
+            n_combiners=len(plot.combiners),
+            n_dcs_cpv=len(dcs_cpv_vals),
+            n_dy_fsc=len(plot.dy_fsc),
+            args=args,
+            cfg=cfg,
+            dy_fsc_labels=dy_fsc_labels,
+        )
         i = 0
         for cname in plot.combiners:
             combiner = cfg.combiners[cname]
@@ -1155,15 +1190,10 @@ def plots_1d(
                         dcs_cpv=dcs_cpv,
                     )
                     combiner_arg = _combiner_file_string(cname, combiner, suffix)
-                    label = (
-                        (combiner.title + _dcs_cpv_label(dcs_cpv, args, cfg))
-                        if len(plot.dy_fsc) == 1
-                        else dy_fsc_labels[dy_fsc]
-                    )
                     plotter.add_scan(
-                        f"{args.prefix}_{combiner_arg}",
+                        f"{scan.file_prefix(args.prefix)}_{combiner_arg}",
                         pars=[par.cf_par],
-                        label=label,
+                        label=_scan_label(combiner, dcs_cpv, dy_fsc, **label_kwargs),
                         col=opts.colors[i],
                         ls=opts.line_styles[i],
                     )
@@ -1211,9 +1241,11 @@ def plots_2d(
             yrange=plot.yrange.range,
             levels=plot.levels,
             logo=plot.logo,
+            logo_subtitle=cfg.logo_date,
             legpos=plot.legpos,
             legfill=plot.legfill,
             legfontsize=plot.legfontsize,
+            legncol=plot.legncol,
         )
 
         dcs_cpv_vals = _dcs_cpv_vals(args, compare_dcs_hypos)
@@ -1230,6 +1262,14 @@ def plots_2d(
             n_dim=2,
         )
 
+        label_kwargs = dict(
+            n_combiners=len(plot.combiners),
+            n_dcs_cpv=len(dcs_cpv_vals),
+            n_dy_fsc=len(plot.dy_fsc),
+            args=args,
+            cfg=cfg,
+            dy_fsc_labels=dy_fsc_labels,
+        )
         i = 0
         for cname in plot.combiners:
             combiner = cfg.combiners[cname]
@@ -1255,11 +1295,9 @@ def plots_2d(
                     )
                     combiner_arg = _combiner_file_string(cname, combiner, suffix)
                     plotter.add_scan(
-                        f"{args.prefix}_{combiner_arg}",
+                        f"{scan.file_prefix(args.prefix)}_{combiner_arg}",
                         pars=[xpar.name, ypar.name],
-                        label=(combiner.title + _dcs_cpv_label(dcs_cpv, args, cfg))
-                        if len(plot.dy_fsc) == 1
-                        else dy_fsc_labels[dy_fsc],
+                        label=_scan_label(combiner, dcs_cpv, dy_fsc, **label_kwargs),
                         col=opts.colors[i],
                         ls=opts.line_styles[i],
                         marker=opts.markers[i],
@@ -1311,7 +1349,7 @@ def parse_args(*, combo: str = "charm", dcs_cpv_default: bool = False) -> argpar
         "-c",
         "--config",
         type=Path,
-        default=repo_path / f"config/{combo}-combo/plotting" / ("2024.py" if combo == "ws" else "WA-2025-06.py"),
+        default=repo_path / f"config/{combo}-combo/plotting" / ("2024.py" if combo == "ws" else "WA-2026-11.py"),
         help="Path of the configuration file",
     )
     parser.add_argument("-e", "--execfile", type=str, default=default_execname, help="Executable name")
