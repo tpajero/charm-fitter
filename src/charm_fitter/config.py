@@ -166,7 +166,6 @@ _WA_1D_LEGFILL = ["phi", "phiM", "Acp_KK", "Acp_PP", "r_K3pi"]
 def wa_combiner(
     id: int,
     title: str,
-    title_long: str,
     parfile: str,
     ranges_1d: dict[str, Range],
     ranges_2d: dict[tuple[str, str], tuple[Range, Range]],
@@ -176,7 +175,6 @@ def wa_combiner(
     Args:
         id: Numerical ID of the combiner.
         title: Title used in plot legends.
-        title_long: Longer version of the title (e.g. for the subtitle under the logo).
         parfile: Start-parameter file used for all scans.
         ranges_1d: Ranges of the 1D scans, by parameter name.
         ranges_2d: Ranges of the 2D scans, by (xpar, ypar).
@@ -188,7 +186,6 @@ def wa_combiner(
     return Combiner(
         id,
         title,
-        title_long=title_long,
         scans_1d=[Scan1D(par, r, parfile=parfile) for par, r in ranges_1d.items()]
         + [Scan1D(par, ranges_1d[par], dy_fsc=dy_fsc, parfile=parfile) for dy_fsc in dy_fscs for par in DY_FSC_1D_VARS],
         scans_2d=[

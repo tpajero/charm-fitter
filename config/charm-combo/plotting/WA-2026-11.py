@@ -39,9 +39,7 @@ _RANGES_2D = RANGES_2D["LHCb-R12"] | {
 }
 
 _BASELINE_COMBINERS = {
-    _BASELINE_COMBINER: wa_combiner(
-        13, "WA November 2026", "World Average November 2026", _FIX_PARFILE, _RANGES_1D, _RANGES_2D
-    ),
+    _BASELINE_COMBINER: wa_combiner(13, "World average", _FIX_PARFILE, _RANGES_1D, _RANGES_2D),
 }
 
 _COMBINERS_BREAKDOWN = {
@@ -132,4 +130,5 @@ CONFIG = CharmPlottingConfig(
     plots_breakdown=_PLOTS_BREAKDOWN,
     plots_dy_fsc_1d=_PLOTS_DY_FSC_1D,
     plots_dy_fsc_2d=_PLOTS_DY_FSC_2D,
+    logo_date="November 2026",
 )

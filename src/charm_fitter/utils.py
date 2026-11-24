@@ -307,7 +307,6 @@ class Combiner:
     Args:
         id: Numerical ID of the combiner, or list of the IDs of the PDFs that it should be built from.
         title: Title that will be used in plots legends.
-        title_long: Longer version of the title for e.g. the subtitle under the logo "CharmFitter". Defaults to `title`.
         col: Color to be used in plots.
         ls: Line style to be used in plots.
         marker: Marker style to be used in plots.
@@ -318,16 +317,11 @@ class Combiner:
     id: int | list[int]
     title: str
     _: KW_ONLY
-    title_long: str = ""
     col: str = ""
     ls: str = ""
     marker: str = ""
     scans_1d: list[Scan1D] = field(default_factory=list)
     scans_2d: list[Scan2D] = field(default_factory=list)
-
-    def __post_init__(self):
-        if not self.title_long:
-            object.__setattr__(self, "title_long", self.title)
 
 
 # Plotting classes --------------------------------------------------------------------------------------------------------------
@@ -535,7 +529,7 @@ class Plotter:
 
         # Legend bounding box: one row per 0.07 of the axes height and one column per 0.2 of its width. Boxes anchored
         # on the right keep their right edge fixed, so that multi-column legends grow towards the left.
-        leg_top_after_logo = 0.88
+        leg_top_after_logo = 0.83 if self.logo_subtitle else 0.88
         leg_right = 0.98
         leg_h = 0.07 * -(-len(self.scanpoints) // self.legncol)
         leg_w = 0.2 * self.legncol
@@ -763,6 +757,7 @@ class PlottingConfig:
             combiners), used to resolve the combiner labels referenced by `plots_1d`/`plots_2d` entries.
         plots_1d: 1D plots to be produced.
         plots_2d: 2D plots to be produced.
+        logo_date: Date shown under the "CharmFitter" logo of all plots (e.g. "Month YYYY"); none if empty.
     """
 
     parameters_list: InitVar[list[PlotParameter]]
@@ -770,6 +765,7 @@ class PlottingConfig:
     _: KW_ONLY
     plots_1d: list[Plot1D] = field(default_factory=list)
     plots_2d: list[Plot2D] = field(default_factory=list)
+    logo_date: str = ""
     combiners: dict[str, Combiner] = field(init=False, default_factory=dict)
     parameters: dict[str, PlotParameter] = field(init=False, default_factory=dict)
 
@@ -1099,6 +1095,7 @@ def plots_1d(
             xtransf=lambda x: plot.range.transf(par.transf(x)),
             cls="r",
             logo=plot.logo,
+            logo_subtitle=cfg.logo_date,
             legpos=plot.legpos,
             legfill=plot.legfill,
             legfontsize=plot.legfontsize,
@@ -1189,6 +1186,7 @@ def plots_2d(
             yrange=plot.yrange.range,
             levels=plot.levels,
             logo=plot.logo,
+            logo_subtitle=cfg.logo_date,
             legpos=plot.legpos,
             legfill=plot.legfill,
             legfontsize=plot.legfontsize,
