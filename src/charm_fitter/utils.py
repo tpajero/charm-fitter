@@ -261,7 +261,26 @@ class _Scan:
         if self.fixed_pars:
             pars_string = ",".join(self.fixed_pars)
             extra_args += f" --fix-from-parfile {pars_string} --fix-parfile {self.fix_parfile}"
+            # Tag the output files, as their names otherwise do not depend on the values of the fixed parameters
+            extra_args += f" --ext {self.file_tag}"
         object.__setattr__(self, "extra_args", extra_args.strip())
+
+    @property
+    def file_tag(self) -> str:
+        """Tag added by the combination executable to the output file names (empty if no parameter is fixed)."""
+        return "-".join([Path(self.fix_parfile).stem] + self.fixed_pars) if self.fixed_pars else ""
+
+    def file_prefix(self, prefix: str) -> str:
+        """Prefix of the scan file locations, including the file tag of the scan.
+
+        Args:
+            prefix: Prefix of the scan file locations of untagged scans, e.g. "charm-combo_scanner".
+        """
+        if not self.file_tag:
+            return prefix
+        if not prefix.endswith("_scanner"):
+            raise ValueError(f"Cannot add the file tag {self.file_tag!r} to prefix {prefix!r} (not ending in _scanner)")
+        return f"{prefix.removesuffix('_scanner')}_{self.file_tag}_scanner"
 
 
 @dataclass(frozen=True)
@@ -1172,7 +1191,7 @@ def plots_1d(
                     )
                     combiner_arg = _combiner_file_string(cname, combiner, suffix)
                     plotter.add_scan(
-                        f"{args.prefix}_{combiner_arg}",
+                        f"{scan.file_prefix(args.prefix)}_{combiner_arg}",
                         pars=[par.cf_par],
                         label=_scan_label(combiner, dcs_cpv, dy_fsc, **label_kwargs),
                         col=opts.colors[i],
@@ -1276,7 +1295,7 @@ def plots_2d(
                     )
                     combiner_arg = _combiner_file_string(cname, combiner, suffix)
                     plotter.add_scan(
-                        f"{args.prefix}_{combiner_arg}",
+                        f"{scan.file_prefix(args.prefix)}_{combiner_arg}",
                         pars=[xpar.name, ypar.name],
                         label=_scan_label(combiner, dcs_cpv, dy_fsc, **label_kwargs),
                         col=opts.colors[i],
