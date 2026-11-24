@@ -267,7 +267,7 @@ def dy_fsc_plots_2d(
             logo="br",
             legfill=(xpar, ypar) in (legfill or []),
             legpos="l",
-            legfontsize=12,
+            legfontsize=14 if (xpar, ypar) != ("Acp_KK", "Acp_PP") else 13.5,
             dy_fsc=DY_FSCS,
         )
         for (xpar, ypar), (xrange, yrange) in ranges_2d.items()
